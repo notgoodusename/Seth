@@ -2161,7 +2161,7 @@ void GUI::renderGuiStyle() noexcept
                 ImGui::BeginChild("##UP", ImVec2{ 700, 45 }, false);
                 {
                     ImGui::SetCursorPos(ImVec2{ 10, 6 });
-                    ImGui::PushFont(fonts.tahoma34); ImGui::Text("Better Osiris"); ImGui::PopFont();
+                    ImGui::PushFont(fonts.tahoma34); ImGui::Text("Seth"); ImGui::PopFont();
 
                     float pos = 305;
                     ImGui::SetCursorPos(ImVec2{ pos, 0 });
@@ -2362,7 +2362,7 @@ void GUI::renderGuiStyle() noexcept
                     ImGui::BeginChild("##Text", ImVec2{ 700, 20 }, false);
                     {
                         ImGui::SetCursorPos(ImVec2{ 2, 2 });
-                        ImGui::Text("Better Osiris Made In https://github.com/notgoodusename/OsirisAndExtra");
+                        ImGui::Text("https://github.com/notgoodusename/Seth");
                     }
                     ImGui::EndChild();
                 }

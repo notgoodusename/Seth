@@ -51,7 +51,7 @@ Config::Config() noexcept
         CoTaskMemFree(pathToDocuments);
     }
 
-    path /= "Osiris";
+    path /= "Seth";
     listConfigs();
     misc.clanTag[0] = '\0';
     misc.name[0] = '\0';

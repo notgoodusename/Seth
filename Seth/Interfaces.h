@@ -20,13 +20,11 @@ class GameEventManager;
 class GameMovement;
 class GameUI;
 class InputSystem;
-class Localize;
 class MaterialSystem;
 class MDLCache;
 class ModelInfo;
 class ModelRender;
 class NetworkStringTableContainer;
-class PanoramaUIEngine;
 class PhysicsSurfaceProps;
 class Prediction;
 class RenderView;
@@ -43,30 +41,28 @@ type* name = reinterpret_cast<type*>(find(moduleName, version));
     GAME_INTERFACE(BaseFileSystem, baseFileSystem, FILESYSTEM_DLL, "VBaseFileSystem011")
     GAME_INTERFACE(Client, client, CLIENT_DLL, "VClient017")
     GAME_INTERFACE(Cvar, cvar, VSTDLIB_DLL, "VEngineCvar004")
-    GAME_INTERFACE(DebugOverlay, debugOverlay, ENGINE_DLL, "VDebugOverlay004")
+    GAME_INTERFACE(DebugOverlay, debugOverlay, ENGINE_DLL, "VDebugOverlay003")
     GAME_INTERFACE(Engine, engine, ENGINE_DLL, "VEngineClient013")
     GAME_INTERFACE(EngineTrace, engineTrace, ENGINE_DLL, "EngineTraceClient003")
     GAME_INTERFACE(EntityList, entityList, CLIENT_DLL, "VClientEntityList003")
-    GAME_INTERFACE(FileSystem, fileSystem, FILESYSTEM_DLL, "VFileSystem017")
+    GAME_INTERFACE(FileSystem, fileSystem, FILESYSTEM_DLL, "VFileSystem022")
     GAME_INTERFACE(GameEventManager, gameEventManager, ENGINE_DLL, "GAMEEVENTSMANAGER002")
     GAME_INTERFACE(GameMovement, gameMovement, CLIENT_DLL, "GameMovement001")
-    GAME_INTERFACE(GameUI, gameUI, CLIENT_DLL, "GameUI011")
+    GAME_INTERFACE(GameUI, gameUI, GAMEUI_DLL, "GameUI011")
     GAME_INTERFACE(InputSystem, inputSystem, INPUTSYSTEM_DLL, "InputSystemVersion001")
-    GAME_INTERFACE(Localize, localize, LOCALIZE_DLL, "Localize_001")
-    GAME_INTERFACE(MaterialSystem, materialSystem, MATERIALSYSTEM_DLL, "VMaterialSystem080")
+    GAME_INTERFACE(MaterialSystem, materialSystem, MATERIALSYSTEM_DLL, "VMaterialSystem081")
     GAME_INTERFACE(MDLCache, mdlCache, DATACACHE_DLL, "MDLCache004")
     GAME_INTERFACE(ModelInfo, modelInfo, ENGINE_DLL, "VModelInfoClient006")
     GAME_INTERFACE(ModelRender, modelRender, ENGINE_DLL, "VEngineModel016")
     GAME_INTERFACE(NetworkStringTableContainer, networkStringTableContainer, ENGINE_DLL, "VEngineClientStringTable001")
-    GAME_INTERFACE(PanoramaUIEngine, panoramaUIEngine, PANORAMA_DLL, "PanoramaUIEngine001")
     GAME_INTERFACE(PhysicsSurfaceProps, physicsSurfaceProps, VPHYSICS_DLL, "VPhysicsSurfaceProps001")
     GAME_INTERFACE(Prediction, prediction, CLIENT_DLL, "VClientPrediction001")
     GAME_INTERFACE(RenderView, renderView, ENGINE_DLL, "VEngineRenderView014")
     GAME_INTERFACE(Surface, surface, VGUIMATSURFACE_DLL, "VGUI_Surface030")
     GAME_INTERFACE(EngineSound, sound, ENGINE_DLL, "IEngineSoundClient003")
-    GAME_INTERFACE(Server, server, SERVER_DLL, "ServerGameDLL005")
-    GAME_INTERFACE(SoundEmitter, soundEmitter, SOUNDEMITTERSYSTEM_DLL, "VSoundEmitter003")
-    GAME_INTERFACE(StudioRender, studioRender, STUDIORENDER_DLL, "VStudioRender026")
+    GAME_INTERFACE(Server, server, SERVER_DLL, "ServerGameDLL012")
+    GAME_INTERFACE(SoundEmitter, soundEmitter, SOUNDEMITTERSYSTEM_DLL, "VSoundEmitter002")
+    GAME_INTERFACE(StudioRender, studioRender, STUDIORENDER_DLL, "VStudioRender025")
 
 #undef GAME_INTERFACE
 private:
@@ -79,8 +75,8 @@ private:
                 return foundInterface;
         }
 
-        //MessageBoxA(nullptr, ("Failed to find " + std::string{ name } + " interface!").c_str(), "Osiris", MB_OK | MB_ICONERROR);
-        //std::exit(EXIT_FAILURE);
+        MessageBoxA(nullptr, ("Failed to find " + std::string{ name } + " interface!").c_str(), "Seth", MB_OK | MB_ICONERROR);
+        std::exit(EXIT_FAILURE);
         return nullptr;
     }
 };
