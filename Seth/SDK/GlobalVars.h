@@ -10,12 +10,12 @@ struct GlobalVars {
     const float realtime;
     int framecount;
     const float absoluteFrameTime;
-    PAD(4);
     float currenttime;
     float frametime;
     const int maxClients;
     const int tickCount;
     const float intervalPerTick;
+    const float interpolationAmount;
 
     float serverTime(UserCmd* = nullptr) const noexcept;
 };

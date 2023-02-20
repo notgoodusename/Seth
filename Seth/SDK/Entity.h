@@ -108,9 +108,10 @@ public:
 class Entity {
 public:
 
-    VIRTUAL_METHOD(void, think, 139, (), (this))
-    VIRTUAL_METHOD(bool, isAlive, 156, (), (this))
-    VIRTUAL_METHOD(bool, isPlayer, 158, (), (this))
+    bool isAlive() noexcept
+    {
+        return lifeState() == 0;
+    }
 
     bool isOnGround() noexcept
     {
@@ -135,6 +136,7 @@ public:
     NETVAR(simulationTime, "CBaseEntity", "m_flSimulationTime", float)
     NETVAR(ownerEntity, "CBaseEntity", "m_hOwnerEntity", int)
     NETVAR(spotted, "CBaseEntity", "m_bSpotted", bool)
+    NETVAR(lifeState, "CBasePlayer", "m_lifeState", unsigned char)
 
     NETVAR(weapons, "CBaseCombatCharacter", "m_hMyWeapons", int[64])
     PNETVAR(wearables, "CBaseCombatCharacter", "m_hMyWearables", int)
