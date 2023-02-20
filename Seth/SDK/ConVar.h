@@ -34,18 +34,48 @@ enum CvarFlags
 	CLIENTCMD_CAN_EXECUTE = (1 << 30)
 };
 
-struct ConVar {
-    VIRTUAL_METHOD(float, getFloat, 12, (), (this))
-    VIRTUAL_METHOD(int, getInt, 13, (), (this))
-    VIRTUAL_METHOD(void, setValue, 14, (const char* value), (this, value))
-    VIRTUAL_METHOD(void, setValue, 15, (float value), (this, value))
-    VIRTUAL_METHOD(void, setValue, 16, (int value), (this, value))
+class ConCommandBase
+{
+public:
+	void* vmt;
+	ConCommandBase* next;
+	bool registered;
+	const char* name;
+	const char* helpString;
+	int flags;
+	static ConCommandBase* conCommandBases;
+	static void* accessor;
+};
 
-    PAD(24)
-    std::add_pointer_t<void __cdecl()> changeCallback;
-    ConVar* parent;
-    const char* defaultValue;
-    char* string;
-    PAD(44)
-    UtlVector<void(__cdecl*)()> onChangeCallbacks;
+class ConVar : ConCommandBase
+{
+public:
+	VIRTUAL_METHOD(void, setValue, 10, (const char* value), (this, value))
+	VIRTUAL_METHOD(void, setValue, 11, (float value), (this, value))
+	VIRTUAL_METHOD(void, setValue, 12, (int value), (this, value))
+
+	float getFloat() noexcept
+	{
+		return parent->value.floatValue;
+	}
+
+	int getInt() noexcept
+	{
+		return parent->value.intValue;
+	}
+
+	void* vmt;
+	ConVar* parent;
+	const char* defaultValue;
+	struct Value
+	{
+		char* string;
+		int stringLength;
+		float floatValue;
+		int	intValue;
+	} value;
+	bool hasMin;
+	float minVal;
+	bool hasMax;
+	float maxVal;
 };
