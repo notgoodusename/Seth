@@ -118,7 +118,10 @@ public:
         return groundEntity() >= 0 || flags() & 1;
     }
 
-    NETVAR_OFFSET(collisionChangeTime, "CCSPlayer", "m_bIsScoped", -0x50, float)
+    UtlVector<matrix3x4>& getBoneCache() noexcept
+    {
+        return *reinterpret_cast<UtlVector<matrix3x4>*>(reinterpret_cast<uintptr_t>(this) + 0x2138);
+    }
 
     NETVAR(didSmokeEffect, "CSmokeGrenadeProjectile", "m_bDidSmokeEffect", bool)
 
