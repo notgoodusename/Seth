@@ -1,6 +1,5 @@
 #pragma once
 
-#include "checksum_crc.h"
 #include "Vector.h"
 
 struct UserCmd {

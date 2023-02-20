@@ -117,6 +117,7 @@
     <ClInclude Include="SDK\FrameStage.h" />
     <ClInclude Include="SDK\GlobalVars.h" />
     <ClInclude Include="SDK\Datamap.h" />
+    <ClInclude Include="SDK\InputSystem.h" />
     <ClInclude Include="SDK\LocalPlayer.h" />
     <ClInclude Include="SDK\matrix3x4.h" />
     <ClInclude Include="SDK\MDLCache.h" />
