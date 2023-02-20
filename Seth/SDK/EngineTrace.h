@@ -8,7 +8,6 @@
 #include "ConVar.h"
 #include "Vector.h"
 #include "VirtualMethod.h"
-#include "WeaponData.h"
 
 class matrix3x4;
 
@@ -62,9 +61,6 @@ namespace HitGroup {
         RightLeg,
         Gear = 10
     };
-
-    float getDamageMultiplier(int hitGroup, const WeaponInfo* weaponData, bool hasHeavyArmor, int teamNumber) noexcept;
-    bool isArmored(int hitGroup, bool helmet, int armorValue, bool hasHeavyArmor) noexcept;
 }
 
 struct Trace {

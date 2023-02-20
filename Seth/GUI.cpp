@@ -13,13 +13,7 @@
 
 #include "imguiCustom.h"
 
-#include "Hacks/AntiAim.h"
-#include "Hacks/Backtrack.h"
-#include "Hacks/Glow.h"
 #include "Hacks/Misc.h"
-#include "Hacks/SkinChanger.h"
-#include "Hacks/Sound.h"
-#include "Hacks/Visuals.h"
 
 #include "GUI.h"
 #include "Config.h"
@@ -1398,12 +1392,7 @@ void GUI::renderVisualsWindow() noexcept
     ImGui::PushID(4);
     ImGui::SliderInt("", &config->visuals.flashReduction, 0, 100, "Flash reduction: %d%%");
     ImGui::PopID();
-    ImGui::Combo("Skybox", &config->visuals.skybox, Visuals::skyboxList.data(), Visuals::skyboxList.size());
-     if (config->visuals.skybox == 26) {
-        ImGui::InputText("Skybox filename", &config->visuals.customSkybox);
-        if (ImGui::IsItemHovered())
-            ImGui::SetTooltip("skybox files must be put in csgo/materials/skybox/ ");
-    }
+  
     ImGuiCustom::colorPicker("World color", config->visuals.world);
     ImGuiCustom::colorPicker("Props color", config->visuals.props);
     ImGuiCustom::colorPicker("Sky color", config->visuals.sky);
@@ -1488,205 +1477,7 @@ void GUI::renderVisualsWindow() noexcept
 
 void GUI::renderSkinChangerWindow() noexcept
 {
-    static auto itemIndex = 0;
 
-    ImGui::PushItemWidth(110.0f);
-    ImGui::Combo("##1", &itemIndex, [](void* data, int idx, const char** out_text) {
-        *out_text = SkinChanger::weapon_names[idx].name;
-        return true;
-        }, nullptr, SkinChanger::weapon_names.size(), 5);
-    ImGui::PopItemWidth();
-
-    auto& selected_entry = config->skinChanger[itemIndex];
-    selected_entry.itemIdIndex = itemIndex;
-
-    constexpr auto rarityColor = [](int rarity) {
-        constexpr auto rarityColors = std::to_array<ImU32>({
-            IM_COL32(0,     0,   0,   0),
-            IM_COL32(176, 195, 217, 255),
-            IM_COL32( 94, 152, 217, 255),
-            IM_COL32( 75, 105, 255, 255),
-            IM_COL32(136,  71, 255, 255),
-            IM_COL32(211,  44, 230, 255),
-            IM_COL32(235,  75,  75, 255),
-            IM_COL32(228, 174,  57, 255)
-        });
-        return rarityColors[static_cast<std::size_t>(rarity) < rarityColors.size() ? rarity : 0];
-    };
-
-    constexpr auto passesFilter = [](const std::wstring& str, std::wstring filter) {
-        constexpr auto delimiter = L" ";
-        wchar_t* _;
-        wchar_t* token = std::wcstok(filter.data(), delimiter, &_);
-        while (token) {
-            if (!std::wcsstr(str.c_str(), token))
-                return false;
-            token = std::wcstok(nullptr, delimiter, &_);
-        }
-        return true;
-    };
-
-    {
-        ImGui::SameLine();
-        ImGui::Checkbox("Enabled", &selected_entry.enabled);
-        ImGui::Separator();
-        ImGui::Columns(2, nullptr, false);
-        ImGui::InputInt("Seed", &selected_entry.seed);
-        ImGui::InputInt("StatTrak\u2122", &selected_entry.stat_trak);
-        selected_entry.stat_trak = (std::max)(selected_entry.stat_trak, -1);
-        ImGui::SliderFloat("Wear", &selected_entry.wear, FLT_MIN, 1.f, "%.10f", ImGuiSliderFlags_Logarithmic);
-
-        const auto& kits = itemIndex == 1 ? SkinChanger::getGloveKits() : SkinChanger::getSkinKits();
-
-        if (ImGui::BeginCombo("Paint Kit", kits[selected_entry.paint_kit_vector_index].name.c_str())) {
-            ImGui::PushID("Paint Kit");
-            ImGui::PushID("Search");
-            ImGui::SetNextItemWidth(-1.0f);
-            static std::array<std::string, SkinChanger::weapon_names.size()> filters;
-            auto& filter = filters[itemIndex];
-            ImGui::InputTextWithHint("", "Search", &filter);
-            if (ImGui::IsItemHovered() || (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) && !ImGui::IsAnyItemActive() && !ImGui::IsMouseClicked(0)))
-                ImGui::SetKeyboardFocusHere(-1);
-            ImGui::PopID();
-
-            const std::wstring filterWide = Helpers::toUpper(Helpers::toWideString(filter));
-            if (ImGui::BeginChild("##scrollarea", { 0, 6 * ImGui::GetTextLineHeightWithSpacing() })) {
-                for (std::size_t i = 0; i < kits.size(); ++i) {
-                    if (filter.empty() || passesFilter(kits[i].nameUpperCase, filterWide)) {
-                        ImGui::PushID(i);
-                        const auto selected = i == selected_entry.paint_kit_vector_index;
-                        if (ImGui::SelectableWithBullet(kits[i].name.c_str(), rarityColor(kits[i].rarity), selected)) {
-                            selected_entry.paint_kit_vector_index = i;
-                            ImGui::CloseCurrentPopup();
-                        }
-
-                        if (ImGui::IsItemHovered()) {
-                            if (const auto icon = SkinChanger::getItemIconTexture(kits[i].iconPath)) {
-                                ImGui::BeginTooltip();
-                                ImGui::Image(icon, { 200.0f, 150.0f });
-                                ImGui::EndTooltip();
-                            }
-                        }
-                        if (selected && ImGui::IsWindowAppearing())
-                            ImGui::SetScrollHereY();
-                        ImGui::PopID();
-                    }
-                }
-            }
-            ImGui::EndChild();
-            ImGui::PopID();
-            ImGui::EndCombo();
-        }
-
-        ImGui::Combo("Quality", &selected_entry.entity_quality_vector_index, [](void* data, int idx, const char** out_text) {
-            *out_text = SkinChanger::getQualities()[idx].name.c_str(); // safe within this lamba
-            return true;
-            }, nullptr, SkinChanger::getQualities().size(), 5);
-
-        if (itemIndex == 0) {
-            ImGui::Combo("Knife", &selected_entry.definition_override_vector_index, [](void* data, int idx, const char** out_text) {
-                *out_text = SkinChanger::getKnifeTypes()[idx].name.c_str();
-                return true;
-                }, nullptr, SkinChanger::getKnifeTypes().size(), 5);
-        } else if (itemIndex == 1) {
-            ImGui::Combo("Glove", &selected_entry.definition_override_vector_index, [](void* data, int idx, const char** out_text) {
-                *out_text = SkinChanger::getGloveTypes()[idx].name.c_str();
-                return true;
-                }, nullptr, SkinChanger::getGloveTypes().size(), 5);
-        } else {
-            static auto unused_value = 0;
-            selected_entry.definition_override_vector_index = 0;
-            ImGui::Combo("Unavailable", &unused_value, "For knives or gloves\0");
-        }
-
-        ImGui::InputText("Name Tag", selected_entry.custom_name, 32);
-    }
-
-    ImGui::NextColumn();
-
-    {
-        ImGui::PushID("sticker");
-
-        static std::size_t selectedStickerSlot = 0;
-
-        ImGui::PushItemWidth(-1);
-        ImVec2 size;
-        size.x = 0.0f;
-        size.y = ImGui::GetTextLineHeightWithSpacing() * 5.25f + ImGui::GetStyle().FramePadding.y * 2.0f;
-
-        if (ImGui::BeginListBox("", size)) {
-            for (int i = 0; i < 5; ++i) {
-                ImGui::PushID(i);
-
-                const auto kit_vector_index = config->skinChanger[itemIndex].stickers[i].kit_vector_index;
-                const std::string text = '#' + std::to_string(i + 1) + "  " + SkinChanger::getStickerKits()[kit_vector_index].name;
-
-                if (ImGui::Selectable(text.c_str(), i == selectedStickerSlot))
-                    selectedStickerSlot = i;
-
-                ImGui::PopID();
-            }
-            ImGui::EndListBox();
-        }
-
-        ImGui::PopItemWidth();
-
-        auto& selected_sticker = selected_entry.stickers[selectedStickerSlot];
-
-        const auto& kits = SkinChanger::getStickerKits();
-        if (ImGui::BeginCombo("Sticker", kits[selected_sticker.kit_vector_index].name.c_str())) {
-            ImGui::PushID("Sticker");
-            ImGui::PushID("Search");
-            ImGui::SetNextItemWidth(-1.0f);
-            static std::array<std::string, SkinChanger::weapon_names.size()> filters;
-            auto& filter = filters[itemIndex];
-            ImGui::InputTextWithHint("", "Search", &filter);
-            if (ImGui::IsItemHovered() || (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) && !ImGui::IsAnyItemActive() && !ImGui::IsMouseClicked(0)))
-                ImGui::SetKeyboardFocusHere(-1);
-            ImGui::PopID();
-
-            const std::wstring filterWide = Helpers::toUpper(Helpers::toWideString(filter));
-            if (ImGui::BeginChild("##scrollarea", { 0, 6 * ImGui::GetTextLineHeightWithSpacing() })) {
-                for (std::size_t i = 0; i < kits.size(); ++i) {
-                    if (filter.empty() || passesFilter(kits[i].nameUpperCase, filterWide)) {
-                        ImGui::PushID(i);
-                        const auto selected = i == selected_sticker.kit_vector_index;
-                        if (ImGui::SelectableWithBullet(kits[i].name.c_str(), rarityColor(kits[i].rarity), selected)) {
-                            selected_sticker.kit_vector_index = i;
-                            ImGui::CloseCurrentPopup();
-                        }
-                        if (ImGui::IsItemHovered()) {
-                            if (const auto icon = SkinChanger::getItemIconTexture(kits[i].iconPath)) {
-                                ImGui::BeginTooltip();
-                                ImGui::Image(icon, { 200.0f, 150.0f });
-                                ImGui::EndTooltip();
-                            }
-                        }
-                        if (selected && ImGui::IsWindowAppearing())
-                            ImGui::SetScrollHereY();
-                        ImGui::PopID();
-                    }
-                }
-            }
-            ImGui::EndChild();
-            ImGui::PopID();
-            ImGui::EndCombo();
-        }
-
-        ImGui::SliderFloat("Wear", &selected_sticker.wear, FLT_MIN, 1.0f, "%.10f", ImGuiSliderFlags_Logarithmic);
-        ImGui::SliderFloat("Scale", &selected_sticker.scale, 0.1f, 5.0f);
-        ImGui::SliderFloat("Rotation", &selected_sticker.rotation, 0.0f, 360.0f);
-
-        ImGui::PopID();
-    }
-    selected_entry.update();
-
-    ImGui::Columns(1);
-
-    ImGui::Separator();
-
-    if (ImGui::Button("Update", { 130.0f, 30.0f }))
-        SkinChanger::scheduleHudUpdate();
 }
 
 void GUI::renderMiscWindow() noexcept
@@ -1898,8 +1689,6 @@ void GUI::renderMiscWindow() noexcept
     ImGui::PushItemWidth(120.0f);
     ImGui::PushID(0);
 
-    if (ImGui::InputText("", config->misc.clanTag, sizeof(config->misc.clanTag)))
-        Misc::updateClanTag(true);
     ImGui::PopID();
 
     ImGui::Checkbox("Custom name", &config->misc.customName);
@@ -1907,8 +1696,6 @@ void GUI::renderMiscWindow() noexcept
     ImGui::PushItemWidth(120.0f);
     ImGui::PushID("Custom name change");
 
-    if (ImGui::InputText("", config->misc.name, sizeof(config->misc.name)) && config->misc.customName)
-        Misc::changeName(false, (std::string{ config->misc.name } + '\x1').c_str(), 0.0f);
     ImGui::PopID();
 
     ImGui::Checkbox("Kill message", &config->misc.killMessage);
@@ -2037,8 +1824,6 @@ void GUI::renderMiscWindow() noexcept
         ImGui::Checkbox("Wall Hacking", &config->misc.reportbot.wallhack);
         ImGui::Checkbox("Aim Hacking", &config->misc.reportbot.aimbot);
         ImGui::Checkbox("Other Hacking", &config->misc.reportbot.other);
-        if (ImGui::Button("Reset"))
-            Misc::resetReportbot();
         ImGui::EndPopup();
     }
     ImGui::PopID();
@@ -2266,7 +2051,7 @@ void GUI::renderConfigWindow() noexcept
 
                 if (ImGui::Selectable(names[i])) {
                     switch (i) {
-                    case 0: config->reset(); Misc::updateClanTag(true); SkinChanger::scheduleHudUpdate(); break;
+                    case 0: config->reset(); break;
                     case 1: config->legitbot = { }; config->legitbotKey.reset(); break;
                     case 2: config->legitAntiAim = { }; break;
                     case 3: config->ragebot = { }; config->ragebotKey.reset();  break;
@@ -2275,13 +2060,13 @@ void GUI::renderConfigWindow() noexcept
                     case 6: config->fakelag = { }; break;
                     case 7: config->backtrack = { }; break;
                     case 8: config->triggerbot = { }; config->triggerbotKey.reset(); break;
-                    case 9: Glow::resetConfig(); break;
+                    case 9: break;
                     case 10: config->chams = { }; config->chamsKey.reset(); break;
                     case 11: config->streamProofESP = { }; break;
                     case 12: config->visuals = { }; break;
-                    case 13: config->skinChanger = { }; SkinChanger::scheduleHudUpdate(); break;
-                    case 14: Sound::resetConfig(); break;
-                    case 15: config->misc = { };  Misc::updateClanTag(true); break;
+                    case 13: break;
+                    case 14: break;
+                    case 15: config->misc = { }; break;
                     }
                 }
             }
@@ -2290,8 +2075,6 @@ void GUI::renderConfigWindow() noexcept
         if (currentConfig != -1) {
             if (ImGui::Button("Load selected", { 100.0f, 25.0f })) {
                 config->load(currentConfig, incrementalLoad);
-                SkinChanger::scheduleHudUpdate();
-                Misc::updateClanTag(true);
             }
             if (ImGui::Button("Save selected", { 100.0f, 25.0f }))
                 ImGui::OpenPopup("##reallySave");
@@ -2556,8 +2339,6 @@ void GUI::renderGuiStyle() noexcept
                                     renderMiscWindow();
                                     break;
                                 case 2:
-                                    //Sound
-                                    Sound::drawGUI();
                                     break;
                                 default:
                                     break;

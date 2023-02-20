@@ -8,7 +8,7 @@
 #include <vector>
 
 #include "Hacks/Misc.h"
-#include "Hacks/Visuals.h"
+
 #include "Interfaces.h"
 #include "Netvars.h"
 
@@ -22,32 +22,6 @@
 #include "SDK/Recv.h"
 
 static std::unordered_map<std::uint32_t, std::pair<recvProxy, recvProxy*>> proxies;
-
-static void __cdecl spottedHook(recvProxyData& data, void* arg2, void* arg3) noexcept
-{
-    if (config->misc.radarHack)
-        data.value._int = 1;
-
-    constexpr auto hash{ fnv::hash("CBaseEntity->m_bSpotted") };
-    proxies[hash].first(data, arg2, arg3);
-}
-
-static void __cdecl viewModelSequence(recvProxyData& data, void* outStruct, void* arg3) noexcept
-{
-    const auto viewModel = reinterpret_cast<Entity*>(outStruct);
-
-    if (localPlayer && interfaces->entityList->getEntityFromHandle(viewModel->owner()) == localPlayer.get()) {
-        if (const auto weapon = interfaces->entityList->getEntityFromHandle(viewModel->weapon())) {
-            if (config->visuals.deagleSpinner && weapon->getClientClass()->classId == ClassId::Deagle && data.value._int == 7)
-                data.value._int = 8;
-
-            SkinChanger::fixKnifeAnimation(weapon, data.value._int);
-        }
-    }
-    constexpr auto hash{ fnv::hash("CBaseViewModel->m_nSequence") };
-    proxies[hash].first(data, outStruct, arg3);
-}
-
 static std::vector<std::pair<std::uint32_t, std::uint32_t>> offsets;
 
 static void walkTable(const char* networkName, RecvTable* recvTable, const std::size_t offset = 0) noexcept
@@ -70,10 +44,6 @@ static void walkTable(const char* networkName, RecvTable* recvTable, const std::
 
         constexpr auto getHook{ [](std::uint32_t hash) noexcept -> recvProxy {
              switch (hash) {
-             case fnv::hash("CBaseEntity->m_bSpotted"):
-                 return spottedHook;
-             case fnv::hash("CBaseViewModel->m_nSequence"):
-                 return viewModelSequence;
              default:
                  return nullptr;
              }

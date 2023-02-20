@@ -6,14 +6,10 @@
 #include <Windows.h>
 
 #include "Hooks/MinHook.h"
-#include "Hooks/VmtHook.h"
-#include "Hooks/VmtSwap.h"
 
 #include "SDK/Platform.h"
 
 struct SoundInfo;
-
-using HookType = MinHook;
 
 class Hooks {
 public:
@@ -26,9 +22,10 @@ public:
     void install() noexcept;
     void uninstall() noexcept;
 
-    HookType client;
-    HookType engine;
-    HookType surface;
+    MinHook client;
+    MinHook clientMode;
+    MinHook engine;
+    MinHook surface;
 private:
     HMODULE moduleHandle;
     HWND window;

@@ -2,7 +2,6 @@
 
 #include "ClientClass.h"
 #include "Pad.h"
-#include "NetworkChannel.h"
 #include "Vector.h"
 
 class EventInfo {
@@ -31,7 +30,7 @@ public:
         deltaTick = -1;
     }
     std::byte        pad0[0x9C];
-    NetworkChannel* netChannel;
+    void* netChannel;
     int                challengeNr;
     std::byte        pad1[0x04];
     double          m_connect_time;

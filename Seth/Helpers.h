@@ -14,7 +14,6 @@ struct Vector;
 
 namespace Helpers
 {
-    void logConsole(std::string_view msg, const std::array<std::uint8_t, 4> color = { 255, 255, 255, 255 }) noexcept;
     float simpleSpline(float value) noexcept;
     float simpleSplineRemapVal(float val, float A, float B, float C, float D) noexcept;
     float simpleSplineRemapValClamped(float val, float A, float B, float C, float D) noexcept;
@@ -32,16 +31,10 @@ namespace Helpers
     float remapValClamped(float val, float A, float B, float C, float D) noexcept;
     float normalizeYaw(float yaw) noexcept;
 
-    bool worldToScreen(const Vector& in, ImVec2& out, bool floor = false) noexcept;
-
-    unsigned int calculateColor(Color4 color) noexcept;
-    unsigned int calculateColor(Color3 color) noexcept;
-    unsigned int calculateColor(int r, int g, int b, int a) noexcept;
     void setAlphaFactor(float newAlphaFactor) noexcept;
     float getAlphaFactor() noexcept;
     void convertHSVtoRGB(float h, float s, float v, float& outR, float& outG, float& outB) noexcept;
     void healthColor(float fraction, float& outR, float& outG, float& outB) noexcept;
-    unsigned int healthColor(float fraction) noexcept;
 
     constexpr auto units2meters(float units) noexcept
     {

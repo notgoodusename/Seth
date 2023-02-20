@@ -1,11 +1,5 @@
 #pragma once
 
-#define LINUX_ARGS(...)
-#define RETURN_ADDRESS() std::uintptr_t(_ReturnAddress())
-#define FRAME_ADDRESS() (std::uintptr_t(_AddressOfReturnAddress()) - sizeof(std::uintptr_t))
-#define IS_WIN32() true
-#define WIN32_LINUX(win32, linux) win32
-
 constexpr auto CLIENT_DLL = "client";
 constexpr auto SERVER_DLL = "server";
 constexpr auto ENGINE_DLL = "engine";

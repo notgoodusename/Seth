@@ -4,6 +4,8 @@
 
 class InputSystem {
 public:
-    VIRTUAL_METHOD(void, enableInput, 11, (bool enable), (this, enable))
-    VIRTUAL_METHOD(void, resetInputState, 39, (), (this))
+	virtual void AttachToWindow(void* hWnd) = 0;
+	virtual void DetachFromWindow() = 0;
+	virtual void enableInput(bool bEnable) = 0;
+    VIRTUAL_METHOD(void, resetInputState, 25, (), (this))
 };

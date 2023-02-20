@@ -8,8 +8,6 @@
 
 #include "imgui/imgui.h"
 
-#include "Hacks/SkinChanger.h"
-
 #include "ConfigStructs.h"
 #include "InputUtil.h"
 
@@ -320,7 +318,6 @@ public:
         Color4 molotovTimerText{ 0.0f, 0.0f, 0.0f, 1.0f };
     } visuals;
 
-    std::array<item_setting, 36> skinChanger;
 
     struct Misc {
         Misc() { clanTag[0] = '\0'; name[0] = '\0'; menuKey.keyMode = KeyMode::Toggle; }
@@ -483,7 +480,8 @@ public:
             bool showKeyTiles = false;
             Color4 color{ 1.0f, 1.0f, 1.0f, 1.0f };
         } keyBoardDisplay;
-    } misc;
+
+} misc;
 
     void scheduleFontLoad(const std::string& name) noexcept;
     bool loadScheduledFonts() noexcept;

@@ -45,6 +45,7 @@ public:
     std::uintptr_t present;
     std::uintptr_t reset;
 
+    ClientMode* clientMode;
     GlobalVars* globalVars;
 private:
 };

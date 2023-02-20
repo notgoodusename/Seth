@@ -11,11 +11,6 @@
 #include "Config.h"
 #include "Helpers.h"
 
-#include "Hacks/AntiAim.h"
-#include "Hacks/Backtrack.h"
-#include "Hacks/Glow.h"
-#include "Hacks/Sound.h"
-
 #include "SDK/Platform.h"
 
 int CALLBACK fontCallback(const LOGFONTW* lpelfe, const TEXTMETRICW*, DWORD, LPARAM lParam)
@@ -480,32 +475,6 @@ static void from_json(const json& j, Config::Visuals& v)
     read<value_t::object>(j, "Footstep", v.footsteps);
 }
 
-static void from_json(const json& j, sticker_setting& s)
-{
-    read(j, "Kit", s.kit);
-    read(j, "Wear", s.wear);
-    read(j, "Scale", s.scale);
-    read(j, "Rotation", s.rotation);
-
-    s.onLoad();
-}
-
-static void from_json(const json& j, item_setting& i)
-{
-    read(j, "Enabled", i.enabled);
-    read(j, "Definition index", i.itemId);
-    read(j, "Quality", i.quality);
-    read(j, "Paint Kit", i.paintKit);
-    read(j, "Definition override", i.definition_override_index);
-    read(j, "Seed", i.seed);
-    read(j, "StatTrak", i.stat_trak);
-    read(j, "Wear", i.wear);
-    read(j, "Custom name", i.custom_name, sizeof(i.custom_name));
-    read(j, "Stickers", i.stickers);
-
-    i.onLoad();
-}
-
 static void from_json(const json& j, PurchaseList& pl)
 {
     read(j, "Enabled", pl.enabled);
@@ -811,8 +780,6 @@ void Config::load(const char8_t* name, bool incremental) noexcept
     read(j["Chams"], "Key", chamsKey);
     read<value_t::object>(j, "ESP", streamProofESP);
     read<value_t::object>(j, "Visuals", visuals);
-    read(j, "Skin changer", skinChanger);
-    ::Sound::fromJson(j["Sound"]);
     read<value_t::object>(j, "Misc", misc);
 }
 
@@ -1498,32 +1465,6 @@ static void to_json(json& j, const ImVec4& o)
     j[3] = o.w;
 }
 
-static void to_json(json& j, const sticker_setting& o)
-{
-    const sticker_setting dummy;
-
-    WRITE("Kit", kit);
-    WRITE("Wear", wear);
-    WRITE("Scale", scale);
-    WRITE("Rotation", rotation);
-}
-
-static void to_json(json& j, const item_setting& o)
-{
-    const item_setting dummy;
-
-    WRITE("Enabled", enabled);
-    WRITE("Definition index", itemId);
-    WRITE("Quality", quality);
-    WRITE("Paint Kit", paintKit);
-    WRITE("Definition override", definition_override_index);
-    WRITE("Seed", seed);
-    WRITE("StatTrak", stat_trak);
-    WRITE("Wear", wear);
-    if (o.custom_name[0])
-        j["Custom name"] = o.custom_name;
-    WRITE("Stickers", stickers);
-}
 
 #pragma endregion
 
@@ -1575,10 +1516,7 @@ void Config::save(size_t id) const noexcept
         j["Chams"] = chams;
         to_json(j["Chams"]["Key"], chamsKey, KeyBind::NONE);
         j["ESP"] = streamProofESP;
-        j["Sound"] = ::Sound::toJson();
-        j["Visuals"] = visuals;
         j["Misc"] = misc;
-        j["Skin changer"] = skinChanger;
 
         removeEmptyObjects(j);
         out << std::setw(2) << j;
@@ -1620,12 +1558,9 @@ void Config::reset() noexcept
     tickbase = { };
     backtrack = { };
     triggerbot = { };
-    Glow::resetConfig();
     chams = { };
     streamProofESP = { };
     visuals = { };
-    skinChanger = { };
-    Sound::resetConfig();
     misc = { };
 }
 
