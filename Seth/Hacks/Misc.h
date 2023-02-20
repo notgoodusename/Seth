@@ -9,6 +9,7 @@
 namespace Misc
 {
     void bunnyHop(UserCmd*) noexcept;
+    void autoStrafe(UserCmd* cmd, Vector& currentViewAngles) noexcept;
     void fixMovement(UserCmd* cmd, float yaw) noexcept;
 
     void showKeybinds() noexcept;

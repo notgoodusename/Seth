@@ -167,6 +167,66 @@ void Misc::bunnyHop(UserCmd* cmd) noexcept
     wasLastTimeOnGround = localPlayer->isOnGround();
 }
 
+void Misc::autoStrafe(UserCmd* cmd, Vector& currentViewAngles) noexcept
+{
+    if (!config->misc.autoStrafe)
+        return;
+
+    if (!localPlayer || !localPlayer->isAlive())
+        return;
+
+    const float speed = localPlayer->velocity().length2D();
+    if (speed < 5.0f)
+        return;
+
+    static float angle = 0.f;
+
+    const bool back = cmd->buttons & UserCmd::IN_BACK;
+    const bool forward = cmd->buttons & UserCmd::IN_FORWARD;
+    const bool right = cmd->buttons & UserCmd::IN_MOVERIGHT;
+    const bool left = cmd->buttons & UserCmd::IN_MOVELEFT;
+
+    if (back) {
+        angle = -180.f;
+        if (left)
+            angle -= 45.f;
+        else if (right)
+            angle += 45.f;
+    }
+    else if (left) {
+        angle = 90.f;
+        if (back)
+            angle += 45.f;
+        else if (forward)
+            angle -= 45.f;
+    }
+    else if (right) {
+        angle = -90.f;
+        if (back)
+            angle -= 45.f;
+        else if (forward)
+            angle += 45.f;
+    }
+    else {
+        angle = 0.f;
+    }
+
+    //If we are on ground, noclip or in a ladder return
+    if (localPlayer->isOnGround() || localPlayer->moveType() == MoveType::NOCLIP || localPlayer->moveType() == MoveType::LADDER)
+        return;
+
+    currentViewAngles.y += angle;
+
+    cmd->forwardmove = 0.f;
+    cmd->sidemove = 0.f;
+
+    const auto delta = Helpers::normalizeYaw(currentViewAngles.y - Helpers::rad2deg(std::atan2(localPlayer->velocity().y, localPlayer->velocity().x)));
+
+    cmd->sidemove = delta > 0.f ? -450.f : 450.f;
+
+    currentViewAngles.y = Helpers::normalizeYaw(currentViewAngles.y - delta);
+}
+
 void Misc::fixMovement(UserCmd* cmd, float yaw) noexcept
 {
     float oldYaw = yaw + (yaw < 0.0f ? 360.0f : 0.0f);

@@ -109,6 +109,7 @@ static bool __fastcall createMove(void* ecx, void* edx, float inputSampleTime, U
 
     memory->globalVars->serverTime(cmd);
     Misc::bunnyHop(cmd);
+    Misc::autoStrafe(cmd, currentViewAngles);
 
     auto viewAnglesDelta{ cmd->viewangles - previousViewAngles };
     viewAnglesDelta.normalize();
