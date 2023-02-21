@@ -151,7 +151,7 @@ public:
 
     UtlVector<matrix3x4>& getBoneCache() noexcept
     {
-        return *reinterpret_cast<UtlVector<matrix3x4>*>(reinterpret_cast<uintptr_t>(this) + 0x2138);
+        return *reinterpret_cast<UtlVector<matrix3x4>*>(reinterpret_cast<uintptr_t>(this) + 0x848);
     }
 
     NETVAR(body, "CBaseAnimating", "m_nBody", int)
