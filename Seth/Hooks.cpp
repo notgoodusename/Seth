@@ -20,6 +20,7 @@
 #include "Memory.h"
 
 #include "Hacks/Misc.h"
+#include "Hacks/StreamProofESP.h"
 
 #include "SDK/ClassId.h"
 #include "SDK/Client.h"
@@ -73,7 +74,7 @@ static HRESULT __stdcall present(IDirect3DDevice9* device, const RECT* src, cons
     ImGui::NewFrame();
 
     if (const auto& displaySize = ImGui::GetIO().DisplaySize; displaySize.x > 0.0f && displaySize.y > 0.0f) {
-
+        StreamProofESP::render();
         gui->handleToggle();
 
         if (gui->isOpen())

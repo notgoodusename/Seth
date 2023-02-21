@@ -1146,31 +1146,7 @@ void GUI::renderStreamProofESPWindow() noexcept
             auto& playerConfig = getConfigPlayer(currentCategory, currentItem);
 
             ImGuiCustom::colorPicker("Weapon", playerConfig.weapon);
-            ImGuiCustom::colorPicker("Flash Duration", playerConfig.flashDuration);
-            ImGui::SameLine(spacing);
             ImGuiCustom::colorPicker("Skeleton", playerConfig.skeleton);
-            ImGui::Checkbox("Audible Only", &playerConfig.audibleOnly);
-            ImGui::SameLine(spacing);
-            ImGui::Checkbox("Spotted Only", &playerConfig.spottedOnly);
-
-            ImGuiCustom::colorPicker("Head Box", playerConfig.headBox);
-            ImGui::SameLine();
-
-            ImGui::PushID("Head Box");
-
-            if (ImGui::Button("..."))
-                ImGui::OpenPopup("");
-
-            if (ImGui::BeginPopup("")) {
-                ImGui::SetNextItemWidth(95.0f);
-                ImGui::Combo("Type", &playerConfig.headBox.type, "2D\0" "2D corners\0" "3D\0" "3D corners\0");
-                ImGui::SetNextItemWidth(275.0f);
-                ImGui::SliderFloat3("Scale", playerConfig.headBox.scale.data(), 0.0f, 0.50f, "%.2f");
-                ImGuiCustom::colorPicker("Fill", playerConfig.headBox.fill);
-                ImGui::EndPopup();
-            }
-
-            ImGui::PopID();
         
             ImGui::SameLine(spacing);
             ImGui::Checkbox("Health Bar", &playerConfig.healthBar.enabled);
@@ -1193,12 +1169,8 @@ void GUI::renderStreamProofESPWindow() noexcept
 
             ImGui::PopID();
             
-            ImGuiCustom::colorPicker("Footsteps", config->visuals.footsteps.footstepBeams);
             ImGui::SliderInt("Thickness", &config->visuals.footsteps.footstepBeamThickness, 0, 30, "Thickness: %d%%");
             ImGui::SliderInt("Radius", &config->visuals.footsteps.footstepBeamRadius, 0, 230, "Radius: %d%%");
-
-            ImGuiCustom::colorPicker("Line of sight", playerConfig.lineOfSight);
-
         } else if (currentCategory == 2) {
             auto& weaponConfig = config->streamProofESP.weapons[currentItem];
             ImGuiCustom::colorPicker("Ammo", weaponConfig.ammo);

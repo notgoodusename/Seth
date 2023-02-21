@@ -147,7 +147,7 @@ PlayerData::PlayerData(Entity* entity) noexcept : BaseData{ entity }, handle{ en
 
 void PlayerData::update(Entity* entity) noexcept
 {
-    name = "";// entity->getPlayerName();
+    name = entity->getPlayerName();
     const auto idx = entity->index();
 
     dormant = entity->isDormant();

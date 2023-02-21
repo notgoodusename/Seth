@@ -9,6 +9,7 @@
 
 #include "Config.h"
 #include "ConfigStructs.h"
+#include "GameData.h"
 #include "Helpers.h"
 #include "Memory.h"
 
@@ -277,7 +278,41 @@ float Helpers::normalizeYaw(float yaw) noexcept
     return yaw;
 }
 
+bool Helpers::worldToScreen(const Vector& in, ImVec2& out, bool floor) noexcept
+{
+    const auto& matrix = GameData::toScreenMatrix();
+
+    const auto w = matrix._41 * in.x + matrix._42 * in.y + matrix._43 * in.z + matrix._44;
+    if (w < 0.001f)
+        return false;
+
+    out = ImGui::GetIO().DisplaySize / 2.0f;
+    out.x *= 1.0f + (matrix._11 * in.x + matrix._12 * in.y + matrix._13 * in.z + matrix._14) / w;
+    out.y *= 1.0f - (matrix._21 * in.x + matrix._22 * in.y + matrix._23 * in.z + matrix._24) / w;
+    if (floor)
+        out = ImFloor(out);
+    return true;
+}
+
 static float alphaFactor = 1.0f;
+
+unsigned int Helpers::calculateColor(Color4 color) noexcept
+{
+    color.color[3] *= std::clamp(alphaFactor, 0.0f, 1.0f);
+    auto&& [r, g, b, a] = color.rainbow ? rainbowColor(color.rainbowSpeed, color.color[3]) : color.color;
+    return ImGui::ColorConvertFloat4ToU32({ r, g, b, a });
+}
+
+unsigned int Helpers::calculateColor(Color3 color) noexcept
+{
+    auto&& [r, g, b] = color.rainbow ? rainbowColor(color.rainbowSpeed) : color.color;
+    return ImGui::ColorConvertFloat4ToU32({ r, g, b, 1.0f });
+}
+
+unsigned int Helpers::calculateColor(int r, int g, int b, int a) noexcept
+{
+    return IM_COL32(r, g, b, a * alphaFactor);
+}
 
 void Helpers::setAlphaFactor(float newAlphaFactor) noexcept
 {
@@ -299,6 +334,13 @@ void Helpers::healthColor(float fraction, float& outR, float& outG, float& outB)
     constexpr auto greenHue = 1.0f / 3.0f;
     constexpr auto redHue = 0.0f;
     convertHSVtoRGB(std::lerp(redHue, greenHue, fraction), 1.0f, 1.0f, outR, outG, outB);
+}
+
+unsigned int Helpers::healthColor(float fraction) noexcept
+{
+    float r, g, b;
+    healthColor(fraction, r, g, b);
+    return calculateColor(static_cast<int>(r * 255.0f), static_cast<int>(g * 255.0f), static_cast<int>(b * 255.0f), 255);
 }
 
 ImWchar* Helpers::getFontGlyphRanges() noexcept

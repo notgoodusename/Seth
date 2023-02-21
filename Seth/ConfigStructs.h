@@ -106,13 +106,8 @@ struct Player : Shared {
     }
 
     ColorToggle weapon;
-    ColorToggle flashDuration;
-    bool audibleOnly = false;
-    bool spottedOnly = false;
     HealthBar healthBar;
     ColorToggleThickness skeleton;
-    Box headBox;
-    ColorToggleThickness lineOfSight;
 
     using Shared::operator=;
 };

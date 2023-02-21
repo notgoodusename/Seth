@@ -31,10 +31,17 @@ namespace Helpers
     float remapValClamped(float val, float A, float B, float C, float D) noexcept;
     float normalizeYaw(float yaw) noexcept;
 
+    bool worldToScreen(const Vector& in, ImVec2& out, bool floor = false) noexcept;
+
+    unsigned int calculateColor(Color4 color) noexcept;
+    unsigned int calculateColor(Color3 color) noexcept;
+    unsigned int calculateColor(int r, int g, int b, int a) noexcept;
+
     void setAlphaFactor(float newAlphaFactor) noexcept;
     float getAlphaFactor() noexcept;
     void convertHSVtoRGB(float h, float s, float v, float& outR, float& outG, float& outB) noexcept;
     void healthColor(float fraction, float& outR, float& outG, float& outB) noexcept;
+    unsigned int healthColor(float fraction) noexcept;
 
     constexpr auto units2meters(float units) noexcept
     {

@@ -46,7 +46,8 @@ public:
 	static ConCommandBase* conCommandBases;
 	static void* accessor;
 };
-
+#pragma warning( push )
+#pragma warning( disable : 4099)
 class ConVar : ConCommandBase
 {
 public:
@@ -79,3 +80,4 @@ public:
 	bool hasMax;
 	float maxVal;
 };
+#pragma warning( pop ) 

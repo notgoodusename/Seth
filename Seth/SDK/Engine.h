@@ -23,22 +23,14 @@ struct Matrix4x4 {
 };
 
 struct PlayerInfo {
-    std::uint64_t version;
-    union {
-        std::uint64_t xuid;
-        struct {
-            std::uint32_t xuidLow;
-            std::uint32_t xuidHigh;
-        };
-    };
-    char name[128];
+    char name[32];
     int userId;
     char guid[33];
     std::uint32_t friendsId;
-    char friendsName[128];
+    char friendsName[32];
     bool fakeplayer;
     bool hltv;
-    int customfiles[4];
+    unsigned long customfiles[4];
     unsigned char filesDownloaded;
 };
 

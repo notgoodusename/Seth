@@ -197,13 +197,8 @@ static void from_json(const json& j, Player& p)
     from_json(j, static_cast<Shared&>(p));
 
     read<value_t::object>(j, "Weapon", p.weapon);
-    read<value_t::object>(j, "Flash Duration", p.flashDuration);
-    read(j, "Audible Only", p.audibleOnly);
-    read(j, "Spotted Only", p.spottedOnly);
     read<value_t::object>(j, "Health Bar", p.healthBar);
     read<value_t::object>(j, "Skeleton", p.skeleton);
-    read<value_t::object>(j, "Head Box", p.headBox);
-    read<value_t::object>(j, "Line of sight", p.lineOfSight);
 }
 
 static void from_json(const json& j, OffscreenEnemies& o)
@@ -869,13 +864,8 @@ static void to_json(json& j, const Player& o, const Player& dummy = {})
 {
     to_json(j, static_cast<const Shared&>(o), dummy);
     WRITE("Weapon", weapon);
-    WRITE("Flash Duration", flashDuration);
-    WRITE("Audible Only", audibleOnly);
-    WRITE("Spotted Only", spottedOnly);
     WRITE("Health Bar", healthBar);
     WRITE("Skeleton", skeleton);
-    WRITE("Head Box", headBox);
-    WRITE("Line of sight", lineOfSight);
 }
 
 static void to_json(json& j, const Weapon& o, const Weapon& dummy = {})
