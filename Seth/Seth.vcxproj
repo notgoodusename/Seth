@@ -28,6 +28,7 @@
     <ClCompile Include="freetype\src\sfnt\sfnt.c" />
     <ClCompile Include="freetype\src\smooth\smooth.c" />
     <ClCompile Include="freetype\src\truetype\truetype.c" />
+    <ClCompile Include="GameData.cpp" />
     <ClCompile Include="Helpers.cpp" />
     <ClCompile Include="Hooks\MinHook.cpp" />
     <ClCompile Include="imguiCustom.cpp" />
@@ -65,6 +66,7 @@
     <ClInclude Include="fnv.h" />
     <ClInclude Include="freetype\freetype\config\ftmodule.h" />
     <ClInclude Include="freetype\freetype\config\ftoption.h" />
+    <ClInclude Include="GameData.h" />
     <ClInclude Include="Hacks\Misc.h" />
     <ClInclude Include="Helpers.h" />
     <ClInclude Include="Hooks\MinHook.h" />
@@ -122,10 +124,12 @@
     <ClInclude Include="SDK\matrix3x4.h" />
     <ClInclude Include="SDK\MDLCache.h" />
     <ClInclude Include="SDK\MemAlloc.h" />
+    <ClInclude Include="SDK\ModelInfo.h" />
     <ClInclude Include="SDK\ModelRender.h" />
     <ClInclude Include="SDK\MoveHelper.h" />
     <ClInclude Include="SDK\Pad.h" />
     <ClInclude Include="SDK\Platform.h" />
+    <ClInclude Include="SDK\PlayerResource.h" />
     <ClInclude Include="SDK\Prediction.h" />
     <ClInclude Include="SDK\Recv.h" />
     <ClInclude Include="SDK\Server.h" />
@@ -138,6 +142,9 @@
     <ClInclude Include="SDK\VirtualMethod.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="Texture.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="cpp.hint" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

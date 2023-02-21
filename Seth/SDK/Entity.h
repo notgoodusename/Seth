@@ -87,26 +87,39 @@ enum class ObsMode {
 enum class Team {
     None = 0,
     Spectators,
-    TT,
-    CT
+    BLU,
+    RED
 };
 
 class Collideable {
 public:
-    PAD(8); //0
-    Vector vecMins; //8(x), 12(y), 16(z) 
-    Vector vecMaxs; //20(x), 24(y), 28(z)
-    unsigned short solidFlags; //32
-    unsigned char solidType; //34
-    unsigned char triggerBloat; //35
-    float radius; //36
-
-    VIRTUAL_METHOD(Vector&, obbMins, 1, (), (this))
-    VIRTUAL_METHOD(Vector&, obbMaxs, 2, (), (this))
+    VIRTUAL_METHOD(const Vector&, obbMins, 3, (), (this))
+    VIRTUAL_METHOD(const Vector&, obbMaxs, 4, (), (this))
 };
 
 class Entity {
 public:
+    VIRTUAL_METHOD(void, release, 1, (), (this + sizeof(uintptr_t) * 2))
+    VIRTUAL_METHOD(ClientClass*, getClientClass, 2, (), (this + sizeof(uintptr_t) * 2))
+    VIRTUAL_METHOD(bool, isDormant, 8, (), (this + sizeof(uintptr_t) * 2))
+    VIRTUAL_METHOD(int, index, 9, (), (this + sizeof(uintptr_t) * 2))
+
+    VIRTUAL_METHOD(Vector&, getRenderOrigin, 1, (), (this + sizeof(uintptr_t)))
+    VIRTUAL_METHOD(Vector&, getRenderAngles, 2, (), (this + sizeof(uintptr_t)))
+    VIRTUAL_METHOD(bool, shouldDraw, 3, (), (this + sizeof(uintptr_t)))
+    VIRTUAL_METHOD(const Model*, getModel, 9, (), (this + sizeof(uintptr_t)))
+    VIRTUAL_METHOD(const matrix3x4&, toWorldTransform, 34, (), (this + sizeof(uintptr_t)))
+
+    VIRTUAL_METHOD(int&, handle, 2, (), (this))
+    VIRTUAL_METHOD(Collideable*, getCollideable, 3, (), (this))
+
+    VIRTUAL_METHOD(const Vector&, getAbsOrigin, 9, (), (this))
+    VIRTUAL_METHOD(Vector&, getAbsAngle, 10, (), (this))
+
+    bool isPlayer() noexcept
+    {
+        return getClassId() == ClassId::TFPlayer;
+    }
 
     bool isAlive() noexcept
     {
@@ -118,15 +131,28 @@ public:
         return groundEntity() >= 0 || flags() & 1;
     }
 
+    bool isEnemy(Entity* entity) noexcept
+    {
+        return entity->teamNumber() != teamNumber();
+    }
+
+    std::string getPlayerName() noexcept;
+
+    Vector getEyePosition() noexcept
+    {
+        return viewOffset() + getAbsOrigin();
+    }
+
+    ClassId getClassId() noexcept
+    {
+        const auto clientClass = getClientClass();
+        return clientClass ? clientClass->classId : ClassId(0);
+    }
+
     UtlVector<matrix3x4>& getBoneCache() noexcept
     {
         return *reinterpret_cast<UtlVector<matrix3x4>*>(reinterpret_cast<uintptr_t>(this) + 0x2138);
     }
-
-    NETVAR(didSmokeEffect, "CSmokeGrenadeProjectile", "m_bDidSmokeEffect", bool)
-
-    NETVAR(pinPulled, "CBaseCSGrenade", "m_bPinPulled", bool);
-    NETVAR(throwTime, "CBaseCSGrenade", "m_fThrowTime", float_t);
 
     NETVAR(body, "CBaseAnimating", "m_nBody", int)
     NETVAR(clientSideAnimation, "CBaseAnimating", "m_bClientSideAnimation", bool)
@@ -140,6 +166,8 @@ public:
     NETVAR(ownerEntity, "CBaseEntity", "m_hOwnerEntity", int)
     NETVAR(spotted, "CBaseEntity", "m_bSpotted", bool)
     NETVAR(lifeState, "CBasePlayer", "m_lifeState", unsigned char)
+    NETVAR(teamNumber, "CBaseEntity", "m_iTeamNum", Team)
+
 
     NETVAR(weapons, "CBaseCombatCharacter", "m_hMyWeapons", int[64])
     PNETVAR(wearables, "CBaseCombatCharacter", "m_hMyWearables", int)
@@ -162,23 +190,14 @@ public:
     NETVAR(duckSpeed, "CBasePlayer", "m_flDuckSpeed", float)
     NETVAR(fallVelocity, "CBasePlayer", "m_flFallVelocity", float)
     NETVAR(groundEntity, "CBasePlayer", "m_hGroundEntity", int)
+    NETVAR(health, "CBasePlayer", "m_iHealth", int)
 
     NETVAR(armor, "CCSPlayer", "m_ArmorValue", int)
     NETVAR(hasHeavyArmor, "CCSPlayer", "m_bHasHeavyArmor", bool)
     NETVAR(eyeAngles, "CCSPlayer", "m_angEyeAngles", Vector)
     NETVAR(isScoped, "CCSPlayer", "m_bIsScoped", bool)
-    NETVAR(isDefusing, "CCSPlayer", "m_bIsDefusing", bool)
-    NETVAR(flashMaxAlpha, "CCSPlayer", "m_flFlashMaxAlpha", float)
-    NETVAR_OFFSET(flashDuration, "CCSPlayer", "m_flFlashMaxAlpha", 4, float)
-    NETVAR_OFFSET(flashBuildUp, "CCSPlayer", "m_flFlashMaxAlpha", -4, bool)
-    NETVAR_OFFSET(flashOverlayAlpha, "CCSPlayer", "m_flFlashMaxAlpha", -8, float)
-    NETVAR_OFFSET(flashScreenshotAlpha, "CCSPlayer", "m_flFlashMaxAlpha", -12, float)
-    NETVAR_OFFSET(flashBangTime, "CCSPlayer", "m_flFlashMaxAlpha", -16, float)
     NETVAR(gunGameImmunity, "CCSPlayer", "m_bGunGameImmunity", bool)
     NETVAR(account, "CCSPlayer", "m_iAccount", int)
-    NETVAR(inBombZone, "CCSPlayer", "m_bInBombZone", bool)
-    NETVAR(hasDefuser, "CCSPlayer", "m_bHasDefuser", bool)
-    NETVAR(hasHelmet, "CCSPlayer", "m_bHasHelmet", bool)
     NETVAR(lby, "CCSPlayer", "m_flLowerBodyYawTarget", float)
     NETVAR(ragdoll, "CCSPlayer", "m_hRagdoll", int)
     NETVAR(shotsFired, "CCSPlayer", "m_iShotsFired", int)
@@ -235,44 +254,4 @@ public:
     NETVAR(mapHasBombTarget, "CCSGameRulesProxy", "m_bMapHasBombTarget", bool)
     NETVAR(freezePeriod, "CCSGameRulesProxy", "m_bFreezePeriod", bool)
     NETVAR(isValveDS, "CCSGameRulesProxy", "m_bIsValveDS", bool)
-
-    NETVAR(fireXDelta, "CInferno", "m_fireXDelta", int[100])
-    NETVAR(fireYDelta, "CInferno", "m_fireYDelta", int[100])
-    NETVAR(fireZDelta, "CInferno", "m_fireZDelta", int[100])
-    NETVAR(fireIsBurning, "CInferno", "m_bFireIsBurning", bool[100])
-    NETVAR(fireCount, "CInferno", "m_fireCount", int)
-       
-    float getFlashStartTime() noexcept 
-    {
-        return (flashBangTime() - flashDuration()); 
-    }
-    float getFlashTimeElapsed() noexcept
-    { 
-        return max(memory->globalVars->currenttime - getFlashStartTime(), 0.0f); 
-    }
-
-    bool isFlashed() noexcept
-    {
-        return flashOverlayAlpha() > 75.0f;
-    }
-};
-
-class PlantedC4 : public Entity {
-public:
-    NETVAR(c4BlowTime, "CPlantedC4", "m_flC4Blow", float)
-    NETVAR(c4TimerLength, "CPlantedC4", "m_flTimerLength", float)
-    NETVAR(c4BombSite, "CPlantedC4", "m_nBombSite", int)
-    NETVAR(c4Ticking, "CPlantedC4", "m_bBombTicking", bool)
-    NETVAR(c4DefuseCountDown, "CPlantedC4", "m_flDefuseCountDown", float)
-    NETVAR(c4DefuseLength, "CPlantedC4", "m_flDefuseLength", float)
-    NETVAR(c4Defuser, "CPlantedC4", "m_hBombDefuser", int)
-};
-
-class FogController : public Entity {
-public:
-    NETVAR(enable, "CFogController", "m_fog.enable", int)
-    NETVAR(start, "CFogController", "m_fog.start", float)
-    NETVAR(end, "CFogController", "m_fog.end", float)
-    NETVAR(density, "CFogController", "m_fog.maxdensity", float)
-    NETVAR(color, "CFogController", "m_fog.colorPrimary", int)
 };

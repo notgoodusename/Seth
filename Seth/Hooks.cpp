@@ -13,6 +13,7 @@
 #include "MinHook/MinHook.h"
 
 #include "Config.h"
+#include "GameData.h"
 #include "GUI.h"
 #include "Hooks.h"
 #include "Interfaces.h"
@@ -140,6 +141,8 @@ static bool __fastcall createMove(void* ecx, void* edx, float inputSampleTime, U
 
 static void __stdcall frameStageNotify(FrameStage stage) noexcept
 {
+    if (stage == FrameStage::START)
+        GameData::update();
     hooks->client.callOriginal<void, 35>(stage);
 }
 
