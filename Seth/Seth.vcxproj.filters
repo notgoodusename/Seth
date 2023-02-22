@@ -430,5 +430,8 @@
     <ClInclude Include="Hacks\StreamProofESP.h">
       <Filter>Hacks</Filter>
     </ClInclude>
+    <ClInclude Include="SDK\Panel.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

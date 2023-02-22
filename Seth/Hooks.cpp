@@ -33,6 +33,7 @@
 #include "SDK/GlobalVars.h"
 #include "SDK/InputSystem.h"
 #include "SDK/ModelRender.h"
+#include "SDK/Panel.h"
 #include "SDK/Platform.h"
 #include "SDK/Prediction.h"
 #include "SDK/StudioRender.h"
@@ -58,7 +59,11 @@ static LRESULT __stdcall wndProc(HWND window, UINT msg, WPARAM wParam, LPARAM lP
     LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
     ImGui_ImplWin32_WndProcHandler(window, msg, wParam, lParam);
 
-    interfaces->inputSystem->enableInput(!gui->isOpen());
+    if (gui->isOpen())
+    {
+        interfaces->inputSystem->resetInputState();
+        return 1;
+    }
 
     return CallWindowProcW(hooks->originalWndProc, window, msg, wParam, lParam);
 }
@@ -99,7 +104,7 @@ static HRESULT __stdcall reset(IDirect3DDevice9* device, D3DPRESENT_PARAMETERS* 
     return hooks->originalReset(device, params);
 }
 
-static bool __fastcall createMove(void* ecx, void* edx, float inputSampleTime, UserCmd* cmd) noexcept
+static bool __fastcall createMove(void* thisPointer, void*, float inputSampleTime, UserCmd* cmd) noexcept
 {
     auto result = hooks->clientMode.callOriginal<bool, 21>(inputSampleTime, cmd);
 
@@ -152,6 +157,25 @@ static void __stdcall frameStageNotify(FrameStage stage) noexcept
     hooks->client.callOriginal<void, 35>(stage);
 }
 
+void __fastcall paintTraverse(void* thisPointer, void*, unsigned int vguiPanel, bool forceRepaint, bool allowForce)
+{
+    hooks->panel.callOriginal<void, 41>(vguiPanel, forceRepaint, allowForce);
+
+    static unsigned int vguiFocusOverlayPanel;
+
+    if (vguiFocusOverlayPanel == NULL)
+    {
+        const char* szName = interfaces->panel->getName(vguiPanel);
+        if (szName[0] == 'F' && szName[5] == 'O' && szName[12] == 'P')
+        {
+            vguiFocusOverlayPanel = vguiPanel;
+        }
+    }
+
+    if (vguiFocusOverlayPanel == vguiPanel)
+        interfaces->panel->setMouseInputEnabled(vguiPanel, gui->isOpen());
+}
+
 static void __stdcall lockCursor() noexcept
 {
     if (gui->isOpen())
@@ -202,6 +226,9 @@ void Hooks::install() noexcept
 
     clientMode.init(memory->clientMode);
     clientMode.hookAt(21, createMove);
+
+    panel.init(interfaces->panel);
+    panel.hookAt(41, paintTraverse);
 
     surface.init(interfaces->surface);
     surface.hookAt(62, lockCursor);

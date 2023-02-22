@@ -25,6 +25,7 @@ public:
     MinHook client;
     MinHook clientMode;
     MinHook engine;
+    MinHook panel;
     MinHook surface;
 private:
     HMODULE moduleHandle;

@@ -943,7 +943,7 @@ void GUI::renderStreamProofESPWindow() noexcept
             const auto items = [](std::size_t category) noexcept -> std::vector<const char*> {
                 switch (category) {
                 case 0:
-                case 1: return { "Visible", "Occluded" };
+                case 1: return { };
                 case 2: return { "Pistols", "SMGs", "Rifles", "Sniper Rifles", "Shotguns", "Machineguns", "Grenades", "Melee", "Other" };
                 case 3: return { "Flashbang", "HE Grenade", "Breach Charge", "Bump Mine", "Decoy Grenade", "Molotov", "TA Grenade", "Smoke Grenade", "Snowball" };
                 case 4: return { "Pistol Case", "Light Case", "Heavy Case", "Explosive Case", "Tools Case", "Cash Dufflebag" };
