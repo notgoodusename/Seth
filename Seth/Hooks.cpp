@@ -43,6 +43,7 @@ static LRESULT __stdcall wndProc(HWND window, UINT msg, WPARAM wParam, LPARAM lP
 {
     [[maybe_unused]] static const auto once = [](HWND window) noexcept {
         Netvars::init();
+        Misc::initHiddenCvars();
 
         ImGui::CreateContext();
         ImGui_ImplWin32_Init(window);
@@ -144,6 +145,10 @@ static void __stdcall frameStageNotify(FrameStage stage) noexcept
 {
     if (stage == FrameStage::START)
         GameData::update();
+
+    if (stage == FrameStage::RENDER_START) {
+        Misc::unlockHiddenCvars();
+    }
     hooks->client.callOriginal<void, 35>(stage);
 }
 

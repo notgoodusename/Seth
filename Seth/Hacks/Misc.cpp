@@ -227,6 +227,52 @@ void Misc::autoStrafe(UserCmd* cmd, Vector& currentViewAngles) noexcept
     currentViewAngles.y = Helpers::normalizeYaw(currentViewAngles.y - delta);
 }
 
+
+std::vector<ConCommandBase*> dev;
+std::vector<ConCommandBase*> hidden;
+
+void Misc::initHiddenCvars() noexcept {
+    ConCommandBase* cmdBase = interfaces->cvar->getCommands();
+
+    while(cmdBase != nullptr)
+    {
+        if (cmdBase->flags & CvarFlags::DEVELOPMENTONLY)
+            dev.push_back(cmdBase);
+
+        if (cmdBase->flags & CvarFlags::HIDDEN)
+            hidden.push_back(cmdBase);
+
+        cmdBase = cmdBase->next;
+    }
+}
+
+void Misc::unlockHiddenCvars() noexcept {
+
+    static bool toggle = true;
+
+    if (config->misc.unhideConvars == toggle)
+        return;
+
+    if (config->misc.unhideConvars) {
+        for (unsigned x = 0; x < dev.size(); x++)
+            dev.at(x)->flags &= ~CvarFlags::DEVELOPMENTONLY;
+
+        for (unsigned x = 0; x < hidden.size(); x++)
+            hidden.at(x)->flags &= ~CvarFlags::HIDDEN;
+
+    }
+    if (!config->misc.unhideConvars) {
+        for (unsigned x = 0; x < dev.size(); x++)
+            dev.at(x)->flags |= CvarFlags::DEVELOPMENTONLY;
+
+        for (unsigned x = 0; x < hidden.size(); x++)
+            hidden.at(x)->flags |= CvarFlags::HIDDEN;
+    }
+
+    toggle = config->misc.unhideConvars;
+
+}
+
 void Misc::fixMovement(UserCmd* cmd, float yaw) noexcept
 {
     float oldYaw = yaw + (yaw < 0.0f ? 360.0f : 0.0f);
