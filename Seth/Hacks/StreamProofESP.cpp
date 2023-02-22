@@ -267,14 +267,14 @@ struct FontPush {
     }
 };
 
-static void drawHealthBar(const HealthBar& config, const ImVec2& pos, float height, int health) noexcept
+static void drawHealthBar(const HealthBar& config, const ImVec2& pos, float height, int health, int maxHealth) noexcept
 {
     if (!config.enabled)
         return;
 
     constexpr float width = 3.0f;
 
-    drawList->PushClipRect(pos + ImVec2{ 0.0f, (100 - health) / 100.0f * height }, pos + ImVec2{ width + 1.0f, height + 1.0f });
+    drawList->PushClipRect(pos + ImVec2{ 0.0f, ((static_cast<float>(maxHealth) - static_cast<float>(health)) / static_cast<float>(maxHealth)) * height }, pos + ImVec2{ width + 1.0f, height + 1.0f });
 
     if (config.type == HealthBar::Gradient) {
         const auto green = Helpers::calculateColor(0, 255, 0, 255);
@@ -291,7 +291,7 @@ static void drawHealthBar(const HealthBar& config, const ImVec2& pos, float heig
         max.y += height / 2.0f;
         drawList->AddRectFilledMultiColor(ImFloor(min), ImFloor(max), yellow, yellow, red, red);
     } else {
-        const auto color = config.type == HealthBar::HealthBased ? Helpers::healthColor(std::clamp(health / 100.0f, 0.0f, 1.0f)) : Helpers::calculateColor(config);
+        const auto color = config.type == HealthBar::HealthBased ? Helpers::healthColor(std::clamp(static_cast<float>(health) / static_cast<float>(maxHealth), 0.0f, 1.0f)) : Helpers::calculateColor(config);
         drawList->AddRectFilled(pos + ImVec2{ 1.0f, 1.0f }, pos + ImVec2{ width + 1.0f, height + 1.0f }, color & IM_COL32_A_MASK);
         drawList->AddRectFilled(pos, pos + ImVec2{ width, height }, color);
     }
@@ -311,10 +311,10 @@ static void renderPlayerBox(const PlayerData& playerData, const Player& config) 
     ImVec2 offsetMins{}, offsetMaxs{};
 
     const auto height = (bbox.max.y - bbox.min.y);
-    drawHealthBar(config.healthBar, bbox.min - ImVec2{ 5.0f, 0.0f }, height, playerData.health);
+    drawHealthBar(config.healthBar, bbox.min - ImVec2{ 5.0f, 0.0f }, height, playerData.health, playerData.maxHealth);
     if (config.healthBar.enabled)
     {
-        const auto position = bbox.min - ImVec2{ 5.0f, 0.0f } + ImVec2{ 0.0f, (100 - playerData.health) / 100.0f * height };
+        const auto position = bbox.min - ImVec2{ 5.0f, 0.0f } + ImVec2{ 0.0f, std::clamp((static_cast<float>(playerData.maxHealth) - static_cast<float>(playerData.health)) / static_cast<float>(playerData.maxHealth), 0.0f, 1.0f) * height };
         renderText(playerData.distanceToLocal, config.textCullDistance, Color4(), std::to_string(playerData.health).c_str(), { position.x , position.y });
     }
 

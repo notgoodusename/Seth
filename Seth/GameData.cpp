@@ -167,6 +167,7 @@ void PlayerData::update(Entity* entity) noexcept
     }
 
     health = entity->health();
+    maxHealth = entity->getMaxHealth();
     if (!alive || !inViewFrustum)
         return;
 

@@ -105,6 +105,7 @@ struct PlayerData : BaseData {
     bool immune = false;
     float lastContactTime = 0.0f;
     int health;
+    int maxHealth;
     int handle;
     Team team;
     std::string name;

@@ -115,6 +115,7 @@ public:
 
     VIRTUAL_METHOD(const Vector&, getAbsOrigin, 9, (), (this))
     VIRTUAL_METHOD(Vector&, getAbsAngle, 10, (), (this))
+    VIRTUAL_METHOD(int, getMaxHealth, 107, (), (this))
 
     bool isPlayer() noexcept
     {
@@ -242,16 +243,7 @@ public:
 
     NETVAR(owner, "CBaseViewModel", "m_hOwner", int)
     NETVAR(weapon, "CBaseViewModel", "m_hWeapon", int)
-
-    NETVAR(c4StartedArming, "CC4", "m_bStartedArming", bool)
-
-    NETVAR(tabletReceptionIsBlocked, "CTablet", "m_bTabletReceptionIsBlocked", bool)
     
-    NETVAR(droneTarget, "CDrone", "m_hMoveToThisEntity", int)
-
-    NETVAR(thrower, "CBaseGrenade", "m_hThrower", int)
-        
-    NETVAR(mapHasBombTarget, "CCSGameRulesProxy", "m_bMapHasBombTarget", bool)
     NETVAR(freezePeriod, "CCSGameRulesProxy", "m_bFreezePeriod", bool)
     NETVAR(isValveDS, "CCSGameRulesProxy", "m_bIsValveDS", bool)
 };
