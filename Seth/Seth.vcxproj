@@ -122,6 +122,7 @@
     <ClInclude Include="SDK\GlobalVars.h" />
     <ClInclude Include="SDK\Datamap.h" />
     <ClInclude Include="SDK\InputSystem.h" />
+    <ClInclude Include="SDK\Localize.h" />
     <ClInclude Include="SDK\LocalPlayer.h" />
     <ClInclude Include="SDK\matrix3x4.h" />
     <ClInclude Include="SDK\MDLCache.h" />
@@ -143,6 +144,7 @@
     <ClInclude Include="SDK\Vector.h" />
     <ClInclude Include="SDK\Utils.h" />
     <ClInclude Include="SDK\VirtualMethod.h" />
+    <ClInclude Include="SDK\WeaponId.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="Texture.h" />
   </ItemGroup>

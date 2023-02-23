@@ -20,6 +20,7 @@ class GameEventManager;
 class GameMovement;
 class GameUI;
 class InputSystem;
+class Localize;
 class MaterialSystem;
 class MDLCache;
 class ModelInfo;
@@ -51,6 +52,7 @@ type* name = reinterpret_cast<type*>(find(moduleName, version));
     GAME_INTERFACE(GameMovement, gameMovement, CLIENT_DLL, "GameMovement001")
     GAME_INTERFACE(GameUI, gameUI, GAMEUI_DLL, "GameUI011")
     GAME_INTERFACE(InputSystem, inputSystem, INPUTSYSTEM_DLL, "InputSystemVersion001")
+    GAME_INTERFACE(Localize, localize, VGUI2_DLL, "VGUI_Localize005")
     GAME_INTERFACE(MaterialSystem, materialSystem, MATERIALSYSTEM_DLL, "VMaterialSystem081")
     GAME_INTERFACE(MDLCache, mdlCache, DATACACHE_DLL, "MDLCache004")
     GAME_INTERFACE(ModelInfo, modelInfo, ENGINE_DLL, "VModelInfoClient006")

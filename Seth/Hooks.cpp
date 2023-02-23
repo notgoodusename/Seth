@@ -157,11 +157,11 @@ static void __stdcall frameStageNotify(FrameStage stage) noexcept
     hooks->client.callOriginal<void, 35>(stage);
 }
 
+static unsigned int vguiFocusOverlayPanel;
+
 void __fastcall paintTraverse(void* thisPointer, void*, unsigned int vguiPanel, bool forceRepaint, bool allowForce)
 {
     hooks->panel.callOriginal<void, 41>(vguiPanel, forceRepaint, allowForce);
-
-    static unsigned int vguiFocusOverlayPanel;
 
     if (vguiFocusOverlayPanel == NULL)
     {
@@ -185,7 +185,12 @@ static void __stdcall lockCursor() noexcept
 
 void resetAll(int resetType) noexcept
 {
-
+    if (resetType == 1)
+    {
+        if (vguiFocusOverlayPanel != NULL)
+            interfaces->panel->setMouseInputEnabled(vguiFocusOverlayPanel, false);
+        interfaces->surface->unlockCursor();
+    }
 }
 
 static void __fastcall levelShutDown(void* thisPointer) noexcept

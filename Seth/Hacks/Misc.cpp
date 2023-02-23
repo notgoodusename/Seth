@@ -270,7 +270,6 @@ void Misc::unlockHiddenCvars() noexcept {
     }
 
     toggle = config->misc.unhideConvars;
-
 }
 
 void Misc::fixMovement(UserCmd* cmd, float yaw) noexcept

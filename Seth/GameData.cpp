@@ -21,6 +21,7 @@
 #include "SDK/Entity.h"
 #include "SDK/EntityList.h"
 #include "SDK/GlobalVars.h"
+#include "SDK/Localize.h"
 #include "SDK/LocalPlayer.h"
 #include "SDK/ModelInfo.h"
 
@@ -71,12 +72,13 @@ void GameData::update() noexcept
             if (entity == localPlayer.get() || !entity->isAlive())
                 continue;
 
-            if (const auto player = playerByHandleWritable(entity->handle())) {
-                player->update(entity);
-            } else {
-                playerData.emplace_back(entity);
-            }
-        } 
+if (const auto player = playerByHandleWritable(entity->handle())) {
+    player->update(entity);
+}
+else {
+    playerData.emplace_back(entity);
+}
+        }
     }
 
     std::sort(playerData.begin(), playerData.end());
@@ -127,12 +129,13 @@ void LocalPlayerData::update() noexcept
 BaseData::BaseData(Entity* entity) noexcept
 {
     distanceToLocal = entity->getAbsOrigin().distTo(localPlayerData.origin);
- 
+
     if (entity->isPlayer()) {
         const auto collideable = entity->getCollideable();
         obbMins = collideable->obbMins();
         obbMaxs = collideable->obbMaxs();
-    } else if (const auto model = entity->getModel()) {
+    }
+    else if (const auto model = entity->getModel()) {
         obbMins = model->mins;
         obbMaxs = model->maxs;
     }
@@ -168,6 +171,10 @@ void PlayerData::update(Entity* entity) noexcept
 
     health = entity->health();
     maxHealth = entity->getMaxHealth();
+
+    if (const auto weapon = entity->getActiveWeapon())
+        activeWeapon = interfaces->localize->findAsUTF8(weapon->getPrintName());
+
     if (!alive || !inViewFrustum)
         return;
 

@@ -23,6 +23,7 @@
 #include "UtlVector.h"
 #include "Vector.h"
 #include "VirtualMethod.h"
+#include "WeaponId.h"
 
 struct AnimState;
 
@@ -91,6 +92,19 @@ enum class Team {
     RED
 };
 
+enum class TFClass {
+    NONE = 0,
+    SCOUT,
+    SNIPER,
+    SOLDIER,
+    DEMOMAN,
+    MEDIC,
+    HEAVY,
+    PYRO,
+    SPY,
+    ENGINEER
+};
+
 class Collideable {
 public:
     VIRTUAL_METHOD(const Vector&, obbMins, 3, (), (this))
@@ -117,6 +131,13 @@ public:
     VIRTUAL_METHOD(Vector&, getAbsAngle, 10, (), (this))
     VIRTUAL_METHOD(int, getMaxHealth, 107, (), (this))
 
+
+    VIRTUAL_METHOD(Vector&, bulletSpread, 286, (), (this))
+    VIRTUAL_METHOD(int, slot, 330, (), (this))
+    VIRTUAL_METHOD(const char*, getPrintName, 333, (), (this))
+    VIRTUAL_METHOD(int, damageType, 340, (), (this))
+    VIRTUAL_METHOD(WeaponId, weaponId, 381, (), (this))
+
     bool isPlayer() noexcept
     {
         return getClassId() == ClassId::TFPlayer;
@@ -135,6 +156,11 @@ public:
     bool isEnemy(Entity* entity) noexcept
     {
         return entity->teamNumber() != teamNumber();
+    }
+
+    Entity* getActiveWeapon() noexcept
+    {
+        return reinterpret_cast<Entity*>(interfaces->entityList->getEntityFromHandle(activeWeapon()));
     }
 
     std::string getPlayerName() noexcept;
@@ -168,6 +194,8 @@ public:
     NETVAR(spotted, "CBaseEntity", "m_bSpotted", bool)
     NETVAR(lifeState, "CBasePlayer", "m_lifeState", unsigned char)
     NETVAR(teamNumber, "CBaseEntity", "m_iTeamNum", Team)
+
+    NETVAR(getPlayerClass, "CTFPlayer", "m_iClass", TFClass)
 
 
     NETVAR(weapons, "CBaseCombatCharacter", "m_hMyWeapons", int[64])
@@ -220,6 +248,8 @@ public:
     NETVAR(nextPrimaryAttack, "CBaseCombatWeapon", "m_flNextPrimaryAttack", float)
     NETVAR(nextSecondaryAttack, "CBaseCombatWeapon", "m_flNextSecondaryAttack", float)
     NETVAR(recoilIndex, "CBaseCombatWeapon", "m_flRecoilIndex", float)
+
+    NETVAR(activeWeapon, "CBaseCombatCharacter", "m_hActiveWeapon", int)
 
     NETVAR(nextAttack, "CBaseCombatCharacter", "m_flNextAttack", float)
 

@@ -433,5 +433,11 @@
     <ClInclude Include="SDK\Panel.h">
       <Filter>SDK</Filter>
     </ClInclude>
+    <ClInclude Include="SDK\WeaponId.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\Localize.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
