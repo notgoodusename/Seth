@@ -161,7 +161,7 @@ void Misc::bunnyHop(UserCmd* cmd) noexcept
 
     if (config->misc.bunnyHop && !localPlayer->isOnGround() 
         && localPlayer->moveType() != MoveType::LADDER && localPlayer->moveType() != MoveType::NOCLIP && localPlayer->moveType() != MoveType::OBSERVER
-        && !localPlayer->isInBumperKart() && !localPlayer->isAGhost() && !localPlayer->isSwimming()
+        && !localPlayer->isInBumperKart() && !localPlayer->isAGhost() && !localPlayer->isSwimming() && localPlayer->isAlive()
         && !wasLastTimeOnGround)
         cmd->buttons &= ~UserCmd::IN_JUMP;
 
