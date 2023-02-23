@@ -72,12 +72,12 @@ void GameData::update() noexcept
             if (entity == localPlayer.get() || !entity->isAlive())
                 continue;
 
-if (const auto player = playerByHandleWritable(entity->handle())) {
-    player->update(entity);
-}
-else {
-    playerData.emplace_back(entity);
-}
+            if (const auto player = playerByHandleWritable(entity->handle())) {
+                player->update(entity);
+            }
+            else {
+                playerData.emplace_back(entity);
+            }
         }
     }
 
