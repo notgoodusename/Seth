@@ -28,7 +28,7 @@
 static Matrix4x4 viewMatrix;
 static LocalPlayerData localPlayerData;
 static std::vector<PlayerData> playerData;
-
+static std::vector<BuildingsData> buildingsData;
 
 static auto playerByHandleWritable(int handle) noexcept
 {
@@ -53,6 +53,8 @@ void GameData::update() noexcept
 
     Lock lock;
 
+    buildingsData.clear();
+
     localPlayerData.update();
 
     if (!localPlayer) {
@@ -69,7 +71,7 @@ void GameData::update() noexcept
             continue;
 
         if (entity->isPlayer()) {
-            if (entity == localPlayer.get() || !entity->isAlive())
+            if (entity == localPlayer.get())
                 continue;
 
             if (const auto player = playerByHandleWritable(entity->handle())) {
@@ -79,9 +81,50 @@ void GameData::update() noexcept
                 playerData.emplace_back(entity);
             }
         }
+        else
+        {
+            switch (entity->getClassId())
+            {
+                case ClassId::ObjectSentrygun:
+                case ClassId::ObjectDispenser:
+                case ClassId::ObjectTeleporter:
+                    buildingsData.emplace_back(entity);
+                    break;
+                case ClassId::BaseAnimating:
+                    break;
+                case ClassId::TFAmmoPack:
+                    break;
+                case ClassId::TFProjectile_Rocket:
+                case ClassId::TFGrenadePipebombProjectile:
+                case ClassId::TFProjectile_Jar:
+                case ClassId::TFProjectile_JarGas:
+                case ClassId::TFProjectile_JarMilk:
+                case ClassId::TFProjectile_Arrow:
+                case ClassId::TFProjectile_SentryRocket:
+                case ClassId::TFProjectile_Flare:
+                case ClassId::TFProjectile_GrapplingHook:
+                case ClassId::TFProjectile_Cleaver:
+                case ClassId::TFProjectile_EnergyBall:
+                case ClassId::TFProjectile_EnergyRing:
+                case ClassId::TFProjectile_HealingBolt:
+                case ClassId::TFProjectile_ThrowableBreadMonster:
+                case ClassId::TFStunBall:
+                case ClassId::TFBall_Ornament:
+                    break;
+                case ClassId::HeadlessHatman:
+                case ClassId::TFTankBoss:
+                case ClassId::Merasmus:
+                case ClassId::Zombie:
+                case ClassId::EyeballBoss:
+                    break;
+            default:
+                break;
+            }
+        }
     }
 
     std::sort(playerData.begin(), playerData.end());
+    std::sort(buildingsData.begin(), buildingsData.end());
 
     std::erase_if(playerData, [](const auto& player) { return interfaces->entityList->getEntityFromHandle(player.handle) == nullptr; });
 
@@ -102,6 +145,11 @@ const LocalPlayerData& GameData::local() noexcept
 const std::vector<PlayerData>& GameData::players() noexcept
 {
     return playerData;
+}
+
+const std::vector<BuildingsData>& GameData::buildings() noexcept
+{
+    return buildingsData;
 }
 
 const PlayerData* GameData::playerByHandle(int handle) noexcept
@@ -135,9 +183,9 @@ BaseData::BaseData(Entity* entity) noexcept
         obbMins = collideable->obbMins();
         obbMaxs = collideable->obbMaxs();
     }
-    else if (const auto model = entity->getModel()) {
-        obbMins = model->mins;
-        obbMaxs = model->maxs;
+    else {
+        obbMins = entity->obbMins();
+        obbMaxs = entity->obbMaxs();
     }
 
     coordinateFrame = entity->toWorldTransform();
@@ -211,4 +259,39 @@ float PlayerData::fadingAlpha() const noexcept
 {
     constexpr float fadeTime = 1.50f;
     return std::clamp(1.0f - (memory->globalVars->realtime - lastContactTime - 0.25f) / fadeTime, 0.0f, 1.0f);
+}
+
+BuildingsData::BuildingsData(Entity* building) noexcept : BaseData{ building }, handle { building->handle() }
+{
+    if (localPlayer) {
+        enemy = building->isEnemy(localPlayer.get());
+    }
+
+    alive = building->isAlive();
+    health = building->objectHealth();
+    maxHealth = building->objectMaxHealth();
+
+    switch (building->objectType())
+    {
+        case 0:
+            name = "Dispenser";
+            break;
+        case 1:
+            name = building->objectMode() >= 1 ? "Teleporter Out" : "Teleporter In";
+            break;
+        case 2:
+            name = building->isMini() ? "Mini Sentry" : "Sentry";
+            break;
+        default:
+            name = "unknown";
+            break;
+    }
+
+    if (!building->mapPlaced())
+    {
+        if (const auto buildingOwner = building->getObjectOwner())
+            owner = buildingOwner->getPlayerName();
+    }
+    else
+        owner = "Map placed";
 }

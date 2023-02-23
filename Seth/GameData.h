@@ -15,14 +15,8 @@
 struct LocalPlayerData;
 
 struct PlayerData;
-struct ObserverData;
-struct WeaponData;
+struct BuildingsData;
 struct EntityData;
-struct LootCrateData;
-struct ProjectileData;
-struct BombData;
-struct InfernoData;
-struct SmokeData;
 
 struct Matrix4x4;
 
@@ -43,15 +37,7 @@ namespace GameData
     const LocalPlayerData& local() noexcept;
     const std::vector<PlayerData>& players() noexcept;
     const PlayerData* playerByHandle(int handle) noexcept;
-    const std::vector<ObserverData>& observers() noexcept;
-    const std::vector<WeaponData>& weapons() noexcept;
-    const std::vector<EntityData>& entities() noexcept;
-    const std::vector<LootCrateData>& lootCrates() noexcept;
-    const std::forward_list<ProjectileData>& projectiles() noexcept;
-    const BombData& plantedC4() noexcept;
-    const std::string& gameMode() noexcept;
-    const std::vector<InfernoData>& infernos() noexcept;
-    const std::vector<SmokeData>& smokes() noexcept;
+    const std::vector<BuildingsData>& buildings() noexcept;
 }
 
 enum class Team;
@@ -93,16 +79,12 @@ struct PlayerData : BaseData {
     PlayerData& operator=(PlayerData&&) = default;
 
     void update(Entity* entity) noexcept;
-    const std::string getRankName() const noexcept;
-    ImTextureID getAvatarTexture() const noexcept;
-    ImTextureID getRankTexture() const noexcept;
     float fadingAlpha() const noexcept;
 
     bool dormant;
     bool enemy = false;
     bool inViewFrustum;
     bool alive;
-    bool immune = false;
     float lastContactTime = 0.0f;
     int health;
     int maxHealth;
@@ -128,4 +110,16 @@ struct PlayerData : BaseData {
         void clear() noexcept;
         ImTextureID get() const noexcept { return texture; }
     };
+};
+
+struct BuildingsData : BaseData {
+    BuildingsData(Entity* building) noexcept;
+
+    bool enemy = false;
+    bool alive;
+    int handle;
+    std::string name;
+    std::string owner;
+    int health;
+    int maxHealth;
 };

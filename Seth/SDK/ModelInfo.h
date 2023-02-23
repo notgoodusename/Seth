@@ -136,5 +136,6 @@ struct Model;
 class ModelInfo {
 public:
     VIRTUAL_METHOD(int, getModelIndex, 2, (const char* name), (this, name))
+    VIRTUAL_METHOD(const char*, getModelName, 3, (const Model* model), (this, model))
     VIRTUAL_METHOD(StudioHdr*, getStudioModel, 28, (const Model* model), (this, model))
 };

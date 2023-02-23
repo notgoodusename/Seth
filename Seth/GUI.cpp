@@ -931,7 +931,7 @@ void GUI::renderStreamProofESPWindow() noexcept
                 switch (category) {
                 case 0:
                 case 1: return { };
-                case 2: return { };
+                case 2: return { "Allies", "Enemies" };
                 case 3: return { "Flashbang", "HE Grenade", "Breach Charge", "Bump Mine", "Decoy Grenade", "Molotov", "TA Grenade", "Smoke Grenade", "Snowball" };
                 default: return { };
                 }
@@ -1082,7 +1082,29 @@ void GUI::renderStreamProofESPWindow() noexcept
 
             ImGui::Checkbox("Disable on cloaked", &playerConfig.disableOnCloaked);
         } else if (currentCategory == 2) {
-            auto& weaponConfig = config->streamProofESP.buildings[currentItem];
+            auto& buildingConfig = config->streamProofESP.buildings[currentItem];
+
+            ImGuiCustom::colorPicker("Owner", buildingConfig.owner);
+
+            ImGui::Checkbox("Health Bar", &buildingConfig.healthBar.enabled);
+            ImGui::SameLine();
+
+            ImGui::PushID("Health Bar");
+
+            if (ImGui::Button("..."))
+                ImGui::OpenPopup("");
+
+            if (ImGui::BeginPopup("")) {
+                ImGui::SetNextItemWidth(95.0f);
+                ImGui::Combo("Type", &buildingConfig.healthBar.type, "Gradient\0Solid\0Health-based\0");
+                if (buildingConfig.healthBar.type == HealthBar::Solid) {
+                    ImGui::SameLine();
+                    ImGuiCustom::colorPicker("", static_cast<Color4&>(buildingConfig.healthBar));
+                }
+                ImGui::EndPopup();
+            }
+
+            ImGui::PopID();
         }
 
         ImGui::SetNextItemWidth(115.0f);

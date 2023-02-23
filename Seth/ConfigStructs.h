@@ -85,7 +85,6 @@ struct Shared {
     Snapline snapline;
     Box box;
     ColorToggle name;
-    bool disableOnCloaked;
     float textCullDistance = 0.0f;
 };
 
@@ -109,11 +108,14 @@ struct Player : Shared {
     ColorToggle weapon;
     HealthBar healthBar;
     ColorToggleThickness skeleton;
+    bool disableOnCloaked;
 
     using Shared::operator=;
 };
 
 struct Buildings : Shared {
+    ColorToggle owner;
+    HealthBar healthBar;
 
     using Shared::operator=;
 };

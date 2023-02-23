@@ -80,9 +80,7 @@ static HRESULT __stdcall present(IDirect3DDevice9* device, const RECT* src, cons
         gui->handleToggle();
 
         if (gui->isOpen())
-        {
             gui->render();
-        }
     }
 
     ImGui::EndFrame();

@@ -335,6 +335,35 @@ static void renderPlayerBox(const PlayerData& playerData, const Player& config) 
     drawSnapline(config.snapline, bbox.min + offsetMins, bbox.max + offsetMaxs);
 }
 
+static void renderBuildingBox(const BuildingsData& buildingData, const Buildings& config) noexcept
+{
+    const BoundingBox bbox{ buildingData, config.box.scale };
+
+    if (!bbox)
+        return;
+
+    renderBox(bbox, config.box);
+    drawSnapline(config.snapline, bbox.min, bbox.max);
+
+    const auto height = (bbox.max.y - bbox.min.y);
+    drawHealthBar(config.healthBar, bbox.min - ImVec2{ 5.0f, 0.0f }, height, buildingData.health, buildingData.maxHealth);
+
+    FontPush font{ config.font.name, buildingData.distanceToLocal };
+
+    if (config.healthBar.enabled)
+    {
+        const auto textSize = ImGui::CalcTextSize(std::to_string(buildingData.health).c_str());
+        const auto position = bbox.min - ImVec2{ 5.0f + (textSize.x / 2.0f), 0.0f } + ImVec2{ 0.0f, std::clamp((static_cast<float>(buildingData.maxHealth) - static_cast<float>(buildingData.health)) / static_cast<float>(buildingData.maxHealth), 0.0f, 1.0f) * height };
+        renderText(buildingData.distanceToLocal, config.textCullDistance, Color4(), std::to_string(buildingData.health).c_str(), { position.x , position.y });
+    }
+
+    if (config.name.enabled)
+        renderText(buildingData.distanceToLocal, config.textCullDistance, config.name, buildingData.name.data(), { (bbox.min.x + bbox.max.x) / 2, bbox.min.y - 2 });
+
+    if (config.owner.enabled)
+        renderText(buildingData.distanceToLocal, config.textCullDistance, config.name, buildingData.owner.data(), { (bbox.min.x + bbox.max.x) / 2, bbox.max.y - 5 });
+}
+
 static void renderEntityBox(const BaseData& entityData, const char* name, const Shared& config) noexcept
 {
     const BoundingBox bbox{ entityData, config.box.scale };
@@ -388,9 +417,6 @@ static bool renderPlayerEsp(const PlayerData& playerData, const Player& playerCo
     if (playerData.isCloaked && playerConfig.disableOnCloaked)
         return false;
 
-    if (playerData.immune)
-        Helpers::setAlphaFactor(0.5f);
-
     Helpers::setAlphaFactor(Helpers::getAlphaFactor() * playerData.fadingAlpha());
 
     renderPlayerBox(playerData, playerConfig);
@@ -398,6 +424,15 @@ static bool renderPlayerEsp(const PlayerData& playerData, const Player& playerCo
 
     Helpers::setAlphaFactor(1.0f);
 
+    return true;
+}
+
+static bool renderBuildingEsp(const BuildingsData& buildingData, const Buildings& buildingConfig) noexcept
+{
+    if (!buildingConfig.enabled)
+        return false;
+
+    renderBuildingBox(buildingData, buildingConfig);
     return true;
 }
 
@@ -425,6 +460,14 @@ void StreamProofESP::render() noexcept
 
         auto& playerConfig = player.enemy ? config->streamProofESP.enemies : config->streamProofESP.allies;
         renderPlayerEsp(player, playerConfig["All"]);
+    }
+
+    for (const auto& building : GameData::buildings()) {
+        if (!building.alive)
+            continue;
+
+        if(!renderBuildingEsp(building, config->streamProofESP.buildings["All"]))
+            renderBuildingEsp(building, building.enemy ? config->streamProofESP.buildings["Enemies"] : config->streamProofESP.buildings["Allies"]);
     }
 }
 
