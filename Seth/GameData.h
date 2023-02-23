@@ -16,6 +16,7 @@ struct LocalPlayerData;
 
 struct PlayerData;
 struct BuildingsData;
+struct WorldData;
 struct EntityData;
 
 struct Matrix4x4;
@@ -38,6 +39,7 @@ namespace GameData
     const std::vector<PlayerData>& players() noexcept;
     const PlayerData* playerByHandle(int handle) noexcept;
     const std::vector<BuildingsData>& buildings() noexcept;
+    const std::vector<WorldData>& world() noexcept;
 }
 
 enum class Team;
@@ -117,9 +119,14 @@ struct BuildingsData : BaseData {
 
     bool enemy = false;
     bool alive;
-    int handle;
     std::string name;
     std::string owner;
     int health;
     int maxHealth;
+};
+
+struct WorldData : BaseData {
+    WorldData(Entity* worldEntity) noexcept;
+
+    std::string name;
 };

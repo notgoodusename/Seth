@@ -469,6 +469,10 @@ void StreamProofESP::render() noexcept
         if(!renderBuildingEsp(building, config->streamProofESP.buildings["All"]))
             renderBuildingEsp(building, building.enemy ? config->streamProofESP.buildings["Enemies"] : config->streamProofESP.buildings["Allies"]);
     }
+
+    for (const auto& world : GameData::world()) {
+        renderEntityBox(world, world.name.data(), config->streamProofESP.world["All"]);
+    }
 }
 
 void StreamProofESP::updateInput() noexcept

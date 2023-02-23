@@ -29,6 +29,7 @@ static Matrix4x4 viewMatrix;
 static LocalPlayerData localPlayerData;
 static std::vector<PlayerData> playerData;
 static std::vector<BuildingsData> buildingsData;
+static std::vector<WorldData> worldData;
 
 static auto playerByHandleWritable(int handle) noexcept
 {
@@ -54,6 +55,7 @@ void GameData::update() noexcept
     Lock lock;
 
     buildingsData.clear();
+    worldData.clear();
 
     localPlayerData.update();
 
@@ -91,8 +93,10 @@ void GameData::update() noexcept
                     buildingsData.emplace_back(entity);
                     break;
                 case ClassId::BaseAnimating:
+                    worldData.emplace_back(entity);
                     break;
                 case ClassId::TFAmmoPack:
+                    worldData.emplace_back(entity);
                     break;
                 case ClassId::TFProjectile_Rocket:
                 case ClassId::TFGrenadePipebombProjectile:
@@ -150,6 +154,11 @@ const std::vector<PlayerData>& GameData::players() noexcept
 const std::vector<BuildingsData>& GameData::buildings() noexcept
 {
     return buildingsData;
+}
+
+const std::vector<WorldData>& GameData::world() noexcept
+{
+    return worldData;
 }
 
 const PlayerData* GameData::playerByHandle(int handle) noexcept
@@ -261,7 +270,7 @@ float PlayerData::fadingAlpha() const noexcept
     return std::clamp(1.0f - (memory->globalVars->realtime - lastContactTime - 0.25f) / fadeTime, 0.0f, 1.0f);
 }
 
-BuildingsData::BuildingsData(Entity* building) noexcept : BaseData{ building }, handle { building->handle() }
+BuildingsData::BuildingsData(Entity* building) noexcept : BaseData{ building }
 {
     if (localPlayer) {
         enemy = building->isEnemy(localPlayer.get());
@@ -294,4 +303,55 @@ BuildingsData::BuildingsData(Entity* building) noexcept : BaseData{ building }, 
     }
     else
         owner = "Map placed";
+}
+
+WorldData::WorldData(Entity* worldEntity) noexcept : BaseData{ worldEntity }
+{
+    switch (fnv::hashRuntime(worldEntity->getModelName()))
+    {
+        case fnv::hash("models/items/medkit_small.mdl"):
+        case fnv::hash("models/items/medkit_small_bday.mdl"):
+        case fnv::hash("models/props_halloween/halloween_medkit_small.mdl"):
+            name = "Pill";
+            break;
+        case fnv::hash("models/items/ammopack_small.mdl"):
+        case fnv::hash("models/items/ammopack_small_bday.mdl"):
+            name = "Ammo";
+            break;
+        case fnv::hash("models/items/medkit_medium.mdl"):
+        case fnv::hash("models/items/medkit_medium_bday.mdl"):
+        case fnv::hash("models/props_halloween/halloween_medkit_medium.mdl"):
+            name = "Medkit";
+            break;
+        case fnv::hash("models/items/ammopack_medium.mdl"):
+        case fnv::hash("models/items/ammopack_medium_bday.mdl"):
+            name = "Ammo Pack";
+            break;
+        case fnv::hash("models/items/medkit_large.mdl"):
+        case fnv::hash("models/items/medkit_large_bday.mdl"):
+        case fnv::hash("models/props_halloween/halloween_medkit_large.mdl"):
+            name = "Full Medkit";
+            break;
+        case fnv::hash("models/items/ammopack_large.mdl"):
+        case fnv::hash("models/items/ammopack_large_bday.mdl"):
+            name = "Full Ammo Pack";
+            break;
+        case fnv::hash("models/items/tf_gift.mdl"):
+        case fnv::hash("models/props_halloween/halloween_gift.mdl"):
+            name = "Gift";
+            break;
+        case fnv::hash("models/items/plate.mdl"):
+        case fnv::hash("models/items/plate_steak.mdl"):
+        case fnv::hash("models/items/plate_robo_sandwich.mdl"):
+            name = "Sandwich";
+            break;
+        case fnv::hash("models/items/currencypack_small.mdl"):
+        case fnv::hash("models/items/currencypack_medium.mdl"):
+        case fnv::hash("models/items/currencypack_large.mdl"):
+            name = "Money";
+            break;
+        default:
+            name = worldEntity->getModelName();
+            break;
+    }
 }
