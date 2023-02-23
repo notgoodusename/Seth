@@ -312,13 +312,15 @@ static void renderPlayerBox(const PlayerData& playerData, const Player& config) 
 
     const auto height = (bbox.max.y - bbox.min.y);
     drawHealthBar(config.healthBar, bbox.min - ImVec2{ 5.0f, 0.0f }, height, playerData.health, playerData.maxHealth);
-    if (config.healthBar.enabled)
-    {
-        const auto position = bbox.min - ImVec2{ 5.0f, 0.0f } + ImVec2{ 0.0f, std::clamp((static_cast<float>(playerData.maxHealth) - static_cast<float>(playerData.health)) / static_cast<float>(playerData.maxHealth), 0.0f, 1.0f) * height };
-        renderText(playerData.distanceToLocal, config.textCullDistance, Color4(), std::to_string(playerData.health).c_str(), { position.x , position.y });
-    }
 
     FontPush font{ config.font.name, playerData.distanceToLocal };
+
+    if (config.healthBar.enabled)
+    {
+        const auto textSize = ImGui::CalcTextSize(std::to_string(playerData.health).c_str());
+        const auto position = bbox.min - ImVec2{ 5.0f + (textSize.x/2.0f), 0.0f } + ImVec2{ 0.0f, std::clamp((static_cast<float>(playerData.maxHealth) - static_cast<float>(playerData.health)) / static_cast<float>(playerData.maxHealth), 0.0f, 1.0f) * height };
+        renderText(playerData.distanceToLocal, config.textCullDistance, Color4(), std::to_string(playerData.health).c_str(), { position.x , position.y });
+    }
 
     if (config.name.enabled) {
         const auto nameSize = renderText(playerData.distanceToLocal, config.textCullDistance, config.name, playerData.name.c_str(), { (bbox.min.x + bbox.max.x) / 2, bbox.min.y - 2 });
