@@ -59,11 +59,7 @@ static LRESULT __stdcall wndProc(HWND window, UINT msg, WPARAM wParam, LPARAM lP
     LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
     ImGui_ImplWin32_WndProcHandler(window, msg, wParam, lParam);
 
-    if (gui->isOpen())
-    {
-        interfaces->inputSystem->resetInputState();
-        return 1;
-    }
+    interfaces->inputSystem->enableInput(!gui->isOpen());
 
     return CallWindowProcW(hooks->originalWndProc, window, msg, wParam, lParam);
 }
@@ -84,7 +80,9 @@ static HRESULT __stdcall present(IDirect3DDevice9* device, const RECT* src, cons
         gui->handleToggle();
 
         if (gui->isOpen())
+        {
             gui->render();
+        }
     }
 
     ImGui::EndFrame();
@@ -185,12 +183,6 @@ static void __stdcall lockCursor() noexcept
 
 void resetAll(int resetType) noexcept
 {
-    if (resetType == 1)
-    {
-        if (vguiFocusOverlayPanel != NULL)
-            interfaces->panel->setMouseInputEnabled(vguiFocusOverlayPanel, false);
-        interfaces->surface->unlockCursor();
-    }
 }
 
 static void __fastcall levelShutDown(void* thisPointer) noexcept
@@ -247,6 +239,9 @@ static DWORD WINAPI unload(HMODULE moduleHandle) noexcept
 {
     Sleep(100);
 
+    if (vguiFocusOverlayPanel != NULL)
+        interfaces->panel->setMouseInputEnabled(vguiFocusOverlayPanel, false);
+    interfaces->surface->unlockCursor();
     interfaces->inputSystem->enableInput(true);
 
     ImGui_ImplDX9_Shutdown();
