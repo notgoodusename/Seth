@@ -150,14 +150,19 @@ public:
         return lifeState() == 0;
     }
 
+    bool isEnemy(Entity* entity) noexcept
+    {
+        return entity->teamNumber() != teamNumber();
+    }
+
     bool isOnGround() noexcept
     {
         return groundEntity() >= 0 || flags() & 1;
     }
 
-    bool isEnemy(Entity* entity) noexcept
+    bool isSwimming() noexcept
     {
-        return entity->teamNumber() != teamNumber();
+        return waterLevel() > 1;
     }
     
     const char* getModelName() noexcept
@@ -252,6 +257,7 @@ public:
     NETVAR(conditionEx2, "CTFPlayer", "m_nPlayerCondEx2", int)
     NETVAR(conditionEx3, "CTFPlayer", "m_nPlayerCondEx3", int)
     NETVAR(getPlayerClass, "CTFPlayer", "m_iClass", TFClass)
+    NETVAR(waterLevel, "CTFPlayer", "m_nWaterLevel", unsigned char)
 
     NETVAR(objectType, "CBaseObject", "m_iObjectType", int)
     NETVAR(objectMode, "CBaseObject", "m_iObjectMode", int)

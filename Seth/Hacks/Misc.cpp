@@ -160,7 +160,8 @@ void Misc::bunnyHop(UserCmd* cmd) noexcept
     static auto wasLastTimeOnGround{ localPlayer->isOnGround() };
 
     if (config->misc.bunnyHop && !localPlayer->isOnGround() 
-        && localPlayer->moveType() != MoveType::LADDER && localPlayer->moveType() != MoveType::NOCLIP && localPlayer->moveType() != MoveType::OBSERVER 
+        && localPlayer->moveType() != MoveType::LADDER && localPlayer->moveType() != MoveType::NOCLIP && localPlayer->moveType() != MoveType::OBSERVER
+        && !localPlayer->isInBumperKart() && !localPlayer->isAGhost() && !localPlayer->isSwimming()
         && !wasLastTimeOnGround)
         cmd->buttons &= ~UserCmd::IN_JUMP;
 
@@ -213,6 +214,9 @@ void Misc::autoStrafe(UserCmd* cmd, Vector& currentViewAngles) noexcept
 
     //If we are on ground, noclip or in a ladder return
     if (localPlayer->isOnGround() || localPlayer->moveType() == MoveType::NOCLIP || localPlayer->moveType() == MoveType::LADDER)
+        return;
+
+    if (localPlayer->isInBumperKart() || localPlayer->isAGhost() || localPlayer->isSwimming())
         return;
 
     currentViewAngles.y += angle;
