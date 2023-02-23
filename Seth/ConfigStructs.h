@@ -113,33 +113,12 @@ struct Player : Shared {
     using Shared::operator=;
 };
 
-struct Weapon : Shared {
-    ColorToggle ammo;
+struct Buildings : Shared {
 
     using Shared::operator=;
 };
 
-struct Trail : ColorToggleThickness {
-    enum Type {
-        Line = 0,
-        Circles,
-        FilledCircles
-    };
-
-    int type = Line;
-    float time = 2.0f;
-};
-
-struct Trails {
-    bool enabled = false;
-
-    Trail localPlayer;
-    Trail allies;
-    Trail enemies;
-};
-
-struct Projectile : Shared {
-    Trails trails;
+struct World : Shared {
 
     using Shared::operator=;
 };

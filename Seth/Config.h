@@ -191,9 +191,8 @@ public:
 
         std::unordered_map<std::string, Player> allies;
         std::unordered_map<std::string, Player> enemies;
-        std::unordered_map<std::string, Weapon> weapons;
-        std::unordered_map<std::string, Projectile> projectiles; 
-        std::unordered_map<std::string, Shared> otherEntities;
+        std::unordered_map<std::string, Buildings> buildings;
+        std::unordered_map<std::string, World> world; 
     } streamProofESP;
 
     struct Font {

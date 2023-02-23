@@ -156,34 +156,14 @@ static void from_json(const json& j, Shared& s)
     read(j, "Text Cull Distance", s.textCullDistance);
 }
 
-static void from_json(const json& j, Weapon& w)
+static void from_json(const json& j, Buildings& w)
 {
     from_json(j, static_cast<Shared&>(w));
-
-    read<value_t::object>(j, "Ammo", w.ammo);
 }
 
-static void from_json(const json& j, Trail& t)
-{
-    from_json(j, static_cast<ColorToggleThickness&>(t));
-
-    read(j, "Type", t.type);
-    read(j, "Time", t.time);
-}
-
-static void from_json(const json& j, Trails& t)
-{
-    read(j, "Enabled", t.enabled);
-    read<value_t::object>(j, "Local Player", t.localPlayer);
-    read<value_t::object>(j, "Allies", t.allies);
-    read<value_t::object>(j, "Enemies", t.enemies);
-}
-
-static void from_json(const json& j, Projectile& p)
+static void from_json(const json& j, World& p)
 {
     from_json(j, static_cast<Shared&>(p));
-
-    read<value_t::object>(j, "Trails", p.trails);
 }
 
 static void from_json(const json& j, HealthBar& o)
@@ -383,9 +363,8 @@ static void from_json(const json& j, Config::StreamProofESP& e)
     read(j, "Key", e.key);
     read(j, "Allies", e.allies);
     read(j, "Enemies", e.enemies);
-    read(j, "Weapons", e.weapons);
-    read(j, "Projectiles", e.projectiles);
-    read(j, "Other Entities", e.otherEntities);
+    read(j, "Buildings", e.buildings);
+    read(j, "World", e.world);
 }
 
 static void from_json(const json& j, Config::Visuals& v)
@@ -859,25 +838,9 @@ static void to_json(json& j, const Player& o, const Player& dummy = {})
     WRITE("Skeleton", skeleton);
 }
 
-static void to_json(json& j, const Weapon& o, const Weapon& dummy = {})
+static void to_json(json& j, const Buildings& o, const Buildings& dummy = {})
 {
     to_json(j, static_cast<const Shared&>(o), dummy);
-    WRITE("Ammo", ammo);
-}
-
-static void to_json(json& j, const Trail& o, const Trail& dummy = {})
-{
-    to_json(j, static_cast<const ColorToggleThickness&>(o), dummy);
-    WRITE("Type", type);
-    WRITE("Time", time);
-}
-
-static void to_json(json& j, const Trails& o, const Trails& dummy = {})
-{
-    WRITE("Enabled", enabled);
-    WRITE("Local Player", localPlayer);
-    WRITE("Allies", allies);
-    WRITE("Enemies", enemies);
 }
 
 static void to_json(json& j, const OffscreenEnemies& o, const OffscreenEnemies& dummy = {})
@@ -892,11 +855,9 @@ static void to_json(json& j, const BulletTracers& o, const BulletTracers& dummy 
     to_json(j, static_cast<const ColorToggle&>(o), dummy);
 }
 
-static void to_json(json& j, const Projectile& o, const Projectile& dummy = {})
+static void to_json(json& j, const World& o, const World& dummy = {})
 {
-    j = static_cast<const Shared&>(o);
-
-    WRITE("Trails", trails);
+    to_json(j, static_cast<const Shared&>(o), dummy);
 }
 
 static void to_json(json& j, const ImVec2& o, const ImVec2& dummy = {})
@@ -1012,9 +973,8 @@ static void to_json(json& j, const Config::StreamProofESP& o, const Config::Stre
     WRITE("Key", key);
     j["Allies"] = o.allies;
     j["Enemies"] = o.enemies;
-    j["Weapons"] = o.weapons;
-    j["Projectiles"] = o.projectiles;
-    j["Other Entities"] = o.otherEntities;
+    j["Buildings"] = o.buildings;
+    j["World"] = o.world;
 }
 
 static void to_json(json& j, const Config::Misc::Reportbot& o, const Config::Misc::Reportbot& dummy = {})
