@@ -859,8 +859,7 @@ void GUI::renderStreamProofESPWindow() noexcept
         case 1: return config->streamProofESP.allies[item];
         case 2: return config->streamProofESP.weapons[item];
         case 3: return config->streamProofESP.projectiles[item];
-        case 4: return config->streamProofESP.lootCrates[item];
-        case 5: return config->streamProofESP.otherEntities[item];
+        case 4: return config->streamProofESP.otherEntities[item];
         }
     };
 
@@ -872,7 +871,7 @@ void GUI::renderStreamProofESPWindow() noexcept
     };
 
     if (ImGui::BeginListBox("##list", { 170.0f, 300.0f })) {
-        constexpr std::array categories{ "Enemies", "Allies", "Weapons", "Projectiles", "Loot Crates", "Other Entities" };
+        constexpr std::array categories{ "Enemies", "Allies", "Weapons", "Projectiles", "Other Entities" };
 
         for (std::size_t i = 0; i < categories.size(); ++i) {
             if (ImGui::Selectable(categories[i], currentCategory == i && std::string_view{ currentItem } == "All")) {
@@ -946,8 +945,7 @@ void GUI::renderStreamProofESPWindow() noexcept
                 case 1: return { };
                 case 2: return { };
                 case 3: return { "Flashbang", "HE Grenade", "Breach Charge", "Bump Mine", "Decoy Grenade", "Molotov", "TA Grenade", "Smoke Grenade", "Snowball" };
-                case 4: return { "Pistol Case", "Light Case", "Heavy Case", "Explosive Case", "Tools Case", "Cash Dufflebag" };
-                case 5: return { "Defuse Kit", "Chicken", "Planted C4", "Hostage", "Sentry", "Cash", "Ammo Box", "Radar Jammer", "Snowball Pile", "Collectable Coin" };
+                case 4: return { "Defuse Kit", "Chicken", "Planted C4", "Hostage", "Sentry", "Cash", "Ammo Box", "Radar Jammer", "Snowball Pile", "Collectable Coin" };
                 default: return { };
                 }
             }(i);
@@ -1168,9 +1166,8 @@ void GUI::renderStreamProofESPWindow() noexcept
             }
 
             ImGui::PopID();
-            
-            ImGui::SliderInt("Thickness", &config->visuals.footsteps.footstepBeamThickness, 0, 30, "Thickness: %d%%");
-            ImGui::SliderInt("Radius", &config->visuals.footsteps.footstepBeamRadius, 0, 230, "Radius: %d%%");
+
+            ImGui::Checkbox("Disable on cloaked", &playerConfig.disableOnCloaked);
         } else if (currentCategory == 2) {
             auto& weaponConfig = config->streamProofESP.weapons[currentItem];
             ImGuiCustom::colorPicker("Ammo", weaponConfig.ammo);

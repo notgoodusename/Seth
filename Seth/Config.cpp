@@ -385,15 +385,7 @@ static void from_json(const json& j, Config::StreamProofESP& e)
     read(j, "Enemies", e.enemies);
     read(j, "Weapons", e.weapons);
     read(j, "Projectiles", e.projectiles);
-    read(j, "Loot Crates", e.lootCrates);
     read(j, "Other Entities", e.otherEntities);
-}
-
-static void from_json(const json& j, Config::Visuals::FootstepESP& ft)
-{
-    read<value_t::object>(j, "Enabled", ft.footstepBeams);
-    read(j, "Thickness", ft.footstepBeamThickness);
-    read(j, "Radius", ft.footstepBeamRadius);
 }
 
 static void from_json(const json& j, Config::Visuals& v)
@@ -467,7 +459,6 @@ static void from_json(const json& j, Config::Visuals& v)
     read<value_t::object>(j, "Molotov timer BG", v.molotovTimerBG);
     read<value_t::object>(j, "Molotov timer TIMER", v.molotovTimerTimer);
     read<value_t::object>(j, "Molotov timer TEXT", v.molotovTimerText);
-    read<value_t::object>(j, "Footstep", v.footsteps);
 }
 
 static void from_json(const json& j, PurchaseList& pl)
@@ -1023,7 +1014,6 @@ static void to_json(json& j, const Config::StreamProofESP& o, const Config::Stre
     j["Enemies"] = o.enemies;
     j["Weapons"] = o.weapons;
     j["Projectiles"] = o.projectiles;
-    j["Loot Crates"] = o.lootCrates;
     j["Other Entities"] = o.otherEntities;
 }
 
@@ -1210,13 +1200,6 @@ static void to_json(json& j, const Config::Misc::Logger& o, const Config::Misc::
 {
     WRITE("Modes", modes);
     WRITE("Events", events);
-}
-
-static void to_json(json& j, const Config::Visuals::FootstepESP& o, const Config::Visuals::FootstepESP& dummy)
-{
-    WRITE("Enabled", footstepBeams);
-    WRITE("Thickness", footstepBeamThickness);
-    WRITE("Radius", footstepBeamRadius);
 }
 
 static void to_json(json& j, const Config::Visuals::MotionBlur& o, const Config::Visuals::MotionBlur& dummy)
@@ -1444,7 +1427,6 @@ static void to_json(json& j, const Config::Visuals& o)
     WRITE("Molotov timer BG", molotovTimerBG);
     WRITE("Molotov timer TIMER", molotovTimerTimer);
     WRITE("Molotov timer TEXT", molotovTimerText);
-    WRITE("Footstep", footsteps);
 }
 
 static void to_json(json& j, const ImVec4& o)

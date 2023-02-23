@@ -9,6 +9,7 @@
 
 #include "ClientClass.h"
 #include "CommandContext.h"
+#include "Conditions.h"
 #include "Cvar.h"
 #include "Datamap.h"
 #include "Engine.h"
@@ -181,6 +182,45 @@ public:
         return *reinterpret_cast<UtlVector<matrix3x4>*>(reinterpret_cast<uintptr_t>(this) + 0x848);
     }
 
+    CONDITION(isCharging, condition(), TFCond_Charging)
+    CONDITION(isScoped, condition(), TFCond_Zoomed)
+    CONDITION(isUbered, condition(), TFCond_Ubercharged)
+    CONDITION(isBonked, condition(), TFCond_Bonked)
+    CONDITION(inMilk, condition(), TFCond_Milked)
+    CONDITION(inJarate, condition(), TFCond_Jarated)
+    CONDITION(isBleeding, condition(), TFCond_Bleeding)
+    CONDITION(isDisguised, condition(), TFCond_Disguised)
+    CONDITION(isCloaked, condition(), TFCond_Cloaked)
+    CONDITION(isTaunting, condition(), TFCond_Taunting)
+    CONDITION(isOnFire, condition(), TFCond_OnFire)
+    CONDITION(isStunned, condition(), TFCond_Stunned)
+    CONDITION(isSlowed, condition(), TFCond_Slowed)
+    CONDITION(isMegaHealed, condition(), TFCond_MegaHeal)
+    CONDITION(isAGhost, conditionEx2(), TFCondEx2_HalloweenGhostMode)
+    CONDITION(isInBumperKart, conditionEx2(), TFCondEx_InKart)
+    CONDITION(isPhlogUbered, conditionEx(), TFCondEx_PhlogUber)
+    CONDITION(isBlastImmune, conditionEx2(), TFCondEx2_BlastImmune)
+    CONDITION(isBulletImmune, conditionEx2(), TFCondEx2_BulletImmune)
+    CONDITION(isFireImmune, conditionEx2(), TFCondEx2_FireImmune)
+    CONDITION(hasStrengthRune, conditionEx2(), TFCondEx2_StrengthRune)
+    CONDITION(hasHasteRune, conditionEx2(), TFCondEx2_HasteRune)
+    CONDITION(hasRegenRune, conditionEx2(), TFCondEx2_RegenRune)
+    CONDITION(hasResistRune, conditionEx2(), TFCondEx2_ResistRune)
+    CONDITION(hasVampireRune, conditionEx2(), TFCondEx2_VampireRune)
+    CONDITION(hasReflectRune, conditionEx2(), TFCondEx2_ReflectRune)
+    CONDITION(hasPrecisionRune, conditionEx3(), TFCondEx3_PrecisionRune)
+    CONDITION(hasAgilityRune, conditionEx3(), TFCondEx3_AgilityRune)
+    CONDITION(hasKnockoutRune, conditionEx3(), TFCondEx3_KnockoutRune)
+    CONDITION(hasImbalanceRune, conditionEx3(), TFCondEx3_ImbalanceRune)
+    CONDITION(hasCritTempRune, conditionEx3(), TFCondEx3_CritboostedTempRune)
+    CONDITION(hasKingRune, conditionEx3(), TFCondEx3_KingRune)
+    CONDITION(hasPlagueRune, conditionEx3(), TFCondEx3_PlagueRune)
+    CONDITION(hasSupernovaRune, conditionEx3(), TFCondEx3_SupernovaRune)
+    CONDITION(hasBuffedByKing, conditionEx3(), TFCondEx3_KingBuff)
+    CONDITION(hasBlastResist, conditionEx(), TFCondEx_ExplosiveCharge)
+    CONDITION(hasBulletResist, conditionEx(), TFCondEx_BulletCharge)
+    CONDITION(hasFireResist, conditionEx(), TFCondEx_FireCharge)
+
     NETVAR(body, "CBaseAnimating", "m_nBody", int)
     NETVAR(clientSideAnimation, "CBaseAnimating", "m_bClientSideAnimation", bool)
     NETVAR(hitboxSet, "CBaseAnimating", "m_nHitboxSet", int)
@@ -195,8 +235,11 @@ public:
     NETVAR(lifeState, "CBasePlayer", "m_lifeState", unsigned char)
     NETVAR(teamNumber, "CBaseEntity", "m_iTeamNum", Team)
 
+    NETVAR(condition, "CTFPlayer", "m_nPlayerCond", int)
+    NETVAR(conditionEx, "CTFPlayer", "m_nPlayerCondEx", int)
+    NETVAR(conditionEx2, "CTFPlayer", "m_nPlayerCondEx2", int)
+    NETVAR(conditionEx3, "CTFPlayer", "m_nPlayerCondEx3", int)
     NETVAR(getPlayerClass, "CTFPlayer", "m_iClass", TFClass)
-
 
     NETVAR(weapons, "CBaseCombatCharacter", "m_hMyWeapons", int[64])
     PNETVAR(wearables, "CBaseCombatCharacter", "m_hMyWearables", int)
@@ -224,7 +267,6 @@ public:
     NETVAR(armor, "CCSPlayer", "m_ArmorValue", int)
     NETVAR(hasHeavyArmor, "CCSPlayer", "m_bHasHeavyArmor", bool)
     NETVAR(eyeAngles, "CCSPlayer", "m_angEyeAngles", Vector)
-    NETVAR(isScoped, "CCSPlayer", "m_bIsScoped", bool)
     NETVAR(gunGameImmunity, "CCSPlayer", "m_bGunGameImmunity", bool)
     NETVAR(account, "CCSPlayer", "m_iAccount", int)
     NETVAR(lby, "CCSPlayer", "m_flLowerBodyYawTarget", float)

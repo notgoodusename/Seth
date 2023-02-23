@@ -172,6 +172,8 @@ void PlayerData::update(Entity* entity) noexcept
     health = entity->health();
     maxHealth = entity->getMaxHealth();
 
+    isCloaked = entity->isCloaked();
+
     if (const auto weapon = entity->getActiveWeapon())
         activeWeapon = interfaces->localize->findAsUTF8(weapon->getPrintName());
 

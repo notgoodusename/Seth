@@ -31,3 +31,9 @@ namespace Netvars
 
 #define NETVAR(funcname, class_name, var_name, type) \
     NETVAR_OFFSET(funcname, class_name, var_name, 0, type)
+
+#define CONDITION(funcname, conditions, cond)  \
+    bool funcname() noexcept \
+    { \
+	    return (conditions & cond); \
+    }

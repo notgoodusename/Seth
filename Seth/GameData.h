@@ -107,6 +107,7 @@ struct PlayerData : BaseData {
     int health;
     int maxHealth;
     int handle;
+    bool isCloaked;
     Team team;
     std::string name;
     Vector origin;

@@ -85,6 +85,7 @@ struct Shared {
     Snapline snapline;
     Box box;
     ColorToggle name;
+    bool disableOnCloaked;
     float textCullDistance = 0.0f;
 };
 

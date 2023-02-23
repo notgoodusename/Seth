@@ -385,6 +385,9 @@ static bool renderPlayerEsp(const PlayerData& playerData, const Player& playerCo
     if (!playerConfig.enabled)
         return false;
 
+    if (playerData.isCloaked && playerConfig.disableOnCloaked)
+        return false;
+
     if (playerData.immune)
         Helpers::setAlphaFactor(0.5f);
 
