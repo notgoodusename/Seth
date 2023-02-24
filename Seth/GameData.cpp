@@ -129,8 +129,10 @@ void GameData::update() noexcept
 
     std::sort(playerData.begin(), playerData.end());
     std::sort(buildingsData.begin(), buildingsData.end());
+    std::sort(worldData.begin(), worldData.end());
 
     std::erase_if(playerData, [](const auto& player) { return interfaces->entityList->getEntityFromHandle(player.handle) == nullptr; });
+    std::erase_if(worldData, [](const auto& world) { return world.name == ""; });
 
     if (shouldUpdatePlayerVisibility())
         nextPlayerVisibilityUpdateTime = memory->globalVars->realtime + playerVisibilityUpdateDelay;
@@ -351,7 +353,7 @@ WorldData::WorldData(Entity* worldEntity) noexcept : BaseData{ worldEntity }
             name = "Money";
             break;
         default:
-            name = worldEntity->getModelName();
+            name = "";
             break;
     }
 }

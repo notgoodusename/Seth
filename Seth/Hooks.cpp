@@ -19,6 +19,7 @@
 #include "Interfaces.h"
 #include "Memory.h"
 
+#include "Hacks/Chams.h"
 #include "Hacks/Misc.h"
 #include "Hacks/StreamProofESP.h"
 
@@ -36,7 +37,7 @@
 #include "SDK/Panel.h"
 #include "SDK/Platform.h"
 #include "SDK/Prediction.h"
-#include "SDK/StudioRender.h"
+#include "SDK/RenderView.h"
 #include "SDK/Surface.h"
 #include "SDK/UserCmd.h"
 
@@ -153,9 +154,19 @@ static void __stdcall frameStageNotify(FrameStage stage) noexcept
     hooks->client.callOriginal<void, 35>(stage);
 }
 
+static void __fastcall drawModelExecute(void* thisPointer, void*, void* state, const ModelRenderInfo& info, matrix3x4* customBoneToWorld) noexcept
+{
+    static Chams chams;
+    if (!chams.render(state, info, customBoneToWorld))
+        hooks->modelRender.callOriginal<void, 19>(state, std::cref(info), customBoneToWorld);
+    interfaces->renderView->setColorModulation(1.0f, 1.0f, 1.0f);
+    interfaces->renderView->setBlend(1.0f);
+    interfaces->modelRender->forcedMaterialOverride(nullptr);
+}
+
 static unsigned int vguiFocusOverlayPanel;
 
-void __fastcall paintTraverse(void* thisPointer, void*, unsigned int vguiPanel, bool forceRepaint, bool allowForce)
+static void __fastcall paintTraverse(void* thisPointer, void*, unsigned int vguiPanel, bool forceRepaint, bool allowForce)
 {
     hooks->panel.callOriginal<void, 41>(vguiPanel, forceRepaint, allowForce);
 
@@ -221,6 +232,9 @@ void Hooks::install() noexcept
 
     clientMode.init(memory->clientMode);
     clientMode.hookAt(21, createMove);
+
+    modelRender.init(interfaces->modelRender);
+    modelRender.hookAt(19, drawModelExecute);
 
     panel.init(interfaces->panel);
     panel.hookAt(41, paintTraverse);

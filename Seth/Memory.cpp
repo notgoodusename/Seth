@@ -87,5 +87,9 @@ Memory::Memory() noexcept
     //input = *reinterpret_cast<Input**>((*reinterpret_cast<uintptr_t**>(interfaces->client))[16] + 1);
     globalVars = *reinterpret_cast<GlobalVars**>(findPattern(ENGINE_DLL, "\xA1????\x8B\x11\x68") + 0x8);// **reinterpret_cast<GlobalVars***>((*reinterpret_cast<uintptr_t**>(interfaces->client))[11] + 10);
 
+
+    keyValuesInitialize = reinterpret_cast<decltype(keyValuesInitialize)>(findPattern(ENGINE_DLL, "\xFF\x15????\x83\xC4\x08\x89\x06\x8B\xC6") - 0x42);
+    keyValuesFindKey = reinterpret_cast<decltype(keyValuesFindKey)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\x81\xEC????\x56\x8B\x75\x08\x57\x8B\xF9\x85\xF6\x0F\x84????\x80\x3E\x00\x0F\x84????"));
+
     localPlayer.init(*reinterpret_cast<Entity***>(findPattern(CLIENT_DLL, "\xA1????\x33\xC9\x83\xC4\x04")+1));
 }

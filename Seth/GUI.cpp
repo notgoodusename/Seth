@@ -759,7 +759,7 @@ void GUI::renderChamsWindow() noexcept
 
     static int material = 1;
 
-    if (ImGui::Combo("", &currentCategory, "Allies\0Enemies\0Planting\0Defusing\0Local player\0Weapons\0Hands\0Backtrack\0Sleeves\0Desync\0Ragdolls\0Fake lag\0"))
+    if (ImGui::Combo("", &currentCategory, "Allies\0Enemies\0Local player\0"))
         material = 1;
 
     ImGui::PopID();
@@ -774,7 +774,7 @@ void GUI::renderChamsWindow() noexcept
     ImGui::SameLine();
     ImGui::Text("%d", material);
 
-    constexpr std::array categories{ "Allies", "Enemies", "Planting", "Defusing", "Local player", "Weapons", "Hands", "Backtrack", "Sleeves", "Desync", "Ragdolls", "Fake lag"};
+    constexpr std::array categories{ "Allies", "Enemies", "Local player" };
 
     ImGui::SameLine();
 
@@ -791,7 +791,7 @@ void GUI::renderChamsWindow() noexcept
     ImGui::Separator();
     ImGui::Checkbox("Health based", &chams.healthBased);
     ImGui::Checkbox("Blinking", &chams.blinking);
-    ImGui::Combo("Material", &chams.material, "Normal\0Flat\0Animated\0Platinum\0Glass\0Chrome\0Crystal\0Silver\0Gold\0Plastic\0Glow\0Pearlescent\0Metallic\0");
+    ImGui::Combo("Material", &chams.material, "Normal\0Flat\0");
     ImGui::Checkbox("Wireframe", &chams.wireframe);
     ImGui::Checkbox("Cover", &chams.cover);
     ImGui::Checkbox("Ignore-Z", &chams.ignorez);

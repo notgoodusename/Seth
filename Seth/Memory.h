@@ -47,6 +47,9 @@ public:
 
     ClientMode* clientMode;
     GlobalVars* globalVars;
+
+    KeyValues* (__thiscall* keyValuesInitialize)(KeyValues*, char*);
+    KeyValues* (__thiscall* keyValuesFindKey)(KeyValues* keyValues, const char* keyName, bool create);
 private:
 };
 
