@@ -91,5 +91,10 @@ Memory::Memory() noexcept
     keyValuesInitialize = reinterpret_cast<decltype(keyValuesInitialize)>(findPattern(ENGINE_DLL, "\xFF\x15????\x83\xC4\x08\x89\x06\x8B\xC6") - 0x42);
     keyValuesFindKey = reinterpret_cast<decltype(keyValuesFindKey)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\x81\xEC????\x56\x8B\x75\x08\x57\x8B\xF9\x85\xF6\x0F\x84????\x80\x3E\x00\x0F\x84????"));
 
+    setAbsOrigin = reinterpret_cast<decltype(setAbsOrigin)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\x56\x57\x8B\xF1\xE8????\x8B\x7D\x08\xF3\x0F\x10\x07"));
+    calcAbsoluteVelocity = relativeToAbsolute<decltype(calcAbsoluteVelocity)>(findPattern(CLIENT_DLL, "\xE8????\xD9\xE8\x8D\x45\xEC") + 1);
+
+    estimateAbsVelocity = findPattern(CLIENT_DLL, "\x55\x8B\xEC\x83\xEC?\x56\x8B\xF1\xE8????\x3B\xF0\x75?\x8B\xCE\xE8????\x8B\x45?\xD9\x86????\xD9\x18\xD9\x86????\xD9\x58?\xD9\x86????\xD9\x58?\x5E\x8B\xE5\x5D\xC2");
+
     localPlayer.init(*reinterpret_cast<Entity***>(findPattern(CLIENT_DLL, "\xA1????\x33\xC9\x83\xC4\x04")+1));
 }

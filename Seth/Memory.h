@@ -50,6 +50,11 @@ public:
 
     KeyValues* (__thiscall* keyValuesInitialize)(KeyValues*, char*);
     KeyValues* (__thiscall* keyValuesFindKey)(KeyValues* keyValues, const char* keyName, bool create);
+
+    void(__thiscall* setAbsOrigin)(Entity*, const Vector&);
+    void(__thiscall* calcAbsoluteVelocity)(void*);
+
+    std::uintptr_t estimateAbsVelocity;
 private:
 };
 

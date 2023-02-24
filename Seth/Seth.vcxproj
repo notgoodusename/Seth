@@ -29,6 +29,7 @@
     <ClCompile Include="freetype\src\smooth\smooth.c" />
     <ClCompile Include="freetype\src\truetype\truetype.c" />
     <ClCompile Include="GameData.cpp" />
+    <ClCompile Include="Hacks\Animations.cpp" />
     <ClCompile Include="Hacks\Chams.cpp" />
     <ClCompile Include="Hacks\StreamProofESP.cpp" />
     <ClCompile Include="Helpers.cpp" />
@@ -70,6 +71,7 @@
     <ClInclude Include="freetype\freetype\config\ftmodule.h" />
     <ClInclude Include="freetype\freetype\config\ftoption.h" />
     <ClInclude Include="GameData.h" />
+    <ClInclude Include="Hacks\Animations.h" />
     <ClInclude Include="Hacks\Chams.h" />
     <ClInclude Include="Hacks\Misc.h" />
     <ClInclude Include="Hacks\StreamProofESP.h" />

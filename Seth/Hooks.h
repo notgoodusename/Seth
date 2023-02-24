@@ -22,6 +22,9 @@ public:
     void install() noexcept;
     void uninstall() noexcept;
 
+    MinHook estimateAbsVelocity;
+    MinHook updateClientSideAnimation;
+
     MinHook client;
     MinHook clientMode;
     MinHook engine;

@@ -29,35 +29,6 @@
 
 struct AnimState;
 
-struct AnimationLayer
-{
-public:
-    float animationTime; //0
-    float fadeOut; //4
-    CStudioHdr* dispatchedStudioHdr; //8
-    int dispatchedSrc; //12
-    int dispatchedDst; //16
-    unsigned int order; //20, networked
-    unsigned int sequence; //24, networked
-    float prevCycle; //28, networked
-    float weight; //32, networked
-    float weightDeltaRate; //36, networked
-    float playbackRate; //40, networked
-    float cycle; //44, networked
-    void* owner; //48
-    int invalidatePhysicsBits; //52
-
-    void reset()
-    {
-        sequence = 0;
-        weight = 0;
-        weightDeltaRate = 0;
-        playbackRate = 0;
-        prevCycle = 0;
-        cycle = 0;
-    }
-};
-
 enum class MoveType {
     NONE = 0,
     ISOMETRIC,
@@ -133,7 +104,7 @@ public:
     VIRTUAL_METHOD(Vector&, getAbsAngle, 10, (), (this))
     VIRTUAL_METHOD(int, getMaxHealth, 107, (), (this))
 
-
+    VIRTUAL_METHOD(void, updateClientSideAnimation, 193, (), (this))
     VIRTUAL_METHOD(Vector&, bulletSpread, 286, (), (this))
     VIRTUAL_METHOD(int, slot, 330, (), (this))
     VIRTUAL_METHOD(const char*, getPrintName, 333, (), (this))
@@ -163,6 +134,14 @@ public:
     bool isSwimming() noexcept
     {
         return waterLevel() > 1;
+    }
+
+    void getAbsVelocity(Vector& vel) noexcept
+    {
+        memory->calcAbsoluteVelocity(this);
+        vel.x = *reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + 0x15C);
+        vel.y = *reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + 0x160);
+        vel.z = *reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + 0x164);
     }
     
     const char* getModelName() noexcept
@@ -196,6 +175,26 @@ public:
     Entity* getObjectOwner() noexcept
     {
         return reinterpret_cast<Entity*>(interfaces->entityList->getEntityFromHandle(objectBuilder()));
+    }
+
+    bool setupBones(matrix3x4* out, int maxBones, int boneMask, float currentTime) noexcept
+    {
+        Vector absOrigin = getAbsOrigin();
+
+        this->invalidateBoneCache();
+
+        memory->setAbsOrigin(this, origin());
+
+        auto result = VirtualMethod::call<bool, 16>(this + sizeof(uintptr_t), out, maxBones, boneMask, currentTime);
+
+        memory->setAbsOrigin(this, absOrigin);
+        return result;
+    }
+
+    void invalidateBoneCache() noexcept
+    {
+        *reinterpret_cast<int*>(reinterpret_cast<uintptr_t>(this) + 0x59C) = UINT_MAX; //m_iMostRecentModelBoneCounter = g_iModelBoneCounter - 1
+        *reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + 0x860) = -FLT_MAX; //m_flLastBoneSetupTime = -FLT_MAX
     }
 
     CONDITION(isCharging, condition(), TFCond_Charging)

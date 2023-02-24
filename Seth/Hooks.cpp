@@ -19,6 +19,7 @@
 #include "Interfaces.h"
 #include "Memory.h"
 
+#include "Hacks/Animations.h"
 #include "Hacks/Chams.h"
 #include "Hacks/Misc.h"
 #include "Hacks/StreamProofESP.h"
@@ -151,6 +152,10 @@ static void __stdcall frameStageNotify(FrameStage stage) noexcept
     if (stage == FrameStage::RENDER_START) {
         Misc::unlockHiddenCvars();
     }
+    if (interfaces->engine->isInGame()) {
+        Animations::handlePlayers(stage);
+    }
+
     hooks->client.callOriginal<void, 35>(stage);
 }
 
@@ -190,6 +195,19 @@ static void __stdcall lockCursor() noexcept
     return hooks->surface.callOriginal<void, 62>();
 }
 
+static void __fastcall estimateAbsVelocityHook(void* thisPointer, void*, Vector* vel)
+{
+    static auto original = hooks->estimateAbsVelocity.getOriginal<void>(vel);
+
+    const auto entity = reinterpret_cast<Entity*>(thisPointer);
+    if (localPlayer && entity->isPlayer() && entity != localPlayer.get())
+    {
+        entity->getAbsVelocity(*vel);
+        return;
+    }
+    original(thisPointer, vel);
+}
+
 void resetAll(int resetType) noexcept
 {
 }
@@ -225,6 +243,8 @@ void Hooks::install() noexcept
     **reinterpret_cast<decltype(reset)***>(memory->reset) = reset;
 
     MH_Initialize();
+
+    estimateAbsVelocity.detour(memory->estimateAbsVelocity, estimateAbsVelocityHook);
 
     client.init(interfaces->client);
     client.hookAt(7, levelShutDown);
