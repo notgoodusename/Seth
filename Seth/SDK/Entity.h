@@ -20,6 +20,7 @@
 #include "MDLCache.h"
 #include "ModelInfo.h"
 #include "ModelRender.h"
+#include "TFWeapons.h"
 #include "Utils.h"
 #include "UtlVector.h"
 #include "Vector.h"
@@ -77,6 +78,20 @@ enum class TFClass {
     ENGINEER
 };
 
+enum class WeaponType {
+    UNKNOWN, 
+    HITSCAN, 
+    PROJECTILE, 
+    MELEE,
+    THROWABLE
+};
+
+enum WeaponSlots {
+    SLOT_PRIMARY,
+    SLOT_SECONDARY,
+    SLOT_MELEE
+};
+
 class Collideable {
 public:
     VIRTUAL_METHOD(const Vector&, obbMins, 3, (), (this))
@@ -113,7 +128,7 @@ public:
     VIRTUAL_METHOD(void, setLocalViewAngles, 302, (Vector& viewAngles), (this, &viewAngles))
     VIRTUAL_METHOD(int, slot, 330, (), (this))
     VIRTUAL_METHOD(const char*, getPrintName, 333, (), (this))
-    VIRTUAL_METHOD(int, damageType, 340, (), (this))
+    VIRTUAL_METHOD(int, getDamageType, 340, (), (this))
     VIRTUAL_METHOD(WeaponId, weaponId, 381, (), (this))
 
     bool isPlayer() noexcept
@@ -186,6 +201,53 @@ public:
     Entity* getObjectOwner() noexcept
     {
         return reinterpret_cast<Entity*>(interfaces->entityList->getEntityFromHandle(objectBuilder()));
+    }
+
+    WeaponType getWeaponType(Entity* weapon) noexcept
+    {
+        if (!weapon)
+            return WeaponType::UNKNOWN;
+
+        if (weapon->slot() == WeaponSlots::SLOT_MELEE)
+            return WeaponType::MELEE;
+
+        switch (weapon->weaponId())
+        {
+            case WeaponId::ROCKETLAUNCHER:
+            case WeaponId::FLAME_BALL:
+            case WeaponId::GRENADELAUNCHER:
+            case WeaponId::FLAREGUN:
+            case WeaponId::COMPOUND_BOW:
+            case WeaponId::DIRECTHIT:
+            case WeaponId::CROSSBOW:
+            case WeaponId::PARTICLE_CANNON:
+            case WeaponId::DRG_POMSON:
+            case WeaponId::FLAREGUN_REVENGE:
+            case WeaponId::RAYGUN:
+            case WeaponId::CANNON:
+            case WeaponId::SYRINGEGUN_MEDIC:
+            case WeaponId::SHOTGUN_BUILDING_RESCUE:
+            case WeaponId::FLAMETHROWER:
+            case WeaponId::CLEAVER:
+            case WeaponId::PIPEBOMBLAUNCHER:
+                return WeaponType::PROJECTILE;
+            default:
+                const int damageType = weapon->getDamageType();
+                if (damageType & (1 << 1) || damageType && (1 << 29))
+                    return WeaponType::HITSCAN;
+                break;
+        }
+        int currentItemDefinitonIndex = weapon->itemDefinitionIndex();
+        if (currentItemDefinitonIndex == Heavy_s_RoboSandvich ||
+            currentItemDefinitonIndex == Heavy_s_Sandvich ||
+            currentItemDefinitonIndex == Heavy_s_FestiveSandvich ||
+            currentItemDefinitonIndex == Heavy_s_Fishcake ||
+            currentItemDefinitonIndex == Heavy_s_TheDalokohsBar ||
+            currentItemDefinitonIndex == Heavy_s_SecondBanana) {
+            return WeaponType::THROWABLE;
+        }
+
+        return WeaponType::UNKNOWN;
     }
 
     bool setupBones(matrix3x4* out, int maxBones, int boneMask, float currentTime) noexcept
@@ -354,4 +416,6 @@ public:
 
     NETVAR(activeWeapon, "CBaseCombatCharacter", "m_hActiveWeapon", int)
     NETVAR(nextAttack, "CBaseCombatCharacter", "m_flNextAttack", float)
+
+    NETVAR(itemDefinitionIndex, "CEconEntity", "m_iItemDefinitionIndex", int)
 };
