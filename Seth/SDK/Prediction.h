@@ -13,31 +13,16 @@ public:
     PAD(4);
     std::uintptr_t lastGround;
     bool inPrediction;
-    bool oldCLPredictValue;
     bool isFirstTimePredicted;
+    bool oldCLPredictValue;
     bool enginePaused;
-	int previousStartFrame;
-	int incomingPacketNumber;
-	float lastServerWorldTimeStamp;
-
-	struct Split
-	{
-		bool		isFirstTimePredicted;
-		PAD(3)
-		int			commandsPredicted;
-		int			serverCommandsAcknowledged;
-		int			previousAckHadErrors;
-		float		idealPitch;
-		int			lastCommandAcknowledged;
-		bool		previousAckErrorTriggersFullLatchReset;
-		UtlVector<std::uintptr_t> vecEntitiesWithPredictionErrorsInLastAck;
-		bool		performedTickShift;
-	};
-
-	Split split[1];
+	int	commandsPredicted;
+	int	serverCommandsAcknowledged;
+	int	previousAckHadErrors;
+	int	incomingPacketNumber;
+	float idealPitch;
 
     VIRTUAL_METHOD(void, update, 3, (int startFrame, bool validFrame, int incAck, int outCmd), (this, startFrame, validFrame, incAck, outCmd))
-	VIRTUAL_METHOD(void, checkMovingGround, 18, (Entity* localPlayer, double frameTime), (this, localPlayer, frameTime))
-    VIRTUAL_METHOD(void, setupMove, 20, (Entity* localPlayer, UserCmd* cmd, MoveHelper* moveHelper, MoveData* moveData), (this, localPlayer, cmd, moveHelper, moveData))
-    VIRTUAL_METHOD(void, finishMove, 21, (Entity* localPlayer, UserCmd* cmd, MoveData* moveData), (this, localPlayer, cmd, moveData))
+    VIRTUAL_METHOD(void, setupMove, 18, (Entity* localPlayer, UserCmd* cmd, MoveHelper* moveHelper, MoveData* moveData), (this, localPlayer, cmd, moveHelper, moveData))
+    VIRTUAL_METHOD(void, finishMove, 19, (Entity* localPlayer, UserCmd* cmd, MoveData* moveData), (this, localPlayer, cmd, moveData))
 };

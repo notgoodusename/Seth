@@ -18,7 +18,6 @@ class ItemSystem;
 class KeyValues;
 class MemAlloc;
 class MoveHelper;
-class MoveData;
 class PlantedC4;
 class PlayerResource;
 class ViewRender;
@@ -46,15 +45,23 @@ public:
     std::uintptr_t reset;
 
     ClientMode* clientMode;
+    ClientState* clientState;
     GlobalVars* globalVars;
+    MoveHelper* moveHelper;
 
     KeyValues* (__thiscall* keyValuesInitialize)(KeyValues*, char*);
     KeyValues* (__thiscall* keyValuesFindKey)(KeyValues* keyValues, const char* keyName, bool create);
 
-    void(__thiscall* setAbsOrigin)(Entity*, const Vector&);
     void(__thiscall* calcAbsoluteVelocity)(void*);
+    int(__thiscall* getNextThinkTick)(void*, const char*);
+    void(__thiscall* setAbsOrigin)(Entity*, const Vector&);
+    void(__thiscall* setNextThink)(void*, float, const char*);
+    bool(__thiscall* physicsRunThink)(void*, int);
+
+    int* predictionRandomSeed;
 
     std::uintptr_t estimateAbsVelocity;
+    std::uintptr_t itemPostFrame;
     std::uintptr_t sendDatagram;
 private:
 };

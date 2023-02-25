@@ -22,6 +22,7 @@
 #include "Hacks/Animations.h"
 #include "Hacks/Backtrack.h"
 #include "Hacks/Chams.h"
+#include "Hacks/EnginePrediction.h"
 #include "Hacks/Misc.h"
 #include "Hacks/StreamProofESP.h"
 
@@ -103,7 +104,7 @@ static HRESULT __stdcall reset(IDirect3DDevice9* device, D3DPRESENT_PARAMETERS* 
     return hooks->originalReset(device, params);
 }
 
-static int __fastcall sendDatagramHook(NetworkChannel* network, void* edx, void* datagram) noexcept
+static int __fastcall sendDatagramHook(NetworkChannel* network, void*, void* datagram) noexcept
 {
     static auto original = hooks->sendDatagram.getOriginal<int>(datagram);
     if (!config->backtrack.fakeLatency || !interfaces->engine->isInGame() || datagram)
@@ -140,6 +141,10 @@ static bool __fastcall createMove(void* thisPointer, void*, float inputSampleTim
     Misc::autoStrafe(cmd, currentViewAngles);
 
     Backtrack::updateIncomingSequences();
+
+    EnginePrediction::update();
+    EnginePrediction::run(cmd);
+
     Backtrack::run(cmd);
 
     auto viewAnglesDelta{ cmd->viewangles - previousViewAngles };
@@ -236,10 +241,22 @@ static void __fastcall estimateAbsVelocityHook(void* thisPointer, void*, Vector*
     original(thisPointer, vel);
 }
 
+static void __fastcall itemPostFrameHook(void* thisPointer, void*) noexcept
+{
+    static auto original = hooks->itemPostFrame.getOriginal<void>();
+
+    //i dont feel like rebuilding postthink.
+    if (EnginePrediction::isInPrediction())
+        return;
+
+    original(thisPointer);
+}
+
 void resetAll(int resetType) noexcept
 {
     Animations::reset();
     Misc::reset(resetType);
+    EnginePrediction::reset();
 }
 
 static void __fastcall levelShutDown(void* thisPointer) noexcept
@@ -275,6 +292,7 @@ void Hooks::install() noexcept
     MH_Initialize();
 
     estimateAbsVelocity.detour(memory->estimateAbsVelocity, estimateAbsVelocityHook);
+    itemPostFrame.detour(memory->itemPostFrame, itemPostFrameHook);
     sendDatagram.detour(memory->sendDatagram, sendDatagramHook);
 
     client.init(interfaces->client);

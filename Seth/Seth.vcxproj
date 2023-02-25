@@ -32,6 +32,7 @@
     <ClCompile Include="Hacks\Animations.cpp" />
     <ClCompile Include="Hacks\Backtrack.cpp" />
     <ClCompile Include="Hacks\Chams.cpp" />
+    <ClCompile Include="Hacks\EnginePrediction.cpp" />
     <ClCompile Include="Hacks\StreamProofESP.cpp" />
     <ClCompile Include="Helpers.cpp" />
     <ClCompile Include="Hooks\MinHook.cpp" />
@@ -75,6 +76,7 @@
     <ClInclude Include="Hacks\Animations.h" />
     <ClInclude Include="Hacks\Backtrack.h" />
     <ClInclude Include="Hacks\Chams.h" />
+    <ClInclude Include="Hacks\EnginePrediction.h" />
     <ClInclude Include="Hacks\Misc.h" />
     <ClInclude Include="Hacks\StreamProofESP.h" />
     <ClInclude Include="Helpers.h" />
@@ -127,8 +129,8 @@
     <ClInclude Include="Memory.h" />
     <ClInclude Include="SDK\FileSystem.h" />
     <ClInclude Include="SDK\FrameStage.h" />
+    <ClInclude Include="SDK\GameMovement.h" />
     <ClInclude Include="SDK\GlobalVars.h" />
-    <ClInclude Include="SDK\Datamap.h" />
     <ClInclude Include="SDK\InputSystem.h" />
     <ClInclude Include="SDK\KeyValues.h" />
     <ClInclude Include="SDK\Localize.h" />

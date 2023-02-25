@@ -23,6 +23,7 @@ public:
     void uninstall() noexcept;
 
     MinHook estimateAbsVelocity;
+    MinHook itemPostFrame;
     MinHook sendDatagram;
 
     MinHook client;

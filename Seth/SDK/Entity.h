@@ -11,7 +11,6 @@
 #include "CommandContext.h"
 #include "Conditions.h"
 #include "Cvar.h"
-#include "Datamap.h"
 #include "Engine.h"
 #include "EngineTrace.h"
 #include "EntityList.h"
@@ -104,8 +103,14 @@ public:
     VIRTUAL_METHOD(Vector&, getAbsAngle, 10, (), (this))
     VIRTUAL_METHOD(int, getMaxHealth, 107, (), (this))
 
+    VIRTUAL_METHOD(void, think, 121, (), (this))
+    VIRTUAL_METHOD(void, setSequence, 189, (int sequence), (this, sequence))
+    VIRTUAL_METHOD(void, studioFrameAdvance, 190, (), (this))
     VIRTUAL_METHOD(void, updateClientSideAnimation, 193, (), (this))
+    VIRTUAL_METHOD(void, preThink, 261, (), (this))
+    VIRTUAL_METHOD(void, postThink, 262, (), (this))
     VIRTUAL_METHOD(Vector&, bulletSpread, 286, (), (this))
+    VIRTUAL_METHOD(void, setLocalViewAngles, 302, (Vector& viewAngles), (this, &viewAngles))
     VIRTUAL_METHOD(int, slot, 330, (), (this))
     VIRTUAL_METHOD(const char*, getPrintName, 333, (), (this))
     VIRTUAL_METHOD(int, damageType, 340, (), (this))
@@ -136,6 +141,12 @@ public:
         return waterLevel() > 1;
     }
 
+    void setCurrentCommand(UserCmd* cmd) noexcept
+    {
+        static int m_hConstraintEntity = Netvars::get(fnv::hash("CBasePlayer->m_hConstraintEntity"));
+        *reinterpret_cast<UserCmd**>(reinterpret_cast<uintptr_t>(this) + m_hConstraintEntity - 4) = cmd;
+    }
+
     void getAbsVelocity(Vector& vel) noexcept
     {
         memory->calcAbsoluteVelocity(this);
@@ -143,7 +154,7 @@ public:
         vel.y = *reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + 0x160);
         vel.z = *reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + 0x164);
     }
-    
+
     const char* getModelName() noexcept
     {
         return interfaces->modelInfo->getModelName(getModel());
@@ -195,6 +206,64 @@ public:
     {
         *reinterpret_cast<int*>(reinterpret_cast<uintptr_t>(this) + 0x59C) = UINT_MAX; //m_iMostRecentModelBoneCounter = g_iModelBoneCounter - 1
         *reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + 0x860) = -FLT_MAX; //m_flLastBoneSetupTime = -FLT_MAX
+    }
+
+    int& getButtons() noexcept
+    {
+        return *reinterpret_cast<int*>(reinterpret_cast<uintptr_t>(this) + 0x1180);
+    }
+
+    int& getButtonLast() noexcept
+    {
+        return *reinterpret_cast<int*>(reinterpret_cast<uintptr_t>(this) + 0x1174);
+    }
+
+    int& getButtonPressed() noexcept
+    {
+        return *reinterpret_cast<int*>(reinterpret_cast<uintptr_t>(this) + 0x1178);
+    }
+
+    int& getButtonReleased() noexcept
+    {
+        return *reinterpret_cast<int*>(reinterpret_cast<uintptr_t>(this) + 0x117C);
+    }
+
+    void updateButtonState(int userCmdButtonMask) noexcept
+    {
+        getButtonLast() = getButtons();
+
+        getButtons() = userCmdButtonMask;
+        const int buttonsChanged = getButtonLast() ^ getButtons();
+
+        getButtonPressed() = buttonsChanged & getButtons();
+        getButtonReleased() = buttonsChanged & (~getButtons());
+    }
+
+    bool physicsRunThink(int thinkMethod = 0) noexcept
+    {
+        return memory->physicsRunThink(this, thinkMethod);
+    }
+
+    void runPreThink() noexcept
+    {
+        if (physicsRunThink())
+            preThink();
+    }
+
+    void runThink() noexcept
+    {
+        const auto nextThinkTick = memory->getNextThinkTick(this, NULL);
+        if (nextThinkTick > 0 &&
+            nextThinkTick <= tickBase())
+        {
+            memory->setNextThink(this, -1, NULL);
+            think();
+        }
+    }
+
+    void runPostThink() noexcept
+    {
+        postThink();
     }
 
     CONDITION(isCharging, condition(), TFCond_Charging)

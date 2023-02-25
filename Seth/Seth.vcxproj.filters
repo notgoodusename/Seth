@@ -194,6 +194,9 @@
     <ClCompile Include="Hacks\Backtrack.cpp">
       <Filter>Hacks</Filter>
     </ClCompile>
+    <ClCompile Include="Hacks\EnginePrediction.cpp">
+      <Filter>Hacks</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GUI.h">
@@ -400,9 +403,6 @@
     <ClInclude Include="SDK\Angle.h">
       <Filter>SDK</Filter>
     </ClInclude>
-    <ClInclude Include="SDK\Datamap.h">
-      <Filter>SDK</Filter>
-    </ClInclude>
     <ClInclude Include="SDK\ClientState.h">
       <Filter>SDK</Filter>
     </ClInclude>
@@ -473,6 +473,12 @@
       <Filter>Hacks</Filter>
     </ClInclude>
     <ClInclude Include="SDK\NetworkChannel.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="Hacks\EnginePrediction.h">
+      <Filter>Hacks</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\GameMovement.h">
       <Filter>SDK</Filter>
     </ClInclude>
   </ItemGroup>
