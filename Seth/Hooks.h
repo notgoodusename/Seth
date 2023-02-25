@@ -22,6 +22,7 @@ public:
     void install() noexcept;
     void uninstall() noexcept;
 
+    MinHook calcViewModelView;
     MinHook estimateAbsVelocity;
     MinHook itemPostFrame;
     MinHook sendDatagram;

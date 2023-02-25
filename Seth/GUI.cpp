@@ -775,7 +775,6 @@ void GUI::renderVisualsWindow() noexcept
         ImGui::SliderFloat("##x", &config->visuals.viewModel.x, -20.0f, 20.0f, "X: %.4f");
         ImGui::SliderFloat("##y", &config->visuals.viewModel.y, -20.0f, 20.0f, "Y: %.4f");
         ImGui::SliderFloat("##z", &config->visuals.viewModel.z, -20.0f, 20.0f, "Z: %.4f");
-        ImGui::SliderInt("##fov", &config->visuals.viewModel.fov, -60, 60, "Viewmodel FOV: %d");
         ImGui::SliderFloat("##roll", &config->visuals.viewModel.roll, -90.0f, 90.0f, "Viewmodel roll: %.2f");
         ImGui::PopItemWidth();
         ImGui::EndPopup();

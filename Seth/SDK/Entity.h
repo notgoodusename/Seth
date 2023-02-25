@@ -250,6 +250,11 @@ public:
         return WeaponType::UNKNOWN;
     }
 
+    Entity* getObserverTarget() noexcept
+    {
+        return interfaces->entityList->getEntityFromHandle(observerTarget());
+    }
+
     bool setupBones(matrix3x4* out, int maxBones, int boneMask, float currentTime) noexcept
     {
         Vector absOrigin = getAbsOrigin();
@@ -403,6 +408,8 @@ public:
     NETVAR(fov, "CBasePlayer", "m_iFOV", int)
     NETVAR(fovStart, "CBasePlayer", "m_iFOVStart", int)
     NETVAR(defaultFov, "CBasePlayer", "m_iDefaultFOV", int)
+    NETVAR(observerTarget, "CBasePlayer", "m_hObserverTarget", int)
+    NETVAR(getObserverMode, "CBasePlayer", "m_iObserverMode", ObsMode)
     NETVAR(flags, "CBasePlayer", "m_fFlags", int)
     NETVAR(tickBase, "CBasePlayer", "m_nTickBase", int)
     NETVAR(baseVelocity, "CBasePlayer", "m_vecBaseVelocity", Vector)

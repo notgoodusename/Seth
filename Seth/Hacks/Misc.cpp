@@ -22,6 +22,7 @@
 #include "../SDK/Entity.h"
 #include "../SDK/FrameStage.h"
 #include "../SDK/GlobalVars.h"
+#include "../SDK/Input.h"
 #include "../SDK/LocalPlayer.h"
 #include "../SDK/Prediction.h"
 #include "../SDK/Surface.h"
@@ -190,6 +191,23 @@ void Misc::autoStrafe(UserCmd* cmd, Vector& currentViewAngles) noexcept
     currentViewAngles.y = Helpers::normalizeYaw(currentViewAngles.y - delta);
 }
 
+void Misc::viewModelChanger(Vector& eyePosition, Vector& eyeAngles) noexcept
+{
+    if (!localPlayer)
+        return;
+
+    auto setViewmodel = [](Vector& origin, Vector& angles) noexcept
+    {
+        Vector forward = Vector::fromAngle(angles);
+        Vector up = Vector::fromAngle(angles - Vector{ 90.0f, 0.0f, 0.0f });
+        Vector side = forward.cross(up);
+        Vector offset = side * config->visuals.viewModel.x + forward * config->visuals.viewModel.y + up * config->visuals.viewModel.z;
+        origin += offset;
+        angles += Vector{ 0.0f, 0.0f, config->visuals.viewModel.roll };
+    };
+
+    setViewmodel(eyePosition, eyeAngles);
+}
 
 std::vector<ConCommandBase*> dev;
 std::vector<ConCommandBase*> hidden;

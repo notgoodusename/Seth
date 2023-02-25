@@ -396,7 +396,6 @@ static void from_json(const json& j, Config::Misc::Logger& o)
 static void from_json(const json& j, Config::Visuals::Viewmodel& vxyz)
 {
     read(j, "Enabled", vxyz.enabled);
-    read(j, "Fov", vxyz.fov);
     read(j, "X", vxyz.x);
     read(j, "Y", vxyz.y);
     read(j, "Z", vxyz.z);
@@ -773,7 +772,6 @@ static void to_json(json& j, const Config::Misc::Logger& o, const Config::Misc::
 static void to_json(json& j, const Config::Visuals::Viewmodel& o, const Config::Visuals::Viewmodel& dummy)
 {
     WRITE("Enabled", enabled);
-    WRITE("Fov", fov);
     WRITE("X", x);
     WRITE("Y", y);
     WRITE("Z", z);

@@ -47,6 +47,7 @@ public:
     ClientMode* clientMode;
     ClientState* clientState;
     GlobalVars* globalVars;
+    Input* input;
     MoveHelper* moveHelper;
 
     KeyValues* (__thiscall* keyValuesInitialize)(KeyValues*, char*);
@@ -55,11 +56,13 @@ public:
     void(__thiscall* calcAbsoluteVelocity)(void*);
     int(__thiscall* getNextThinkTick)(void*, const char*);
     void(__thiscall* setAbsOrigin)(Entity*, const Vector&);
+    void(__thiscall* setAbsAngle)(Entity*, const Vector&);
     void(__thiscall* setNextThink)(void*, float, const char*);
     bool(__thiscall* physicsRunThink)(void*, int);
 
     int* predictionRandomSeed;
 
+    std::uintptr_t calcViewModelView;
     std::uintptr_t estimateAbsVelocity;
     std::uintptr_t itemPostFrame;
     std::uintptr_t sendDatagram;

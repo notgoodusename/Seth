@@ -484,5 +484,11 @@
     <ClInclude Include="SDK\TFWeapons.h">
       <Filter>SDK</Filter>
     </ClInclude>
+    <ClInclude Include="SDK\ViewSetup.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\Input.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

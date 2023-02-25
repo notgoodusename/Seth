@@ -5,11 +5,13 @@
 #include "../SDK/UserCmd.h"
 #include "../SDK/LocalPlayer.h"
 #include "../SDK/Vector.h"
+#include "../SDK/ViewSetup.h"
 
 namespace Misc
 {
     void bunnyHop(UserCmd*) noexcept;
     void autoStrafe(UserCmd* cmd, Vector& currentViewAngles) noexcept;
+    void viewModelChanger(Vector& eyePosition, Vector& eyeAngles) noexcept;
     void initHiddenCvars() noexcept;
     void unlockHiddenCvars() noexcept;
     void fixMovement(UserCmd* cmd, float yaw) noexcept;

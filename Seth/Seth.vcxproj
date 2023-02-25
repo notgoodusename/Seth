@@ -131,6 +131,7 @@
     <ClInclude Include="SDK\FrameStage.h" />
     <ClInclude Include="SDK\GameMovement.h" />
     <ClInclude Include="SDK\GlobalVars.h" />
+    <ClInclude Include="SDK\Input.h" />
     <ClInclude Include="SDK\InputSystem.h" />
     <ClInclude Include="SDK\KeyValues.h" />
     <ClInclude Include="SDK\Localize.h" />
@@ -158,6 +159,7 @@
     <ClInclude Include="SDK\UtlVector.h" />
     <ClInclude Include="SDK\Vector.h" />
     <ClInclude Include="SDK\Utils.h" />
+    <ClInclude Include="SDK\ViewSetup.h" />
     <ClInclude Include="SDK\VirtualMethod.h" />
     <ClInclude Include="SDK\WeaponId.h" />
     <ClInclude Include="stb_image.h" />

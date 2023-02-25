@@ -35,6 +35,7 @@
 #include "SDK/EntityList.h"
 #include "SDK/FrameStage.h"
 #include "SDK/GlobalVars.h"
+#include "SDK/Input.h"
 #include "SDK/InputSystem.h"
 #include "SDK/ModelRender.h"
 #include "SDK/Panel.h"
@@ -43,6 +44,7 @@
 #include "SDK/RenderView.h"
 #include "SDK/Surface.h"
 #include "SDK/UserCmd.h"
+#include "SDK/ViewSetup.h"
 
 static LRESULT __stdcall wndProc(HWND window, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
@@ -202,9 +204,29 @@ static void __fastcall drawModelExecute(void* thisPointer, void*, void* state, c
     interfaces->modelRender->forcedMaterialOverride(nullptr);
 }
 
+static void __stdcall overrideView(ViewSetup* setup) noexcept
+{
+    if (localPlayer && !localPlayer->isScoped())
+        setup->fov += config->visuals.fov;
+
+    hooks->clientMode.callOriginal<void, 16>(setup);
+}
+
+void __fastcall calcViewModelViewHook(void* thisPointer, void*, Entity* owner, Vector* eyePosition, Vector* eyeAngles)
+{
+    static auto original = hooks->calcViewModelView.getOriginal<void>(owner, eyePosition, eyeAngles);
+
+    auto eyePositionCopy = eyePosition;
+    auto eyeAnglesCopy = eyeAngles;
+
+    Misc::viewModelChanger(*eyePositionCopy, *eyeAnglesCopy);
+
+    original(thisPointer, owner, eyePositionCopy, eyeAnglesCopy);
+}
+
 static unsigned int vguiFocusOverlayPanel;
 
-static void __fastcall paintTraverse(void* thisPointer, void*, unsigned int vguiPanel, bool forceRepaint, bool allowForce)
+static void __fastcall paintTraverse(void* thisPointer, void*, unsigned int vguiPanel, bool forceRepaint, bool allowForce) noexcept
 {
     hooks->panel.callOriginal<void, 41>(vguiPanel, forceRepaint, allowForce);
 
@@ -291,6 +313,7 @@ void Hooks::install() noexcept
 
     MH_Initialize();
 
+    calcViewModelView.detour(memory->calcViewModelView, calcViewModelViewHook);
     estimateAbsVelocity.detour(memory->estimateAbsVelocity, estimateAbsVelocityHook);
     itemPostFrame.detour(memory->itemPostFrame, itemPostFrameHook);
     sendDatagram.detour(memory->sendDatagram, sendDatagramHook);
@@ -300,6 +323,7 @@ void Hooks::install() noexcept
     client.hookAt(35, frameStageNotify);
 
     clientMode.init(memory->clientMode);
+    clientMode.hookAt(16, overrideView);
     clientMode.hookAt(21, createMove);
 
     modelRender.init(interfaces->modelRender);
