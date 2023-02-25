@@ -17,19 +17,15 @@ private:
     bool open = true;
 
     void renderGuiStyle() noexcept;
-    void renderLegitbotWindow() noexcept;
-    void renderRagebotWindow() noexcept;
+    void renderAimbotWindow() noexcept;
     void renderTriggerbotWindow() noexcept;
     void renderFakelagWindow() noexcept;
-    void renderLegitAntiAimWindow() noexcept;
-    void renderRageAntiAimWindow() noexcept;
-    void renderFakeAngleWindow() noexcept;
+    void renderAntiAimWindow() noexcept;
     void renderBacktrackWindow() noexcept;
     void renderChamsWindow() noexcept;
     void renderGlowWindow() noexcept;
     void renderStreamProofESPWindow() noexcept;
     void renderVisualsWindow() noexcept;
-    void renderSkinChangerWindow() noexcept;
     void renderMiscWindow() noexcept;
     void renderConfigWindow() noexcept;
 

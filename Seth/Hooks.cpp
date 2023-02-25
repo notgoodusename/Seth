@@ -144,8 +144,8 @@ static bool __fastcall createMove(void* thisPointer, void*, float inputSampleTim
 
     auto viewAnglesDelta{ cmd->viewangles - previousViewAngles };
     viewAnglesDelta.normalize();
-    viewAnglesDelta.x = std::clamp(viewAnglesDelta.x, -config->misc.maxAngleDelta, config->misc.maxAngleDelta);
-    viewAnglesDelta.y = std::clamp(viewAnglesDelta.y, -config->misc.maxAngleDelta, config->misc.maxAngleDelta);
+    viewAnglesDelta.x = std::clamp(viewAnglesDelta.x, -255.0f, 255.0f);
+    viewAnglesDelta.y = std::clamp(viewAnglesDelta.y, -255.0f, 255.0f);
 
     cmd->viewangles = previousViewAngles + viewAnglesDelta;
 

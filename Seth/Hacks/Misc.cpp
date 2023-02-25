@@ -31,41 +31,27 @@
 
 const bool anyActiveKeybinds() noexcept
 {
-    const bool rageBot = config->ragebotKey.canShowKeybind();
-    const bool minDamageOverride = config->minDamageOverrideKey.canShowKeybind();
-    const bool fakeAngle = config->fakeAngle.enabled && config->fakeAngle.invert.canShowKeybind();
-    const bool antiAimManualForward = config->rageAntiAim.enabled && config->rageAntiAim.manualForward.canShowKeybind();
-    const bool antiAimManualBackward = config->rageAntiAim.enabled && config->rageAntiAim.manualBackward.canShowKeybind();
-    const bool antiAimManualRight = config->rageAntiAim.enabled && config->rageAntiAim.manualRight.canShowKeybind();
-    const bool antiAimManualLeft = config->rageAntiAim.enabled && config->rageAntiAim.manualLeft.canShowKeybind();
-    const bool legitAntiAim = config->legitAntiAim.enabled && config->legitAntiAim.invert.canShowKeybind();
+    const bool antiAimManualForward = config->antiAim.enabled && config->antiAim.manualForward.canShowKeybind();
+    const bool antiAimManualBackward = config->antiAim.enabled && config->antiAim.manualBackward.canShowKeybind();
+    const bool antiAimManualRight = config->antiAim.enabled && config->antiAim.manualRight.canShowKeybind();
+    const bool antiAimManualLeft = config->antiAim.enabled && config->antiAim.manualLeft.canShowKeybind();
     const bool doubletap = config->tickbase.doubletap.canShowKeybind();
     const bool hideshots = config->tickbase.hideshots.canShowKeybind();
-    const bool legitBot = config->legitbotKey.canShowKeybind();
-    const bool triggerBot = config->triggerbotKey.canShowKeybind();
+    const bool aimbot = config->aimbot.enabled && config->aimbotKey.canShowKeybind();
+    const bool triggerBot = config->triggerbot.enabled && config->triggerbotKey.canShowKeybind();
     const bool glow = config->glowKey.canShowKeybind();
     const bool chams = config->chamsKey.canShowKeybind();
     const bool esp = config->streamProofESP.key.canShowKeybind();
 
-    const bool zoom = config->visuals.zoom && config->visuals.zoomKey.canShowKeybind();
     const bool thirdperson = config->visuals.thirdperson && config->visuals.thirdpersonKey.canShowKeybind();
     const bool freeCam = config->visuals.freeCam && config->visuals.freeCamKey.canShowKeybind();
 
-    const bool blockbot = config->misc.blockBot && config->misc.blockBotKey.canShowKeybind();
     const bool edgejump = config->misc.edgeJump && config->misc.edgeJumpKey.canShowKeybind();
-    const bool minijump = config->misc.miniJump && config->misc.miniJumpKey.canShowKeybind();
-    const bool jumpBug = config->misc.jumpBug && config->misc.jumpBugKey.canShowKeybind();
-    const bool edgebug = config->misc.edgeBug && config->misc.edgeBugKey.canShowKeybind();
-    const bool autoPixelSurf = config->misc.autoPixelSurf && config->misc.autoPixelSurfKey.canShowKeybind();
-    const bool slowwalk = config->misc.slowwalk && config->misc.slowwalkKey.canShowKeybind();
-    const bool fakeduck = config->misc.fakeduck && config->misc.fakeduckKey.canShowKeybind();
-    const bool autoPeek = config->misc.autoPeek.enabled && config->misc.autoPeekKey.canShowKeybind();
-    const bool prepareRevolver = config->misc.prepareRevolver && config->misc.prepareRevolverKey.canShowKeybind();
 
-    return rageBot || minDamageOverride || fakeAngle || antiAimManualForward || antiAimManualBackward || antiAimManualRight  || antiAimManualLeft 
+    return aimbot || antiAimManualForward || antiAimManualBackward || antiAimManualRight  || antiAimManualLeft 
         || doubletap || hideshots
-        || legitAntiAim || legitBot || triggerBot || chams || glow || esp
-        || zoom || thirdperson || freeCam || blockbot || edgejump || minijump || jumpBug || edgebug || autoPixelSurf || slowwalk || fakeduck || autoPeek || prepareRevolver;
+        || triggerBot || chams || glow || esp
+        || thirdperson || freeCam || edgejump;
 }
 
 void Misc::showKeybinds() noexcept
@@ -95,59 +81,32 @@ void Misc::showKeybinds() noexcept
     ImGui::Begin("Keybind list", nullptr, windowFlags);
     ImGui::PopStyleVar();
 
-    config->ragebotKey.showKeybind();
-    config->minDamageOverrideKey.showKeybind();
-    if (config->fakeAngle.enabled)
-        config->fakeAngle.invert.showKeybind();
-    if (config->rageAntiAim.enabled)
+    if (config->antiAim.enabled)
     {
-        config->rageAntiAim.manualForward.showKeybind();
-        config->rageAntiAim.manualBackward.showKeybind();
-        config->rageAntiAim.manualRight.showKeybind();
-        config->rageAntiAim.manualLeft.showKeybind();
+        config->antiAim.manualForward.showKeybind();
+        config->antiAim.manualBackward.showKeybind();
+        config->antiAim.manualRight.showKeybind();
+        config->antiAim.manualLeft.showKeybind();
     }
 
     config->tickbase.doubletap.showKeybind();
     config->tickbase.hideshots.showKeybind();
 
-    if (config->legitAntiAim.enabled)
-        config->legitAntiAim.invert.showKeybind();
-
-    config->legitbotKey.showKeybind();
-    config->triggerbotKey.showKeybind();
+    if (config->aimbot.enabled)
+        config->aimbotKey.showKeybind();
+    if (config->triggerbot.enabled)
+        config->triggerbotKey.showKeybind();
     config->chamsKey.showKeybind();
     config->glowKey.showKeybind();
     config->streamProofESP.key.showKeybind();
 
-    if (config->visuals.zoom)
-        config->visuals.zoomKey.showKeybind();
     if (config->visuals.thirdperson)
         config->visuals.thirdpersonKey.showKeybind();
     if (config->visuals.freeCam)
         config->visuals.freeCamKey.showKeybind();
 
-    if (config->misc.blockBot)
-        config->misc.blockBotKey.showKeybind();
     if (config->misc.edgeJump)
         config->misc.edgeJumpKey.showKeybind();
-    if (config->misc.miniJump)
-        config->misc.miniJumpKey.showKeybind();
-    if (config->misc.jumpBug)
-        config->misc.jumpBugKey.showKeybind();
-    if (config->misc.edgeBug)
-        config->misc.edgeBugKey.showKeybind();
-    if (config->misc.autoPixelSurf)
-        config->misc.autoPixelSurfKey.showKeybind();
-    if (config->misc.jumpBug)
-        config->misc.jumpBugKey.showKeybind();
-    if (config->misc.slowwalk)
-        config->misc.slowwalkKey.showKeybind();
-    if (config->misc.fakeduck)
-        config->misc.fakeduckKey.showKeybind();
-    if (config->misc.autoPeek.enabled)
-        config->misc.autoPeekKey.showKeybind();
-    if (config->misc.prepareRevolver)
-        config->misc.prepareRevolverKey.showKeybind();
 
     ImGui::End();
 }
@@ -291,16 +250,7 @@ void Misc::fixMovement(UserCmd* cmd, float yaw) noexcept
 
 void Misc::updateInput() noexcept
 {
-    config->misc.blockBotKey.handleToggle();
     config->misc.edgeJumpKey.handleToggle();
-    config->misc.miniJumpKey.handleToggle();
-    config->misc.jumpBugKey.handleToggle();
-    config->misc.edgeBugKey.handleToggle();
-    config->misc.autoPixelSurfKey.handleToggle();
-    config->misc.slowwalkKey.handleToggle();
-    config->misc.fakeduckKey.handleToggle();
-    config->misc.autoPeekKey.handleToggle();
-    config->misc.prepareRevolverKey.handleToggle();
 }
 
 void Misc::reset(int resetType) noexcept
