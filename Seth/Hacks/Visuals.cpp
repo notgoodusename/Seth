@@ -83,6 +83,9 @@ void Visuals::drawAimbotFov(ImDrawList* drawList) noexcept
 
 void Visuals::thirdperson() noexcept
 {
+    if (!interfaces->engine->isInGame())
+        return;
+
     if (!config->visuals.thirdperson && !config->visuals.freeCam && !memory->input->isCameraInThirdPerson())
         return;
 

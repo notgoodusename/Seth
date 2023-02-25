@@ -193,6 +193,9 @@ void Misc::autoStrafe(UserCmd* cmd, Vector& currentViewAngles) noexcept
 
 void Misc::viewModelChanger(Vector& eyePosition, Vector& eyeAngles) noexcept
 {
+    if (!config->visuals.viewModel.enabled)
+        return;
+
     if (!localPlayer)
         return;
 
