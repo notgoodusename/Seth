@@ -13,10 +13,10 @@ class matrix3x4;
 
 struct Ray {
     Ray(const Vector& src, const Vector& dest)
-        : start(src), delta(dest - src), extents(Vector{ }), startOffset(Vector{ }), worldAxisTransform(NULL), isRay(true) { isSwept = delta.x || delta.y || delta.z; }
+        : start(src), delta(dest - src), extents(Vector{ }), startOffset(Vector{ }), isRay(true) { isSwept = delta.x || delta.y || delta.z; }
 
     Ray(const Vector& src, const Vector& dest, const Vector& mins, const Vector& maxs)
-        : delta(dest - src), extents(maxs - mins), startOffset(maxs + mins), worldAxisTransform(NULL)
+        : delta(dest - src), extents(maxs - mins), startOffset(maxs + mins)
     {
         isSwept = delta.x || delta.y || delta.z;
         extents *= 0.5f;
@@ -34,7 +34,6 @@ struct Ray {
     float pad2{ };
     Vector extents{ };
     float pad3{ };
-    const matrix3x4* worldAxisTransform;
     bool isRay{ };
     bool isSwept{ };
 };
@@ -78,14 +77,14 @@ struct Trace {
     unsigned short dispFlags;
     bool allSolid;
     bool startSolid;
-    std::byte pad1[4];
+    float fractionLeftSolid;
     struct Surface {
         const char* name;
         short surfaceProps;
         unsigned short flags;
     } surface;
     int hitgroup;
-    std::byte pad2[4];
+    short physicsBone;
     Entity* entity;
     int hitbox;
 
@@ -102,7 +101,7 @@ struct Trace {
 class EngineTrace {
 public:
     VIRTUAL_METHOD(int, getPointContents, 0, (const Vector& absPosition, int contentsMask), (this, std::cref(absPosition), contentsMask, nullptr))
-    VIRTUAL_METHOD(void, _traceRay, 5, (const Ray& ray, unsigned int mask, const TraceFilter& filter, Trace& trace), (this, std::cref(ray), mask, std::cref(filter), std::ref(trace)))
+    VIRTUAL_METHOD(void, _traceRay, 4, (const Ray& ray, unsigned int mask, const TraceFilter& filter, Trace& trace), (this, std::cref(ray), mask, std::cref(filter), std::ref(trace)))
 
     void traceRay(const Ray& ray, unsigned int mask, const TraceFilter& filter, Trace& trace) noexcept
     {
