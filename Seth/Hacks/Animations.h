@@ -15,6 +15,9 @@ namespace Animations
 {
 	void init() noexcept;
 	void reset() noexcept;
+
+	float getExtraTicks() noexcept;
+
 	void handlePlayers(FrameStage) noexcept;
 
 	struct Players
@@ -27,7 +30,6 @@ namespace Animations
 		struct Record {
 			std::deque<Vector> positions;
 			Vector origin;
-			Vector absAngle;
 			Vector mins;
 			Vector maxs;
 			float simulationTime;

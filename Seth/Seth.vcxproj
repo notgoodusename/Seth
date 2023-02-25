@@ -30,6 +30,7 @@
     <ClCompile Include="freetype\src\truetype\truetype.c" />
     <ClCompile Include="GameData.cpp" />
     <ClCompile Include="Hacks\Animations.cpp" />
+    <ClCompile Include="Hacks\Backtrack.cpp" />
     <ClCompile Include="Hacks\Chams.cpp" />
     <ClCompile Include="Hacks\StreamProofESP.cpp" />
     <ClCompile Include="Helpers.cpp" />
@@ -72,6 +73,7 @@
     <ClInclude Include="freetype\freetype\config\ftoption.h" />
     <ClInclude Include="GameData.h" />
     <ClInclude Include="Hacks\Animations.h" />
+    <ClInclude Include="Hacks\Backtrack.h" />
     <ClInclude Include="Hacks\Chams.h" />
     <ClInclude Include="Hacks\Misc.h" />
     <ClInclude Include="Hacks\StreamProofESP.h" />
@@ -139,6 +141,7 @@
     <ClInclude Include="SDK\ModelInfo.h" />
     <ClInclude Include="SDK\ModelRender.h" />
     <ClInclude Include="SDK\MoveHelper.h" />
+    <ClInclude Include="SDK\NetworkChannel.h" />
     <ClInclude Include="SDK\Pad.h" />
     <ClInclude Include="SDK\Panel.h" />
     <ClInclude Include="SDK\Platform.h" />

@@ -23,7 +23,7 @@ public:
     void uninstall() noexcept;
 
     MinHook estimateAbsVelocity;
-    MinHook updateClientSideAnimation;
+    MinHook sendDatagram;
 
     MinHook client;
     MinHook clientMode;

@@ -20,6 +20,7 @@
 #include "Memory.h"
 
 #include "Hacks/Animations.h"
+#include "Hacks/Backtrack.h"
 #include "Hacks/Chams.h"
 #include "Hacks/Misc.h"
 #include "Hacks/StreamProofESP.h"
@@ -102,6 +103,27 @@ static HRESULT __stdcall reset(IDirect3DDevice9* device, D3DPRESENT_PARAMETERS* 
     return hooks->originalReset(device, params);
 }
 
+static int __fastcall sendDatagramHook(NetworkChannel* network, void* edx, void* datagram) noexcept
+{
+    static auto original = hooks->sendDatagram.getOriginal<int>(datagram);
+    if (!config->backtrack.fakeLatency || !interfaces->engine->isInGame() || datagram)
+        return original(network, datagram);
+
+    const int instate = network->inReliableState;
+    const int insequencenr = network->inSequenceNr;
+
+    const float delta = max(0.f, (config->backtrack.fakeLatencyAmount / 1000.f));
+
+    Backtrack::addLatencyToNetwork(network, delta);
+
+    int result = original(network, datagram);
+
+    network->inReliableState = instate;
+    network->inSequenceNr = insequencenr;
+
+    return result;
+}
+
 static bool __fastcall createMove(void* thisPointer, void*, float inputSampleTime, UserCmd* cmd) noexcept
 {
     auto result = hooks->clientMode.callOriginal<bool, 21>(inputSampleTime, cmd);
@@ -116,6 +138,9 @@ static bool __fastcall createMove(void* thisPointer, void*, float inputSampleTim
     memory->globalVars->serverTime(cmd);
     Misc::bunnyHop(cmd);
     Misc::autoStrafe(cmd, currentViewAngles);
+
+    Backtrack::updateIncomingSequences();
+    Backtrack::run(cmd);
 
     auto viewAnglesDelta{ cmd->viewangles - previousViewAngles };
     viewAnglesDelta.normalize();
@@ -146,6 +171,8 @@ static bool __fastcall createMove(void* thisPointer, void*, float inputSampleTim
 
 static void __stdcall frameStageNotify(FrameStage stage) noexcept
 {
+    static auto backtrackInit = (Backtrack::init(), false);
+
     if (stage == FrameStage::START)
         GameData::update();
 
@@ -164,6 +191,7 @@ static void __fastcall drawModelExecute(void* thisPointer, void*, void* state, c
     static Chams chams;
     if (!chams.render(state, info, customBoneToWorld))
         hooks->modelRender.callOriginal<void, 19>(state, std::cref(info), customBoneToWorld);
+
     interfaces->renderView->setColorModulation(1.0f, 1.0f, 1.0f);
     interfaces->renderView->setBlend(1.0f);
     interfaces->modelRender->forcedMaterialOverride(nullptr);
@@ -210,6 +238,8 @@ static void __fastcall estimateAbsVelocityHook(void* thisPointer, void*, Vector*
 
 void resetAll(int resetType) noexcept
 {
+    Animations::reset();
+    Misc::reset(resetType);
 }
 
 static void __fastcall levelShutDown(void* thisPointer) noexcept
@@ -245,6 +275,7 @@ void Hooks::install() noexcept
     MH_Initialize();
 
     estimateAbsVelocity.detour(memory->estimateAbsVelocity, estimateAbsVelocityHook);
+    sendDatagram.detour(memory->sendDatagram, sendDatagramHook);
 
     client.init(interfaces->client);
     client.hookAt(7, levelShutDown);

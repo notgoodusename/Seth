@@ -733,8 +733,6 @@ void GUI::renderBacktrackWindow() noexcept
     ImGui::Columns(2, nullptr, false);
     ImGui::SetColumnOffset(1, 300.f);
     ImGui::Checkbox("Enabled", &config->backtrack.enabled);
-    ImGui::Checkbox("Ignore smoke", &config->backtrack.ignoreSmoke);
-    ImGui::Checkbox("Ignore flash", &config->backtrack.ignoreFlash);
     ImGui::PushItemWidth(220.0f);
     ImGui::SliderInt("Time limit", &config->backtrack.timeLimit, 1, 200, "%d ms");
     ImGui::PopItemWidth();
@@ -759,7 +757,7 @@ void GUI::renderChamsWindow() noexcept
 
     static int material = 1;
 
-    if (ImGui::Combo("", &currentCategory, "Allies\0Enemies\0Local player\0"))
+    if (ImGui::Combo("", &currentCategory, "Allies\0Enemies\0Local player\0Backtrack\0"))
         material = 1;
 
     ImGui::PopID();
@@ -774,7 +772,7 @@ void GUI::renderChamsWindow() noexcept
     ImGui::SameLine();
     ImGui::Text("%d", material);
 
-    constexpr std::array categories{ "Allies", "Enemies", "Local player" };
+    constexpr std::array categories{ "Allies", "Enemies", "Local player", "Backtrack" };
 
     ImGui::SameLine();
 

@@ -6,6 +6,8 @@
 #include "../Hooks.h"
 #include "../Interfaces.h"
 
+#include "Animations.h"
+#include "Backtrack.h"
 #include "Chams.h"
 
 #include "../SDK/Entity.h"
@@ -89,6 +91,25 @@ void Chams::renderPlayer(Entity* player) noexcept
         applyChams(config->chams["Local player"].materials, health);
     } else if (player->isEnemy(localPlayer.get())) {
         applyChams(config->chams["Enemies"].materials, health);
+        if (config->backtrack.enabled)
+        {
+            const auto records = Animations::getBacktrackRecords(player->index());
+            if (records && !records->empty())
+            {
+                int lastTick = -1;
+
+                for (int i = static_cast<int>(records->size()) - 1; i >= 0; i--)
+                {
+                    if (Backtrack::valid(records->at(i).simulationTime))
+                    {
+                        if (!appliedChams)
+                            hooks->modelRender.callOriginal<void, 19>(state, info, customBoneToWorld);
+                        applyChams(config->chams["Backtrack"].materials, health, records->at(i).matrix);
+                        interfaces->modelRender->forcedMaterialOverride(nullptr);
+                    }
+                }
+            }
+        }
     } else {
         applyChams(config->chams["Allies"].materials, health);
     }

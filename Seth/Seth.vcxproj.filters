@@ -191,6 +191,9 @@
     <ClCompile Include="Hacks\Animations.cpp">
       <Filter>Hacks</Filter>
     </ClCompile>
+    <ClCompile Include="Hacks\Backtrack.cpp">
+      <Filter>Hacks</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GUI.h">
@@ -465,6 +468,12 @@
     </ClInclude>
     <ClInclude Include="Hacks\Animations.h">
       <Filter>Hacks</Filter>
+    </ClInclude>
+    <ClInclude Include="Hacks\Backtrack.h">
+      <Filter>Hacks</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\NetworkChannel.h">
+      <Filter>SDK</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -95,6 +95,7 @@ Memory::Memory() noexcept
     calcAbsoluteVelocity = relativeToAbsolute<decltype(calcAbsoluteVelocity)>(findPattern(CLIENT_DLL, "\xE8????\xD9\xE8\x8D\x45\xEC") + 1);
 
     estimateAbsVelocity = findPattern(CLIENT_DLL, "\x55\x8B\xEC\x83\xEC?\x56\x8B\xF1\xE8????\x3B\xF0\x75?\x8B\xCE\xE8????\x8B\x45?\xD9\x86????\xD9\x18\xD9\x86????\xD9\x58?\xD9\x86????\xD9\x58?\x5E\x8B\xE5\x5D\xC2");
+    sendDatagram = findPattern(ENGINE_DLL, "\x55\x8B\xEC\xB8????\xE8????\xA1????\x53\x56\x8B\xD9");;
 
     localPlayer.init(*reinterpret_cast<Entity***>(findPattern(CLIENT_DLL, "\xA1????\x33\xC9\x83\xC4\x04")+1));
 }

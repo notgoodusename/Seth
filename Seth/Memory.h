@@ -55,6 +55,7 @@ public:
     void(__thiscall* calcAbsoluteVelocity)(void*);
 
     std::uintptr_t estimateAbsVelocity;
+    std::uintptr_t sendDatagram;
 private:
 };
 

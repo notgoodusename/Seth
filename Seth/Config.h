@@ -148,8 +148,6 @@ public:
 
     struct Backtrack {
         bool enabled = false;
-        bool ignoreSmoke = false;
-        bool ignoreFlash = false;
         int timeLimit = 200;
         bool fakeLatency = false;
         int fakeLatencyAmount = 200;

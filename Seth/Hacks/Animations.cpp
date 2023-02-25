@@ -2,6 +2,7 @@
 #include "../Interfaces.h"
 
 #include "Animations.h"
+#include "Backtrack.h"
 
 #include "../SDK/LocalPlayer.h"
 #include "../SDK/Cvar.h"
@@ -25,7 +26,7 @@ void Animations::reset() noexcept
         record.reset();
 }
 
-float getExtraTicks() noexcept
+float Animations::getExtraTicks() noexcept
 {
     if (!config->backtrack.fakeLatency || config->backtrack.fakeLatencyAmount <= 0)
         return 0.f;
@@ -45,6 +46,8 @@ void Animations::handlePlayers(FrameStage stage) noexcept
             record.clear();
         return;
     }
+
+    const auto localPlayerOrigin{ localPlayer->getAbsOrigin() };
 
     for (int i = 1; i <= interfaces->engine->getMaxClients(); i++)
     {
@@ -94,6 +97,30 @@ void Animations::handlePlayers(FrameStage stage) noexcept
         {
             player.backtrackRecords.clear();
             continue;
+        }
+
+        if (runPostUpdate)
+        {
+            if (!player.backtrackRecords.empty() && (player.backtrackRecords.front().simulationTime == entity->simulationTime()))
+                continue;
+
+            if (!player.gotMatrix)
+                continue;
+
+            Players::Record record{ };
+            record.origin = player.origin;
+            record.simulationTime = player.simulationTime;
+            record.mins = player.mins;
+            record.maxs = player.maxs;
+            std::copy(player.matrix.begin(), player.matrix.end(), record.matrix);
+            for (auto bone : { 6, 0 }) {
+                record.positions.push_back(record.matrix[bone].origin());
+            }
+
+            player.backtrackRecords.push_front(record);
+
+            while (player.backtrackRecords.size() > 3U && player.backtrackRecords.size() > static_cast<size_t>(timeToTicks(timeLimit)))
+                player.backtrackRecords.pop_back();
         }
     }
 }

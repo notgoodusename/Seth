@@ -317,8 +317,6 @@ static void from_json(const json& j, Config::Tickbase& t)
 static void from_json(const json& j, Config::Backtrack& b)
 {
     read(j, "Enabled", b.enabled);
-    read(j, "Ignore smoke", b.ignoreSmoke);
-    read(j, "Ignore flash", b.ignoreFlash);
     read(j, "Time limit", b.timeLimit);
     read(j, "Fake Latency", b.fakeLatency);
     read(j, "Fake Latency Amount", b.fakeLatencyAmount);
@@ -1040,8 +1038,6 @@ static void to_json(json& j, const Config::Tickbase& o, const Config::Tickbase& 
 static void to_json(json& j, const Config::Backtrack& o, const Config::Backtrack& dummy = {})
 {
     WRITE("Enabled", enabled);
-    WRITE("Ignore smoke", ignoreSmoke);
-    WRITE("Ignore flash", ignoreFlash);
     WRITE("Time limit", timeLimit);
     WRITE("Fake Latency", fakeLatency);
     WRITE("Fake Latency Amount", fakeLatencyAmount);
