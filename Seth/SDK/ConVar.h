@@ -51,7 +51,11 @@ class ConVar : ConCommandBase
 {
 public:
 	VIRTUAL_METHOD(void, setValue, 10, (const char* value), (this, value))
-	VIRTUAL_METHOD(void, setValue, 11, (float value), (this, value))
+	void setValue(float value) noexcept //bandaid fix
+	{
+		setValue(std::to_string(value).data());
+	}
+	//VIRTUAL_METHOD(void, setValue, 11, (float value), (this, value))
 	VIRTUAL_METHOD(void, setValue, 12, (int value), (this, value))
 
 	float getFloat() noexcept

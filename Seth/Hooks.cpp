@@ -25,6 +25,7 @@
 #include "Hacks/EnginePrediction.h"
 #include "Hacks/Misc.h"
 #include "Hacks/StreamProofESP.h"
+#include "Hacks/Visuals.h"
 
 #include "SDK/ClassId.h"
 #include "SDK/Client.h"
@@ -83,6 +84,12 @@ static HRESULT __stdcall present(IDirect3DDevice9* device, const RECT* src, cons
 
     if (const auto& displaySize = ImGui::GetIO().DisplaySize; displaySize.x > 0.0f && displaySize.y > 0.0f) {
         StreamProofESP::render();
+
+        Visuals::updateInput();
+        StreamProofESP::updateInput();
+        Misc::updateInput();
+        Chams::updateInput();
+
         gui->handleToggle();
 
         if (gui->isOpen())
@@ -210,6 +217,7 @@ static void __stdcall overrideView(ViewSetup* setup) noexcept
         setup->fov += config->visuals.fov;
 
     hooks->clientMode.callOriginal<void, 16>(setup);
+    Visuals::thirdperson();
 }
 
 void __fastcall calcViewModelViewHook(void* thisPointer, void*, Entity* owner, Vector* eyePosition, Vector* eyeAngles)

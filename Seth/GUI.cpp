@@ -740,10 +740,6 @@ void GUI::renderVisualsWindow() noexcept
     ImGui::PushID("Thirdperson Key");
     ImGui::hotkey2("", config->visuals.thirdpersonKey);
     ImGui::PopID();
-    ImGui::PushItemWidth(290.0f);
-    ImGui::PushID(0);
-    ImGui::SliderInt("", &config->visuals.thirdpersonDistance, 0, 1000, "Thirdperson distance: %d");
-    ImGui::PopID();
     ImGui::Checkbox("Freecam", &config->visuals.freeCam);
     ImGui::SameLine();
     ImGui::PushID("Freecam Key");

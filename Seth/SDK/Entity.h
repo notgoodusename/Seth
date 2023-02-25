@@ -393,6 +393,7 @@ public:
     NETVAR(conditionEx3, "CTFPlayer", "m_nPlayerCondEx3", int)
     NETVAR(getPlayerClass, "CTFPlayer", "m_iClass", TFClass)
     NETVAR(waterLevel, "CTFPlayer", "m_nWaterLevel", unsigned char)
+    NETVAR(forceTauntCam, "CTFPlayer", "m_nForceTauntCam", int);
 
     NETVAR(objectType, "CBaseObject", "m_iObjectType", int)
     NETVAR(objectMode, "CBaseObject", "m_iObjectMode", int)

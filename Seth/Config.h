@@ -142,7 +142,6 @@ public:
         bool noScopeOverlay{ false };
         bool thirdperson{ false };
         KeyBind thirdpersonKey{ std::string("thirdperson") };
-        int thirdpersonDistance{ 0 };
         bool freeCam{ false };
         KeyBind freeCamKey{ std::string("freecam") };
         int freeCamSpeed{ 2 };

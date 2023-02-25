@@ -309,7 +309,6 @@ static void from_json(const json& j, Config::Visuals& v)
     read(j, "No scope overlay", v.noScopeOverlay);
     read(j, "Thirdperson", v.thirdperson);
     read(j, "Thirdperson key", v.thirdpersonKey);
-    read(j, "Thirdperson distance", v.thirdpersonDistance);
     read(j, "Freecam", v.freeCam);
     read(j, "Freecam key", v.freeCamKey);
     read(j, "Freecam speed", v.freeCamSpeed);
@@ -819,7 +818,6 @@ static void to_json(json& j, const Config::Visuals& o)
     WRITE("No scope overlay", noScopeOverlay);
     WRITE("Thirdperson", thirdperson);
     WRITE("Thirdperson key", thirdpersonKey);
-    WRITE("Thirdperson distance", thirdpersonDistance);
     WRITE("Freecam", freeCam);
     WRITE("Freecam key", freeCamKey);
     WRITE("Freecam speed", freeCamSpeed);
