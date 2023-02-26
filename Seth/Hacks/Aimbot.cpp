@@ -70,6 +70,9 @@ std::vector<Vector> multiPoint(Entity* entity, const matrix3x4 matrix[MAXSTUDIOB
 
 bool canShoot() noexcept
 {
+    if (!localPlayer)
+        return false;
+
     Entity* activeWeapon = localPlayer->getActiveWeapon();
     if (!activeWeapon)
         return false;
