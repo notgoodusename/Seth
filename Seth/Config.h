@@ -64,7 +64,7 @@ public:
             {
                 return enabled != h.enabled || aimlock != h.aimlock || silent != h.silent
                     || friendlyFire != h.friendlyFire || ignoreCloaked != h.ignoreCloaked
-                    || scopedOnly != h.scopedOnly || autoShoot != h.autoShoot
+                    || scopedOnly != h.scopedOnly || targetBacktrack != h.targetBacktrack || autoShoot != h.autoShoot
                     || autoScope != h.autoScope || autoRev != h.autoRev 
                     || autoExtinguishTeam != h.autoExtinguishTeam || waitForHeadshot != h.waitForHeadshot
                     || waitForCharge != h.waitForCharge || sortMethod != h.sortMethod
@@ -76,6 +76,7 @@ public:
             bool friendlyFire{ false };
             bool ignoreCloaked{ true };
             bool scopedOnly{ true };
+            bool targetBacktrack{ true };
             bool autoShoot{ false };
             bool autoScope{ false };
             bool autoRev{ false };

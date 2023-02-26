@@ -7,6 +7,7 @@
 
 #include "../SDK/GlobalVars.h"
 
+class Entity;
 class matrix3x4;
 struct Vector;
 
@@ -18,5 +19,7 @@ std::tuple<float, float, float> rainbowColor(float speed) noexcept;
 int getMaxUserCmdProcessTicks() noexcept;
 
 #define maxUserCmdProcessTicks getMaxUserCmdProcessTicks()
+
+void applyMatrix(Entity* entity, matrix3x4* boneCacheData, Vector origin, Vector absAngle, Vector mins, Vector maxs) noexcept;
 
 Vector calculateRelativeAngle(const Vector& source, const Vector& destination, const Vector& viewAngles) noexcept;

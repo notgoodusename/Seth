@@ -30,6 +30,7 @@ namespace Animations
 		struct Record {
 			std::deque<Vector> positions;
 			Vector origin;
+			Vector absAngle;
 			Vector mins;
 			Vector maxs;
 			float simulationTime;
@@ -41,7 +42,7 @@ namespace Animations
 		std::array<matrix3x4, MAXSTUDIOBONES> matrix;
 
 		Vector mins{}, maxs{};
-		Vector origin{};
+		Vector origin{}, absAngle{};
 
 		int handle = -1;
 

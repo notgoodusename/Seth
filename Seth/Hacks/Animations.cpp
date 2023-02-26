@@ -81,6 +81,7 @@ void Animations::handlePlayers(FrameStage stage) noexcept
             player.chokedPackets = std::clamp(player.chokedPackets, 0, maxUserCmdProcessTicks + 1);
 
             player.origin = entity->origin();
+            player.absAngle = entity->getAbsAngle();
         }
 
         //Setupbones
@@ -109,6 +110,7 @@ void Animations::handlePlayers(FrameStage stage) noexcept
 
             Players::Record record{ };
             record.origin = player.origin;
+            player.absAngle = player.absAngle;
             record.simulationTime = player.simulationTime;
             record.mins = player.mins;
             record.maxs = player.maxs;

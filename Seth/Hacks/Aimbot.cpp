@@ -1,5 +1,6 @@
 #include "Aimbot.h"
 #include "Animations.h"
+#include "Backtrack.h"
 
 #include "../SDK/UserCmd.h"
 #include "../SDK/Vector.h"
@@ -160,6 +161,48 @@ void Aimbot::run(UserCmd* cmd) noexcept
     }
 }
 
+Vector getHitscanTarget( UserCmd* cmd, Entity* entity, matrix3x4 matrix[MAXSTUDIOBONES], std::array<bool, Hitboxes::Max> hitbox, float& bestFov, Vector localPlayerEyePosition) noexcept
+{
+    const Model* model = entity->getModel();
+    if (!model)
+        return Vector{ 0.0f, 0.0f, 0.0f };
+
+    StudioHdr* hdr = interfaces->modelInfo->getStudioModel(model);
+    if (!hdr)
+        return Vector{ 0.0f, 0.0f, 0.0f };
+
+    StudioHitboxSet* set = hdr->getHitboxSet(0);
+    if (!set)
+        return Vector{ 0.0f, 0.0f, 0.0f };
+
+    for (size_t j = 0; j < hitbox.size(); j++)
+    {
+        if (!hitbox[j])
+            continue;
+
+        StudioBbox* hitbox = set->getHitbox(j);
+        if (!hitbox)
+            continue;
+
+        for (auto& bonePosition : multiPoint(entity, matrix, hitbox, localPlayerEyePosition, j))
+        {
+            const Vector angle{ calculateRelativeAngle(localPlayerEyePosition, bonePosition, cmd->viewangles) };
+            const float fov{ angle.length2D() };
+            if (fov > bestFov)
+                continue;
+
+            if (!entity->isVisible(bonePosition))
+                continue;
+
+            if (fov < bestFov) {
+                bestFov = fov;
+                return bonePosition;
+            }
+        }
+    }
+    return Vector{ 0.0f, 0.0f, 0.0f };
+}
+
 void Aimbot::runHitscan(Entity* activeWeapon, UserCmd* cmd) noexcept
 {
     const auto& cfg = config->aimbot.hitscan;
@@ -209,6 +252,7 @@ void Aimbot::runHitscan(Entity* activeWeapon, UserCmd* cmd) noexcept
     }
 
     auto bestFov = cfg.fov;
+    auto bestSimulationTime = -1.0f;
     Vector bestTarget{ };
     const auto localPlayerEyePosition = localPlayer->getEyePosition();
     for (const auto& target : enemies)
@@ -216,46 +260,81 @@ void Aimbot::runHitscan(Entity* activeWeapon, UserCmd* cmd) noexcept
         const auto entity{ interfaces->entityList->getEntity(target.id) };
         if ((entity->isCloaked() && config->aimbot.hitscan.ignoreCloaked) || (!entity->isEnemy(localPlayer.get()) && !config->aimbot.hitscan.friendlyFire))
             continue;
+
         const auto player = Animations::getPlayer(target.id);
-        const Model* model = entity->getModel();
-        if (!model)
-            continue;
+        const auto backupBoneCache = entity->getBoneCache().memory;
+        const auto backupMins = entity->getCollideable()->obbMins();
+        const auto backupMaxs = entity->getCollideable()->obbMaxs();
+        const auto backupOrigin = entity->getAbsOrigin();
+        const auto backupAbsAngle = entity->getAbsAngle();
 
-        StudioHdr* hdr = interfaces->modelInfo->getStudioModel(model);
-        if (!hdr)
-            continue;
-
-        StudioHitboxSet* set = hdr->getHitboxSet(0);
-        if (!set)
-            continue;
-
-        for (size_t j = 0; j < hitbox.size(); j++)
+        for (int cycle = 0; cycle < 2; cycle++)
         {
-            if (!hitbox[j])
-                continue;
+            float currentSimulationTime = -1.0f;
 
-            StudioBbox* hitbox = set->getHitbox(j);
-            if (!hitbox)
-                continue;
-
-            for (auto& bonePosition : multiPoint(entity, player.matrix.data(), hitbox, localPlayerEyePosition, j))
+            if (config->backtrack.enabled)
             {
-                const Vector angle{ calculateRelativeAngle(localPlayerEyePosition, bonePosition, cmd->viewangles) };
-                const float fov{ angle.length2D() };
-                if (fov > bestFov)
+                if (!config->aimbot.hitscan.targetBacktrack && cycle == 1)
                     continue;
 
-                if (!entity->isVisible(bonePosition))
+                const auto records = Animations::getBacktrackRecords(entity->index());
+                if (!records || records->empty())
                     continue;
 
-                if (fov < bestFov) {
-                    bestFov = fov;
-                    bestTarget = bonePosition;
-                    break;
+                int bestTick = -1;
+                if (cycle == 0)
+                {
+                    for (size_t i = 0; i < records->size(); i++)
+                    {
+                        if (Backtrack::valid(records->at(i).simulationTime))
+                        {
+                            bestTick = static_cast<int>(i);
+                            break;
+                        }
+                    }
                 }
+                else
+                {
+                    for (int i = static_cast<int>(records->size() - 1U); i >= 0; i--)
+                    {
+                        if (Backtrack::valid(records->at(i).simulationTime))
+                        {
+                            bestTick = i;
+                            break;
+                        }
+                    }
+                }
+
+                if (bestTick <= -1)
+                    continue;
+
+                memcpy(entity->getBoneCache().memory, records->at(bestTick).matrix, std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
+                memory->setAbsOrigin(entity, records->at(bestTick).origin);
+                memory->setAbsAngle(entity, Vector{ 0.f, records->at(bestTick).absAngle.y, 0.f });
+                memory->setCollisionBounds(entity->getCollideable(), records->at(bestTick).mins, records->at(bestTick).maxs);
+
+                currentSimulationTime = records->at(bestTick).simulationTime;
             }
+            else
+            {
+                if (cycle == 1)
+                    continue;
+
+                memcpy(entity->getBoneCache().memory, player.matrix.data(), std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
+                memory->setAbsOrigin(entity, player.origin);
+                memory->setAbsAngle(entity, Vector{ 0.f, player.absAngle.y, 0.f });
+                memory->setCollisionBounds(entity->getCollideable(), player.mins, player.maxs);
+
+                currentSimulationTime = player.simulationTime;
+            }
+
+            bestTarget = getHitscanTarget(cmd, entity, entity->getBoneCache().memory, hitbox, bestFov, localPlayerEyePosition);
+            applyMatrix(entity, backupBoneCache, backupOrigin, backupAbsAngle, backupMins, backupMaxs);
             if (bestTarget.notNull())
+            {
+                bestSimulationTime = currentSimulationTime;
                 break;
+            }
         }
         if (bestTarget.notNull())
             break;
@@ -274,6 +353,9 @@ void Aimbot::runHitscan(Entity* activeWeapon, UserCmd* cmd) noexcept
 
         if (!cfg.silent)
             interfaces->engine->setViewAngles(cmd->viewangles);
+
+        if (cmd->buttons & UserCmd::IN_ATTACK)
+            cmd->tickCount = timeToTicks(bestSimulationTime + Backtrack::getLerp());
     }
 }
 
