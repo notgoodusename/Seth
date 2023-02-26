@@ -67,6 +67,32 @@ std::vector<Vector> multiPoint(Entity* entity, const matrix3x4 matrix[MAXSTUDIOB
     return vecArray;
 }
 
+bool canShoot() noexcept
+{
+    Entity* activeWeapon = localPlayer->getActiveWeapon();
+    if (!activeWeapon)
+        return false;
+
+    static float lastFire = 0, nextAttack = 0, a = 0;
+    static Entity* oldActiveWeapon;
+
+    if (lastFire != activeWeapon->lastFireTime() || activeWeapon != oldActiveWeapon)
+    {
+        lastFire = activeWeapon->lastFireTime();
+        nextAttack = activeWeapon->nextPrimaryAttack();
+    }
+
+    if (!activeWeapon->clip())
+        return false;
+
+    if (activeWeapon->isInReload())
+        return true;
+
+    oldActiveWeapon = activeWeapon;
+
+    return nextAttack <= memory->globalVars->serverTime() + memory->globalVars->intervalPerTick;
+}
+
 void Aimbot::updateInput() noexcept
 {
     config->aimbotKey.handleToggle();
@@ -74,6 +100,7 @@ void Aimbot::updateInput() noexcept
 
 void Aimbot::run(UserCmd* cmd) noexcept
 {
+    canShoot();
     if (!config->aimbotKey.isActive() || 
         (!config->aimbot.hitscan.enabled && !config->aimbot.projectile.enabled && !config->aimbot.melee.enabled))
         return;
@@ -134,6 +161,9 @@ void Aimbot::runHitscan(Entity* activeWeapon, UserCmd* cmd) noexcept
 {
     const auto& cfg = config->aimbot.hitscan;
     if (!cfg.enabled)
+        return;
+
+    if (!canShoot())
         return;
 
     if (!(cmd->buttons & UserCmd::IN_ATTACK) && !cfg.autoShoot && !cfg.aimlock)
