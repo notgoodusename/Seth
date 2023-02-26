@@ -212,6 +212,19 @@ void Aimbot::runHitscan(Entity* activeWeapon, UserCmd* cmd) noexcept
     if (!cfg.enabled)
         return;
 
+    switch (activeWeapon->itemDefinitionIndex())
+    {
+        case Sniper_m_TheMachina:
+        case Sniper_m_ShootingStar:
+        {
+            if (!localPlayer->isScoped())
+                return;
+            break;
+        }
+        default:
+            break;
+    }
+
     if (!canShoot())
         return;
 
@@ -264,12 +277,12 @@ void Aimbot::runHitscan(Entity* activeWeapon, UserCmd* cmd) noexcept
         if ((entity->isCloaked() && config->aimbot.hitscan.ignoreCloaked) || (!entity->isEnemy(localPlayer.get()) && !config->aimbot.hitscan.friendlyFire))
             continue;
 
-        const auto player = Animations::getPlayer(target.id);
-        const auto backupBoneCache = entity->getBoneCache().memory;
-        const auto backupMins = entity->getCollideable()->obbMins();
-        const auto backupMaxs = entity->getCollideable()->obbMaxs();
-        const auto backupOrigin = entity->getAbsOrigin();
-        const auto backupAbsAngle = entity->getAbsAngle();
+        const auto& player = Animations::getPlayer(target.id);
+        const auto& backupBoneCache = entity->getBoneCache().memory;
+        const auto& backupMins = entity->getCollideable()->obbMins();
+        const auto& backupMaxs = entity->getCollideable()->obbMaxs();
+        const auto& backupOrigin = entity->getAbsOrigin();
+        const auto& backupAbsAngle = entity->getAbsAngle();
 
         for (int cycle = 0; cycle < 2; cycle++)
         {
