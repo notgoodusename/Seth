@@ -200,6 +200,9 @@
     <ClCompile Include="Hacks\Visuals.cpp">
       <Filter>Hacks</Filter>
     </ClCompile>
+    <ClCompile Include="Hacks\Aimbot.cpp">
+      <Filter>Hacks</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GUI.h">
@@ -494,6 +497,9 @@
       <Filter>SDK</Filter>
     </ClInclude>
     <ClInclude Include="Hacks\Visuals.h">
+      <Filter>Hacks</Filter>
+    </ClInclude>
+    <ClInclude Include="Hacks\Aimbot.h">
       <Filter>Hacks</Filter>
     </ClInclude>
   </ItemGroup>

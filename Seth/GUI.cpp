@@ -156,7 +156,7 @@ static void menuBarItem(const char* name, bool& enabled) noexcept
 
 void GUI::renderAimbotWindow() noexcept
 {
-    static const char* hitboxes[]{ "Head","Chest","Stomach","Arms","Legs" };
+    static const char* hitboxes[]{ "Head","Body","Pelvis","Arms","Legs" };
     static bool hitbox[ARRAYSIZE(hitboxes)] = { false, false, false, false, false };
     static std::string previewvalue = "";
     bool once = false;
@@ -170,25 +170,33 @@ void GUI::renderAimbotWindow() noexcept
     ImGui::PushID(0);
     ImGui::Combo("", &currentCategory, "Hitscan\0Projectile\0Melee\0");
     ImGui::PopID();
-    ImGui::SameLine();
-    ImGui::Checkbox("Enabled", &config->aimbot.enabled);
     ImGui::Columns(2, nullptr, false);
     ImGui::SetColumnOffset(1, 220.0f);
+
     switch (currentCategory)
     {
         case 0:
         {
-            ImGui::Checkbox("Aimlock", &config->aimbot.aimlock);
-            ImGui::Checkbox("Silent", &config->aimbot.silent);
+            ImGui::SameLine();
+            ImGui::Checkbox("Enabled", &config->aimbot.hitscan.enabled);
+            ImGui::Checkbox("Aimlock", &config->aimbot.hitscan.aimlock);
+            ImGui::Checkbox("Silent", &config->aimbot.hitscan.silent);
             ImGuiCustom::colorPicker("Draw fov", config->aimbotFov);
-            ImGui::Checkbox("Friendly fire", &config->aimbot.friendlyFire);
-            ImGui::Checkbox("Visible only", &config->aimbot.visibleOnly);
-            ImGui::Checkbox("Scoped only", &config->aimbot.scopedOnly);
-            ImGui::Checkbox("Auto scope", &config->aimbot.autoScope);
+            ImGui::Checkbox("Friendly fire", &config->aimbot.hitscan.friendlyFire);
+            ImGui::Checkbox("Scoped only", &config->aimbot.hitscan.scopedOnly);
+            ImGui::Checkbox("Auto shoot", &config->aimbot.hitscan.autoShoot);
+            if (ImGui::IsItemHovered())
+                ImGui::SetTooltip("This option disables smoothing, if you want to keep it use triggerbot");
+            ImGui::Checkbox("Auto scope", &config->aimbot.hitscan.autoScope);
+            ImGui::Checkbox("Auto rev", &config->aimbot.hitscan.autoRev);
+            ImGui::Checkbox("Auto extinguish team", &config->aimbot.hitscan.autoExtinguishTeam);
+            ImGui::Checkbox("Wait for headshot", &config->aimbot.hitscan.waitForHeadshot);
+            ImGui::Checkbox("Wait for charge", &config->aimbot.hitscan.waitForHeadshot);
 
+            ImGui::Combo("Sort method", &config->aimbot.hitscan.sortMethod, "Distance\0Fov\0Health\0");
             for (size_t i = 0; i < ARRAYSIZE(hitbox); i++)
             {
-                hitbox[i] = (config->aimbot.hitboxes & 1 << i) == 1 << i;
+                hitbox[i] = (config->aimbot.hitscan.hitboxes & 1 << i) == 1 << i;
             }
             if (ImGui::BeginCombo("Hitbox", previewvalue.c_str()))
             {
@@ -209,24 +217,40 @@ void GUI::renderAimbotWindow() noexcept
                 if (hitbox[i])
                 {
                     previewvalue += previewvalue.size() ? std::string(", ") + hitboxes[i] : hitboxes[i];
-                    config->aimbot.hitboxes |= 1 << i;
+                    config->aimbot.hitscan.hitboxes |= 1 << i;
                 }
                 else
                 {
-                    config->aimbot.hitboxes &= ~(1 << i);
+                    config->aimbot.hitscan.hitboxes &= ~(1 << i);
                 }
             }
 
             ImGui::NextColumn();
             ImGui::PushItemWidth(240.0f);
-            ImGui::SliderFloat("Fov", &config->aimbot.fov, 0.0f, 255.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
-            ImGui::SliderFloat("Smooth", &config->aimbot.smooth, 1.0f, 100.0f, "%.2f");
-            ImGui::SliderInt("Min damage", &config->aimbot.minDamage, 0, 101, "%d");
-            config->aimbot.minDamage = std::clamp(config->aimbot.minDamage, 0, 250);
+            ImGui::SliderFloat("Fov", &config->aimbot.hitscan.fov, 0.0f, 255.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
+            ImGui::SliderFloat("Smooth", &config->aimbot.hitscan.smooth, 1.0f, 100.0f, "%.2f");
+            break;
         }
-        break;
-    default:
-        break;
+        case 1:
+            ImGui::SameLine();
+            ImGui::Checkbox("Enabled", &config->aimbot.projectile.enabled);
+            break;
+        case 2:
+        {
+            ImGui::SameLine();
+            ImGui::Checkbox("Enabled", &config->aimbot.melee.enabled);
+            ImGui::Checkbox("Aimlock", &config->aimbot.melee.aimlock);
+            ImGui::Checkbox("Silent", &config->aimbot.melee.silent);
+            ImGui::Checkbox("Auto backstab", &config->aimbot.melee.autoBackstab);
+            ImGui::Combo("Sort method", &config->aimbot.melee.sortMethod, "Distance\0Fov\0Health\0");
+            ImGui::NextColumn();
+            ImGui::PushItemWidth(240.0f);
+            ImGui::SliderFloat("Fov", &config->aimbot.melee.fov, 0.0f, 255.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
+            ImGui::SliderFloat("Smooth", &config->aimbot.melee.smooth, 1.0f, 100.0f, "%.2f");
+            break;
+        }
+        default:
+            break;
     }
 }
 

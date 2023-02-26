@@ -3,9 +3,9 @@
 #include <numbers>
 #include <tuple>
 
-#include "../SDK/GlobalVars.h"
-
 #include "../Memory.h"
+
+#include "../SDK/GlobalVars.h"
 
 class matrix3x4;
 struct Vector;

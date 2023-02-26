@@ -198,17 +198,44 @@ static void from_json(const json& j, ImVec2& v)
 
 static void from_json(const json& j, Config::Aimbot& a)
 {
-    read(j, "Enabled", a.enabled);
-    read(j, "Aimlock", a.aimlock);
-    read(j, "Silent", a.silent);
-    read(j, "Friendly fire", a.friendlyFire);
-    read(j, "Visible only", a.visibleOnly);
-    read(j, "Scoped only", a.scopedOnly);
-    read(j, "Auto scope", a.autoScope);
-    read(j, "Fov", a.fov);
-    read(j, "Smooth", a.smooth);
-    read(j, "Hitboxes", a.hitboxes);
-    read(j, "Min damage", a.minDamage);
+    read<value_t::object>(j, "Hitscan", a.hitscan);
+    read<value_t::object>(j, "Projectile", a.projectile);
+    read<value_t::object>(j, "Melee", a.melee);
+}
+
+static void from_json(const json& j, Config::Aimbot::Hitscan& h)
+{
+    read(j, "Enabled", h.enabled);
+    read(j, "Aimlock", h.aimlock);
+    read(j, "Silent", h.silent);
+    read(j, "Friendly fire", h.friendlyFire);
+    read(j, "Scoped only", h.scopedOnly);
+    read(j, "Auto shoot", h.autoShoot);
+    read(j, "Auto scope", h.autoScope);
+    read(j, "Auto rev", h.autoRev);
+    read(j, "Auto extinguish team", h.autoExtinguishTeam);
+    read(j, "Wait for headshot", h.waitForHeadshot);
+    read(j, "Wait for charge", h.waitForHeadshot);
+    read(j, "Sort method", h.sortMethod);
+    read(j, "Hitboxes", h.hitboxes);
+    read(j, "Fov", h.fov);
+    read(j, "Smooth", h.smooth);
+}
+
+static void from_json(const json& j, Config::Aimbot::Projectile& p)
+{
+    read(j, "Enabled", p.enabled);
+}
+
+static void from_json(const json& j, Config::Aimbot::Melee& m)
+{
+    read(j, "Enabled", m.enabled);
+    read(j, "Aimlock", m.aimlock);
+    read(j, "Silent", m.silent);
+    read(j, "Auto backstab", m.autoBackstab);
+    read(j, "Sort method", m.sortMethod);
+    read(j, "Fov", m.fov);
+    read(j, "Smooth", m.smooth);
 }
 
 static void from_json(const json& j, Config::Triggerbot& t)
@@ -589,19 +616,48 @@ static void to_json(json& j, const ImVec2& o, const ImVec2& dummy = {})
     WRITE("Y", y);
 }
 
-static void to_json(json& j, const Config::Aimbot& o, const Config::Aimbot& dummy = {})
+static void to_json(json& j, const Config::Aimbot& o)
+{
+    const Config::Aimbot dummy;
+
+    WRITE("Hitscan", hitscan);
+    WRITE("Projectile", projectile);
+    WRITE("Melee", melee);
+}
+
+static void to_json(json& j, const Config::Aimbot::Hitscan& o, const Config::Aimbot::Hitscan& dummy = {})
 {
     WRITE("Enabled", enabled);
     WRITE("Aimlock", aimlock);
     WRITE("Silent", silent);
     WRITE("Friendly fire", friendlyFire);
-    WRITE("Visible only", visibleOnly);
     WRITE("Scoped only", scopedOnly);
+    WRITE("Auto shoot", autoScope);
     WRITE("Auto scope", autoScope);
+    WRITE("Auto rev", autoRev);
+    WRITE("Auto extinguish team", autoExtinguishTeam);
+    WRITE("Wait for headshot", waitForHeadshot);
+    WRITE("Wait for charge", waitForHeadshot);
+    WRITE("Sort method", sortMethod);
     WRITE("Hitboxes", hitboxes);
     WRITE("Fov", fov);
     WRITE("Smooth", smooth);
-    WRITE("Min damage", minDamage);
+}
+
+static void to_json(json& j, const Config::Aimbot::Projectile& o, const Config::Aimbot::Projectile& dummy = {})
+{
+    WRITE("Enabled", enabled);
+}
+
+static void to_json(json& j, const Config::Aimbot::Melee& o, const Config::Aimbot::Melee& dummy = {})
+{
+    WRITE("Enabled", enabled);
+    WRITE("Aimlock", aimlock);
+    WRITE("Silent", silent);
+    WRITE("Auto backstab", autoBackstab);
+    WRITE("Sort method", sortMethod);
+    WRITE("Fov", fov);
+    WRITE("Smooth", smooth);
 }
 
 static void to_json(json& j, const Config::Triggerbot& o, const Config::Triggerbot& dummy = {})
@@ -879,6 +935,7 @@ void Config::save(size_t id) const noexcept
         j["Chams"] = chams;
         to_json(j["Chams"]["Key"], chamsKey, KeyBind::NONE);
         j["ESP"] = streamProofESP;
+        j["Visuals"] = visuals;
         j["Misc"] = misc;
 
         removeEmptyObjects(j);

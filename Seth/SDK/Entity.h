@@ -203,15 +203,15 @@ public:
         return reinterpret_cast<Entity*>(interfaces->entityList->getEntityFromHandle(objectBuilder()));
     }
 
-    WeaponType getWeaponType(Entity* weapon) noexcept
+    WeaponType getWeaponType() noexcept
     {
-        if (!weapon)
+        if (!this)
             return WeaponType::UNKNOWN;
 
-        if (weapon->slot() == WeaponSlots::SLOT_MELEE)
+        if (slot() == WeaponSlots::SLOT_MELEE)
             return WeaponType::MELEE;
 
-        switch (weapon->weaponId())
+        switch (weaponId())
         {
             case WeaponId::ROCKETLAUNCHER:
             case WeaponId::FLAME_BALL:
@@ -232,12 +232,12 @@ public:
             case WeaponId::PIPEBOMBLAUNCHER:
                 return WeaponType::PROJECTILE;
             default:
-                const int damageType = weapon->getDamageType();
+                const int damageType = getDamageType();
                 if (damageType & (1 << 1) || damageType && (1 << 29))
                     return WeaponType::HITSCAN;
                 break;
         }
-        int currentItemDefinitonIndex = weapon->itemDefinitionIndex();
+        int currentItemDefinitonIndex = itemDefinitionIndex();
         if (currentItemDefinitonIndex == Heavy_s_RoboSandvich ||
             currentItemDefinitonIndex == Heavy_s_Sandvich ||
             currentItemDefinitonIndex == Heavy_s_FestiveSandvich ||
@@ -253,6 +253,24 @@ public:
     Entity* getObserverTarget() noexcept
     {
         return interfaces->entityList->getEntityFromHandle(observerTarget());
+    }
+
+    Vector getBonePosition(int bone) noexcept
+    {
+        if (matrix3x4 boneMatrices[MAXSTUDIOBONES]; setupBones(boneMatrices, MAXSTUDIOBONES, 256, 0.0f))
+            return boneMatrices[bone].origin();
+        else
+            return Vector{ };
+    }
+
+    bool isVisible(const Vector& position = { }) noexcept
+    {
+        if (!localPlayer)
+            return false;
+
+        Trace trace;
+        interfaces->engineTrace->traceRay({ localPlayer->getEyePosition(), position.notNull() ? position : getBonePosition(6) }, MASK_SHOT | CONTENTS_HITBOX, { localPlayer.get() }, trace);
+        return trace.entity == this || trace.fraction > 0.97f;
     }
 
     bool setupBones(matrix3x4* out, int maxBones, int boneMask, float currentTime) noexcept
@@ -333,6 +351,15 @@ public:
         postThink();
     }
 
+    bool isInReload() noexcept
+    {
+        static auto nextPrimaryAttack = Netvars::get(fnv::hash("CBaseCombatWeapon->m_flNextPrimaryAttack"));
+        bool inReload = *reinterpret_cast<bool*>(this + (nextPrimaryAttack + 0xC));
+        int reloadMode = *reinterpret_cast<int*>(this + 0xB28);
+        return (inReload || reloadMode != 0);
+    }
+
+
     CONDITION(isCharging, condition(), TFCond_Charging)
     CONDITION(isScoped, condition(), TFCond_Zoomed)
     CONDITION(isUbered, condition(), TFCond_Ubercharged)
@@ -393,7 +420,8 @@ public:
     NETVAR(conditionEx3, "CTFPlayer", "m_nPlayerCondEx3", int)
     NETVAR(getPlayerClass, "CTFPlayer", "m_iClass", TFClass)
     NETVAR(waterLevel, "CTFPlayer", "m_nWaterLevel", unsigned char)
-    NETVAR(forceTauntCam, "CTFPlayer", "m_nForceTauntCam", int);
+    NETVAR(forceTauntCam, "CTFPlayer", "m_nForceTauntCam", int)
+    NETVAR(isFeignDeathReady, "CTFPlayer", "m_bFeignDeathReady", bool)
 
     NETVAR(objectType, "CBaseObject", "m_iObjectType", int)
     NETVAR(objectMode, "CBaseObject", "m_iObjectMode", int)
@@ -424,6 +452,12 @@ public:
 
     NETVAR(activeWeapon, "CBaseCombatCharacter", "m_hActiveWeapon", int)
     NETVAR(nextAttack, "CBaseCombatCharacter", "m_flNextAttack", float)
+
+    NETVAR(lastFireTime, "CTFWeaponBase", "m_flLastFireTime", float)
+
+    NETVAR(clip, "CBaseCombatWeapon", "m_iClip1", int)
+    NETVAR(nextSecondaryAttack, "CBaseCombatWeapon","m_flNextSecondaryAttack", float)
+    NETVAR(nextPrimaryAttack, "CBaseCombatWeapon", "m_flNextPrimaryAttack", float)
 
     NETVAR(itemDefinitionIndex, "CEconEntity", "m_iItemDefinitionIndex", int)
 };

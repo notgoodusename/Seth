@@ -38,7 +38,7 @@ const bool anyActiveKeybinds() noexcept
     const bool antiAimManualLeft = config->antiAim.enabled && config->antiAim.manualLeft.canShowKeybind();
     const bool doubletap = config->tickbase.doubletap.canShowKeybind();
     const bool hideshots = config->tickbase.hideshots.canShowKeybind();
-    const bool aimbot = config->aimbot.enabled && config->aimbotKey.canShowKeybind();
+    const bool aimbot = config->aimbotKey.canShowKeybind();
     const bool triggerBot = config->triggerbot.enabled && config->triggerbotKey.canShowKeybind();
     const bool glow = config->glowKey.canShowKeybind();
     const bool chams = config->chamsKey.canShowKeybind();
@@ -93,8 +93,7 @@ void Misc::showKeybinds() noexcept
     config->tickbase.doubletap.showKeybind();
     config->tickbase.hideshots.showKeybind();
 
-    if (config->aimbot.enabled)
-        config->aimbotKey.showKeybind();
+    config->aimbotKey.showKeybind();
     if (config->triggerbot.enabled)
         config->triggerbotKey.showKeybind();
     config->chamsKey.showKeybind();

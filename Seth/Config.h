@@ -58,17 +58,55 @@ public:
     } tickbase;
 
     struct Aimbot {
-        bool enabled{ false };
-        bool aimlock{ false };
-        bool silent{ false };
-        bool friendlyFire{ false };
-        bool visibleOnly{ true };
-        bool scopedOnly{ true };
-        bool autoScope{ false };
-        float fov{ 0.0f };
-        float smooth{ 1.0f };
-        int hitboxes{ 0 };
-        int minDamage{ 1 };
+        struct Hitscan {
+            //I hate this, but otherwise it wont compile
+            constexpr auto operator!=(const Hitscan& h) const noexcept
+            {
+                return enabled != h.enabled || aimlock != h.aimlock || silent != h.silent
+                    || friendlyFire != h.friendlyFire || scopedOnly != h.scopedOnly || autoShoot != h.autoShoot
+                    || autoScope != h.autoScope || autoRev != h.autoRev 
+                    || autoExtinguishTeam != h.autoExtinguishTeam || waitForHeadshot != h.waitForHeadshot
+                    || waitForCharge != h.waitForCharge || sortMethod != h.sortMethod
+                    || hitboxes != h.hitboxes || fov != h.fov || smooth != h.smooth;
+            }
+            bool enabled{ false };
+            bool aimlock{ false };
+            bool silent{ false };
+            bool friendlyFire{ false };
+            bool scopedOnly{ true };
+            bool autoShoot{ false };
+            bool autoScope{ false };
+            bool autoRev{ false };
+            bool autoExtinguishTeam{ false };
+            bool waitForHeadshot{ false };
+            bool waitForCharge{ false };
+            int sortMethod{ 0 };
+            int hitboxes{ 0 };
+            float fov{ 0.0f };
+            float smooth{ 1.0f };
+        } hitscan;
+        struct Projectile {
+            constexpr auto operator!=(const Projectile& p) const noexcept
+            {
+                return enabled != p.enabled;
+            }
+            bool enabled{ false };
+        } projectile;
+        struct Melee {
+            constexpr auto operator!=(const Melee& m) const noexcept
+            {
+                return enabled != m.enabled || aimlock != m.aimlock || silent != m.silent
+                    || autoBackstab != m.autoBackstab || sortMethod != m.sortMethod
+                    || fov != m.fov || smooth != m.smooth;
+            }
+            bool enabled{ false };
+            bool aimlock{ false };
+            bool silent{ false };
+            bool autoBackstab{ true };
+            int sortMethod{ 0 };
+            float fov{ 0.0f };
+            float smooth{ 1.0f };
+        } melee;
     } aimbot;
     KeyBind aimbotKey{ std::string("aimbot") };
     ColorToggleOutline aimbotFov{ 1.0f, 1.0f, 1.0f, 0.25f };

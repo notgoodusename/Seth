@@ -19,6 +19,7 @@
 #include "Interfaces.h"
 #include "Memory.h"
 
+#include "Hacks/Aimbot.h"
 #include "Hacks/Animations.h"
 #include "Hacks/Backtrack.h"
 #include "Hacks/Chams.h"
@@ -155,6 +156,7 @@ static bool __fastcall createMove(void* thisPointer, void*, float inputSampleTim
     EnginePrediction::run(cmd);
 
     Backtrack::run(cmd);
+    Aimbot::run(cmd);
 
     auto viewAnglesDelta{ cmd->viewangles - previousViewAngles };
     viewAnglesDelta.normalize();
