@@ -74,7 +74,7 @@ void EnginePrediction::run(UserCmd* cmd) noexcept
     interfaces->gameMovement->processMovement(localPlayer.get(), &moveData);
     interfaces->prediction->finishMove(localPlayer.get(), cmd, &moveData);
 
-    localPlayer->runPostThink();
+    //localPlayer->runPostThink();
 
     interfaces->gameMovement->finishTrackPredictionErrors(localPlayer.get());
 

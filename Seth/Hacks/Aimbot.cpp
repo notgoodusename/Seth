@@ -82,15 +82,18 @@ bool canShoot() noexcept
         nextAttack = activeWeapon->nextPrimaryAttack();
     }
 
-    if (!activeWeapon->clip())
-        return false;
+    if (!activeWeapon->clip() && activeWeapon->isInReload())
+        return activeWeapon->nextPrimaryAttack() <= memory->globalVars->serverTime();
 
     if (activeWeapon->isInReload())
         return true;
 
+    if (!activeWeapon->clip())
+        return false;
+
     oldActiveWeapon = activeWeapon;
 
-    return nextAttack <= memory->globalVars->serverTime() + memory->globalVars->intervalPerTick;
+    return nextAttack <= memory->globalVars->serverTime();
 }
 
 void Aimbot::updateInput() noexcept
@@ -166,7 +169,7 @@ void Aimbot::runHitscan(Entity* activeWeapon, UserCmd* cmd) noexcept
     if (!canShoot())
         return;
 
-    if (!(cmd->buttons & UserCmd::IN_ATTACK) && !cfg.autoShoot && !cfg.aimlock)
+    if (!(cmd->buttons & UserCmd::IN_ATTACK || cfg.autoShoot || cfg.aimlock))
         return;
 
     std::array<bool, Hitboxes::Max> hitbox{ false };
