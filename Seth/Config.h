@@ -63,7 +63,8 @@ public:
             constexpr auto operator!=(const Hitscan& h) const noexcept
             {
                 return enabled != h.enabled || aimlock != h.aimlock || silent != h.silent
-                    || friendlyFire != h.friendlyFire || scopedOnly != h.scopedOnly || autoShoot != h.autoShoot
+                    || friendlyFire != h.friendlyFire || ignoreCloaked != h.ignoreCloaked
+                    || scopedOnly != h.scopedOnly || autoShoot != h.autoShoot
                     || autoScope != h.autoScope || autoRev != h.autoRev 
                     || autoExtinguishTeam != h.autoExtinguishTeam || waitForHeadshot != h.waitForHeadshot
                     || waitForCharge != h.waitForCharge || sortMethod != h.sortMethod
@@ -73,6 +74,7 @@ public:
             bool aimlock{ false };
             bool silent{ false };
             bool friendlyFire{ false };
+            bool ignoreCloaked{ true };
             bool scopedOnly{ true };
             bool autoShoot{ false };
             bool autoScope{ false };

@@ -209,6 +209,7 @@ static void from_json(const json& j, Config::Aimbot::Hitscan& h)
     read(j, "Aimlock", h.aimlock);
     read(j, "Silent", h.silent);
     read(j, "Friendly fire", h.friendlyFire);
+    read(j, "Ignore cloaked", h.friendlyFire);
     read(j, "Scoped only", h.scopedOnly);
     read(j, "Auto shoot", h.autoShoot);
     read(j, "Auto scope", h.autoScope);
@@ -631,6 +632,7 @@ static void to_json(json& j, const Config::Aimbot::Hitscan& o, const Config::Aim
     WRITE("Aimlock", aimlock);
     WRITE("Silent", silent);
     WRITE("Friendly fire", friendlyFire);
+    WRITE("Ignore cloaked", ignoreCloaked);
     WRITE("Scoped only", scopedOnly);
     WRITE("Auto shoot", autoScope);
     WRITE("Auto scope", autoScope);

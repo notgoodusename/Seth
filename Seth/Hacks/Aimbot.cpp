@@ -214,6 +214,8 @@ void Aimbot::runHitscan(Entity* activeWeapon, UserCmd* cmd) noexcept
     for (const auto& target : enemies)
     {
         const auto entity{ interfaces->entityList->getEntity(target.id) };
+        if (entity->isCloaked() && config->aimbot.hitscan.ignoreCloaked)
+            continue;
         const auto player = Animations::getPlayer(target.id);
         const Model* model = entity->getModel();
         if (!model)

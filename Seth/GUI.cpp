@@ -183,6 +183,7 @@ void GUI::renderAimbotWindow() noexcept
             ImGui::Checkbox("Silent", &config->aimbot.hitscan.silent);
             ImGuiCustom::colorPicker("Draw fov", config->aimbotFov);
             ImGui::Checkbox("Friendly fire", &config->aimbot.hitscan.friendlyFire);
+            ImGui::Checkbox("Ignore cloaked", &config->aimbot.hitscan.ignoreCloaked);
             ImGui::Checkbox("Scoped only", &config->aimbot.hitscan.scopedOnly);
             ImGui::Checkbox("Auto shoot", &config->aimbot.hitscan.autoShoot);
             if (ImGui::IsItemHovered())
