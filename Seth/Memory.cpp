@@ -96,6 +96,7 @@ Memory::Memory() noexcept
     getNextThinkTick = reinterpret_cast<decltype(getNextThinkTick)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\x8B\x45\x08\x56\x8B\xF1\x85\xC0\x75\x13"));
     setAbsOrigin = reinterpret_cast<decltype(setAbsOrigin)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\x56\x57\x8B\xF1\xE8????\x8B\x7D\x08\xF3\x0F\x10\x07"));
     setAbsAngle = reinterpret_cast<decltype(setAbsAngle)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\x83\xEC\x60\x56\x57\x8B\xF1"));
+    setCollisionBounds = relativeToAbsolute<decltype(setCollisionBounds)>(findPattern(CLIENT_DLL, "\xE8????\x0F\xB6\x4E\x40") + 1);
     setNextThink = reinterpret_cast<decltype(setNextThink)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\xF3\x0F\x10\x45?\x0F\x2E\x05????\x53"));
     physicsRunThink = reinterpret_cast<decltype(physicsRunThink)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\x53\x8B\xD9\x56\x57\x8B\x83????\xC1"));
 

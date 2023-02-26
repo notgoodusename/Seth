@@ -57,6 +57,7 @@ public:
     int(__thiscall* getNextThinkTick)(void*, const char*);
     void(__thiscall* setAbsOrigin)(Entity*, const Vector&);
     void(__thiscall* setAbsAngle)(Entity*, const Vector&);
+    void(__thiscall* setCollisionBounds)(void*, const Vector&, const Vector&);
     void(__thiscall* setNextThink)(void*, float, const char*);
     bool(__thiscall* physicsRunThink)(void*, int);
 

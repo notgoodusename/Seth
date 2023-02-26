@@ -94,6 +94,25 @@ enum WeaponSlots {
 
 class Collideable {
 public:
+    PAD(4)
+    Entity* outer;
+    Vector vecMinsPreScaled;
+    Vector vecMaxsPreScaled;
+    Vector vecMins;
+    Vector vecMaxs;
+    float radius;
+    unsigned short solidFlags;
+    unsigned short partition;
+    unsigned char surroundType;
+    unsigned char solidType;
+    unsigned char triggerBloat;
+    Vector vecSpecifiedSurroundingMinsPreScaled;
+    Vector vecSpecifiedSurroundingMaxsPreScaled;
+    Vector vecSpecifiedSurroundingMins;
+    Vector vecSpecifiedSurroundingMaxs;
+    Vector vecSurroundingMins;
+    Vector vecSurroundingMaxs;
+
     VIRTUAL_METHOD(const Vector&, obbMins, 3, (), (this))
     VIRTUAL_METHOD(const Vector&, obbMaxs, 4, (), (this))
 };
@@ -110,6 +129,8 @@ public:
     VIRTUAL_METHOD(bool, shouldDraw, 3, (), (this + sizeof(uintptr_t)))
     VIRTUAL_METHOD(const Model*, getModel, 9, (), (this + sizeof(uintptr_t)))
     VIRTUAL_METHOD(const matrix3x4&, toWorldTransform, 34, (), (this + sizeof(uintptr_t)))
+
+    VIRTUAL_METHOD(Entity*, getBaseAnimating, 39, (), (this))
 
     VIRTUAL_METHOD(int&, handle, 2, (), (this))
     VIRTUAL_METHOD(Collideable*, getCollideable, 3, (), (this))
@@ -402,6 +423,7 @@ public:
     NETVAR(clientSideAnimation, "CBaseAnimating", "m_bClientSideAnimation", bool)
     NETVAR(hitboxSet, "CBaseAnimating", "m_nHitboxSet", int)
     NETVAR(sequence, "CBaseAnimating", "m_nSequence", int)
+    NETVAR(modelScale, "CBaseAnimating", "m_flModelScale", float)
 
     NETVAR(modelIndex, "CBaseEntity", "m_nModelIndex", unsigned)
     NETVAR(origin, "CBaseEntity", "m_vecOrigin", Vector)
