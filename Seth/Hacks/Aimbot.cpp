@@ -413,6 +413,9 @@ void Aimbot::runMelee(Entity* activeWeapon, UserCmd* cmd) noexcept
     if (!(cmd->buttons & UserCmd::IN_ATTACK || cfg.autoHit || cfg.aimlock))
         return;
 
+    if (activeWeapon->nextPrimaryAttack() > memory->globalVars->serverTime() && activeWeapon->nextSecondaryAttack() > memory->globalVars->serverTime())
+        return;
+
     auto bestFov = cfg.fov;
     auto bestSimulationTime = -1.0f;
     Vector bestTarget{ };
