@@ -243,7 +243,7 @@ void PlayerData::update(Entity* entity) noexcept
     if (const auto weapon = entity->getActiveWeapon())
         activeWeapon = interfaces->localize->findAsUTF8(weapon->getPrintName());
 
-    if (!alive || !inViewFrustum)
+    if (!alive)
         return;
 
     const auto model = entity->getModel();
