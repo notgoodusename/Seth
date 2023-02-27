@@ -68,39 +68,6 @@ std::vector<Vector> multiPoint(Entity* entity, const matrix3x4 matrix[MAXSTUDIOB
     return vecArray;
 }
 
-//TODO: create the greatest canShoot function of all time
-bool canShoot() noexcept //This is broken
-{
-    if (!localPlayer)
-        return false;
-
-    Entity* activeWeapon = localPlayer->getActiveWeapon();
-    if (!activeWeapon)
-        return false;
-
-    static float lastFire = 0, nextAttack = 0, a = 0;
-    static Entity* oldActiveWeapon;
-
-    if (lastFire != activeWeapon->lastFireTime() || activeWeapon != oldActiveWeapon)
-    {
-        lastFire = activeWeapon->lastFireTime();
-        nextAttack = activeWeapon->nextPrimaryAttack();
-    }
-
-    if (!activeWeapon->clip() && activeWeapon->isInReload())
-        return activeWeapon->nextPrimaryAttack() <= memory->globalVars->serverTime();
-
-    if (activeWeapon->isInReload())
-        return true;
-
-    if (!activeWeapon->clip())
-        return false;
-
-    oldActiveWeapon = activeWeapon;
-
-    return nextAttack <= memory->globalVars->serverTime();
-}
-
 void Aimbot::updateInput() noexcept
 {
     config->aimbotKey.handleToggle();
@@ -108,7 +75,6 @@ void Aimbot::updateInput() noexcept
 
 void Aimbot::run(UserCmd* cmd) noexcept
 {
-    canShoot();
     if (!config->aimbotKey.isActive() || 
         (!config->aimbot.hitscan.enabled && !config->aimbot.projectile.enabled && !config->aimbot.melee.enabled))
         return;
@@ -213,6 +179,12 @@ void Aimbot::runHitscan(Entity* activeWeapon, UserCmd* cmd) noexcept
     if (!cfg.enabled)
         return;
 
+    if (!(cmd->buttons & UserCmd::IN_ATTACK || cfg.autoShoot || cfg.aimlock))
+        return;
+
+    if (!activeWeapon->clip() || activeWeapon->nextPrimaryAttack() > memory->globalVars->serverTime() || activeWeapon->isInReload())
+        return;
+
     switch (activeWeapon->itemDefinitionIndex())
     {
         case Sniper_m_TheMachina:
@@ -225,12 +197,6 @@ void Aimbot::runHitscan(Entity* activeWeapon, UserCmd* cmd) noexcept
         default:
             break;
     }
-
-    if (!canShoot())
-        return;
-
-    if (!(cmd->buttons & UserCmd::IN_ATTACK || cfg.autoShoot || cfg.aimlock))
-        return;
 
     std::array<bool, Hitboxes::LeftUpperArm> hitbox{ false };
 
