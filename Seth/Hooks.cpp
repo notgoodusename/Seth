@@ -290,6 +290,7 @@ void resetAll(int resetType) noexcept
     Animations::reset();
     Misc::reset(resetType);
     EnginePrediction::reset();
+    Visuals::reset(resetType);
 }
 
 static void __fastcall levelShutDown(void* thisPointer) noexcept
