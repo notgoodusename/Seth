@@ -15,6 +15,7 @@
 
 #include "stb_image.h"
 
+#include "SDK/Client.h"
 #include "SDK/ClientClass.h"
 #include "SDK/Engine.h"
 #include "SDK/EngineTrace.h"
@@ -24,6 +25,8 @@
 #include "SDK/Localize.h"
 #include "SDK/LocalPlayer.h"
 #include "SDK/ModelInfo.h"
+#include "SDK/RenderView.h"
+#include "SDK/ViewSetup.h"
 
 static Matrix4x4 viewMatrix;
 static LocalPlayerData localPlayerData;
@@ -64,7 +67,12 @@ void GameData::update() noexcept
         return;
     }
 
-    viewMatrix = interfaces->engine->worldToScreenMatrix();
+    if (ViewSetup viewSetup = {}; interfaces->client->getPlayerView(viewSetup))
+    {
+        Matrix4x4 worldToView = {}, viewToProjection = {}, worldToProjection = {}, worldToPixels = {};
+        interfaces->renderView->getMatricesForView(viewSetup, &worldToView, &viewToProjection, &worldToProjection, &worldToPixels);
+        viewMatrix = worldToProjection;
+    }
 
     const auto highestEntityIndex = interfaces->entityList->getHighestEntityIndex();
     for (int i = 1; i <= highestEntityIndex; ++i) {

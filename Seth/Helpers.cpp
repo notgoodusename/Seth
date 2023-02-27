@@ -280,15 +280,15 @@ float Helpers::normalizeYaw(float yaw) noexcept
 
 bool Helpers::worldToScreen(const Vector& in, ImVec2& out, bool floor) noexcept
 {
-    const auto& matrix = GameData::toScreenMatrix();
+    const auto& matrix = GameData::toScreenMatrix().as3x4();
 
-    const auto w = matrix._41 * in.x + matrix._42 * in.y + matrix._43 * in.z + matrix._44;
+    const auto w = matrix[3][0] * in.x + matrix[3][1] * in.y + matrix[3][2] * in.z + matrix[3][3];
     if (w < 0.001f)
         return false;
 
     out = ImGui::GetIO().DisplaySize / 2.0f;
-    out.x *= 1.0f + (matrix._11 * in.x + matrix._12 * in.y + matrix._13 * in.z + matrix._14) / w;
-    out.y *= 1.0f - (matrix._21 * in.x + matrix._22 * in.y + matrix._23 * in.z + matrix._24) / w;
+    out.x *= 1.0f + (matrix[0][0] * in.x + matrix[0][1] * in.y + matrix[0][2] * in.z + matrix[0][3]) / w;
+    out.y *= 1.0f - (matrix[1][0] * in.x + matrix[1][1] * in.y + matrix[1][2] * in.z + matrix[1][3]) / w;
     if (floor)
         out = ImFloor(out);
     return true;

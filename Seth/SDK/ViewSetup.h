@@ -1,6 +1,6 @@
 #pragma once
 
-#include "matrix3x4.h"
+#include "Engine.h"
 #include "Vector.h"
 
 class ViewSetup
@@ -38,5 +38,5 @@ public:
 	bool doBloomAndToneMapping;
 	bool cacheFullSceneState;
 	bool viewToProjectionOverride;
-	matrix3x4 viewToProjection;
+	Matrix4x4 viewToProjection;
 };

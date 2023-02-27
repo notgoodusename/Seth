@@ -471,6 +471,9 @@ void StreamProofESP::render() noexcept
     }
 
     for (const auto& world : GameData::world()) {
+        if (config->streamProofESP.world["All"].enabled)
+            break;
+
         renderEntityBox(world, world.name.data(), config->streamProofESP.world["All"]);
     }
 }

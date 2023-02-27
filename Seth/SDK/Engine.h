@@ -3,23 +3,23 @@
 #include <cstdint>
 #include <functional>
 
+#include "matrix3x4.h"
 #include "Pad.h"
 #include "Vector.h"
 #include "VirtualMethod.h"
 
 struct SteamAPIContext;
 
-struct Matrix4x4 {
-    union {
-        struct {
-            float _11, _12, _13, _14;
-            float _21, _22, _23, _24;
-            float _31, _32, _33, _34;
-            float _41, _42, _43, _44;
+struct Matrix4x4
+{
+private:
+    Vector m[4][4];
 
-        };
-        float m[4][4];
-    };
+public:
+    const matrix3x4& as3x4() const
+    {
+        return *((const matrix3x4*)this);
+    }
 };
 
 struct PlayerInfo {
