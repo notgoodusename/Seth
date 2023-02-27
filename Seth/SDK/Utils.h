@@ -20,6 +20,6 @@ int getMaxUserCmdProcessTicks() noexcept;
 
 #define maxUserCmdProcessTicks getMaxUserCmdProcessTicks()
 
-void applyMatrix(Entity* entity, matrix3x4* boneCacheData, Vector origin, Vector absAngle, Vector mins, Vector maxs) noexcept;
+void applyMatrix(Entity* entity, matrix3x4* boneCacheData, Vector origin, Vector absAngle) noexcept;
 
 Vector calculateRelativeAngle(const Vector& source, const Vector& destination, const Vector& viewAngles) noexcept;

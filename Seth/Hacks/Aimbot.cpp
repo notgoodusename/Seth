@@ -236,8 +236,6 @@ void Aimbot::runHitscan(Entity* activeWeapon, UserCmd* cmd) noexcept
 
         const auto& player = Animations::getPlayer(target.id);
         const auto& backupBoneCache = entity->getBoneCache().memory;
-        const auto& backupMins = entity->getCollideable()->obbMins();
-        const auto& backupMaxs = entity->getCollideable()->obbMaxs();
         const auto& backupOrigin = entity->getAbsOrigin();
         const auto& backupAbsAngle = entity->getAbsAngle();
 
@@ -291,7 +289,6 @@ void Aimbot::runHitscan(Entity* activeWeapon, UserCmd* cmd) noexcept
                 memcpy(entity->getBoneCache().memory, records->at(bestTick).matrix, std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
                 memory->setAbsOrigin(entity, records->at(bestTick).origin);
                 memory->setAbsAngle(entity, Vector{ 0.f, records->at(bestTick).absAngle.y, 0.f });
-                memory->setCollisionBounds(entity->getCollideable(), records->at(bestTick).mins, records->at(bestTick).maxs);
 
                 currentSimulationTime = records->at(bestTick).simulationTime;
             }
@@ -303,13 +300,12 @@ void Aimbot::runHitscan(Entity* activeWeapon, UserCmd* cmd) noexcept
                 memcpy(entity->getBoneCache().memory, player.matrix.data(), std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
                 memory->setAbsOrigin(entity, player.origin);
                 memory->setAbsAngle(entity, Vector{ 0.f, player.absAngle.y, 0.f });
-                memory->setCollisionBounds(entity->getCollideable(), player.mins, player.maxs);
 
                 currentSimulationTime = player.simulationTime;
             }
 
             bestTarget = getHitscanTarget(cmd, entity, entity->getBoneCache().memory, hitbox, bestFov, localPlayerEyePosition);
-            applyMatrix(entity, backupBoneCache, backupOrigin, backupAbsAngle, backupMins, backupMaxs);
+            applyMatrix(entity, backupBoneCache, backupOrigin, backupAbsAngle);
             if (bestTarget.notNull())
             {
                 bestSimulationTime = currentSimulationTime;
@@ -472,10 +468,9 @@ void runKnife(Entity* activeWeapon, UserCmd* cmd) noexcept
                     memcpy(entity->getBoneCache().memory, records->at(i).matrix, std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
                     memory->setAbsOrigin(entity, records->at(i).origin);
                     memory->setAbsAngle(entity, Vector{ 0.f, records->at(i).absAngle.y, 0.f });
-                    memory->setCollisionBounds(entity->getCollideable(), records->at(i).mins, records->at(i).maxs);
 
                     bestTarget = getMeleeTarget(cmd, entity, entity->getBoneCache().memory, activeWeapon, bestFov, localPlayerEyePosition, cfg.autoBackstab, records->at(i).eyeAngle);
-                    applyMatrix(entity, backupBoneCache, backupOrigin, backupAbsAngle, backupMins, backupMaxs);
+                    applyMatrix(entity, backupBoneCache, backupOrigin, backupAbsAngle);
 
                     if (bestTarget.notNull())
                     {
@@ -490,11 +485,10 @@ void runKnife(Entity* activeWeapon, UserCmd* cmd) noexcept
             memcpy(entity->getBoneCache().memory, player.matrix.data(), std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
             memory->setAbsOrigin(entity, player.origin);
             memory->setAbsAngle(entity, Vector{ 0.f, player.absAngle.y, 0.f });
-            memory->setCollisionBounds(entity->getCollideable(), player.mins, player.maxs);
 
             bestTarget = getMeleeTarget(cmd, entity, entity->getBoneCache().memory, activeWeapon, bestFov, localPlayerEyePosition, cfg.autoBackstab, player.eyeAngle);
 
-            applyMatrix(entity, backupBoneCache, backupOrigin, backupAbsAngle, backupMins, backupMaxs);
+            applyMatrix(entity, backupBoneCache, backupOrigin, backupAbsAngle);
 
             if (bestTarget.notNull())
             {
@@ -509,10 +503,12 @@ void runKnife(Entity* activeWeapon, UserCmd* cmd) noexcept
 
     if (bestTarget.notNull())
     {
-        auto angle = calculateRelativeAngle(localPlayerEyePosition, bestTarget, cmd->viewangles);
+        const auto angle = calculateRelativeAngle(localPlayerEyePosition, bestTarget, cmd->viewangles);
 
-        cmd->buttons |= UserCmd::IN_ATTACK;
-        cmd->tickCount = timeToTicks(bestSimulationTime + Backtrack::getLerp());
+        if (cfg.autoHit)
+            cmd->buttons |= UserCmd::IN_ATTACK;
+        if (cmd->buttons & (UserCmd::IN_ATTACK))
+            cmd->tickCount = timeToTicks(bestSimulationTime + Backtrack::getLerp());
         cmd->viewangles += angle;
 
         if (!cfg.silent)
@@ -527,8 +523,6 @@ public:
     int index;
     Vector origin;
     Vector absAngle;
-    Vector mins;
-    Vector maxs;
     Vector target;
     float simulationTime;
     matrix3x4* matrix;
@@ -552,12 +546,10 @@ void Aimbot::runMelee(Entity* activeWeapon, UserCmd* cmd) noexcept
             const auto angle = calculateRelativeAngle(localPlayer->getEyePosition(), meleeRecord.target, cmd->viewangles);
 
             const auto& backupBoneCache = entity->getBoneCache().memory;
-            const auto& backupMins = entity->getCollideable()->obbMins();
-            const auto& backupMaxs = entity->getCollideable()->obbMaxs();
             const auto& backupOrigin = entity->getAbsOrigin();
             const auto& backupAbsAngle = entity->getAbsAngle();
 
-            applyMatrix(entity, meleeRecord.matrix, meleeRecord.origin, meleeRecord.absAngle, meleeRecord.mins, meleeRecord.maxs);
+            applyMatrix(entity, meleeRecord.matrix, meleeRecord.origin, meleeRecord.absAngle);
             if (doesMeleeHit(activeWeapon, meleeRecord.index, cmd->viewangles + angle))
             {
                 cmd->viewangles += angle;
@@ -566,7 +558,7 @@ void Aimbot::runMelee(Entity* activeWeapon, UserCmd* cmd) noexcept
                 if (!cfg.silent)
                     interfaces->engine->setViewAngles(cmd->viewangles);
             }
-            applyMatrix(entity, backupBoneCache, backupOrigin, backupAbsAngle, backupMins, backupMaxs);
+            applyMatrix(entity, backupBoneCache, backupOrigin, backupAbsAngle);
         }
     }
 
@@ -660,7 +652,6 @@ void Aimbot::runMelee(Entity* activeWeapon, UserCmd* cmd) noexcept
                 memcpy(entity->getBoneCache().memory, records->at(bestTick).matrix, std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
                 memory->setAbsOrigin(entity, records->at(bestTick).origin);
                 memory->setAbsAngle(entity, Vector{ 0.f, records->at(bestTick).absAngle.y, 0.f });
-                memory->setCollisionBounds(entity->getCollideable(), records->at(bestTick).mins, records->at(bestTick).maxs);
 
                 currentSimulationTime = records->at(bestTick).simulationTime;
             }
@@ -672,19 +663,16 @@ void Aimbot::runMelee(Entity* activeWeapon, UserCmd* cmd) noexcept
                 memcpy(entity->getBoneCache().memory, player.matrix.data(), std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
                 memory->setAbsOrigin(entity, player.origin);
                 memory->setAbsAngle(entity, Vector{ 0.f, player.absAngle.y, 0.f });
-                memory->setCollisionBounds(entity->getCollideable(), player.mins, player.maxs);
 
                 currentSimulationTime = player.simulationTime;
             }
 
             meleeRecord.matrix = entity->getBoneCache().memory;
-            meleeRecord.mins = entity->getCollideable()->obbMins();
-            meleeRecord.maxs = entity->getCollideable()->obbMaxs();
             meleeRecord.origin = entity->getAbsOrigin();
             meleeRecord.absAngle = entity->getAbsAngle();
 
             bestTarget = getMeleeTarget(cmd, entity, entity->getBoneCache().memory, activeWeapon, bestFov, localPlayerEyePosition);
-            applyMatrix(entity, backupBoneCache, backupOrigin, backupAbsAngle, backupMins, backupMaxs);
+            applyMatrix(entity, backupBoneCache, backupOrigin, backupAbsAngle);
             if (bestTarget.notNull())
             {
                 meleeRecord.target = bestTarget;

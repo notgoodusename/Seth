@@ -21,12 +21,11 @@ int getMaxUserCmdProcessTicks() noexcept
     return 24;
 }
 
-void applyMatrix(Entity* entity, matrix3x4* boneCacheData, Vector origin, Vector absAngle, Vector mins, Vector maxs) noexcept
+void applyMatrix(Entity* entity, matrix3x4* boneCacheData, Vector origin, Vector absAngle) noexcept
 {
     memcpy(entity->getBoneCache().memory, boneCacheData, std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
     memory->setAbsOrigin(entity, origin);
     memory->setAbsAngle(entity, Vector{ 0.f, absAngle.y, 0.f });
-    memory->setCollisionBounds(entity->getCollideable(), mins, maxs);
 }
 
 Vector calculateRelativeAngle(const Vector& source, const Vector& destination, const Vector& viewAngles) noexcept
