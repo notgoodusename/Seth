@@ -455,7 +455,7 @@ void StreamProofESP::render() noexcept
     GameData::Lock lock;
 
     for (const auto& player : GameData::players()) {
-        if ((player.dormant && player.fadingAlpha() == 0.0f) || !player.alive || !player.inViewFrustum)
+        if ((player.dormant && player.fadingAlpha() == 0.0f) || !player.alive)
             continue;
 
         auto& playerConfig = player.enemy ? config->streamProofESP.enemies : config->streamProofESP.allies;

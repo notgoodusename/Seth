@@ -228,7 +228,6 @@ void PlayerData::update(Entity* entity) noexcept
     team = entity->teamNumber();
     static_cast<BaseData&>(*this) = { entity };
     origin = entity->getAbsOrigin();
-    inViewFrustum = !interfaces->engine->cullBox(obbMins + origin, obbMaxs + origin);
     alive = entity->isAlive();
     lastContactTime = alive ? memory->globalVars->realtime : 0.0f;
 
