@@ -271,6 +271,18 @@ public:
         return WeaponType::UNKNOWN;
     }
 
+    float getSwingRange() noexcept
+    {
+        if (weaponId() == WeaponId::SWORD)
+            return 72; // swords are typically 72
+        return 48;
+    }
+
+    bool isKnife() noexcept
+    {
+        return weaponId() == WeaponId::KNIFE;
+    }
+
     Entity* getObserverTarget() noexcept
     {
         return interfaces->entityList->getEntityFromHandle(observerTarget());

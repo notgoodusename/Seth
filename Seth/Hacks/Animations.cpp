@@ -94,7 +94,7 @@ void Animations::handlePlayers(FrameStage stage) noexcept
         }
 
         //Backtrack records
-        if (!config->backtrack.enabled || !entity->isEnemy(localPlayer.get()))
+        if (!config->backtrack.enabled)
         {
             player.backtrackRecords.clear();
             continue;

@@ -98,17 +98,22 @@ public:
         struct Melee {
             constexpr auto operator!=(const Melee& m) const noexcept
             {
-                return enabled != m.enabled || aimlock != m.aimlock || silent != m.silent
+                return enabled != m.enabled || aimlock != m.aimlock || silent != m.silent 
+                    || friendlyFire != m.friendlyFire || ignoreCloaked != m.ignoreCloaked
+                    || targetBacktrack != m.targetBacktrack|| autoHit != m.autoHit
                     || autoBackstab != m.autoBackstab || sortMethod != m.sortMethod
-                    || fov != m.fov || smooth != m.smooth;
+                    || fov != m.fov;
             }
             bool enabled{ false };
             bool aimlock{ false };
             bool silent{ false };
+            bool friendlyFire{ false };
+            bool ignoreCloaked{ true };
+            bool targetBacktrack{ true };
+            bool autoHit{ false };
             bool autoBackstab{ true };
             int sortMethod{ 0 };
             float fov{ 0.0f };
-            float smooth{ 1.0f };
         } melee;
     } aimbot;
     KeyBind aimbotKey{ std::string("aimbot") };

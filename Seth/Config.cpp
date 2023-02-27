@@ -234,10 +234,13 @@ static void from_json(const json& j, Config::Aimbot::Melee& m)
     read(j, "Enabled", m.enabled);
     read(j, "Aimlock", m.aimlock);
     read(j, "Silent", m.silent);
+    read(j, "Friendly fire", m.friendlyFire);
+    read(j, "Ignore cloaked", m.ignoreCloaked);
+    read(j, "Target backtrack", m.targetBacktrack);
+    read(j, "Auto hit", m.autoHit);
     read(j, "Auto backstab", m.autoBackstab);
     read(j, "Sort method", m.sortMethod);
     read(j, "Fov", m.fov);
-    read(j, "Smooth", m.smooth);
 }
 
 static void from_json(const json& j, Config::Triggerbot& t)
@@ -658,10 +661,13 @@ static void to_json(json& j, const Config::Aimbot::Melee& o, const Config::Aimbo
     WRITE("Enabled", enabled);
     WRITE("Aimlock", aimlock);
     WRITE("Silent", silent);
+    WRITE("Friendly fire", friendlyFire);
+    WRITE("Ignore cloaked", ignoreCloaked);
+    WRITE("Target backtrack", targetBacktrack);
+    WRITE("Auto hit", autoHit);
     WRITE("Auto backstab", autoBackstab);
     WRITE("Sort method", sortMethod);
     WRITE("Fov", fov);
-    WRITE("Smooth", smooth);
 }
 
 static void to_json(json& j, const Config::Triggerbot& o, const Config::Triggerbot& dummy = {})

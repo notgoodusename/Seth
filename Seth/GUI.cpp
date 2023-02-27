@@ -156,8 +156,8 @@ static void menuBarItem(const char* name, bool& enabled) noexcept
 
 void GUI::renderAimbotWindow() noexcept
 {
-    static const char* hitboxes[]{ "Head","Body","Pelvis","Arms","Legs" };
-    static bool hitbox[ARRAYSIZE(hitboxes)] = { false, false, false, false, false };
+    static const char* hitboxes[]{ "Head","Body","Pelvis" };
+    static bool hitbox[ARRAYSIZE(hitboxes)] = { false, false, false };
     static std::string previewvalue = "";
     bool once = false;
 
@@ -171,7 +171,7 @@ void GUI::renderAimbotWindow() noexcept
     ImGui::Combo("", &currentCategory, "Hitscan\0Projectile\0Melee\0");
     ImGui::PopID();
     ImGui::Columns(2, nullptr, false);
-    ImGui::SetColumnOffset(1, 220.0f);
+    ImGui::SetColumnOffset(1, 230.0f);
 
     switch (currentCategory)
     {
@@ -243,12 +243,15 @@ void GUI::renderAimbotWindow() noexcept
             ImGui::Checkbox("Enabled", &config->aimbot.melee.enabled);
             ImGui::Checkbox("Aimlock", &config->aimbot.melee.aimlock);
             ImGui::Checkbox("Silent", &config->aimbot.melee.silent);
+            ImGui::Checkbox("Friendly fire", &config->aimbot.melee.friendlyFire);
+            ImGui::Checkbox("Ignore cloaked", &config->aimbot.melee.ignoreCloaked);
+            ImGui::Checkbox("Target backtrack", &config->aimbot.melee.targetBacktrack);
+            ImGui::Checkbox("Auto hit", &config->aimbot.melee.autoHit);
             ImGui::Checkbox("Auto backstab", &config->aimbot.melee.autoBackstab);
             ImGui::Combo("Sort method", &config->aimbot.melee.sortMethod, "Distance\0Fov\0Health\0");
             ImGui::NextColumn();
             ImGui::PushItemWidth(240.0f);
             ImGui::SliderFloat("Fov", &config->aimbot.melee.fov, 0.0f, 255.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
-            ImGui::SliderFloat("Smooth", &config->aimbot.melee.smooth, 1.0f, 100.0f, "%.2f");
             break;
         }
         default:
