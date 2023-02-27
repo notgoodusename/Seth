@@ -92,30 +92,7 @@ enum WeaponSlots {
     SLOT_MELEE
 };
 
-class Collideable {
-public:
-    PAD(4)
-    Entity* outer;
-    Vector vecMinsPreScaled;
-    Vector vecMaxsPreScaled;
-    Vector vecMins;
-    Vector vecMaxs;
-    float radius;
-    unsigned short solidFlags;
-    unsigned short partition;
-    unsigned char surroundType;
-    unsigned char solidType;
-    unsigned char triggerBloat;
-    Vector vecSpecifiedSurroundingMinsPreScaled;
-    Vector vecSpecifiedSurroundingMaxsPreScaled;
-    Vector vecSpecifiedSurroundingMins;
-    Vector vecSpecifiedSurroundingMaxs;
-    Vector vecSurroundingMins;
-    Vector vecSurroundingMaxs;
-
-    VIRTUAL_METHOD(const Vector&, obbMins, 3, (), (this))
-    VIRTUAL_METHOD(const Vector&, obbMaxs, 4, (), (this))
-};
+class Collideable;
 
 class Entity {
 public:
@@ -336,6 +313,11 @@ public:
         *reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + 0x860) = -FLT_MAX; //m_flLastBoneSetupTime = -FLT_MAX
     }
 
+    int& EFlags() noexcept
+    {
+        return *reinterpret_cast<int*>(reinterpret_cast<uintptr_t>(this) + 0x1A0);
+    }
+
     int& getButtons() noexcept
     {
         return *reinterpret_cast<int*>(reinterpret_cast<uintptr_t>(this) + 0x1180);
@@ -504,4 +486,81 @@ public:
     NETVAR(nextPrimaryAttack, "CBaseCombatWeapon", "m_flNextPrimaryAttack", float)
 
     NETVAR(itemDefinitionIndex, "CEconEntity", "m_iItemDefinitionIndex", int)
+};
+
+class Collideable {
+public:
+    PAD(4)
+    Entity* outer;
+    Vector vecMinsPreScaled;
+    Vector vecMaxsPreScaled;
+    Vector vecMins;
+    Vector vecMaxs;
+    float radius;
+    unsigned short solidFlags;
+    unsigned short partition;
+    unsigned char surroundType;
+    unsigned char solidType;
+    unsigned char triggerBloat;
+    Vector vecSpecifiedSurroundingMinsPreScaled;
+    Vector vecSpecifiedSurroundingMaxsPreScaled;
+    Vector vecSpecifiedSurroundingMins;
+    Vector vecSpecifiedSurroundingMaxs;
+    Vector vecSurroundingMins;
+    Vector vecSurroundingMaxs;
+
+    VIRTUAL_METHOD(const Vector&, obbMins, 3, (), (this))
+    VIRTUAL_METHOD(const Vector&, obbMaxs, 4, (), (this))
+
+    void setCollisionBounds(const Vector& mins, const Vector& maxs) noexcept
+    {
+        //Imma leave this here
+        if ((vecMinsPreScaled != mins) || (vecMaxsPreScaled != maxs))
+        {
+            vecMinsPreScaled = mins;
+            vecMaxsPreScaled = maxs;
+        }
+
+        bool dirty = false;
+
+        Entity* baseAnimating = outer->getBaseAnimating();
+        if (baseAnimating && baseAnimating->modelScale() != 1.0f)
+        {
+            Vector vecNewMins = mins * baseAnimating->modelScale();
+            Vector vecNewMaxs = maxs * baseAnimating->modelScale();
+
+            if ((vecMins != vecNewMins) || (vecMaxs != vecNewMaxs))
+            {
+                vecMins = vecNewMins;
+                vecMaxs = vecNewMaxs;
+                dirty = true;
+            }
+        }
+        else
+        {
+            if ((vecMins != mins) || (vecMaxs != maxs))
+            {
+                vecMins = mins;
+                vecMaxs = maxs;
+                dirty = true;
+            }
+        }
+
+        if (dirty)
+        {
+            Vector vecSize;
+            Vector::vectorSubtract(vecMaxs, vecMins, vecSize);
+            radius = vecSize.length() * 0.5f;
+
+            outer->EFlags() |= (1 << 14);
+
+            if (outer->index() == 0)
+                return;
+
+            if (!(outer->EFlags() & (1 << 15)))
+            {
+                outer->EFlags() |= (1 << 15);
+            }
+        }
+    }
 };
