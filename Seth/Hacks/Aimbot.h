@@ -11,6 +11,8 @@ namespace Aimbot
     void runProjectile(Entity* activeWeapon, UserCmd* cmd) noexcept;
     void runMelee(Entity* activeWeapon, UserCmd* cmd) noexcept;
 
+    void reset() noexcept;
+
     void updateInput() noexcept;
 
     struct Enemy {

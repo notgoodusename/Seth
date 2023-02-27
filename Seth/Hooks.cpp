@@ -286,6 +286,7 @@ static void __fastcall itemPostFrameHook(void* thisPointer, void*) noexcept
 
 void resetAll(int resetType) noexcept
 {
+    Aimbot::reset();
     Animations::reset();
     Misc::reset(resetType);
     EnginePrediction::reset();

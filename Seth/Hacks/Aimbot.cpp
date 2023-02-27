@@ -181,7 +181,7 @@ void Aimbot::runHitscan(Entity* activeWeapon, UserCmd* cmd) noexcept
 
     if (!(cmd->buttons & UserCmd::IN_ATTACK || cfg.autoShoot || cfg.aimlock))
         return;
-
+    //TODO: Fix decloaking on both functions
     if (!activeWeapon->clip() || activeWeapon->nextPrimaryAttack() > memory->globalVars->serverTime() || activeWeapon->isInReload())
         return;
 
@@ -404,11 +404,55 @@ Vector getMeleeTarget(UserCmd* cmd, Entity* entity, matrix3x4 matrix[MAXSTUDIOBO
     return Vector{ 0.0f, 0.0f, 0.0f };
 }
 
+struct MeleeRecord
+{
+public:
+    int commandNumber{ -1 };
+    int index;
+    Vector origin;
+    Vector absAngle;
+    Vector mins;
+    Vector maxs;
+    Vector target;
+    float simulationTime;
+    matrix3x4* matrix;
+} meleeRecord;
+
 void Aimbot::runMelee(Entity* activeWeapon, UserCmd* cmd) noexcept
 {
     const auto& cfg = config->aimbot.melee;
     if (!cfg.enabled)
         return;
+
+    //Due to the delay of melee registering after shooting we gotta do this
+    //And also recalculate melee
+    //If you miss its because of movement
+    if (meleeRecord.commandNumber == cmd->commandNumber)
+    {
+        const auto entity{ interfaces->entityList->getEntity(meleeRecord.index) };
+        if (entity)
+        {
+            //We gotta recalculate to aim correctly
+            const auto angle = calculateRelativeAngle(localPlayer->getEyePosition(), meleeRecord.target, cmd->viewangles);
+
+            const auto& backupBoneCache = entity->getBoneCache().memory;
+            const auto& backupMins = entity->getCollideable()->obbMins();
+            const auto& backupMaxs = entity->getCollideable()->obbMaxs();
+            const auto& backupOrigin = entity->getAbsOrigin();
+            const auto& backupAbsAngle = entity->getAbsAngle();
+
+            applyMatrix(entity, meleeRecord.matrix, meleeRecord.origin, meleeRecord.absAngle, meleeRecord.mins, meleeRecord.maxs);
+            if (doesMeleeHit(activeWeapon, meleeRecord.index, cmd->viewangles + angle))
+            {
+                cmd->viewangles += angle;
+                cmd->tickCount = timeToTicks(meleeRecord.simulationTime + Backtrack::getLerp());
+
+                if (!cfg.silent)
+                    interfaces->engine->setViewAngles(cmd->viewangles);
+            }
+            applyMatrix(entity, backupBoneCache, backupOrigin, backupAbsAngle, backupMins, backupMaxs);
+        }
+    }
 
     if (!(cmd->buttons & UserCmd::IN_ATTACK || cfg.autoHit || cfg.aimlock))
         return;
@@ -417,7 +461,6 @@ void Aimbot::runMelee(Entity* activeWeapon, UserCmd* cmd) noexcept
         return;
 
     auto bestFov = cfg.fov;
-    auto bestSimulationTime = -1.0f;
     Vector bestTarget{ };
     const auto localPlayerOrigin = localPlayer->getAbsOrigin();
     const auto localPlayerEyePosition = localPlayer->getEyePosition();
@@ -453,7 +496,8 @@ void Aimbot::runMelee(Entity* activeWeapon, UserCmd* cmd) noexcept
                 {
                     for (size_t i = 0; i < records->size(); i++)
                     {
-                        if (Backtrack::valid(records->at(i).simulationTime))
+                        //We gotta make sure if we fire now it will be correct when registering 0.2 seconds later and can register right now
+                        if (Backtrack::valid(records->at(i).simulationTime - 0.2121f) && Backtrack::valid(records->at(i).simulationTime))
                         {
                             bestTick = static_cast<int>(i);
                             break;
@@ -465,7 +509,7 @@ void Aimbot::runMelee(Entity* activeWeapon, UserCmd* cmd) noexcept
                     auto bestBacktrackDistance = FLT_MAX;
                     for (int i = static_cast<int>(records->size() - 1U); i >= 0; i--)
                     {
-                        if (Backtrack::valid(records->at(i).simulationTime))
+                        if (Backtrack::valid(records->at(i).simulationTime - 0.2121f) && Backtrack::valid(records->at(i).simulationTime))
                         {
                             const auto distance{ localPlayerOrigin.distTo(entity->getAbsOrigin()) };
 
@@ -501,27 +545,31 @@ void Aimbot::runMelee(Entity* activeWeapon, UserCmd* cmd) noexcept
                 currentSimulationTime = player.simulationTime;
             }
 
+            meleeRecord.matrix = entity->getBoneCache().memory;
+            meleeRecord.mins = entity->getCollideable()->obbMins();
+            meleeRecord.maxs = entity->getCollideable()->obbMaxs();
+            meleeRecord.origin = entity->getAbsOrigin();
+            meleeRecord.absAngle = entity->getAbsAngle();
+
             bestTarget = getMeleeTarget(cmd, entity, entity->getBoneCache().memory, activeWeapon, bestFov, localPlayerEyePosition);
             applyMatrix(entity, backupBoneCache, backupOrigin, backupAbsAngle, backupMins, backupMaxs);
             if (bestTarget.notNull())
             {
-                bestSimulationTime = currentSimulationTime;
+                meleeRecord.target = bestTarget;
+                meleeRecord.index = target.id;
+                meleeRecord.simulationTime = currentSimulationTime;
+                meleeRecord.commandNumber = cmd->commandNumber + static_cast<int>(round(0.2121f / memory->globalVars->intervalPerTick));
+                cmd->buttons |= UserCmd::IN_ATTACK;
                 break;
             }
         }
         if (bestTarget.notNull())
             break;
     }
+}
 
-    if (bestTarget.notNull())
-    {
-        auto angle = calculateRelativeAngle(localPlayerEyePosition, bestTarget, cmd->viewangles);
 
-        cmd->buttons |= UserCmd::IN_ATTACK;
-        cmd->tickCount = timeToTicks(bestSimulationTime + Backtrack::getLerp());
-        cmd->viewangles += angle;
-
-        if (!cfg.silent)
-            interfaces->engine->setViewAngles(cmd->viewangles);
-    }
+void Aimbot::reset() noexcept
+{
+    meleeRecord.commandNumber = -1;
 }
