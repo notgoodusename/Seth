@@ -1,3 +1,3 @@
 # Seth
 
-Used osirisandextra as a base and ported to tf2
+Used osirisandextra as a base and ported it to tf2
