@@ -128,6 +128,7 @@ public:
     VIRTUAL_METHOD(Vector&, getRenderAngles, 2, (), (this + sizeof(uintptr_t)))
     VIRTUAL_METHOD(bool, shouldDraw, 3, (), (this + sizeof(uintptr_t)))
     VIRTUAL_METHOD(const Model*, getModel, 9, (), (this + sizeof(uintptr_t)))
+    VIRTUAL_METHOD(void, getRenderBounds, 20, (Vector& mins, Vector& maxs), (this + sizeof(uintptr_t), &mins, &maxs))
     VIRTUAL_METHOD(const matrix3x4&, toWorldTransform, 34, (), (this + sizeof(uintptr_t)))
 
     VIRTUAL_METHOD(Entity*, getBaseAnimating, 39, (), (this))
@@ -175,6 +176,21 @@ public:
     bool isSwimming() noexcept
     {
         return waterLevel() > 1;
+    }
+
+    bool isKnife() noexcept
+    {
+        return weaponId() == WeaponId::KNIFE;
+    }
+
+    bool isVisible(const Vector& position = { }) noexcept
+    {
+        if (!localPlayer)
+            return false;
+
+        Trace trace;
+        interfaces->engineTrace->traceRay({ localPlayer->getEyePosition(), position.notNull() ? position : getBonePosition(6) }, MASK_SHOT | CONTENTS_HITBOX, { localPlayer.get() }, trace);
+        return trace.entity == this || trace.fraction > 0.97f;
     }
 
     void setCurrentCommand(UserCmd* cmd) noexcept
@@ -278,9 +294,13 @@ public:
         return 48;
     }
 
-    bool isKnife() noexcept
+    Vector getWorldSpaceCenter() noexcept
     {
-        return weaponId() == WeaponId::KNIFE;
+        Vector mins, maxs;
+        getRenderBounds(mins, maxs);
+        Vector worldSpaceCenter = getAbsOrigin();
+        worldSpaceCenter.z += (mins.z + maxs.z) / 2.0f;
+        return worldSpaceCenter;
     }
 
     Entity* getObserverTarget() noexcept
@@ -294,16 +314,6 @@ public:
             return boneMatrices[bone].origin();
         else
             return Vector{ };
-    }
-
-    bool isVisible(const Vector& position = { }) noexcept
-    {
-        if (!localPlayer)
-            return false;
-
-        Trace trace;
-        interfaces->engineTrace->traceRay({ localPlayer->getEyePosition(), position.notNull() ? position : getBonePosition(6) }, MASK_SHOT | CONTENTS_HITBOX, { localPlayer.get() }, trace);
-        return trace.entity == this || trace.fraction > 0.97f;
     }
 
     bool setupBones(matrix3x4* out, int maxBones, int boneMask, float currentTime) noexcept
@@ -392,7 +402,6 @@ public:
         return (inReload || reloadMode != 0);
     }
 
-
     CONDITION(isCharging, condition(), TFCond_Charging)
     CONDITION(isScoped, condition(), TFCond_Zoomed)
     CONDITION(isUbered, condition(), TFCond_Ubercharged)
@@ -456,6 +465,7 @@ public:
     NETVAR(waterLevel, "CTFPlayer", "m_nWaterLevel", unsigned char)
     NETVAR(forceTauntCam, "CTFPlayer", "m_nForceTauntCam", int)
     NETVAR(isFeignDeathReady, "CTFPlayer", "m_bFeignDeathReady", bool)
+    NETVAR(eyeAngles, "CTFPlayer", "m_angEyeAngles[0]", Vector)
 
     NETVAR(objectType, "CBaseObject", "m_iObjectType", int)
     NETVAR(objectMode, "CBaseObject", "m_iObjectMode", int)

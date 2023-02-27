@@ -8,7 +8,7 @@
 
 std::vector<Aimbot::Enemy> enemies;
 
-std::vector<Vector> multiPoint(Entity* entity, const matrix3x4 matrix[MAXSTUDIOBONES], StudioBbox* hitbox, Vector localEyePos, int _hitbox) noexcept
+std::vector<Vector> multiPoint(Entity* entity, const matrix3x4 matrix[MAXSTUDIOBONES], StudioBbox* hitbox, Vector localEyePos, int _hitbox, bool doNotRunMultipoint = false) noexcept
 {
     auto VectorTransformWrapper = [](const Vector& in1, const matrix3x4 in2, Vector& out)
     {
@@ -33,6 +33,9 @@ std::vector<Vector> multiPoint(Entity* entity, const matrix3x4 matrix[MAXSTUDIOB
     std::vector<Vector> vecArray;
 
     vecArray.emplace_back(center);
+
+    if (doNotRunMultipoint)
+        return vecArray;
 
     Vector currentAngles = calculateRelativeAngle(center, localEyePos, Vector{});
 
@@ -89,8 +92,8 @@ void Aimbot::run(UserCmd* cmd) noexcept
 
     enemies.clear();
 
-    const auto localPlayerOrigin = localPlayer->getAbsOrigin();
-    const auto localPlayerEyePosition = localPlayer->getEyePosition();
+    const auto& localPlayerOrigin = localPlayer->getAbsOrigin();
+    const auto& localPlayerEyePosition = localPlayer->getEyePosition();
     for (int i = 1; i <= interfaces->engine->getMaxClients(); ++i) {
         const auto player = Animations::getPlayer(i);
         if (!player.gotMatrix)
@@ -131,7 +134,7 @@ void Aimbot::run(UserCmd* cmd) noexcept
     }
 }
 
-Vector getHitscanTarget( UserCmd* cmd, Entity* entity, matrix3x4 matrix[MAXSTUDIOBONES], std::array<bool, Hitboxes::LeftUpperArm> hitbox, float& bestFov, Vector localPlayerEyePosition) noexcept
+Vector getHitscanTarget(UserCmd* cmd, Entity* entity, matrix3x4 matrix[MAXSTUDIOBONES], std::array<bool, Hitboxes::LeftUpperArm> hitbox, float& bestFov, Vector localPlayerEyePosition) noexcept
 {
     const Model* model = entity->getModel();
     if (!model)
@@ -216,9 +219,6 @@ void Aimbot::runHitscan(Entity* activeWeapon, UserCmd* cmd) noexcept
         break;
     case 1:
         std::sort(enemies.begin(), enemies.end(), [&](const Enemy& a, const Enemy& b) { return a.fov < b.fov; });
-        break;
-    case 2:
-        std::sort(enemies.begin(), enemies.end(), [&](const Enemy& a, const Enemy& b) { return a.health < b.health; });
         break;
     default:
         break;
@@ -364,11 +364,38 @@ bool doesMeleeHit(Entity* activeWeapon, int index, const Vector angles) noexcept
     Vector vecSwingEnd = vecSwingStart + vecForward * swingRange;
 
     Trace trace;
-    interfaces->engineTrace->traceRay({ vecSwingStart, vecSwingEnd, vecSwingMins, vecSwingMaxs }, MASK_SHOT | CONTENTS_HITBOX, { localPlayer.get() }, trace);
+    interfaces->engineTrace->traceRay({ vecSwingStart, vecSwingEnd, vecSwingMins, vecSwingMaxs }, MASK_SHOT, { localPlayer.get() }, trace);
     return trace.entity && trace.entity->index() == index;
 }
 
-Vector getMeleeTarget(UserCmd* cmd, Entity* entity, matrix3x4 matrix[MAXSTUDIOBONES], Entity* activeWeapon, float& bestFov, Vector localPlayerEyePosition) noexcept
+bool canBackstab(Entity* entity, Vector angles, Vector entityAngles) noexcept
+{
+    Vector vecToTarget;
+    vecToTarget = entity->getWorldSpaceCenter() - localPlayer->getWorldSpaceCenter();
+    vecToTarget.z = 0.0f;
+    vecToTarget = vecToTarget.normalized();
+
+    // Get owner forward view vector
+    Vector vecOwnerForward;
+    Vector::fromAngleAll(angles, &vecOwnerForward, NULL, NULL);
+    vecOwnerForward.z = 0.0f;
+    vecOwnerForward = vecOwnerForward.normalized();
+
+    // Get target forward view vector
+    Vector vecTargetForward;
+    Vector::fromAngleAll(entityAngles, &vecTargetForward, NULL, NULL);
+    vecTargetForward.z = 0.0f;
+    vecTargetForward = vecTargetForward.normalized();
+
+    // Make sure owner is behind, facing and aiming at target's back
+    float posVsTargetViewDot = vecToTarget.dotProduct(vecTargetForward);
+    float posVsOwnerViewDot = vecToTarget.dotProduct(vecOwnerForward);
+    float viewAnglesDot = vecTargetForward.dotProduct(vecOwnerForward);
+
+    return (posVsTargetViewDot > 0.f && posVsOwnerViewDot > 0.5 && viewAnglesDot > -0.3f);
+}
+
+Vector getMeleeTarget(UserCmd* cmd, Entity* entity, matrix3x4 matrix[MAXSTUDIOBONES], Entity* activeWeapon, float& bestFov, Vector localPlayerEyePosition, bool mustBackstab = false, Vector eyeAngle = {}) noexcept
 {
     const Model* model = entity->getModel();
     if (!model)
@@ -382,15 +409,18 @@ Vector getMeleeTarget(UserCmd* cmd, Entity* entity, matrix3x4 matrix[MAXSTUDIOBO
     if (!set)
         return Vector{ 0.0f, 0.0f, 0.0f };
 
-    StudioBbox* hitbox = set->getHitbox(Hitboxes::Pelvis);
+    StudioBbox* hitbox = set->getHitbox(mustBackstab ? Hitboxes::Spine1 : Hitboxes::Pelvis);
     if (!hitbox)
         return Vector{ 0.0f, 0.0f, 0.0f };
 
-    for (auto& bonePosition : multiPoint(entity, matrix, hitbox, localPlayerEyePosition, 0))
+    for (auto& bonePosition : multiPoint(entity, matrix, hitbox, localPlayerEyePosition, 0, true))
     {
         const Vector angle{ calculateRelativeAngle(localPlayerEyePosition, bonePosition, cmd->viewangles) };
         const float fov{ angle.length2D() };
         if (fov > bestFov)
+            continue;
+
+        if (mustBackstab && !canBackstab(entity, cmd->viewangles + angle, eyeAngle))
             continue;
 
         if (!doesMeleeHit(activeWeapon, entity->index(), cmd->viewangles + angle))
@@ -402,6 +432,92 @@ Vector getMeleeTarget(UserCmd* cmd, Entity* entity, matrix3x4 matrix[MAXSTUDIOBO
         }
     }
     return Vector{ 0.0f, 0.0f, 0.0f };
+}
+
+void runKnife(Entity* activeWeapon, UserCmd* cmd) noexcept
+{
+    const auto& cfg = config->aimbot.melee;
+
+    const bool mustBackstab = cfg.autoBackstab;
+    float bestSimulationTime{ -1.0f };
+    auto bestFov = cfg.fov;
+    Vector bestTarget{ };
+    const auto& localPlayerOrigin = localPlayer->getAbsOrigin();
+    const auto& localPlayerEyePosition = localPlayer->getEyePosition();
+
+    for (const auto& target : enemies)
+    {
+        const auto entity{ interfaces->entityList->getEntity(target.id) };
+        if ((entity->isCloaked() && cfg.ignoreCloaked) || (!entity->isEnemy(localPlayer.get()) && !cfg.friendlyFire))
+            continue;
+
+        const auto& player = Animations::getPlayer(target.id);
+        
+        auto& backupBoneCache = entity->getBoneCache().memory;
+        auto& backupMins = entity->getCollideable()->obbMins();
+        auto& backupMaxs = entity->getCollideable()->obbMaxs();
+        auto& backupOrigin = entity->getAbsOrigin();
+        auto& backupAbsAngle = entity->getAbsAngle();
+
+        if (config->backtrack.enabled && cfg.targetBacktrack)
+        {
+            const auto records = Animations::getBacktrackRecords(entity->index());
+            if (!records || records->empty())
+                continue;
+
+            for (int i = static_cast<int>(records->size() - 1U); i >= 0; i--)
+            {
+                if (Backtrack::valid(records->at(i).simulationTime))
+                {
+                    memcpy(entity->getBoneCache().memory, records->at(i).matrix, std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
+                    memory->setAbsOrigin(entity, records->at(i).origin);
+                    memory->setAbsAngle(entity, Vector{ 0.f, records->at(i).absAngle.y, 0.f });
+                    memory->setCollisionBounds(entity->getCollideable(), records->at(i).mins, records->at(i).maxs);
+
+                    bestTarget = getMeleeTarget(cmd, entity, entity->getBoneCache().memory, activeWeapon, bestFov, localPlayerEyePosition, cfg.autoBackstab, records->at(i).eyeAngle);
+                    applyMatrix(entity, backupBoneCache, backupOrigin, backupAbsAngle, backupMins, backupMaxs);
+
+                    if (bestTarget.notNull())
+                    {
+                        bestSimulationTime = records->at(i).simulationTime;
+                        break;
+                    }
+                }
+            }
+        }
+        else
+        {
+            memcpy(entity->getBoneCache().memory, player.matrix.data(), std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
+            memory->setAbsOrigin(entity, player.origin);
+            memory->setAbsAngle(entity, Vector{ 0.f, player.absAngle.y, 0.f });
+            memory->setCollisionBounds(entity->getCollideable(), player.mins, player.maxs);
+
+            bestTarget = getMeleeTarget(cmd, entity, entity->getBoneCache().memory, activeWeapon, bestFov, localPlayerEyePosition, cfg.autoBackstab, player.eyeAngle);
+
+            applyMatrix(entity, backupBoneCache, backupOrigin, backupAbsAngle, backupMins, backupMaxs);
+
+            if (bestTarget.notNull())
+            {
+                bestSimulationTime = player.simulationTime;
+                break;
+            }
+        }
+        
+        if (bestTarget.notNull())
+            break;
+    }
+
+    if (bestTarget.notNull())
+    {
+        auto angle = calculateRelativeAngle(localPlayerEyePosition, bestTarget, cmd->viewangles);
+
+        cmd->buttons |= UserCmd::IN_ATTACK;
+        cmd->tickCount = timeToTicks(bestSimulationTime + Backtrack::getLerp());
+        cmd->viewangles += angle;
+
+        if (!cfg.silent)
+            interfaces->engine->setViewAngles(cmd->viewangles);
+    }
 }
 
 struct MeleeRecord
@@ -460,10 +576,26 @@ void Aimbot::runMelee(Entity* activeWeapon, UserCmd* cmd) noexcept
     if (activeWeapon->nextPrimaryAttack() > memory->globalVars->serverTime() && activeWeapon->nextSecondaryAttack() > memory->globalVars->serverTime())
         return;
 
+    switch (cfg.sortMethod)
+    {
+    case 0:
+        std::sort(enemies.begin(), enemies.end(), [&](const Enemy& a, const Enemy& b) { return a.distance < b.distance; });
+        break;
+    case 1:
+        std::sort(enemies.begin(), enemies.end(), [&](const Enemy& a, const Enemy& b) { return a.fov < b.fov; });
+        break;
+    default:
+        break;
+    }
+
+    //The knife has no delay to register a hit
+    if (activeWeapon->isKnife())
+        return runKnife(activeWeapon, cmd);
+
     auto bestFov = cfg.fov;
     Vector bestTarget{ };
-    const auto localPlayerOrigin = localPlayer->getAbsOrigin();
-    const auto localPlayerEyePosition = localPlayer->getEyePosition();
+    const auto& localPlayerOrigin = localPlayer->getAbsOrigin();
+    const auto& localPlayerEyePosition = localPlayer->getEyePosition();
     for (const auto& target : enemies)
     {
         const auto entity{ interfaces->entityList->getEntity(target.id) };
@@ -567,7 +699,6 @@ void Aimbot::runMelee(Entity* activeWeapon, UserCmd* cmd) noexcept
             break;
     }
 }
-
 
 void Aimbot::reset() noexcept
 {

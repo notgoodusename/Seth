@@ -31,6 +31,7 @@ namespace Animations
 			std::deque<Vector> positions;
 			Vector origin;
 			Vector absAngle;
+			Vector eyeAngle;
 			Vector mins;
 			Vector maxs;
 			float simulationTime;
@@ -43,6 +44,7 @@ namespace Animations
 
 		Vector mins{}, maxs{};
 		Vector origin{}, absAngle{};
+		Vector eyeAngle{};
 
 		int handle = -1;
 
@@ -56,6 +58,8 @@ namespace Animations
 			simulationTime = -1.0f;
 
 			origin = Vector{};
+			eyeAngle = Vector{};
+			absAngle = Vector{};
 			mins = Vector{};
 			maxs = Vector{};
 

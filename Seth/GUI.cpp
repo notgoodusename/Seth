@@ -195,7 +195,7 @@ void GUI::renderAimbotWindow() noexcept
             ImGui::Checkbox("Wait for headshot", &config->aimbot.hitscan.waitForHeadshot);
             ImGui::Checkbox("Wait for charge", &config->aimbot.hitscan.waitForHeadshot);
 
-            ImGui::Combo("Sort method", &config->aimbot.hitscan.sortMethod, "Distance\0Fov\0Health\0");
+            ImGui::Combo("Sort method", &config->aimbot.hitscan.sortMethod, "Distance\0Fov\0");
             for (size_t i = 0; i < ARRAYSIZE(hitbox); i++)
             {
                 hitbox[i] = (config->aimbot.hitscan.hitboxes & 1 << i) == 1 << i;
@@ -248,7 +248,7 @@ void GUI::renderAimbotWindow() noexcept
             ImGui::Checkbox("Target backtrack", &config->aimbot.melee.targetBacktrack);
             ImGui::Checkbox("Auto hit", &config->aimbot.melee.autoHit);
             ImGui::Checkbox("Auto backstab", &config->aimbot.melee.autoBackstab);
-            ImGui::Combo("Sort method", &config->aimbot.melee.sortMethod, "Distance\0Fov\0Health\0");
+            ImGui::Combo("Sort method", &config->aimbot.melee.sortMethod, "Distance\0Fov\0");
             ImGui::NextColumn();
             ImGui::PushItemWidth(240.0f);
             ImGui::SliderFloat("Fov", &config->aimbot.melee.fov, 0.0f, 255.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
