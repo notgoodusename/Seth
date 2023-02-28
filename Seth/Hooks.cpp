@@ -117,13 +117,13 @@ static HRESULT __stdcall reset(IDirect3DDevice9* device, D3DPRESENT_PARAMETERS* 
 static int __fastcall sendDatagramHook(NetworkChannel* network, void*, void* datagram) noexcept
 {
     static auto original = hooks->sendDatagram.getOriginal<int>(datagram);
-    if (!config->backtrack.fakeLatency || !localPlayer || !interfaces->engine->isInGame() || datagram)
+    if (!localPlayer || !interfaces->engine->isInGame() || datagram)
         return original(network, datagram);
 
     const int instate = network->inReliableState;
     const int insequencenr = network->inSequenceNr;
 
-    const float delta = max(0.f, (config->backtrack.fakeLatencyAmount / 1000.f));
+    const float delta = config->backtrack.fakeLatency ? max(0.f, (config->backtrack.fakeLatencyAmount / 1000.f)) : 0;
 
     Backtrack::addLatencyToNetwork(network, delta);
 
