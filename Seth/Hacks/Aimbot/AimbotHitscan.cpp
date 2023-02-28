@@ -110,7 +110,10 @@ void AimbotHitscan::run(Entity* activeWeapon, UserCmd* cmd) noexcept
             continue;
 
         const auto& player = Animations::getPlayer(target.id);
+
         const auto& backupBoneCache = entity->getBoneCache().memory;
+        const auto& backupMins = entity->getCollideable()->obbMins();
+        const auto& backupMaxs = entity->getCollideable()->obbMaxs();
         const auto& backupOrigin = entity->getAbsOrigin();
         const auto& backupAbsAngle = entity->getAbsAngle();
 
@@ -164,6 +167,7 @@ void AimbotHitscan::run(Entity* activeWeapon, UserCmd* cmd) noexcept
                 memcpy(entity->getBoneCache().memory, records->at(bestTick).matrix, std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
                 memory->setAbsOrigin(entity, records->at(bestTick).origin);
                 memory->setAbsAngle(entity, Vector{ 0.f, records->at(bestTick).absAngle.y, 0.f });
+                memory->setCollisionBounds(entity->getCollideable(), records->at(bestTick).mins, records->at(bestTick).maxs);
 
                 bestSimulationTime = records->at(bestTick).simulationTime;
             }
@@ -175,12 +179,13 @@ void AimbotHitscan::run(Entity* activeWeapon, UserCmd* cmd) noexcept
                 memcpy(entity->getBoneCache().memory, player.matrix.data(), std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
                 memory->setAbsOrigin(entity, player.origin);
                 memory->setAbsAngle(entity, Vector{ 0.f, player.absAngle.y, 0.f });
+                memory->setCollisionBounds(entity->getCollideable(), player.mins, player.maxs);
 
                 bestSimulationTime = player.simulationTime;
             }
 
             bestTarget = getHitscanTarget(cmd, entity, entity->getBoneCache().memory, hitbox, bestFov, localPlayerEyePosition);
-            applyMatrix(entity, backupBoneCache, backupOrigin, backupAbsAngle);
+            applyMatrix(entity, backupBoneCache, backupOrigin, backupAbsAngle, backupMins, backupMaxs);
             if (bestTarget.notNull())
                 break;
         }
