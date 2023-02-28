@@ -172,8 +172,10 @@ void runKnife(Entity* activeWeapon, UserCmd* cmd) noexcept
 
         if (cfg.autoHit)
             cmd->buttons |= UserCmd::IN_ATTACK;
+
         if (cmd->buttons & UserCmd::IN_ATTACK)
             cmd->tickCount = timeToTicks(bestSimulationTime + Backtrack::getLerp());
+
         cmd->viewangles += angle;
 
         if (!cfg.silent)
@@ -271,7 +273,7 @@ void AimbotMelee::run(Entity* activeWeapon, UserCmd* cmd) noexcept
         {
             float currentSimulationTime = -1.0f;
 
-            if (config->backtrack.enabled)
+            if (config->backtrack.enabled || config->backtrack.fakeLatency)
             {
                 if (!cfg.targetBacktrack && cycle == 1)
                     continue;

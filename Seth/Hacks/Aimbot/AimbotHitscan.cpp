@@ -165,7 +165,7 @@ void AimbotHitscan::run(Entity* activeWeapon, UserCmd* cmd) noexcept
                 memory->setAbsOrigin(entity, records->at(bestTick).origin);
                 memory->setAbsAngle(entity, Vector{ 0.f, records->at(bestTick).absAngle.y, 0.f });
 
-                currentSimulationTime = records->at(bestTick).simulationTime;
+                bestSimulationTime = records->at(bestTick).simulationTime;
             }
             else
             {
@@ -176,16 +176,13 @@ void AimbotHitscan::run(Entity* activeWeapon, UserCmd* cmd) noexcept
                 memory->setAbsOrigin(entity, player.origin);
                 memory->setAbsAngle(entity, Vector{ 0.f, player.absAngle.y, 0.f });
 
-                currentSimulationTime = player.simulationTime;
+                bestSimulationTime = player.simulationTime;
             }
 
             bestTarget = getHitscanTarget(cmd, entity, entity->getBoneCache().memory, hitbox, bestFov, localPlayerEyePosition);
             applyMatrix(entity, backupBoneCache, backupOrigin, backupAbsAngle);
             if (bestTarget.notNull())
-            {
-                bestSimulationTime = currentSimulationTime;
                 break;
-            }
         }
         if (bestTarget.notNull())
             break;
@@ -200,13 +197,14 @@ void AimbotHitscan::run(Entity* activeWeapon, UserCmd* cmd) noexcept
 
         if (!cfg.autoShoot)
             angle /= cfg.smooth;
+
+        if (cmd->buttons & UserCmd::IN_ATTACK)
+            cmd->tickCount = timeToTicks(bestSimulationTime + Backtrack::getLerp());
+
         cmd->viewangles += angle;
 
         if (!cfg.silent)
             interfaces->engine->setViewAngles(cmd->viewangles);
-
-        if (cmd->buttons & UserCmd::IN_ATTACK)
-            cmd->tickCount = timeToTicks(bestSimulationTime + Backtrack::getLerp());
     }
 }
 
