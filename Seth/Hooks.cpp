@@ -274,17 +274,6 @@ static void __fastcall estimateAbsVelocityHook(void* thisPointer, void*, Vector&
     original(thisPointer, &vel);
 }
 
-static void __fastcall itemPostFrameHook(void* thisPointer, void*) noexcept
-{
-    static auto original = hooks->itemPostFrame.getOriginal<void>();
-
-    //i dont feel like rebuilding postthink.
-    if (EnginePrediction::isInPrediction())
-        return;
-
-    original(thisPointer);
-}
-
 void resetAll(int resetType) noexcept
 {
     Aimbot::reset();
@@ -328,7 +317,6 @@ void Hooks::install() noexcept
 
     calcViewModelView.detour(memory->calcViewModelView, calcViewModelViewHook);
     estimateAbsVelocity.detour(memory->estimateAbsVelocity, estimateAbsVelocityHook);
-    itemPostFrame.detour(memory->itemPostFrame, itemPostFrameHook);
     sendDatagram.detour(memory->sendDatagram, sendDatagramHook);
 
     client.init(interfaces->client);
