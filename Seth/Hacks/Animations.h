@@ -49,7 +49,6 @@ namespace Animations
 		int handle = -1;
 
 		float simulationTime{ -1.0f };
-		int chokedPackets{ 0 };
 		bool gotMatrix{ false };
 
 		void clear()
@@ -64,12 +63,6 @@ namespace Animations
 			maxs = Vector{};
 
 			backtrackRecords.clear();
-		}
-
-		void reset()
-		{
-			clear();
-			chokedPackets = 0;
 		}
 	};
 	Players getPlayer(int index) noexcept;

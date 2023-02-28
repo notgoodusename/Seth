@@ -23,7 +23,7 @@ void Animations::init() noexcept
 void Animations::reset() noexcept
 {
     for (auto& record : players)
-        record.reset();
+        record.clear();
 }
 
 float Animations::getExtraTicks() noexcept
@@ -47,7 +47,7 @@ void Animations::handlePlayers(FrameStage stage) noexcept
         return;
     }
 
-    const auto localPlayerOrigin{ localPlayer->getAbsOrigin() };
+    const auto& localPlayerOrigin{ localPlayer->getAbsOrigin() };
 
     for (int i = 1; i <= interfaces->engine->getMaxClients(); i++)
     {
@@ -62,32 +62,19 @@ void Animations::handlePlayers(FrameStage stage) noexcept
         if (entity->handle() != player.handle)
         {
             player.handle = entity->handle();
-            player.reset();
+            player.clear();
         }
 
         bool runPostUpdate = false;
 
-        if (player.simulationTime != entity->simulationTime() && player.simulationTime < entity->simulationTime())
+        if (player.simulationTime != entity->simulationTime())
         {
             runPostUpdate = true;
-            if (player.simulationTime == -1.0f)
-                player.simulationTime = entity->simulationTime();
-
-            //Get chokedPackets
-            const auto simDifference = fabsf(entity->simulationTime() - player.simulationTime);
-
-            player.simulationTime != entity->simulationTime() ?
-                player.chokedPackets = static_cast<int>(simDifference / memory->globalVars->intervalPerTick) - 1 : player.chokedPackets = 0;
-            player.chokedPackets = std::clamp(player.chokedPackets, 0, maxUserCmdProcessTicks + 1);
 
             player.origin = entity->origin();
             player.eyeAngle = entity->eyeAngles();
             player.absAngle = entity->getAbsAngle();
-        }
 
-        //Setupbones
-        if (runPostUpdate)
-        {
             player.simulationTime = entity->simulationTime();
             player.mins = entity->getCollideable()->obbMins();
             player.maxs = entity->getCollideable()->obbMaxs();
