@@ -280,6 +280,11 @@ public:
         return worldSpaceCenter;
     }
 
+    Entity* getGroundEntity() noexcept
+    {
+        return interfaces->entityList->getEntityFromHandle(groundEntity());
+    }
+
     Entity* getObserverTarget() noexcept
     {
         return interfaces->entityList->getEntityFromHandle(observerTarget());

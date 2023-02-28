@@ -222,7 +222,7 @@ static void __stdcall overrideView(ViewSetup* setup) noexcept
     Visuals::thirdperson();
 }
 
-void __fastcall calcViewModelViewHook(void* thisPointer, void*, Entity* owner, Vector* eyePosition, Vector* eyeAngles)
+static void __fastcall calcViewModelViewHook(void* thisPointer, void*, Entity* owner, Vector* eyePosition, Vector* eyeAngles) noexcept
 {
     static auto original = hooks->calcViewModelView.getOriginal<void>(owner, eyePosition, eyeAngles);
 
@@ -260,17 +260,18 @@ static void __stdcall lockCursor() noexcept
     return hooks->surface.callOriginal<void, 62>();
 }
 
-static void __fastcall estimateAbsVelocityHook(void* thisPointer, void*, Vector* vel)
+static void __fastcall estimateAbsVelocityHook(void* thisPointer, void*, Vector& vel) noexcept
 {
-    static auto original = hooks->estimateAbsVelocity.getOriginal<void>(vel);
+    static auto original = hooks->estimateAbsVelocity.getOriginal<void>(&vel);
 
     const auto entity = reinterpret_cast<Entity*>(thisPointer);
     if (localPlayer && entity->isPlayer() && entity != localPlayer.get())
     {
-        entity->getAbsVelocity(*vel);
+        entity->getAbsVelocity(vel);
         return;
     }
-    original(thisPointer, vel);
+
+    original(thisPointer, &vel);
 }
 
 static void __fastcall itemPostFrameHook(void* thisPointer, void*) noexcept
