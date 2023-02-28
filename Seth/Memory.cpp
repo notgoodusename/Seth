@@ -98,6 +98,7 @@ Memory::Memory() noexcept
     setAbsAngle = reinterpret_cast<decltype(setAbsAngle)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\x83\xEC\x60\x56\x57\x8B\xF1"));
     setCollisionBounds = relativeToAbsolute<decltype(setCollisionBounds)>(findPattern(CLIENT_DLL, "\xE8????\x0F\xB6\x4E\x40") + 1);
     setNextThink = reinterpret_cast<decltype(setNextThink)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\xF3\x0F\x10\x45?\x0F\x2E\x05????\x53"));
+    logDirect = reinterpret_cast<decltype(logDirect)>(GetProcAddress(GetModuleHandleA("tier0.dll"), "Msg"));
     physicsRunThink = reinterpret_cast<decltype(physicsRunThink)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\x53\x8B\xD9\x56\x57\x8B\x83????\xC1"));
 
     predictionRandomSeed = *reinterpret_cast<int**>(findPattern(CLIENT_DLL, "\xC7\x05????????\x5D\xC3\x8B\x40\x34") + 2);

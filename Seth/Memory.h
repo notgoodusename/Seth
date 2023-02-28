@@ -59,6 +59,8 @@ public:
     void(__thiscall* setAbsAngle)(Entity*, const Vector&);
     void(__thiscall* setCollisionBounds)(void*, const Vector& mins, const Vector& maxs);
     void(__thiscall* setNextThink)(void*, float, const char*);
+
+    std::add_pointer_t<void _cdecl(const char* msg, ...)> logDirect;
     bool(__thiscall* physicsRunThink)(void*, int);
 
     int* predictionRandomSeed;
