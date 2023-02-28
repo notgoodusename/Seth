@@ -52,6 +52,7 @@ public:
     VIRTUAL_METHOD(int, getMaxClients, 21, (), (this))
     VIRTUAL_METHOD(bool, isInGame, 26, (), (this))
     VIRTUAL_METHOD(bool, isConnected, 27, (), (this))
+    VIRTUAL_METHOD(bool, isDrawingLoadingImage, 27, (), (this))
     VIRTUAL_METHOD(bool, cullBox, 33, (const Vector& mins, const Vector& maxs), (this, std::cref(mins), std::cref(maxs)))
     VIRTUAL_METHOD(const char*, getGameDirectory, 35, (), (this))
     VIRTUAL_METHOD(const Matrix4x4&, worldToScreenMatrix, 36, (), (this))
