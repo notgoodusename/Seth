@@ -30,5 +30,6 @@ namespace Backtrack
 
     bool valid(float simtime) noexcept;
     void init() noexcept;
+    void reset() noexcept;
     float getMaxUnlag() noexcept;
 }

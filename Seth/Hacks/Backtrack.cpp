@@ -150,6 +150,11 @@ void Backtrack::init() noexcept
     cvars.maxUnlag = interfaces->cvar->findVar("sv_maxunlag");
 }
 
+void Backtrack::reset() noexcept
+{
+    sequences.clear();
+}
+
 float Backtrack::getMaxUnlag() noexcept
 {
     return cvars.maxUnlag->getFloat();

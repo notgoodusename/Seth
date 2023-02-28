@@ -279,6 +279,7 @@ void resetAll(int resetType) noexcept
 {
     Aimbot::reset();
     Animations::reset();
+    Backtrack::reset();
     Misc::reset(resetType);
     EnginePrediction::reset();
     Visuals::reset(resetType);
