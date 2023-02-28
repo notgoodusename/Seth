@@ -19,7 +19,7 @@
 #include "Interfaces.h"
 #include "Memory.h"
 
-#include "Hacks/Aimbot.h"
+#include "Hacks/Aimbot/Aimbot.h"
 #include "Hacks/Animations.h"
 #include "Hacks/Backtrack.h"
 #include "Hacks/Chams.h"

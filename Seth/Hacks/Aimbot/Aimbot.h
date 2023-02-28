@@ -1,19 +1,19 @@
 #pragma once
+#include <vector>
+
+#include "../../SDK/matrix3x4.h"
+#include "../../SDK/ModelInfo.h"
+#include "../../SDK/Vector.h"
 
 class Entity;
+class matrix3x4;
 struct UserCmd;
 
 namespace Aimbot
 {
     void run(UserCmd* cmd) noexcept;
-
-    void runHitscan(Entity* activeWeapon, UserCmd* cmd) noexcept;
-    void runProjectile(Entity* activeWeapon, UserCmd* cmd) noexcept;
-    void runMelee(Entity* activeWeapon, UserCmd* cmd) noexcept;
-
-    void reset() noexcept;
-
     void updateInput() noexcept;
+    void reset() noexcept;
 
     struct Enemy {
         int id;
@@ -31,4 +31,7 @@ namespace Aimbot
 
         Enemy(int id, int health, float distance, float fov) noexcept : id(id), health(health), distance(distance), fov(fov) { }
     };
+
+    std::vector<Vector> multiPoint(Entity* entity, const matrix3x4 matrix[MAXSTUDIOBONES], StudioBbox* hitbox, Vector localEyePos, int _hitbox, bool doNotRunMultipoint = false) noexcept;
+    std::vector<Aimbot::Enemy>& getEnemies() noexcept;
 }

@@ -95,7 +95,7 @@ void Animations::handlePlayers(FrameStage stage) noexcept
         }
 
         //Backtrack records
-        if (!config->backtrack.enabled)
+        if (!config->backtrack.enabled && !config->backtrack.fakeLatency)
         {
             player.backtrackRecords.clear();
             continue;

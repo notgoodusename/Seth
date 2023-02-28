@@ -33,6 +33,9 @@
     <Filter Include="freetype">
       <UniqueIdentifier>{15481d2e-5516-4ece-9b00-79e32710804c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Hacks\Aimbot">
+      <UniqueIdentifier>{2022a0b7-f69c-4b31-94a7-3dcabede5475}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GUI.cpp">
@@ -200,8 +203,17 @@
     <ClCompile Include="Hacks\Visuals.cpp">
       <Filter>Hacks</Filter>
     </ClCompile>
-    <ClCompile Include="Hacks\Aimbot.cpp">
-      <Filter>Hacks</Filter>
+    <ClCompile Include="Hacks\Aimbot\Aimbot.cpp">
+      <Filter>Hacks\Aimbot</Filter>
+    </ClCompile>
+    <ClCompile Include="Hacks\Aimbot\AimbotHitscan.cpp">
+      <Filter>Hacks\Aimbot</Filter>
+    </ClCompile>
+    <ClCompile Include="Hacks\Aimbot\AimbotMelee.cpp">
+      <Filter>Hacks\Aimbot</Filter>
+    </ClCompile>
+    <ClCompile Include="Hacks\Aimbot\AimbotProjectile.cpp">
+      <Filter>Hacks\Aimbot</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -499,8 +511,17 @@
     <ClInclude Include="Hacks\Visuals.h">
       <Filter>Hacks</Filter>
     </ClInclude>
-    <ClInclude Include="Hacks\Aimbot.h">
-      <Filter>Hacks</Filter>
+    <ClInclude Include="Hacks\Aimbot\Aimbot.h">
+      <Filter>Hacks\Aimbot</Filter>
+    </ClInclude>
+    <ClInclude Include="Hacks\Aimbot\AimbotHitscan.h">
+      <Filter>Hacks\Aimbot</Filter>
+    </ClInclude>
+    <ClInclude Include="Hacks\Aimbot\AimbotMelee.h">
+      <Filter>Hacks\Aimbot</Filter>
+    </ClInclude>
+    <ClInclude Include="Hacks\Aimbot\AimbotProjectile.h">
+      <Filter>Hacks\Aimbot</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

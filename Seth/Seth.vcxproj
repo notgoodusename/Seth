@@ -29,7 +29,10 @@
     <ClCompile Include="freetype\src\smooth\smooth.c" />
     <ClCompile Include="freetype\src\truetype\truetype.c" />
     <ClCompile Include="GameData.cpp" />
-    <ClCompile Include="Hacks\Aimbot.cpp" />
+    <ClCompile Include="Hacks\Aimbot\Aimbot.cpp" />
+    <ClCompile Include="Hacks\Aimbot\AimbotHitscan.cpp" />
+    <ClCompile Include="Hacks\Aimbot\AimbotMelee.cpp" />
+    <ClCompile Include="Hacks\Aimbot\AimbotProjectile.cpp" />
     <ClCompile Include="Hacks\Animations.cpp" />
     <ClCompile Include="Hacks\Backtrack.cpp" />
     <ClCompile Include="Hacks\Chams.cpp" />
@@ -75,7 +78,10 @@
     <ClInclude Include="freetype\freetype\config\ftmodule.h" />
     <ClInclude Include="freetype\freetype\config\ftoption.h" />
     <ClInclude Include="GameData.h" />
-    <ClInclude Include="Hacks\Aimbot.h" />
+    <ClInclude Include="Hacks\Aimbot\Aimbot.h" />
+    <ClInclude Include="Hacks\Aimbot\AimbotHitscan.h" />
+    <ClInclude Include="Hacks\Aimbot\AimbotMelee.h" />
+    <ClInclude Include="Hacks\Aimbot\AimbotProjectile.h" />
     <ClInclude Include="Hacks\Animations.h" />
     <ClInclude Include="Hacks\Backtrack.h" />
     <ClInclude Include="Hacks\Chams.h" />
