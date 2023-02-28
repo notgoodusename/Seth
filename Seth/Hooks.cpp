@@ -117,7 +117,7 @@ static HRESULT __stdcall reset(IDirect3DDevice9* device, D3DPRESENT_PARAMETERS* 
 static int __fastcall sendDatagramHook(NetworkChannel* network, void*, void* datagram) noexcept
 {
     static auto original = hooks->sendDatagram.getOriginal<int>(datagram);
-    if (!config->backtrack.fakeLatency || !interfaces->engine->isInGame() || datagram)
+    if (!config->backtrack.fakeLatency || !localPlayer || !interfaces->engine->isInGame() || datagram)
         return original(network, datagram);
 
     const int instate = network->inReliableState;
