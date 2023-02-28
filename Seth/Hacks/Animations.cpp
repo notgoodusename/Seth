@@ -118,11 +118,15 @@ void Animations::handlePlayers(FrameStage stage) noexcept
 
 Animations::Players Animations::getPlayer(int index) noexcept
 {
+    if (index >= players.size())
+        return {};
     return players.at(index);
 }
 
 Animations::Players* Animations::setPlayer(int index) noexcept
 {
+    if (index >= players.size())
+        return {};
     return &players.at(index);
 }
 
