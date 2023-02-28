@@ -24,7 +24,6 @@ public:
 
     MinHook calcViewModelView;
     MinHook estimateAbsVelocity;
-    MinHook itemPostFrame;
     MinHook sendDatagram;
 
     MinHook client;

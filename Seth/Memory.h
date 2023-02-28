@@ -67,7 +67,6 @@ public:
 
     std::uintptr_t calcViewModelView;
     std::uintptr_t estimateAbsVelocity;
-    std::uintptr_t itemPostFrame;
     std::uintptr_t sendDatagram;
 private:
 };
