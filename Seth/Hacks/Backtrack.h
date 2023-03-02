@@ -17,10 +17,13 @@ namespace Backtrack
 {
     void run(UserCmd*) noexcept;
 
-    void addLatencyToNetwork(NetworkChannel*, float) noexcept;
+    void updateLatency(NetworkChannel*) noexcept;
     void updateIncomingSequences() noexcept;
 
+    void updateRampUp() noexcept;
+
     float getLerp() noexcept;
+    float getExtraTicks() noexcept;
 
     struct IncomingSequence {
         int inReliableState;

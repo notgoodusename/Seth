@@ -26,17 +26,10 @@ void Animations::reset() noexcept
         record.clear();
 }
 
-float Animations::getExtraTicks() noexcept
-{
-    if (!config->backtrack.fakeLatency || config->backtrack.fakeLatencyAmount <= 0)
-        return 0.f;
-    return std::clamp(static_cast<float>(config->backtrack.fakeLatencyAmount), 0.f, 800.f) / 1000.f;
-}
-
 void Animations::handlePlayers(FrameStage stage) noexcept
 {
     static auto gravity = interfaces->cvar->findVar("sv_gravity");
-    const float timeLimit = static_cast<float>(config->backtrack.timeLimit) / 1000.f + getExtraTicks();
+    const float timeLimit = static_cast<float>(config->backtrack.timeLimit) / 1000.f + Backtrack::getExtraTicks();
     if (stage != FrameStage::NET_UPDATE_END)
         return;
 

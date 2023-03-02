@@ -117,16 +117,14 @@ static HRESULT __stdcall reset(IDirect3DDevice9* device, D3DPRESENT_PARAMETERS* 
 static int __fastcall sendDatagramHook(NetworkChannel* network, void* edx, bufferWrite* datagram) noexcept
 {
     static auto original = hooks->sendDatagram.getOriginal<int>(datagram);
-    if (!localPlayer || !config->backtrack.fakeLatency || !interfaces->engine->isInGame() 
+    if (!localPlayer || !config->backtrack.fakeLatency || !interfaces->engine->isInGame() || !interfaces->engine->isConnected()
         || !network || datagram)
         return original(network, datagram);
 
     const int instate = network->inReliableState;
     const int insequencenr = network->inSequenceNr;
 
-    const float delta = max(0.f, (config->backtrack.fakeLatencyAmount / 1000.f));
-
-    Backtrack::addLatencyToNetwork(network, delta);
+    Backtrack::updateLatency(network);
 
     int result = original(network, datagram);
 
@@ -152,6 +150,7 @@ static bool __fastcall createMove(void* thisPointer, void*, float inputSampleTim
     Misc::autoStrafe(cmd, currentViewAngles);
 
     Backtrack::updateIncomingSequences();
+    Backtrack::updateRampUp();
 
     EnginePrediction::update();
     EnginePrediction::run(cmd);

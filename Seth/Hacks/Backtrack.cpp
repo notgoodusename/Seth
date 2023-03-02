@@ -12,6 +12,7 @@
 #include "../SDK/Utils.h"
 
 static std::deque<Backtrack::IncomingSequence> sequences;
+float latencyRampup = 0.0f;
 
 struct Cvars {
     ConVar* updateRate;
@@ -29,6 +30,18 @@ float Backtrack::getLerp() noexcept
 {
     auto ratio = std::clamp(cvars.interpRatio->getFloat(), cvars.minInterpRatio->getFloat(), cvars.maxInterpRatio->getFloat());
     return (std::max)(cvars.interp->getFloat(), (ratio / ((cvars.maxUpdateRate) ? cvars.maxUpdateRate->getFloat() : cvars.updateRate->getFloat())));
+}
+
+float getLatency() noexcept
+{
+    return latencyRampup * std::clamp(static_cast<float>(config->backtrack.fakeLatencyAmount), 0.f, 800.f);
+}
+
+float Backtrack::getExtraTicks() noexcept
+{
+    if (!config->backtrack.fakeLatency || config->backtrack.fakeLatencyAmount <= 0)
+        return 0.f;
+    return getLatency() / 1000.f;
 }
 
 void Backtrack::run(UserCmd* cmd) noexcept
@@ -85,11 +98,11 @@ void Backtrack::run(UserCmd* cmd) noexcept
     }
 }
 
-void Backtrack::addLatencyToNetwork(NetworkChannel* network, float latency) noexcept
+void Backtrack::updateLatency(NetworkChannel* network) noexcept
 {
     for (auto& sequence : sequences)
     {
-        if (memory->globalVars->serverTime() - sequence.currentTime >= latency)
+        if (memory->globalVars->serverTime() - sequence.currentTime >= (getLatency() / 1000.0f))
         {
             network->inReliableState = sequence.inReliableState;
             network->inSequenceNr = sequence.inSequenceNr;
@@ -132,6 +145,22 @@ void Backtrack::updateIncomingSequences() noexcept
         sequences.pop_back();
 }
 
+void Backtrack::updateRampUp() noexcept
+{
+    if (!localPlayer || !config->backtrack.fakeLatency)
+    {
+        latencyRampup = 0.0f;
+        return;
+    }
+
+    const auto network = interfaces->engine->getNetworkChannel();
+    if (!network)
+        return;
+
+    latencyRampup += memory->globalVars->intervalPerTick / 2.0f;
+    latencyRampup = min(1.0f, latencyRampup);
+}
+
 bool Backtrack::valid(float simtime) noexcept
 {
     const auto network = interfaces->engine->getNetworkChannel();
@@ -160,6 +189,7 @@ void Backtrack::init() noexcept
 
 void Backtrack::reset() noexcept
 {
+    latencyRampup = 0.0f;
     lastIncomingSequenceNumber = 0;
     sequences.clear();
 }
