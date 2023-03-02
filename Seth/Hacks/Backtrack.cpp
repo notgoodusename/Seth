@@ -115,11 +115,6 @@ static int lastIncomingSequenceNumber = 0;
 
 void Backtrack::update() noexcept
 {
-    if (config->visuals.freeCamKey.isActive())
-    {
-        lastIncomingSequenceNumber = 0;
-        sequences.clear();
-    }
     if (!localPlayer)
     {
         latencyRampup = 0.0f;
