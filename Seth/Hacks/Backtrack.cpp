@@ -11,7 +11,7 @@
 #include "../SDK/UserCmd.h"
 #include "../SDK/Utils.h"
 
-static std::deque<Backtrack::incomingSequence> sequences;
+static std::deque<Backtrack::IncomingSequence> sequences;
 
 struct Cvars {
     ConVar* updateRate;
@@ -89,34 +89,42 @@ void Backtrack::addLatencyToNetwork(NetworkChannel* network, float latency) noex
 {
     for (auto& sequence : sequences)
     {
-        if (memory->globalVars->serverTime() - sequence.servertime >= latency)
+        if (memory->globalVars->serverTime() - sequence.currentTime >= latency)
         {
-            network->inReliableState = sequence.inreliablestate;
-            network->inSequenceNr = sequence.sequencenr;
+            network->inReliableState = sequence.inReliableState;
+            network->inSequenceNr = sequence.inSequenceNr;
             break;
         }
     }
 }
 
+static int lastIncomingSequenceNumber = 0;
+
 void Backtrack::updateIncomingSequences() noexcept
 {
-    static int lastIncomingSequenceNumber = 0;
-
     if (!localPlayer)
+    {
+        lastIncomingSequenceNumber = 0;
+        sequences.clear();
         return;
+    }
 
-    auto network = interfaces->engine->getNetworkChannel();
+    const auto network = interfaces->engine->getNetworkChannel();
     if (!network)
+    {
+        lastIncomingSequenceNumber = 0;
+        sequences.clear();
         return;
+    }
 
-    if (network->inSequenceNr != lastIncomingSequenceNumber)
+    if (network->inSequenceNr > lastIncomingSequenceNumber)
     {
         lastIncomingSequenceNumber = network->inSequenceNr;
 
-        incomingSequence sequence{ };
-        sequence.inreliablestate = network->inReliableState;
-        sequence.sequencenr = network->inSequenceNr;
-        sequence.servertime = memory->globalVars->serverTime();
+        IncomingSequence sequence{ };
+        sequence.inReliableState = network->inReliableState;
+        sequence.inSequenceNr = network->inSequenceNr;
+        sequence.currentTime = memory->globalVars->serverTime();
         sequences.push_front(sequence);
     }
 
@@ -152,6 +160,7 @@ void Backtrack::init() noexcept
 
 void Backtrack::reset() noexcept
 {
+    lastIncomingSequenceNumber = 0;
     sequences.clear();
 }
 

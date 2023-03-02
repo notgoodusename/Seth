@@ -22,10 +22,10 @@ namespace Backtrack
 
     float getLerp() noexcept;
 
-    struct incomingSequence {
-        int inreliablestate;
-        int sequencenr;
-        float servertime;
+    struct IncomingSequence {
+        int inReliableState;
+        int inSequenceNr;
+        float currentTime;
     };
 
     bool valid(float simtime) noexcept;
