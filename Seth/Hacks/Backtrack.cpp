@@ -157,7 +157,7 @@ void Backtrack::updateRampUp() noexcept
     if (!network)
         return;
 
-    latencyRampup += memory->globalVars->intervalPerTick / 2.0f;
+    latencyRampup += memory->globalVars->intervalPerTick;
     latencyRampup = min(1.0f, latencyRampup);
 }
 
