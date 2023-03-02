@@ -113,10 +113,16 @@ void Backtrack::updateLatency(NetworkChannel* network) noexcept
 
 static int lastIncomingSequenceNumber = 0;
 
-void Backtrack::updateIncomingSequences() noexcept
+void Backtrack::update() noexcept
 {
+    if (config->visuals.freeCamKey.isActive())
+    {
+        lastIncomingSequenceNumber = 0;
+        sequences.clear();
+    }
     if (!localPlayer)
     {
+        latencyRampup = 0.0f;
         lastIncomingSequenceNumber = 0;
         sequences.clear();
         return;
@@ -125,10 +131,13 @@ void Backtrack::updateIncomingSequences() noexcept
     const auto network = interfaces->engine->getNetworkChannel();
     if (!network)
     {
+        latencyRampup = 0.0f;
         lastIncomingSequenceNumber = 0;
         sequences.clear();
         return;
     }
+
+    latencyRampup = config->backtrack.fakeLatency ? min(1.0f, latencyRampup += memory->globalVars->intervalPerTick) : 0.0f;
 
     if (network->inSequenceNr > lastIncomingSequenceNumber)
     {
@@ -143,22 +152,6 @@ void Backtrack::updateIncomingSequences() noexcept
 
     while (sequences.size() > 2048)
         sequences.pop_back();
-}
-
-void Backtrack::updateRampUp() noexcept
-{
-    if (!localPlayer || !config->backtrack.fakeLatency)
-    {
-        latencyRampup = 0.0f;
-        return;
-    }
-
-    const auto network = interfaces->engine->getNetworkChannel();
-    if (!network)
-        return;
-
-    latencyRampup += memory->globalVars->intervalPerTick;
-    latencyRampup = min(1.0f, latencyRampup);
 }
 
 bool Backtrack::valid(float simtime) noexcept

@@ -29,7 +29,6 @@ void Animations::reset() noexcept
 void Animations::handlePlayers(FrameStage stage) noexcept
 {
     static auto gravity = interfaces->cvar->findVar("sv_gravity");
-    const float timeLimit = static_cast<float>(config->backtrack.timeLimit) / 1000.f + Backtrack::getExtraTicks();
     if (stage != FrameStage::NET_UPDATE_END)
         return;
 
@@ -103,7 +102,7 @@ void Animations::handlePlayers(FrameStage stage) noexcept
 
             player.backtrackRecords.push_front(record);
 
-            while (player.backtrackRecords.size() > 3U && player.backtrackRecords.size() > static_cast<size_t>(timeToTicks(timeLimit)))
+            while (player.backtrackRecords.size() > 3U && static_cast<int>(player.backtrackRecords.size()) > static_cast<int>(round(1.0f / memory->globalVars->intervalPerTick)))
                 player.backtrackRecords.pop_back();
         }
     }

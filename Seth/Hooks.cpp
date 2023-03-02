@@ -149,8 +149,7 @@ static bool __fastcall createMove(void* thisPointer, void*, float inputSampleTim
     Misc::bunnyHop(cmd);
     Misc::autoStrafe(cmd, currentViewAngles);
 
-    Backtrack::updateIncomingSequences();
-    Backtrack::updateRampUp();
+    Backtrack::update();
 
     EnginePrediction::update();
     EnginePrediction::run(cmd);
