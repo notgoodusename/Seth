@@ -32,16 +32,9 @@ float Backtrack::getLerp() noexcept
     return (std::max)(cvars.interp->getFloat(), (ratio / ((cvars.maxUpdateRate) ? cvars.maxUpdateRate->getFloat() : cvars.updateRate->getFloat())));
 }
 
-float getLatency() noexcept
+float Backtrack::getLatency() noexcept
 {
-    return latencyRampup * std::clamp(static_cast<float>(config->backtrack.fakeLatencyAmount), 0.f, 800.f);
-}
-
-float Backtrack::getExtraTicks() noexcept
-{
-    if (!config->backtrack.fakeLatency || config->backtrack.fakeLatencyAmount <= 0)
-        return 0.f;
-    return getLatency() / 1000.f;
+    return latencyRampup * std::clamp(static_cast<float>(config->backtrack.fakeLatencyAmount), 0.f, cvars.maxUnlag->getFloat() * 1000.0f);
 }
 
 void Backtrack::run(UserCmd* cmd) noexcept
@@ -102,7 +95,7 @@ void Backtrack::updateLatency(NetworkChannel* network) noexcept
 {
     for (auto& sequence : sequences)
     {
-        if (memory->globalVars->serverTime() - sequence.currentTime >= (getLatency() / 1000.0f))
+        if (memory->globalVars->realtime - sequence.currentTime >= (getLatency() / 1000.0f))
         {
             network->inReliableState = sequence.inReliableState;
             network->inSequenceNr = sequence.inSequenceNr;
@@ -141,7 +134,7 @@ void Backtrack::update() noexcept
         IncomingSequence sequence{ };
         sequence.inReliableState = network->inReliableState;
         sequence.inSequenceNr = network->inSequenceNr;
-        sequence.currentTime = memory->globalVars->serverTime();
+        sequence.currentTime = memory->globalVars->realtime;
         sequences.push_front(sequence);
     }
 
@@ -159,7 +152,7 @@ bool Backtrack::valid(float simtime) noexcept
     if (simtime < deadTime)
         return false;
 
-    const auto delta = std::clamp(network->getLatency(0) + network->getLatency(1) + getLerp(), 0.f, cvars.maxUnlag->getFloat()) 
+    const auto delta = std::clamp(network->getLatency(0) + network->getLatency(1) + getLerp(), 0.f, cvars.maxUnlag->getFloat())
         - (memory->globalVars->serverTime() - simtime);
     return std::abs(delta) <= 0.2f;
 }

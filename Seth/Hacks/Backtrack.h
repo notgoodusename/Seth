@@ -21,7 +21,7 @@ namespace Backtrack
     void update() noexcept;
 
     float getLerp() noexcept;
-    float getExtraTicks() noexcept;
+    float getLatency() noexcept;
 
     struct IncomingSequence {
         int inReliableState;

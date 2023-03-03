@@ -121,15 +121,15 @@ static int __fastcall sendDatagramHook(NetworkChannel* network, void* edx, buffe
         || !network || datagram)
         return original(network, datagram);
 
-    const int instate = network->inReliableState;
-    const int insequencenr = network->inSequenceNr;
+    const int inState = network->inReliableState;
+    const int inSequenceNr = network->inSequenceNr;
 
     Backtrack::updateLatency(network);
 
     int result = original(network, datagram);
 
-    network->inReliableState = instate;
-    network->inSequenceNr = insequencenr;
+    network->inReliableState = inState;
+    network->inSequenceNr = inSequenceNr;
 
     return result;
 }
@@ -137,6 +137,8 @@ static int __fastcall sendDatagramHook(NetworkChannel* network, void* edx, buffe
 static bool __fastcall createMove(void* thisPointer, void*, float inputSampleTime, UserCmd* cmd) noexcept
 {
     auto result = hooks->clientMode.callOriginal<bool, 21>(inputSampleTime, cmd);
+
+    Backtrack::update();
 
     if (!cmd || !cmd->commandNumber)
         return result;
@@ -148,8 +150,6 @@ static bool __fastcall createMove(void* thisPointer, void*, float inputSampleTim
     memory->globalVars->serverTime(cmd);
     Misc::bunnyHop(cmd);
     Misc::autoStrafe(cmd, currentViewAngles);
-
-    Backtrack::update();
 
     EnginePrediction::update();
     EnginePrediction::run(cmd);
