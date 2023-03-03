@@ -94,11 +94,11 @@ void Chams::renderPlayer(Entity* player) noexcept
         if (config->backtrack.enabled)
         {
             const auto records = Animations::getBacktrackRecords(player->index());
-            if (records && !records->empty())
+            if (records && !records->empty() && records->size() >= 4U)
             {
                 int lastTick = -1;
 
-                for (int i = static_cast<int>(records->size() - 1U); i >= 0; i--)
+                for (int i = static_cast<int>(records->size() - 1U); i >= 3; i--)
                 {
                     if (player->simulationTime() > records->at(i).simulationTime && Backtrack::valid(records->at(i).simulationTime) && records->at(i).origin != player->origin())
                     {

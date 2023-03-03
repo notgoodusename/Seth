@@ -128,13 +128,13 @@ void AimbotHitscan::run(Entity* activeWeapon, UserCmd* cmd) noexcept
                     continue;
 
                 const auto records = Animations::getBacktrackRecords(entity->index());
-                if (!records || records->empty())
+                if (!records || records->empty() || records->size() <= 3U)
                     continue;
 
                 int bestTick = -1;
                 if (cycle == 0)
                 {
-                    for (size_t i = 0; i < records->size(); i++)
+                    for (size_t i = 3; i < records->size(); i++)
                     {
                         if (Backtrack::valid(records->at(i).simulationTime))
                         {
@@ -146,7 +146,7 @@ void AimbotHitscan::run(Entity* activeWeapon, UserCmd* cmd) noexcept
                 else
                 {
                     auto bestBacktrackFov = 255.0f;
-                    for (int i = static_cast<int>(records->size() - 1U); i >= 0; i--)
+                    for (int i = static_cast<int>(records->size() - 1U); i >= 3; i--)
                     {
                         if (Backtrack::valid(records->at(i).simulationTime))
                         {
