@@ -154,7 +154,7 @@ bool Backtrack::valid(float simtime) noexcept
 
     const auto delta = std::clamp(network->getLatency(0) + network->getLatency(1) + getLerp(), 0.f, cvars.maxUnlag->getFloat())
         - (memory->globalVars->serverTime() - simtime);
-    return std::abs(delta) <= 0.2f;
+    return std::abs(delta) <= 0.2f - ticksToTime(network->getLatency(0)*1000.0f);
 }
 
 void Backtrack::init() noexcept
