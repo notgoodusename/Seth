@@ -178,6 +178,7 @@ public:
 
     void getAbsVelocity(Vector& vel) noexcept
     {
+        EFlags() |= (1 << 12);
         memory->calcAbsoluteVelocity(this);
         vel.x = *reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + 0x15C);
         vel.y = *reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + 0x160);
