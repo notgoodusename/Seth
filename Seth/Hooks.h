@@ -23,6 +23,7 @@ public:
     void uninstall() noexcept;
 
     MinHook calcViewModelView;
+    MinHook clLoadWhitelist;
     MinHook estimateAbsVelocity;
     MinHook enableWorldFog;
     MinHook sendDatagram;

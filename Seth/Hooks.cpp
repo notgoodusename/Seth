@@ -259,6 +259,14 @@ static void __stdcall lockCursor() noexcept
     return hooks->surface.callOriginal<void, 62>();
 }
 
+void* __cdecl clLoadWhitelistHook(void* whitelist, const char* name) noexcept
+{
+    static auto original = reinterpret_cast<void*(__cdecl*)(void*, const char*)>(hooks->enableWorldFog.getDetour());
+    if(config->misc.svPureBypass)
+        return NULL;
+    return original(whitelist, name);
+}
+
 static void __fastcall estimateAbsVelocityHook(void* thisPointer, void*, Vector& vel) noexcept
 {
     static auto original = hooks->estimateAbsVelocity.getOriginal<void>(&vel);
@@ -324,6 +332,7 @@ void Hooks::install() noexcept
     MH_Initialize();
 
     calcViewModelView.detour(memory->calcViewModelView, calcViewModelViewHook);
+    clLoadWhitelist.detour(memory->clLoadWhitelist, clLoadWhitelistHook);
     estimateAbsVelocity.detour(memory->estimateAbsVelocity, estimateAbsVelocityHook);
     enableWorldFog.detour(memory->enableWorldFog, enableWorldFogHook);
     sendDatagram.detour(memory->sendDatagram, sendDatagramHook);

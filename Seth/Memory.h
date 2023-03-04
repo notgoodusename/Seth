@@ -66,6 +66,7 @@ public:
     int* predictionRandomSeed;
 
     std::uintptr_t calcViewModelView;
+    std::uintptr_t clLoadWhitelist;
     std::uintptr_t estimateAbsVelocity;
     std::uintptr_t enableWorldFog;
     std::uintptr_t sendDatagram;
