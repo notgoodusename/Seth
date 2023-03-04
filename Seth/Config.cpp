@@ -1018,6 +1018,8 @@ void Config::reset() noexcept
     backtrack = { };
     triggerbot = { };
     chams = { };
+    config->buildingChams = { }; 
+    config->worldChams = { };
     streamProofESP = { };
     visuals = { };
     misc = { };

@@ -476,11 +476,11 @@ void GUI::renderGlowWindow() noexcept
     static int currentCategory{ 0 };
     ImGui::PushItemWidth(110.0f);
     ImGui::PushID(0);
-    constexpr std::array categories{ "Allies", "Enemies", "Planting", "Defusing", "Local Player", "Weapons", "C4", "Planted C4", "Chickens", "Defuse Kits", "Projectiles", "Hostages" };
+    constexpr std::array categories{ "Allies", "Enemies", "Local Player" };
     ImGui::Combo("", &currentCategory, categories.data(), categories.size());
     ImGui::PopID();
     Config::GlowItem* currentItem;
-    if (currentCategory <= 3) {
+    if (currentCategory <= 1) {
         ImGui::SameLine();
         static int currentType{ 0 };
         ImGui::PushID(1);
@@ -1068,7 +1068,7 @@ void GUI::renderConfigWindow() noexcept
                     case 4: config->antiAim = { }; break;
                     case 6: config->fakelag = { }; break;
                     case 7: config->glow = { }; config->glowKey.reset(); break;
-                    case 8: config->chams = { }; config->chamsKey.reset(); break;
+                    case 8: config->chams = { }; config->buildingChams = { }; config->worldChams = { }; config->chamsKey.reset(); break;
                     case 9: config->streamProofESP = { }; break;
                     case 10: config->visuals = { }; break;
                     case 11: config->misc = { }; break;
