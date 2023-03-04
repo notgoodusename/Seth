@@ -86,6 +86,8 @@ static HRESULT __stdcall present(IDirect3DDevice9* device, const RECT* src, cons
     if (const auto& displaySize = ImGui::GetIO().DisplaySize; displaySize.x > 0.0f && displaySize.y > 0.0f) {
         StreamProofESP::render();
 
+        Misc::showKeybinds();
+
         Visuals::updateInput();
         StreamProofESP::updateInput();
         Misc::updateInput();
