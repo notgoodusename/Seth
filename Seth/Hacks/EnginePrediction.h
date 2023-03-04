@@ -14,7 +14,8 @@ namespace EnginePrediction
 
 	void update() noexcept;
 	void run(UserCmd* cmd) noexcept;
-    
+
+	bool wasOnGround() noexcept;
 	int getFlags() noexcept;
 	Vector getVelocity() noexcept;
 	bool isInPrediction() noexcept;

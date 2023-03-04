@@ -158,6 +158,8 @@ static bool __fastcall createMove(void* thisPointer, void*, float inputSampleTim
     Backtrack::run(cmd);
     Aimbot::run(cmd);
 
+    Misc::edgejump(cmd);
+
     auto viewAnglesDelta{ cmd->viewangles - previousViewAngles };
     viewAnglesDelta.normalize();
     viewAnglesDelta.x = std::clamp(viewAnglesDelta.x, -255.0f, 255.0f);

@@ -15,6 +15,7 @@
 
 static int localPlayerFlags;
 static Vector localPlayerVelocity;
+static bool localPlayerWasOnGround;
 static bool inPrediction{ false };
 
 void EnginePrediction::reset() noexcept
@@ -44,6 +45,7 @@ void EnginePrediction::run(UserCmd* cmd) noexcept
     
     localPlayerFlags = localPlayer->flags();
     localPlayerVelocity = localPlayer->velocity();
+    localPlayerWasOnGround = localPlayer->isOnGround();
 
 
     static MoveData moveData;
@@ -88,6 +90,11 @@ void EnginePrediction::run(UserCmd* cmd) noexcept
     interfaces->prediction->inPrediction = oldInPrediction;
 
     inPrediction = false;
+}
+
+bool EnginePrediction::wasOnGround() noexcept
+{
+    return localPlayerWasOnGround;
 }
 
 int EnginePrediction::getFlags() noexcept

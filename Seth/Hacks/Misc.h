@@ -12,6 +12,7 @@ namespace Misc
     void bunnyHop(UserCmd*) noexcept;
     void autoStrafe(UserCmd* cmd, Vector& currentViewAngles) noexcept;
     void antiAfkKick(UserCmd* cmd) noexcept;
+    void edgejump(UserCmd* cmd) noexcept;
     void viewModelChanger(Vector& eyePosition, Vector& eyeAngles) noexcept;
     void initHiddenCvars() noexcept;
     void unlockHiddenCvars() noexcept;

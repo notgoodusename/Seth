@@ -15,6 +15,7 @@
 #include "../Helpers.h"
 
 #include "Misc.h"
+#include "EnginePrediction.h"
 
 #include "../SDK/Client.h"
 #include "../SDK/ClientMode.h"
@@ -194,6 +195,21 @@ void Misc::antiAfkKick(UserCmd* cmd) noexcept
 {
     if (config->misc.antiAfkKick && cmd->commandNumber % 2)
         cmd->buttons |= 1 << 27;
+}
+
+void Misc::edgejump(UserCmd* cmd) noexcept
+{
+    if (!config->misc.edgeJump || !config->misc.edgeJumpKey.isActive())
+        return;
+
+    if (!localPlayer || !localPlayer->isAlive() || localPlayer->isOnGround() || localPlayer->isSwimming())
+        return;
+
+    if (const auto mt = localPlayer->moveType(); mt == MoveType::LADDER || mt == MoveType::NOCLIP)
+        return;
+
+    if (EnginePrediction::wasOnGround())
+        cmd->buttons |= UserCmd::IN_JUMP;
 }
 
 void Misc::viewModelChanger(Vector& eyePosition, Vector& eyeAngles) noexcept
