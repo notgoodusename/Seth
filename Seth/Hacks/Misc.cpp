@@ -190,6 +190,12 @@ void Misc::autoStrafe(UserCmd* cmd, Vector& currentViewAngles) noexcept
     currentViewAngles.y = Helpers::normalizeYaw(currentViewAngles.y - delta);
 }
 
+void Misc::antiAfkKick(UserCmd* cmd) noexcept
+{
+    if (config->misc.antiAfkKick && cmd->commandNumber % 2)
+        cmd->buttons |= 1 << 27;
+}
+
 void Misc::viewModelChanger(Vector& eyePosition, Vector& eyeAngles) noexcept
 {
     if (!config->visuals.viewModel.enabled)
