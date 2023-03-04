@@ -462,6 +462,7 @@ public:
     NETVAR(objectBuilder, "CBaseObject", "m_hBuilder", int)
     NETVAR(objectHealth, "CBaseObject", "m_iHealth", int)
     NETVAR(objectMaxHealth, "CBaseObject", "m_iMaxHealth", int)
+    NETVAR(objectCarried, "CBaseObject", "m_bCarried", bool)
 
     NETVAR(weapons, "CBaseCombatCharacter", "m_hMyWeapons", int[64])
 

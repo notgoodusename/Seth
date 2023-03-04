@@ -45,6 +45,16 @@ static void initializeMaterials() noexcept
     }
 }
 
+static bool areAnyMaterialsEnabled(std::array<Config::Chams::Material, 7> materials)
+{
+    for (size_t i = 0; i < materials.size(); i++)
+    {
+        if (materials.at(i).enabled)
+            return true;
+    }
+    return false;
+}
+
 void Chams::updateInput() noexcept
 {
     config->chamsKey.handleToggle();
@@ -70,14 +80,106 @@ bool Chams::render(void* state, const ModelRenderInfo& info, matrix3x4* customBo
     auto modelNameOriginal = interfaces->modelInfo->getModelName(info.model);
     std::string_view modelName(modelNameOriginal);
 
-    const auto entity = interfaces->entityList->getEntity(info.entityIndex);
-    if (entity && !entity->isDormant())
+    if (modelName.starts_with("models/buildables/"))
     {
-        if (entity->isPlayer())
+        const auto entity = interfaces->entityList->getEntity(info.entityIndex);
+        if (entity && !entity->isDormant())
+            renderBuilding(entity);
+    }
+    else if(modelName.starts_with("models/halloween/") || modelName.starts_with("models/items/"))
+    {
+        const auto entity = interfaces->entityList->getEntity(info.entityIndex);
+        if (entity && !entity->isDormant())
+            renderWorld(entity);
+    }
+    else if (modelName.starts_with("models/bots/"))
+    {
+        const auto entity = interfaces->entityList->getEntity(info.entityIndex);
+        if (entity && !entity->isDormant() && !entity->isPlayer())
+            renderNPCs(entity);
+    }
+    else
+    {
+        const auto entity = interfaces->entityList->getEntity(info.entityIndex);
+        if (entity && !entity->isDormant() && entity->isPlayer())
             renderPlayer(entity);
     }
 
     return appliedChams;
+}
+
+void Chams::renderBuilding(Entity* building) noexcept
+{
+    if (!localPlayer)
+        return;
+
+    if (building->objectCarried() || building->objectHealth() <= 0)
+        return;
+
+    if (!areAnyMaterialsEnabled(config->buildingChams.all.materials))
+    {
+        if (building->isEnemy(localPlayer.get()))
+            applyChams(config->buildingChams.enemies.materials, building->objectHealth(), building->objectMaxHealth());
+        else
+            applyChams(config->buildingChams.allies.materials, building->objectHealth(), building->objectMaxHealth());
+    }
+    else
+    {
+        applyChams(config->buildingChams.all.materials, building->objectHealth(), building->objectMaxHealth());
+    }
+}
+
+void Chams::renderWorld(Entity* worldEntity) noexcept
+{
+    if (!localPlayer)
+        return;
+
+    if (!areAnyMaterialsEnabled(config->worldChams.all.materials) &&
+        !areAnyMaterialsEnabled(config->worldChams.ammoPacks.materials) &&
+        !areAnyMaterialsEnabled(config->worldChams.healthPacks.materials) &&
+        !areAnyMaterialsEnabled(config->worldChams.other.materials))
+        return;
+
+    if (!areAnyMaterialsEnabled(config->worldChams.all.materials))
+    {
+        switch (fnv::hashRuntime(worldEntity->getModelName()))
+        {
+            case fnv::hash("models/items/medkit_small.mdl"):
+            case fnv::hash("models/items/medkit_small_bday.mdl"):
+            case fnv::hash("models/props_halloween/halloween_medkit_small.mdl"):
+            case fnv::hash("models/items/medkit_medium.mdl"):
+            case fnv::hash("models/items/medkit_medium_bday.mdl"):
+            case fnv::hash("models/props_halloween/halloween_medkit_medium.mdl"):
+            case fnv::hash("models/items/medkit_large.mdl"):
+            case fnv::hash("models/items/medkit_large_bday.mdl"):
+            case fnv::hash("models/props_halloween/halloween_medkit_large.mdl"):
+                applyChams(config->worldChams.healthPacks.materials);
+                break;
+            case fnv::hash("models/items/ammopack_small.mdl"):
+            case fnv::hash("models/items/ammopack_small_bday.mdl"):
+            case fnv::hash("models/items/ammopack_medium.mdl"):
+            case fnv::hash("models/items/ammopack_medium_bday.mdl"):
+            case fnv::hash("models/items/ammopack_large.mdl"):
+            case fnv::hash("models/items/ammopack_large_bday.mdl"):
+                applyChams(config->worldChams.ammoPacks.materials);
+                break;
+            default:
+                applyChams(config->worldChams.other.materials);
+                break;
+        }
+    }
+    else
+    {
+        applyChams(config->worldChams.all.materials);
+    }
+}
+
+void Chams::renderNPCs(Entity* npc) noexcept
+{
+    if (!localPlayer)
+        return;
+
+    applyChams(config->chams["NPCs"].materials);
 }
 
 void Chams::renderPlayer(Entity* player) noexcept
@@ -86,11 +188,12 @@ void Chams::renderPlayer(Entity* player) noexcept
         return;
 
     const auto health = player->health();
+    const auto maxHealth = player->getMaxHealth();
     
     if (player == localPlayer.get()) {
-        applyChams(config->chams["Local player"].materials, health);
+        applyChams(config->chams["Local player"].materials, health, maxHealth);
     } else if (player->isEnemy(localPlayer.get())) {
-        applyChams(config->chams["Enemies"].materials, health);
+        applyChams(config->chams["Enemies"].materials, health, maxHealth);
         if (config->backtrack.enabled)
         {
             const auto records = Animations::getBacktrackRecords(player->index());
@@ -104,18 +207,18 @@ void Chams::renderPlayer(Entity* player) noexcept
                     {
                         if (!appliedChams)
                             hooks->modelRender.callOriginal<void, 19>(state, info, customBoneToWorld);
-                        applyChams(config->chams["Backtrack"].materials, health, records->at(i).matrix);
+                        applyChams(config->chams["Backtrack"].materials, health, maxHealth, records->at(i).matrix);
                         interfaces->modelRender->forcedMaterialOverride(nullptr);
                     }
                 }
             }
         }
     } else {
-        applyChams(config->chams["Allies"].materials, health);
+        applyChams(config->chams["Allies"].materials, health, maxHealth);
     }
 }
 
-void Chams::applyChams(const std::array<Config::Chams::Material, 7>& chams, int health, const matrix3x4* customMatrix) noexcept
+void Chams::applyChams(const std::array<Config::Chams::Material, 7>& chams, int health, int maxHealth,const matrix3x4* customMatrix) noexcept
 {
     for (const auto& cham : chams) {
         if (!cham.enabled || !cham.ignorez)
@@ -127,7 +230,7 @@ void Chams::applyChams(const std::array<Config::Chams::Material, 7>& chams, int 
         
         float r, g, b;
         if (cham.healthBased && health) {
-            Helpers::healthColor(std::clamp(health / 100.0f, 0.0f, 1.0f), r, g, b);
+            Helpers::healthColor(std::clamp(health / static_cast<float>(maxHealth), 0.0f, 1.0f), r, g, b);
         } else if (cham.rainbow) {
             std::tie(r, g, b) = rainbowColor(cham.rainbowSpeed);
         } else {
@@ -159,7 +262,7 @@ void Chams::applyChams(const std::array<Config::Chams::Material, 7>& chams, int 
 
         float r, g, b;
         if (cham.healthBased && health) {
-            Helpers::healthColor(std::clamp(health / 100.0f, 0.0f, 1.0f), r, g, b);
+            Helpers::healthColor(std::clamp(health / static_cast<float>(maxHealth), 0.0f, 1.0f), r, g, b);
         } else if (cham.rainbow) {
             std::tie(r, g, b) = rainbowColor(cham.rainbowSpeed);
         } else {

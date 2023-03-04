@@ -148,6 +148,14 @@ public:
         std::array<Material, 7> materials;
     };
 
+    struct BuildingChams {
+        Chams all, enemies, allies;
+    } buildingChams;
+
+    struct WorldChams {
+        Chams all, ammoPacks, healthPacks, other;
+    } worldChams;
+
     std::unordered_map<std::string, Chams> chams;
     KeyBind chamsKey{ std::string("chams") };
 

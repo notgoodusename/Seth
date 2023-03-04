@@ -308,6 +308,21 @@ static void from_json(const json& j, Config::Chams& c)
     read_array_opt(j, "Materials", c.materials);
 }
 
+static void from_json(const json& j, Config::BuildingChams& b)
+{
+    read<value_t::object>(j, "All", b.all);
+    read<value_t::object>(j, "Enemies", b.enemies);
+    read<value_t::object>(j, "Allies", b.allies);
+}
+
+static void from_json(const json& j, Config::WorldChams& w)
+{
+    read<value_t::object>(j, "All", w.all);
+    read<value_t::object>(j, "Ammo packs", w.ammoPacks);
+    read<value_t::object>(j, "Health packs", w.healthPacks);
+    read<value_t::object>(j, "Other", w.other);
+}
+
 static void from_json(const json& j, Config::GlowItem& g)
 {
     from_json(j, static_cast<Color4&>(g));
@@ -497,6 +512,8 @@ void Config::load(const char8_t* name, bool incremental) noexcept
     read(j["Glow"], "Key", glowKey);
 
     read(j, "Chams", chams);
+    read<value_t::object>(j, "Buildings chams", buildingChams);
+    read<value_t::object>(j, "World chams", worldChams);
     read(j["Chams"], "Key", chamsKey);
     read<value_t::object>(j, "ESP", streamProofESP);
     read<value_t::object>(j, "Visuals", visuals);
@@ -696,6 +713,21 @@ static void to_json(json& j, const Config::Chams::Material& o)
 static void to_json(json& j, const Config::Chams& o)
 {
     j["Materials"] = o.materials;
+}
+
+static void to_json(json& j, const Config::BuildingChams& o)
+{
+    j["All"] = o.all;
+    j["Enemies"] = o.enemies;
+    j["Allies"] = o.allies;
+}
+
+static void to_json(json& j, const Config::WorldChams& o)
+{
+    j["All"] = o.all;
+    j["Ammo packs"] = o.ammoPacks;
+    j["Health packs"] = o.healthPacks;
+    j["Other packs"] = o.other;
 }
 
 static void to_json(json& j, const Config::GlowItem& o, const  Config::GlowItem& dummy = {})
@@ -943,6 +975,8 @@ void Config::save(size_t id) const noexcept
         to_json(j["Glow"]["Key"], glowKey, KeyBind::NONE);
 
         j["Chams"] = chams;
+        j["Buildings chams"] = buildingChams;
+        j["World chams"] = worldChams;
         to_json(j["Chams"]["Key"], chamsKey, KeyBind::NONE);
         j["ESP"] = streamProofESP;
         j["Visuals"] = visuals;

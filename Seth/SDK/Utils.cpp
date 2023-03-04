@@ -18,7 +18,7 @@ std::tuple<float, float, float> rainbowColor(float speed) noexcept
 
 int getMaxUserCmdProcessTicks() noexcept
 {
-    return 24;
+    return 22;
 }
 
 void applyMatrix(Entity* entity, matrix3x4* boneCacheData, Vector origin, Vector eyeAngle, Vector mins, Vector maxs) noexcept

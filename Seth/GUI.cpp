@@ -386,8 +386,6 @@ void GUI::renderBacktrackWindow() noexcept
 
 void GUI::renderChamsWindow() noexcept
 {
-    ImGui::Columns(2, nullptr, false);
-    ImGui::SetColumnOffset(1, 300.0f);
     ImGui::hotkey2("Key", config->chamsKey, 80.0f);
     ImGui::Separator();
 
@@ -396,11 +394,46 @@ void GUI::renderChamsWindow() noexcept
     ImGui::PushID(0);
 
     static int material = 1;
+    constexpr std::array categories{ "Allies", "Enemies", "Local player", "Backtrack", "Fake angles", "Buildings", "World", "NPCs" };
 
-    if (ImGui::Combo("", &currentCategory, "Allies\0Enemies\0Local player\0Backtrack\0"))
+    if (ImGui::Combo("", &currentCategory, "Allies\0Enemies\0Local player\0Backtrack\0Fake angles\0Buildings\0World\0NPCs\0"))
         material = 1;
 
     ImGui::PopID();
+
+    Config::Chams* currentItem;
+
+    if (currentCategory == 5) {
+        ImGui::SameLine();
+        static int currentType{ 0 };
+        ImGui::PushID(1);
+        ImGui::Combo("", &currentType, "All\0Enemies\0Allies\0");
+        ImGui::PopID();
+        auto& cfg = config->buildingChams;
+        switch (currentType) {
+        case 0: currentItem = &cfg.all; break;
+        case 1: currentItem = &cfg.enemies; break;
+        case 2: currentItem = &cfg.allies; break;
+        }
+    }
+    else if (currentCategory == 6)
+    {
+        ImGui::SameLine();
+        static int currentType{ 0 };
+        ImGui::PushID(2);
+        ImGui::Combo("", &currentType, "All\0Ammo\0Health\0Other\0");
+        ImGui::PopID();
+        auto& cfg = config->worldChams;
+        switch (currentType) {
+        case 0: currentItem = &cfg.all; break;
+        case 1: currentItem = &cfg.ammoPacks; break;
+        case 2: currentItem = &cfg.healthPacks; break;
+        case 3: currentItem = &cfg.other; break;
+        }
+    }
+    else {
+        currentItem = &config->chams[categories[currentCategory]];
+    }
 
     ImGui::SameLine();
 
@@ -412,30 +445,27 @@ void GUI::renderChamsWindow() noexcept
     ImGui::SameLine();
     ImGui::Text("%d", material);
 
-    constexpr std::array categories{ "Allies", "Enemies", "Local player", "Backtrack" };
-
     ImGui::SameLine();
 
-    if (material >= int(config->chams[categories[currentCategory]].materials.size()))
+    if (material >= int(currentItem->materials.size()))
         ImGuiCustom::arrowButtonDisabled("##right", ImGuiDir_Right);
     else if (ImGui::ArrowButton("##right", ImGuiDir_Right))
         ++material;
 
     ImGui::SameLine();
 
-    auto& chams{ config->chams[categories[currentCategory]].materials[material - 1] };
+    auto& chams{ currentItem->materials[material - 1] };
 
     ImGui::Checkbox("Enabled", &chams.enabled);
     ImGui::Separator();
-    ImGui::Checkbox("Health based", &chams.healthBased);
+    if (currentCategory != 6 && currentCategory != 7)
+        ImGui::Checkbox("Health based", &chams.healthBased);
     ImGui::Checkbox("Blinking", &chams.blinking);
     ImGui::Combo("Material", &chams.material, "Normal\0Flat\0");
     ImGui::Checkbox("Wireframe", &chams.wireframe);
     ImGui::Checkbox("Cover", &chams.cover);
     ImGui::Checkbox("Ignore-Z", &chams.ignorez);
     ImGuiCustom::colorPicker("Color", chams);
-    ImGui::NextColumn();
-    ImGui::Columns(1);
 }
 
 void GUI::renderGlowWindow() noexcept
