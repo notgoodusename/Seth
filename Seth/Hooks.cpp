@@ -385,12 +385,12 @@ static DWORD WINAPI unload(HMODULE moduleHandle) noexcept
 
 void Hooks::uninstall() noexcept
 {
+    resetAll(1);
+
     MH_DisableHook(MH_ALL_HOOKS);
     MH_Uninitialize();
 
     Netvars::restore();
-
-    resetAll(1);
 
     SetWindowLongPtrW(window, GWLP_WNDPROC, LONG_PTR(originalWndProc));
     **reinterpret_cast<void***>(memory->present) = originalPresent;

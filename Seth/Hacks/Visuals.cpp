@@ -114,6 +114,9 @@ void Visuals::updateInput() noexcept
 
 void Visuals::reset(int resetType) noexcept
 {
+    if (!localPlayer)
+        return;
+
     if (resetType == 1)
     {
         //Disable thirdperson/freecam
