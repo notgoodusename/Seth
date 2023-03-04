@@ -273,6 +273,14 @@ static void __fastcall estimateAbsVelocityHook(void* thisPointer, void*, Vector&
     original(thisPointer, &vel);
 }
 
+static void __cdecl enableWorldFogHook() noexcept
+{
+    static auto original = reinterpret_cast<void(__cdecl*)()>(hooks->enableWorldFog.getDetour());
+    if (config->visuals.noFog)
+        return;
+    return original();
+}
+
 void resetAll(int resetType) noexcept
 {
     Aimbot::reset();
@@ -317,6 +325,7 @@ void Hooks::install() noexcept
 
     calcViewModelView.detour(memory->calcViewModelView, calcViewModelViewHook);
     estimateAbsVelocity.detour(memory->estimateAbsVelocity, estimateAbsVelocityHook);
+    enableWorldFog.detour(memory->enableWorldFog, enableWorldFogHook);
     sendDatagram.detour(memory->sendDatagram, sendDatagramHook);
 
     client.init(interfaces->client);

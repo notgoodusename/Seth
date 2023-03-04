@@ -24,6 +24,7 @@ public:
 
     MinHook calcViewModelView;
     MinHook estimateAbsVelocity;
+    MinHook enableWorldFog;
     MinHook sendDatagram;
 
     MinHook client;
