@@ -149,6 +149,7 @@ static bool __fastcall createMove(void* thisPointer, void*, float inputSampleTim
 
     memory->globalVars->serverTime(cmd);
     Misc::antiAfkKick(cmd);
+    Misc::fastStop(cmd);
     Misc::bunnyHop(cmd);
     Misc::autoStrafe(cmd, currentViewAngles);
 
