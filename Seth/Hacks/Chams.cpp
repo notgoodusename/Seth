@@ -20,15 +20,17 @@
 #include "../SDK/RenderView.h"
 #include "../SDK/KeyValues.h"
 
-static Material* normal;
+static Material* shaded;
 static Material* flat;
+static Material* glow;
 
 static constexpr auto dispatchMaterial(int id) noexcept
 {
     switch (id) {
     default:
-    case 0: return normal;
+    case 0: return shaded;
     case 1: return flat;
+    case 2: return glow;
     }
 }
 
@@ -36,20 +38,41 @@ static void initializeMaterials() noexcept
 {
     {
         const auto kv = new KeyValues("VertexLitGeneric");
-        normal = interfaces->materialSystem->createMaterial("normal", kv);
+        kv->setString("$basetexture", "vgui/white_additive");
+        kv->setString("$bumpmap", "vgui/white_additive");
+        kv->setString("$selfillum", "1");
+        kv->setString("$selfillumfresnel", "1");
+        kv->setString("$selfillumfresnelminmaxexp", "[-0.25 1 1]");
+        shaded = interfaces->materialSystem->createMaterial("shaded", kv);
+        shaded->incrementReferenceCount();
     }
 
     {
         const auto kv = new KeyValues("UnlitGeneric");
+        kv->setString("$basetexture", "vgui/white_additive");
         flat = interfaces->materialSystem->createMaterial("flat", kv);
+        flat->incrementReferenceCount();
+    }
+
+    {
+        const auto kv = new KeyValues("UnlitGeneric");
+        kv->setString("$additive", "1");
+        kv->setString("$bumpmap", "models/player/shared/shared_normal");
+        kv->setString("$envmap", "skybox/sky_dustbowl_01");
+        kv->setString("$envmapfresnel", "1");
+        kv->setString("$phong", "1");
+        kv->setString("$phongfresnelranges", "[0 0.05 0.1]");
+        kv->setString("$alpha", ".8");
+        glow = interfaces->materialSystem->createMaterial("glow", kv);
+        glow->incrementReferenceCount();
     }
 }
 
-static bool areAnyMaterialsEnabled(std::array<Config::Chams::Material, 7> materials)
+static bool areAnyMaterialsEnabled(Config::Chams chams)
 {
-    for (size_t i = 0; i < materials.size(); i++)
+    for (size_t i = 0; i < chams.materials.size(); i++)
     {
-        if (materials.at(i).enabled)
+        if (chams.materials.at(i).enabled)
             return true;
     }
     return false;
@@ -116,7 +139,7 @@ void Chams::renderBuilding(Entity* building) noexcept
     if (building->objectCarried() || building->objectHealth() <= 0)
         return;
 
-    if (!areAnyMaterialsEnabled(config->buildingChams.all.materials))
+    if (!areAnyMaterialsEnabled(config->buildingChams.all))
     {
         if (building->isEnemy(localPlayer.get()))
             applyChams(config->buildingChams.enemies.materials, building->objectHealth(), building->objectMaxHealth());
@@ -134,13 +157,13 @@ void Chams::renderWorld(Entity* worldEntity) noexcept
     if (!localPlayer)
         return;
 
-    if (!areAnyMaterialsEnabled(config->worldChams.all.materials) &&
-        !areAnyMaterialsEnabled(config->worldChams.ammoPacks.materials) &&
-        !areAnyMaterialsEnabled(config->worldChams.healthPacks.materials) &&
-        !areAnyMaterialsEnabled(config->worldChams.other.materials))
+    if (!areAnyMaterialsEnabled(config->worldChams.all) &&
+        !areAnyMaterialsEnabled(config->worldChams.ammoPacks) &&
+        !areAnyMaterialsEnabled(config->worldChams.healthPacks) &&
+        !areAnyMaterialsEnabled(config->worldChams.other))
         return;
 
-    if (!areAnyMaterialsEnabled(config->worldChams.all.materials))
+    if (!areAnyMaterialsEnabled(config->worldChams.all))
     {
         switch (fnv::hashRuntime(worldEntity->getModelName()))
         {
@@ -218,7 +241,7 @@ void Chams::renderPlayer(Entity* player) noexcept
     }
 }
 
-void Chams::applyChams(const std::array<Config::Chams::Material, 7>& chams, int health, int maxHealth,const matrix3x4* customMatrix) noexcept
+void Chams::applyChams(const std::array<Config::Chams::Material, 7>& chams, int health, int maxHealth, const matrix3x4* customMatrix) noexcept
 {
     for (const auto& cham : chams) {
         if (!cham.enabled || !cham.ignorez)
@@ -239,7 +262,10 @@ void Chams::applyChams(const std::array<Config::Chams::Material, 7>& chams, int 
             b = cham.color[2];
         }
 
-        interfaces->renderView->setColorModulation(r, g, b);
+        if (material == glow)
+            material->findVar("$envmaptint")->setVectorValue(r, g, b);
+        else
+            interfaces->renderView->setColorModulation(r, g, b);
 
         const auto pulse = cham.color[3] * (cham.blinking ? std::sin(memory->globalVars->currenttime * 5) * 0.5f + 0.5f : 1.0f);
 
@@ -271,9 +297,12 @@ void Chams::applyChams(const std::array<Config::Chams::Material, 7>& chams, int 
             b = cham.color[2];
         }
 
-        interfaces->renderView->setColorModulation(r, g, b);
-
         const auto pulse = cham.color[3] * (cham.blinking ? std::sin(memory->globalVars->currenttime * 5) * 0.5f + 0.5f : 1.0f);
+
+        if (material == glow)
+            material->findVar("$envmaptint")->setVectorValue(r, g, b);
+        else
+            interfaces->renderView->setColorModulation(r, g, b);
 
         interfaces->renderView->setBlend(pulse);
 

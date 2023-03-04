@@ -461,7 +461,9 @@ void GUI::renderChamsWindow() noexcept
     if (currentCategory != 6 && currentCategory != 7)
         ImGui::Checkbox("Health based", &chams.healthBased);
     ImGui::Checkbox("Blinking", &chams.blinking);
-    ImGui::Combo("Material", &chams.material, "Normal\0Flat\0");
+    ImGui::Combo("Material", &chams.material, "Shaded\0Flat\0Glow\0");
+    if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("Using a dxlevel lower than 90, will break glow");
     ImGui::Checkbox("Wireframe", &chams.wireframe);
     ImGui::Checkbox("Cover", &chams.cover);
     ImGui::Checkbox("Ignore-Z", &chams.ignorez);
