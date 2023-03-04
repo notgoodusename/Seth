@@ -476,6 +476,13 @@ void StreamProofESP::render() noexcept
 
         renderEntityBox(world, world.name.data(), config->streamProofESP.world["All"]);
     }
+
+    for (const auto& npc : GameData::npcs()) {
+        if (!config->streamProofESP.npcs["All"].enabled)
+            break;
+
+        renderEntityBox(npc, npc.name.data(), config->streamProofESP.npcs["All"]);
+    }
 }
 
 void StreamProofESP::updateInput() noexcept

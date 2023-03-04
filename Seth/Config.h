@@ -180,6 +180,7 @@ public:
         std::unordered_map<std::string, Player> allies;
         std::unordered_map<std::string, Player> enemies;
         std::unordered_map<std::string, Buildings> buildings;
+        std::unordered_map<std::string, NPCs> npcs;
         std::unordered_map<std::string, World> world; 
     } streamProofESP;
 

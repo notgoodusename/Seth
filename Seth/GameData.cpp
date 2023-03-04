@@ -32,6 +32,7 @@ static Matrix4x4 viewMatrix;
 static LocalPlayerData localPlayerData;
 static std::vector<PlayerData> playerData;
 static std::vector<BuildingsData> buildingsData;
+static std::vector<NPCData> npcData;
 static std::vector<WorldData> worldData;
 
 static auto playerByHandleWritable(int handle) noexcept
@@ -58,6 +59,7 @@ void GameData::update() noexcept
     Lock lock;
 
     buildingsData.clear();
+    npcData.clear();
     worldData.clear();
 
     localPlayerData.update();
@@ -128,6 +130,7 @@ void GameData::update() noexcept
                 case ClassId::Merasmus:
                 case ClassId::Zombie:
                 case ClassId::EyeballBoss:
+                    npcData.emplace_back(entity);
                     break;
             default:
                 break;
@@ -137,6 +140,7 @@ void GameData::update() noexcept
 
     std::sort(playerData.begin(), playerData.end());
     std::sort(buildingsData.begin(), buildingsData.end());
+    std::sort(npcData.begin(), npcData.end());
     std::sort(worldData.begin(), worldData.end());
 
     std::erase_if(playerData, [](const auto& player) { return interfaces->entityList->getEntityFromHandle(player.handle) == nullptr; });
@@ -164,6 +168,11 @@ const std::vector<PlayerData>& GameData::players() noexcept
 const std::vector<BuildingsData>& GameData::buildings() noexcept
 {
     return buildingsData;
+}
+
+const std::vector<NPCData>& GameData::npcs() noexcept
+{
+    return npcData;
 }
 
 const std::vector<WorldData>& GameData::world() noexcept
@@ -312,6 +321,31 @@ BuildingsData::BuildingsData(Entity* building) noexcept : BaseData{ building }
     }
     else
         owner = "Map placed";
+}
+
+NPCData::NPCData(Entity* npc) noexcept : BaseData{ npc }
+{
+    switch (npc->getClassId())
+    {
+        case ClassId::HeadlessHatman:
+            name = "Horseless Headless Horsemann";
+            break;
+        case ClassId::TFTankBoss:
+            name = "Tank";
+            break;
+        case ClassId::Merasmus:
+            name = "Merasmus";
+            break;
+        case ClassId::Zombie:
+            name = "Skeleton";
+            break;
+        case ClassId::EyeballBoss:
+            name = "Monoculus";
+            break;
+        default:
+            name = "unknown";
+            break;
+    }
 }
 
 WorldData::WorldData(Entity* worldEntity) noexcept : BaseData{ worldEntity }

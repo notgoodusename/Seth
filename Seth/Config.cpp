@@ -346,6 +346,7 @@ static void from_json(const json& j, Config::StreamProofESP& e)
     read(j, "Enemies", e.enemies);
     read(j, "Buildings", e.buildings);
     read(j, "World", e.world);
+    read(j, "NPCs", e.npcs);
 }
 
 static void from_json(const json& j, Config::Visuals& v)
@@ -752,6 +753,7 @@ static void to_json(json& j, const Config::StreamProofESP& o, const Config::Stre
     j["Enemies"] = o.enemies;
     j["Buildings"] = o.buildings;
     j["World"] = o.world;
+    j["NPCs"] = o.npcs;
 }
 
 static void to_json(json& j, const Config::AntiAim& o, const Config::AntiAim& dummy = {})

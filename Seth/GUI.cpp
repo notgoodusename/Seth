@@ -527,6 +527,7 @@ void GUI::renderStreamProofESPWindow() noexcept
         case 1: return config->streamProofESP.allies[item];
         case 2: return config->streamProofESP.buildings[item];
         case 3: return config->streamProofESP.world[item];
+        case 4: return config->streamProofESP.npcs[item];
         }
     };
 
@@ -538,7 +539,7 @@ void GUI::renderStreamProofESPWindow() noexcept
     };
 
     if (ImGui::BeginListBox("##list", { 170.0f, 300.0f })) {
-        constexpr std::array categories{ "Enemies", "Allies", "Buildings", "World" };
+        constexpr std::array categories{ "Enemies", "Allies", "Buildings", "World", "NPCs"};
 
         for (std::size_t i = 0; i < categories.size(); ++i) {
             if (ImGui::Selectable(categories[i], currentCategory == i && std::string_view{ currentItem } == "All")) {
@@ -551,6 +552,7 @@ void GUI::renderStreamProofESPWindow() noexcept
                 case 0: case 1: ImGui::SetDragDropPayload("Player", &getConfigPlayer(i, "All"), sizeof(Player), ImGuiCond_Once); break;
                 case 2: ImGui::SetDragDropPayload("Buildings", &config->streamProofESP.buildings["All"], sizeof(Buildings), ImGuiCond_Once); break;
                 case 3: ImGui::SetDragDropPayload("World", &config->streamProofESP.world["All"], sizeof(World), ImGuiCond_Once); break;
+                case 4: ImGui::SetDragDropPayload("NPCs", &config->streamProofESP.npcs["All"], sizeof(World), ImGuiCond_Once); break;
                 default: break;
                 }
                 ImGui::EndDragDropSource();
@@ -564,6 +566,7 @@ void GUI::renderStreamProofESPWindow() noexcept
                     case 0: case 1: getConfigPlayer(i, "All") = data; break;
                     case 2: config->streamProofESP.buildings["All"] = data; break;
                     case 3: config->streamProofESP.world["All"] = data; break;
+                    case 4: config->streamProofESP.npcs["All"] = data; break;
                     default: break;
                     }
                 }
@@ -575,6 +578,7 @@ void GUI::renderStreamProofESPWindow() noexcept
                     case 0: case 1: getConfigPlayer(i, "All") = data; break;
                     case 2: config->streamProofESP.buildings["All"] = data; break;
                     case 3: config->streamProofESP.world["All"] = data; break;
+                    case 4: config->streamProofESP.npcs["All"] = data; break;
                     default: break;
                     }
                 }
@@ -586,9 +590,23 @@ void GUI::renderStreamProofESPWindow() noexcept
                     case 0: case 1: getConfigPlayer(i, "All") = data; break;
                     case 2: config->streamProofESP.buildings["All"] = data; break;
                     case 3: config->streamProofESP.world["All"] = data; break;
+                    case 4: config->streamProofESP.npcs["All"] = data; break;
                     default: break;
                     }
                 }
+
+                if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("NPCs")) {
+                    const auto& data = *(World*)payload->Data;
+
+                    switch (i) {
+                    case 0: case 1: getConfigPlayer(i, "All") = data; break;
+                    case 2: config->streamProofESP.buildings["All"] = data; break;
+                    case 3: config->streamProofESP.world["All"] = data; break;
+                    case 4: config->streamProofESP.npcs["All"] = data; break;
+                    default: break;
+                    }
+                }
+
                 ImGui::EndDragDropTarget();
             }
 
@@ -621,6 +639,7 @@ void GUI::renderStreamProofESPWindow() noexcept
                         case 0: case 1: ImGui::SetDragDropPayload("Player", &getConfigPlayer(i, items[j]), sizeof(Player), ImGuiCond_Once); break;
                         case 2: ImGui::SetDragDropPayload("Buildings", &config->streamProofESP.buildings[items[j]], sizeof(Buildings), ImGuiCond_Once); break;
                         case 3: ImGui::SetDragDropPayload("World", &config->streamProofESP.world[items[j]], sizeof(World), ImGuiCond_Once); break;
+                        case 4: ImGui::SetDragDropPayload("NPCs", &config->streamProofESP.npcs[items[j]], sizeof(World), ImGuiCond_Once); break;
                         default: break;
                         }
                         ImGui::EndDragDropSource();
@@ -634,6 +653,7 @@ void GUI::renderStreamProofESPWindow() noexcept
                             case 0: case 1: getConfigPlayer(i, items[j]) = data; break;
                             case 2: config->streamProofESP.buildings[items[j]] = data; break;
                             case 3: config->streamProofESP.world[items[j]] = data; break;
+                            case 4: config->streamProofESP.npcs[items[j]] = data; break;
                             default: break;
                             }
                         }
@@ -645,6 +665,7 @@ void GUI::renderStreamProofESPWindow() noexcept
                             case 0: case 1: getConfigPlayer(i, items[j]) = data; break;
                             case 2: config->streamProofESP.buildings[items[j]] = data; break;
                             case 3: config->streamProofESP.world[items[j]] = data; break;
+                            case 4: config->streamProofESP.npcs[items[j]] = data; break;
                             default: break;
                             }
                         }
@@ -656,6 +677,19 @@ void GUI::renderStreamProofESPWindow() noexcept
                             case 0: case 1: getConfigPlayer(i, items[j]) = data; break;
                             case 2: config->streamProofESP.buildings[items[j]] = data; break;
                             case 3: config->streamProofESP.world[items[j]] = data; break;
+                            case 4: config->streamProofESP.npcs[items[j]] = data; break;
+                            default: break;
+                            }
+                        }
+
+                        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("NPCs")) {
+                            const auto& data = *(World*)payload->Data;
+
+                            switch (i) {
+                            case 0: case 1: getConfigPlayer(i, items[j]) = data; break;
+                            case 2: config->streamProofESP.buildings[items[j]] = data; break;
+                            case 3: config->streamProofESP.world[items[j]] = data; break;
+                            case 4: config->streamProofESP.npcs[items[j]] = data; break;
                             default: break;
                             }
                         }

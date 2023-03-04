@@ -120,6 +120,10 @@ struct Buildings : Shared {
     using Shared::operator=;
 };
 
+struct NPCs : Shared {
+    using Shared::operator=;
+};
+
 struct World : Shared {
 
     using Shared::operator=;

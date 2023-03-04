@@ -16,8 +16,9 @@ struct LocalPlayerData;
 
 struct PlayerData;
 struct BuildingsData;
-struct WorldData;
 struct EntityData;
+struct NPCData;
+struct WorldData;
 
 struct Matrix4x4;
 
@@ -39,6 +40,7 @@ namespace GameData
     const std::vector<PlayerData>& players() noexcept;
     const PlayerData* playerByHandle(int handle) noexcept;
     const std::vector<BuildingsData>& buildings() noexcept;
+    const std::vector<NPCData>& npcs() noexcept;
     const std::vector<WorldData>& world() noexcept;
 }
 
@@ -111,6 +113,12 @@ struct PlayerData : BaseData {
         void clear() noexcept;
         ImTextureID get() const noexcept { return texture; }
     };
+};
+
+struct NPCData : BaseData {
+    NPCData(Entity* npc) noexcept;
+
+    std::string name;
 };
 
 struct BuildingsData : BaseData {
