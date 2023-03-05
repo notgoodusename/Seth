@@ -105,18 +105,18 @@ void AimbotHitscan::run(Entity* activeWeapon, UserCmd* cmd) noexcept
     const auto localPlayerEyePosition = localPlayer->getEyePosition();
     for (const auto& target : enemies)
     {
-        const auto entity{ interfaces->entityList->getEntity(target.id) };
+        auto entity{ interfaces->entityList->getEntity(target.id) };
         if ((entity->isCloaked() && cfg.ignoreCloaked) || (!entity->isEnemy(localPlayer.get()) && !cfg.friendlyFire))
             continue;
 
-        const auto& player = Animations::getPlayer(target.id);
+        auto player = Animations::getPlayer(target.id);
 
-        const auto& backupBoneCache = entity->getBoneCache().memory;
-        const auto& backupMins = entity->getCollideable()->obbMins();
-        const auto& backupMaxs = entity->getCollideable()->obbMaxs();
-        const auto& backupOrigin = entity->getAbsOrigin();
-        const auto& backupAbsAngle = entity->getAbsAngle();
-        const auto& backupEyeAngle = entity->eyeAngles();
+        matrix3x4* backupBoneCache = entity->getBoneCache().memory;
+        Vector backupMins = entity->getCollideable()->obbMins();
+        Vector backupMaxs = entity->getCollideable()->obbMaxs();
+        Vector backupOrigin = entity->getAbsOrigin();
+        Vector backupAbsAngle = entity->getAbsAngle();
+        Vector backupEyeAngle = entity->eyeAngles();
 
         for (int cycle = 0; cycle < 2; cycle++)
         {

@@ -110,21 +110,22 @@ void runKnife(Entity* activeWeapon, UserCmd* cmd) noexcept
 
     for (const auto& target : enemies)
     {
-        const auto entity{ interfaces->entityList->getEntity(target.id) };
+        auto entity{ interfaces->entityList->getEntity(target.id) };
         if ((entity->isCloaked() && cfg.ignoreCloaked) || (!entity->isEnemy(localPlayer.get()) && !cfg.friendlyFire))
             continue;
 
-        const auto& player = Animations::getPlayer(target.id);
+        auto player = Animations::getPlayer(target.id);
 
-        const auto& backupBoneCache = entity->getBoneCache().memory;
-        const auto& backupMins = entity->getCollideable()->obbMins();
-        const auto& backupMaxs = entity->getCollideable()->obbMaxs();
-        const auto& backupOrigin = entity->getAbsOrigin();
-        const auto& backupEyeAngle = entity->eyeAngles();
+        matrix3x4* backupBoneCache = entity->getBoneCache().memory;
+        Vector backupMins = entity->getCollideable()->obbMins();
+        Vector backupMaxs = entity->getCollideable()->obbMaxs();
+        Vector backupOrigin = entity->getAbsOrigin();
+        Vector backupAbsAngle = entity->getAbsAngle();
+        Vector backupEyeAngle = entity->eyeAngles();
 
         if ((config->backtrack.enabled || config->backtrack.fakeLatency) && cfg.targetBacktrack)
         {
-            const auto records = Animations::getBacktrackRecords(entity->index());
+            auto records = Animations::getBacktrackRecords(entity->index());
             if (!records || records->empty() || records->size() <= 3U)
                 continue;
 
@@ -218,11 +219,12 @@ void AimbotMelee::run(Entity* activeWeapon, UserCmd* cmd) noexcept
             //We gotta recalculate to aim correctly
             const auto angle = calculateRelativeAngle(localPlayer->getEyePosition(), meleeRecord.target, cmd->viewangles);
 
-            const auto& backupBoneCache = entity->getBoneCache().memory;
-            const auto& backupMins = entity->getCollideable()->obbMins();
-            const auto& backupMaxs = entity->getCollideable()->obbMaxs();
-            const auto& backupOrigin = entity->getAbsOrigin();
-            const auto& backupEyeAngle = entity->eyeAngles();
+            matrix3x4* backupBoneCache = entity->getBoneCache().memory;
+            Vector backupMins = entity->getCollideable()->obbMins();
+            Vector backupMaxs = entity->getCollideable()->obbMaxs();
+            Vector backupOrigin = entity->getAbsOrigin();
+            Vector backupAbsAngle = entity->getAbsAngle();
+            Vector backupEyeAngle = entity->eyeAngles();
 
             applyMatrix(entity, meleeRecord.matrix, meleeRecord.origin, meleeRecord.eyeAngle, meleeRecord.mins, meleeRecord.maxs);
             if (doesMeleeHit(activeWeapon, meleeRecord.index, cmd->viewangles + angle))
@@ -267,17 +269,18 @@ void AimbotMelee::run(Entity* activeWeapon, UserCmd* cmd) noexcept
     const auto& localPlayerEyePosition = localPlayer->getEyePosition();
     for (const auto& target : enemies)
     {
-        const auto entity{ interfaces->entityList->getEntity(target.id) };
+        auto entity{ interfaces->entityList->getEntity(target.id) };
         if ((entity->isCloaked() && cfg.ignoreCloaked) || (!entity->isEnemy(localPlayer.get()) && !cfg.friendlyFire))
             continue;
 
-        const auto& player = Animations::getPlayer(target.id);
+        auto player = Animations::getPlayer(target.id);
 
-        const auto& backupBoneCache = entity->getBoneCache().memory;
-        const auto& backupMins = entity->getCollideable()->obbMins();
-        const auto& backupMaxs = entity->getCollideable()->obbMaxs();
-        const auto& backupOrigin = entity->getAbsOrigin();
-        const auto& backupEyeAngle = entity->eyeAngles();
+        matrix3x4* backupBoneCache = entity->getBoneCache().memory;
+        Vector backupMins = entity->getCollideable()->obbMins();
+        Vector backupMaxs = entity->getCollideable()->obbMaxs();
+        Vector backupOrigin = entity->getAbsOrigin();
+        Vector backupAbsAngle = entity->getAbsAngle();
+        Vector backupEyeAngle = entity->eyeAngles();
 
         for (int cycle = 0; cycle < 2; cycle++)
         {
