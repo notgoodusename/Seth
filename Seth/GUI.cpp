@@ -478,21 +478,36 @@ void GUI::renderGlowWindow() noexcept
     static int currentCategory{ 0 };
     ImGui::PushItemWidth(110.0f);
     ImGui::PushID(0);
-    constexpr std::array categories{ "Allies", "Enemies", "Local Player" };
+    constexpr std::array categories{ "Allies", "Enemies", "Local Player", "Buildings", "World", "NPCs" };
     ImGui::Combo("", &currentCategory, categories.data(), categories.size());
     ImGui::PopID();
     Config::GlowItem* currentItem;
-    if (currentCategory <= 1) {
+    if (currentCategory == 3) {
         ImGui::SameLine();
         static int currentType{ 0 };
         ImGui::PushID(1);
-        ImGui::Combo("", &currentType, "All\0Visible\0Occluded\0");
+        ImGui::Combo("", &currentType, "All\0Enemies\0Allies\0");
         ImGui::PopID();
-        auto& cfg = config->playerGlow[categories[currentCategory]];
+        auto& cfg = config->buildingGlow[categories[currentCategory]];
         switch (currentType) {
         case 0: currentItem = &cfg.all; break;
-        case 1: currentItem = &cfg.visible; break;
-        case 2: currentItem = &cfg.occluded; break;
+        case 1: currentItem = &cfg.enemies; break;
+        case 2: currentItem = &cfg.allies; break;
+        }
+    }
+    else if (currentCategory == 4)
+    {
+        ImGui::SameLine();
+        static int currentType{ 0 };
+        ImGui::PushID(1);
+        ImGui::Combo("", &currentType, "All\0Ammo packs\0Health packs\0Other\0");
+        ImGui::PopID();
+        auto& cfg = config->worldGlow[categories[currentCategory]];
+        switch (currentType) {
+        case 0: currentItem = &cfg.all; break;
+        case 1: currentItem = &cfg.ammoPacks; break;
+        case 2: currentItem = &cfg.healthPacks; break;
+        case 3: currentItem = &cfg.other; break;
         }
     }
     else {

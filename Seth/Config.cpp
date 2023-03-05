@@ -332,11 +332,19 @@ static void from_json(const json& j, Config::GlowItem& g)
     read(j, "Style", g.style);
 }
 
-static void from_json(const json& j, Config::PlayerGlow& g)
+static void from_json(const json& j, Config::BuildingGlow& b)
 {
-    read<value_t::object>(j, "All", g.all);
-    read<value_t::object>(j, "Visible", g.visible);
-    read<value_t::object>(j, "Occluded", g.occluded);
+    read<value_t::object>(j, "All", b.all);
+    read<value_t::object>(j, "Enemies", b.enemies);
+    read<value_t::object>(j, "Allies", b.allies);
+}
+
+static void from_json(const json& j, Config::WorldGlow& w)
+{
+    read<value_t::object>(j, "All", w.all);
+    read<value_t::object>(j, "Ammo packs", w.ammoPacks);
+    read<value_t::object>(j, "Health packs", w.healthPacks);
+    read<value_t::object>(j, "Other", w.other);
 }
 
 static void from_json(const json& j, Config::StreamProofESP& e)
@@ -509,7 +517,8 @@ void Config::load(const char8_t* name, bool incremental) noexcept
     read<value_t::object>(j, "Backtrack", backtrack);
 
     read(j["Glow"], "Items", glow);
-    read(j["Glow"], "Players", playerGlow);
+    read(j["Glow"], "Buildings", buildingGlow);
+    read(j["Glow"], "World", worldGlow);
     read(j["Glow"], "Key", glowKey);
 
     read(j, "Chams", chams);
@@ -739,11 +748,19 @@ static void to_json(json& j, const Config::GlowItem& o, const  Config::GlowItem&
     WRITE("Style", style);
 }
 
-static void to_json(json& j, const  Config::PlayerGlow& o, const  Config::PlayerGlow& dummy = {})
+static void to_json(json& j, const  Config::BuildingGlow& o, const  Config::BuildingGlow& dummy = {})
 {
     WRITE("All", all);
-    WRITE("Visible", visible);
-    WRITE("Occluded", occluded);
+    WRITE("Enemies", enemies);
+    WRITE("Allies", allies);
+}
+
+static void to_json(json& j, const  Config::WorldGlow& o, const  Config::WorldGlow& dummy = {})
+{
+    WRITE("All", all);
+    WRITE("Ammo packs", ammoPacks);
+    WRITE("Health packs", healthPacks);
+    WRITE("Other", other);
 }
 
 static void to_json(json& j, const Config::StreamProofESP& o, const Config::StreamProofESP& dummy = {})
@@ -973,7 +990,8 @@ void Config::save(size_t id) const noexcept
         j["Backtrack"] = backtrack;
 
         j["Glow"]["Items"] = glow;
-        j["Glow"]["Players"] = playerGlow;
+        j["Glow"]["Buildings"] =  buildingGlow;
+        j["Glow"]["World"] = worldGlow;
         to_json(j["Glow"]["Key"], glowKey, KeyBind::NONE);
 
         j["Chams"] = chams;

@@ -165,12 +165,17 @@ public:
         int style = 0;
     };
 
-    struct PlayerGlow {
-        GlowItem all, visible, occluded;
+    struct BuildingGlow {
+        GlowItem all, enemies, allies;
     };
 
-    std::unordered_map<std::string, PlayerGlow> playerGlow;
+    struct WorldGlow {
+        GlowItem all, ammoPacks, healthPacks, other;
+    };
+
     std::unordered_map<std::string, GlowItem> glow;
+    std::unordered_map<std::string, BuildingGlow> buildingGlow;
+    std::unordered_map<std::string, WorldGlow> worldGlow;
     KeyBind glowKey{ std::string("glow") };
 
 
