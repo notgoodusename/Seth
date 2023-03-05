@@ -329,7 +329,6 @@ static void from_json(const json& j, Config::GlowItem& g)
 
     read(j, "Enabled", g.enabled);
     read(j, "Health based", g.healthBased);
-    read(j, "Style", g.style);
 }
 
 static void from_json(const json& j, Config::BuildingGlow& b)
@@ -745,7 +744,6 @@ static void to_json(json& j, const Config::GlowItem& o, const  Config::GlowItem&
     to_json(j, static_cast<const Color4&>(o), dummy);
     WRITE("Enabled", enabled);
     WRITE("Health based", healthBased);
-    WRITE("Style", style);
 }
 
 static void to_json(json& j, const  Config::BuildingGlow& o, const  Config::BuildingGlow& dummy = {})

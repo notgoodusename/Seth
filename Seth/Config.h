@@ -162,7 +162,6 @@ public:
     struct GlowItem : Color4 {
         bool enabled = false;
         bool healthBased = false;
-        int style = 0;
     };
 
     struct BuildingGlow {

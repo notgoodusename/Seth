@@ -207,6 +207,11 @@ static void __stdcall frameStageNotify(FrameStage stage) noexcept
     hooks->client.callOriginal<void, 35>(stage);
 }
 
+static bool __fastcall doPostScreenEffects(void* thisPointer, void*, const ViewSetup* setup) noexcept
+{
+    return hooks->clientMode.callOriginal<bool, 39>(setup);
+}
+
 static void __fastcall drawModelExecute(void* thisPointer, void*, void* state, const ModelRenderInfo& info, matrix3x4* customBoneToWorld) noexcept
 {
     static Chams chams;
@@ -265,7 +270,7 @@ static void __stdcall lockCursor() noexcept
     return hooks->surface.callOriginal<void, 62>();
 }
 
-void* __cdecl clLoadWhitelistHook(void* whitelist, const char* name) noexcept
+static void* __cdecl clLoadWhitelistHook(void* whitelist, const char* name) noexcept
 {
     static auto original = reinterpret_cast<void*(__cdecl*)(void*, const char*)>(hooks->enableWorldFog.getDetour());
     if(config->misc.svPureBypass)
@@ -350,6 +355,7 @@ void Hooks::install() noexcept
     clientMode.init(memory->clientMode);
     clientMode.hookAt(16, overrideView);
     clientMode.hookAt(21, createMove);
+    clientMode.hookAt(39, doPostScreenEffects);
 
     modelRender.init(interfaces->modelRender);
     modelRender.hookAt(19, drawModelExecute);

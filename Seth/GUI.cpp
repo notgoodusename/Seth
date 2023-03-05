@@ -517,17 +517,10 @@ void GUI::renderGlowWindow() noexcept
     ImGui::SameLine();
     ImGui::Checkbox("Enabled", &currentItem->enabled);
     ImGui::Separator();
-    ImGui::Columns(2, nullptr, false);
-    ImGui::SetColumnOffset(1, 150.0f);
-    ImGui::Checkbox("Health based", &currentItem->healthBased);
+    if (currentCategory != 4)
+        ImGui::Checkbox("Health based", &currentItem->healthBased);
 
     ImGuiCustom::colorPicker("Color", *currentItem);
-
-    ImGui::NextColumn();
-    ImGui::SetNextItemWidth(100.0f);
-    ImGui::Combo("Style", &currentItem->style, "Default\0Rim3d\0Edge\0Edge Pulse\0");
-
-    ImGui::Columns(1);
 }
 
 void GUI::renderStreamProofESPWindow() noexcept
