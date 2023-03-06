@@ -114,7 +114,7 @@ void Glow::render() noexcept
 
     const auto highestEntityIndex = interfaces->entityList->getHighestEntityIndex();
     for (int i = 1; i <= highestEntityIndex; ++i) {
-        auto applyGlow = [&](const Config::GlowItem& glow, Entity* entity, int health = 0, int maxHealth = 0) noexcept
+        auto applyGlow = [](const Config::GlowItem& glow, Entity* entity, int health = 0, int maxHealth = 0) noexcept
         {
             if (glow.enabled) {
                 GlowEntity glowEntity;
@@ -182,8 +182,14 @@ void Glow::render() noexcept
     }
 
     StencilStateDisable.setStencilState(renderContext);
+
     if (customGlowEntities.empty())
+    {
+        interfaces->modelRender->forcedMaterialOverride(nullptr);
+        interfaces->renderView->setColorModulation(originalColor.data());
+        interfaces->renderView->setBlend(originalBlend);
         return;
+    }
 
     const int w =static_cast<int>(ImGui::GetIO().DisplaySize.x);
     const int h = static_cast<int>(ImGui::GetIO().DisplaySize.y);

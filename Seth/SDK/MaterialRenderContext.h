@@ -12,7 +12,7 @@ public:
 	VIRTUAL_METHOD(void, clearBuffers, 12, (bool clearColor, bool clearDepth, bool clearStencil = false), (this, clearColor, clearDepth, clearStencil))
 	VIRTUAL_METHOD(void, viewport, 38, (int x, int y, int width, int height), (this, x, y, width, height))
 	VIRTUAL_METHOD(void, clearColor4ub, 73, (unsigned char r, unsigned char g, unsigned char b, unsigned char a), (this, r, g, b, a))
-	VIRTUAL_METHOD(void, pushRenderTargetAndViewport, 105, (), (this))
+	VIRTUAL_METHOD(void, pushRenderTargetAndViewport, 108, (), (this))
 	VIRTUAL_METHOD(void, popRenderTargetAndViewport, 109, (), (this))
 	VIRTUAL_METHOD(void, setStencilEnable, 117, (bool enabled), (this, enabled))
     VIRTUAL_METHOD(void, setStencilFailOperation, 118, (int operation), (this, operation))
