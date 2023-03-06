@@ -119,7 +119,7 @@
     <ClCompile Include="imgui\imgui_tables.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="Texture.cpp">
+    <ClCompile Include="CustomTexture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="freetype\src\autofit\autofit.c">
@@ -214,6 +214,9 @@
     </ClCompile>
     <ClCompile Include="Hacks\Aimbot\AimbotProjectile.cpp">
       <Filter>Hacks\Aimbot</Filter>
+    </ClCompile>
+    <ClCompile Include="Hacks\Glow.cpp">
+      <Filter>Hacks</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -391,16 +394,10 @@
     <ClInclude Include="SDK\FileSystem.h">
       <Filter>SDK</Filter>
     </ClInclude>
-    <ClInclude Include="Texture.h">
+    <ClInclude Include="CustomTexture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Resources\Resource.h">
-      <Filter>Resources</Filter>
-    </ClInclude>
-    <ClInclude Include="Resources\avatar_ct.h">
-      <Filter>Resources</Filter>
-    </ClInclude>
-    <ClInclude Include="Resources\avatar_tt.h">
       <Filter>Resources</Filter>
     </ClInclude>
     <ClInclude Include="SDK\ClientMode.h">
@@ -429,9 +426,6 @@
     </ClInclude>
     <ClInclude Include="SDK\DebugOverlay.h">
       <Filter>SDK</Filter>
-    </ClInclude>
-    <ClInclude Include="Resources\skillgroups.h">
-      <Filter>Resources</Filter>
     </ClInclude>
     <ClInclude Include="SDK\Server.h">
       <Filter>SDK</Filter>
@@ -522,6 +516,18 @@
     </ClInclude>
     <ClInclude Include="Hacks\Aimbot\AimbotProjectile.h">
       <Filter>Hacks\Aimbot</Filter>
+    </ClInclude>
+    <ClInclude Include="Hacks\Glow.h">
+      <Filter>Hacks</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\Stencil.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\MaterialRenderContext.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\Texture.h">
+      <Filter>SDK</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -24,6 +24,7 @@
 #include "Hacks/Backtrack.h"
 #include "Hacks/Chams.h"
 #include "Hacks/EnginePrediction.h"
+#include "Hacks/Glow.h"
 #include "Hacks/Misc.h"
 #include "Hacks/StreamProofESP.h"
 #include "Hacks/Visuals.h"
@@ -209,6 +210,10 @@ static void __stdcall frameStageNotify(FrameStage stage) noexcept
 
 static bool __fastcall doPostScreenEffects(void* thisPointer, void*, const ViewSetup* setup) noexcept
 {
+    if (interfaces->engine->isInGame())
+    {
+        Glow::render();
+    }
     return hooks->clientMode.callOriginal<bool, 39>(setup);
 }
 

@@ -9,10 +9,6 @@
 #include "Interfaces.h"
 #include "Memory.h"
 
-#include "Resources/avatar_ct.h"
-#include "Resources/avatar_tt.h"
-#include "Resources/skillgroups.h"
-
 #include "stb_image.h"
 
 #include "SDK/Client.h"

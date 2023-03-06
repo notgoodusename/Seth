@@ -105,6 +105,7 @@ public:
     VIRTUAL_METHOD(Vector&, getRenderAngles, 2, (), (this + sizeof(uintptr_t)))
     VIRTUAL_METHOD(bool, shouldDraw, 3, (), (this + sizeof(uintptr_t)))
     VIRTUAL_METHOD(const Model*, getModel, 9, (), (this + sizeof(uintptr_t)))
+    VIRTUAL_METHOD(int, drawModel, 10, (int flags), (this + sizeof(uintptr_t), flags))
     VIRTUAL_METHOD(void, getRenderBounds, 20, (Vector& mins, Vector& maxs), (this + sizeof(uintptr_t), &mins, &maxs))
     VIRTUAL_METHOD(const matrix3x4&, toWorldTransform, 34, (), (this + sizeof(uintptr_t)))
 

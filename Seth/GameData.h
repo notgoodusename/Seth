@@ -10,7 +10,7 @@
 #include "SDK/matrix3x4.h"
 #include "SDK/Vector.h"
 
-#include "Texture.h"
+#include "CustomTexture.h"
 
 struct LocalPlayerData;
 
@@ -99,15 +99,15 @@ struct PlayerData : BaseData {
     std::string activeWeapon;
     std::vector<std::pair<Vector, Vector>> bones;
 
-    class Texture {
+    class CustomTexture {
         ImTextureID texture = nullptr;
     public:
-        Texture() = default;
-        ~Texture();
-        Texture(const Texture&) = delete;
-        Texture& operator=(const Texture&) = delete;
-        Texture(Texture&& other) noexcept : texture{ other.texture } { other.texture = nullptr; }
-        Texture& operator=(Texture&& other) noexcept { clear(); texture = other.texture; other.texture = nullptr; return *this; }
+        CustomTexture() = default;
+        ~CustomTexture();
+        CustomTexture(const CustomTexture&) = delete;
+        CustomTexture& operator=(const CustomTexture&) = delete;
+        CustomTexture(CustomTexture&& other) noexcept : texture{ other.texture } { other.texture = nullptr; }
+        CustomTexture& operator=(CustomTexture&& other) noexcept { clear(); texture = other.texture; other.texture = nullptr; return *this; }
 
         void init(int width, int height, const std::uint8_t* data) noexcept;
         void clear() noexcept;

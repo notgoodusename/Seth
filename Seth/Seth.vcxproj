@@ -37,6 +37,7 @@
     <ClCompile Include="Hacks\Backtrack.cpp" />
     <ClCompile Include="Hacks\Chams.cpp" />
     <ClCompile Include="Hacks\EnginePrediction.cpp" />
+    <ClCompile Include="Hacks\Glow.cpp" />
     <ClCompile Include="Hacks\StreamProofESP.cpp" />
     <ClCompile Include="Hacks\Visuals.cpp" />
     <ClCompile Include="Helpers.cpp" />
@@ -69,7 +70,7 @@
     <ClCompile Include="SDK\Entity.cpp" />
     <ClCompile Include="SDK\GlobalVars.cpp" />
     <ClCompile Include="SDK\Utils.cpp" />
-    <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="CustomTexture.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Config.h" />
@@ -86,6 +87,7 @@
     <ClInclude Include="Hacks\Backtrack.h" />
     <ClInclude Include="Hacks\Chams.h" />
     <ClInclude Include="Hacks\EnginePrediction.h" />
+    <ClInclude Include="Hacks\Glow.h" />
     <ClInclude Include="Hacks\Misc.h" />
     <ClInclude Include="Hacks\StreamProofESP.h" />
     <ClInclude Include="Hacks\Visuals.h" />
@@ -105,10 +107,7 @@
     <ClInclude Include="MinHook\trampoline.h" />
     <ClInclude Include="Netvars.h" />
     <ClInclude Include="nlohmann\json.hpp" />
-    <ClInclude Include="Resources\avatar_ct.h" />
-    <ClInclude Include="Resources\avatar_tt.h" />
     <ClInclude Include="Resources\Resource.h" />
-    <ClInclude Include="Resources\skillgroups.h" />
     <ClInclude Include="SDK\Angle.h" />
     <ClInclude Include="SDK\BitBuffer.h" />
     <ClInclude Include="SDK\Client.h" />
@@ -147,6 +146,7 @@
     <ClInclude Include="SDK\Localize.h" />
     <ClInclude Include="SDK\LocalPlayer.h" />
     <ClInclude Include="SDK\Material.h" />
+    <ClInclude Include="SDK\MaterialRenderContext.h" />
     <ClInclude Include="SDK\MaterialSystem.h" />
     <ClInclude Include="SDK\matrix3x4.h" />
     <ClInclude Include="SDK\MDLCache.h" />
@@ -163,7 +163,9 @@
     <ClInclude Include="SDK\Recv.h" />
     <ClInclude Include="SDK\RenderView.h" />
     <ClInclude Include="SDK\Server.h" />
+    <ClInclude Include="SDK\Stencil.h" />
     <ClInclude Include="SDK\Surface.h" />
+    <ClInclude Include="SDK\Texture.h" />
     <ClInclude Include="SDK\TFWeapons.h" />
     <ClInclude Include="SDK\UserCmd.h" />
     <ClInclude Include="SDK\UtlVector.h" />
@@ -173,7 +175,7 @@
     <ClInclude Include="SDK\VirtualMethod.h" />
     <ClInclude Include="SDK\WeaponId.h" />
     <ClInclude Include="stb_image.h" />
-    <ClInclude Include="Texture.h" />
+    <ClInclude Include="CustomTexture.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
