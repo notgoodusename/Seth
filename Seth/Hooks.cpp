@@ -212,7 +212,7 @@ static bool __fastcall doPostScreenEffects(void* thisPointer, void*, const ViewS
 {
     if (interfaces->engine->isInGame())
     {
-        Glow::render();
+        //Glow::render();
     }
     return hooks->clientMode.callOriginal<bool, 39>(setup);
 }
