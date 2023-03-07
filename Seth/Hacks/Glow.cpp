@@ -181,18 +181,19 @@ void Glow::render() noexcept
         }
     }
 
-    StencilStateDisable.setStencilState(renderContext);
-
-    if (customGlowEntities.empty())
-    {
-        interfaces->modelRender->forcedMaterialOverride(nullptr);
-        interfaces->renderView->setColorModulation(originalColor.data());
-        interfaces->renderView->setBlend(originalBlend);
-        return;
-    }
-
     const int w =static_cast<int>(ImGui::GetIO().DisplaySize.x);
     const int h = static_cast<int>(ImGui::GetIO().DisplaySize.y);
+
+    StencilState = {};
+    StencilState.enabled = true;
+    StencilState.writeMask = 0x0;
+    StencilState.testMask = 0xFF;
+    StencilState.referenceValue = 0;
+    StencilState.compareFunc = STENCILCOMPARISONFUNCTION_EQUAL;
+    StencilState.passOp = STENCILOPERATION_KEEP;
+    StencilState.failOp = STENCILOPERATION_KEEP;
+    StencilState.ZfailOp = STENCILOPERATION_KEEP;
+    StencilState.setStencilState(renderContext);
 
     interfaces->modelRender->forcedMaterialOverride(normal);
 
@@ -209,21 +210,8 @@ void Glow::render() noexcept
             interfaces->renderView->setColorModulation(glowEntity.color[0], glowEntity.color[1], glowEntity.color[2]);
             drawModel(glowEntity.entity, 0x00000001 | 0x00000080, false);
         }
-
-        StencilStateDisable.setStencilState(renderContext);
     }
     renderContext->popRenderTargetAndViewport();
-
-    ShaderStencilState::ShaderStencilState(StencilState);
-    StencilState.enabled = true;
-    StencilState.writeMask = 0x0;
-    StencilState.testMask = 0xFF;
-    StencilState.referenceValue = 0;
-    StencilState.compareFunc = STENCILCOMPARISONFUNCTION_EQUAL;
-    StencilState.passOp = STENCILOPERATION_KEEP;
-    StencilState.failOp = STENCILOPERATION_KEEP;
-    StencilState.ZfailOp = STENCILOPERATION_KEEP;
-    StencilState.setStencilState(renderContext);
 
     StencilStateDisable.setStencilState(renderContext);
 
