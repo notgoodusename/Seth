@@ -106,7 +106,7 @@ public:
     VIRTUAL_METHOD(bool, shouldDraw, 3, (), (this + sizeof(uintptr_t)))
     VIRTUAL_METHOD(const Model*, getModel, 9, (), (this + sizeof(uintptr_t)))
     VIRTUAL_METHOD(int, drawModel, 10, (int flags), (this + sizeof(uintptr_t), flags))
-    VIRTUAL_METHOD(void, getRenderBounds, 20, (Vector& mins, Vector& maxs), (this + sizeof(uintptr_t), &mins, &maxs))
+    VIRTUAL_METHOD(void, getRenderBounds, 20, (Vector& mins, Vector& maxs), (this + sizeof(uintptr_t), std::cref(mins), std::cref(maxs)))
     VIRTUAL_METHOD(const matrix3x4&, toWorldTransform, 34, (), (this + sizeof(uintptr_t)))
 
     VIRTUAL_METHOD(Entity*, getBaseAnimating, 39, (), (this))
@@ -127,7 +127,7 @@ public:
     VIRTUAL_METHOD(void, preThink, 261, (), (this))
     VIRTUAL_METHOD(void, postThink, 262, (), (this))
     VIRTUAL_METHOD(Vector&, bulletSpread, 286, (), (this))
-    VIRTUAL_METHOD(void, setLocalViewAngles, 302, (Vector& viewAngles), (this, &viewAngles))
+    VIRTUAL_METHOD(void, setLocalViewAngles, 302, (Vector& viewAngles), (this, std::cref(viewAngles)))
     VIRTUAL_METHOD(int, slot, 330, (), (this))
     VIRTUAL_METHOD(const char*, getPrintName, 333, (), (this))
     VIRTUAL_METHOD(int, getDamageType, 340, (), (this))
@@ -505,7 +505,7 @@ public:
     NETVAR(fallVelocity, "CBasePlayer", "m_flFallVelocity", float)
     NETVAR(groundEntity, "CBasePlayer", "m_hGroundEntity", int)
     NETVAR(health, "CBasePlayer", "m_iHealth", int)
-    NETVAR(maxSpeed, "CBaseEntity", "m_flMaxspeed", float)
+    NETVAR(maxSpeed, "CBasePlayer", "m_flMaxspeed", float)
 
     NETVAR(activeWeapon, "CBaseCombatCharacter", "m_hActiveWeapon", int)
     NETVAR(nextAttack, "CBaseCombatCharacter", "m_flNextAttack", float)

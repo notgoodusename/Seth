@@ -250,7 +250,7 @@ struct Trace {
 
 class EngineTrace {
 public:
-    VIRTUAL_METHOD(int, getPointContents, 0, (const Vector& absPosition, int contentsMask), (this, std::cref(absPosition), contentsMask, nullptr))
+    VIRTUAL_METHOD(int, getPointContents, 0, (const Vector& absPosition, int contentsMask), (this, std::cref(absPosition), contentsMask))
     VIRTUAL_METHOD(void, _traceRay, 4, (const Ray& ray, unsigned int mask, const BaseTraceFilter& filter, Trace& trace), (this, std::cref(ray), mask, std::cref(filter), std::ref(trace)))
 
     void traceRay(const Ray& ray, unsigned int mask, const BaseTraceFilter& filter, Trace& trace) noexcept
