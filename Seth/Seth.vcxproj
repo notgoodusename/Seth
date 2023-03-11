@@ -38,6 +38,7 @@
     <ClCompile Include="Hacks\Chams.cpp" />
     <ClCompile Include="Hacks\EnginePrediction.cpp" />
     <ClCompile Include="Hacks\Glow.cpp" />
+    <ClCompile Include="Hacks\MovementRebuild.cpp" />
     <ClCompile Include="Hacks\StreamProofESP.cpp" />
     <ClCompile Include="Hacks\Visuals.cpp" />
     <ClCompile Include="Helpers.cpp" />
@@ -53,6 +54,7 @@
     <ClCompile Include="MinHook\hook.c" />
     <ClCompile Include="MinHook\trampoline.c" />
     <ClCompile Include="Netvars.cpp" />
+    <ClCompile Include="SDK\EngineTrace.cpp" />
     <ClCompile Include="SDK\KeyValues.cpp" />
     <ClCompile Include="Seth.cpp" />
     <ClCompile Include="GUI.cpp" />
@@ -66,7 +68,6 @@
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="Memory.cpp" />
     <ClCompile Include="SDK\BitBuffer.cpp" />
-    <ClCompile Include="SDK\EngineTrace.cpp" />
     <ClCompile Include="SDK\Entity.cpp" />
     <ClCompile Include="SDK\GlobalVars.cpp" />
     <ClCompile Include="SDK\Utils.cpp" />
@@ -89,6 +90,7 @@
     <ClInclude Include="Hacks\EnginePrediction.h" />
     <ClInclude Include="Hacks\Glow.h" />
     <ClInclude Include="Hacks\Misc.h" />
+    <ClInclude Include="Hacks\MovementRebuild.h" />
     <ClInclude Include="Hacks\StreamProofESP.h" />
     <ClInclude Include="Hacks\Visuals.h" />
     <ClInclude Include="Helpers.h" />
@@ -157,6 +159,7 @@
     <ClInclude Include="SDK\NetworkChannel.h" />
     <ClInclude Include="SDK\Pad.h" />
     <ClInclude Include="SDK\Panel.h" />
+    <ClInclude Include="SDK\PhysicsSurfaceProps.h" />
     <ClInclude Include="SDK\Platform.h" />
     <ClInclude Include="SDK\PlayerResource.h" />
     <ClInclude Include="SDK\Prediction.h" />

@@ -141,11 +141,60 @@ struct Ray {
 
 class Entity;
 
-struct TraceFilter {
-    TraceFilter(const Entity* entity) : skip{ entity } { }
-    virtual bool shouldHitEntity(Entity* entity, int) { return entity != skip; }
+class BaseTraceFilter 
+{
+public:
+    virtual bool shouldHitEntity(Entity* entity, int) = 0;
+    virtual int getTraceType() const = 0;
+};
+
+class TraceFilterSkipOne : public BaseTraceFilter
+{
+public:
+    TraceFilterSkipOne() {}
+    TraceFilterSkipOne(const Entity* entity) : skip{ entity } { }
+	virtual bool shouldHitEntity(Entity* entity, int) { return entity != skip; }
+	virtual int getTraceType() const { return 0; }
+
+	const void* skip;
+};
+
+class TraceFilter : public BaseTraceFilter
+{
+public:
     virtual int getTraceType() const { return 0; }
-    const void* skip;
+};
+
+class TraceFilterSimple : public TraceFilter
+{
+public:
+    TraceFilterSimple(Entity* entity, int collisionGroup, int shouldHit = NULL) : passEntity{ entity }, collisionGroup{ collisionGroup }, extraShouldHitCheckFunction{ shouldHit } { }
+    virtual bool shouldHitEntity(Entity* handleEntity, int contentsMask);
+    virtual void setPassEntity(Entity* passEntity) { this->passEntity = passEntity; }
+    virtual void setCollisionGroup(int collisionGroup) { this->collisionGroup = collisionGroup; }
+
+    const void* getPassEntity() { return passEntity; }
+
+private:
+    Entity* passEntity;
+	int collisionGroup;
+	int extraShouldHitCheckFunction;
+};
+
+class TraceFilterIgnoreTeammates : public TraceFilterSimple 
+{
+public:
+	TraceFilterIgnoreTeammates(Entity* entity, int collisionGroup, int ignoreTeam) : TraceFilterSimple(entity, collisionGroup), ignoreTeam(ignoreTeam) { }
+    virtual bool shouldHitEntity(Entity* entity, int contentsMask);
+
+	int ignoreTeam;
+};
+
+class TraceFilterIgnorePlayers : public TraceFilterSimple
+{
+public:
+	TraceFilterIgnorePlayers(Entity* entity, int collisionGroup) : TraceFilterSimple(entity, collisionGroup) { }
+    virtual bool shouldHitEntity(Entity* entity, int contentsMask);
 };
 
 namespace HitGroup {
@@ -202,9 +251,9 @@ struct Trace {
 class EngineTrace {
 public:
     VIRTUAL_METHOD(int, getPointContents, 0, (const Vector& absPosition, int contentsMask), (this, std::cref(absPosition), contentsMask, nullptr))
-    VIRTUAL_METHOD(void, _traceRay, 4, (const Ray& ray, unsigned int mask, const TraceFilter& filter, Trace& trace), (this, std::cref(ray), mask, std::cref(filter), std::ref(trace)))
+    VIRTUAL_METHOD(void, _traceRay, 4, (const Ray& ray, unsigned int mask, const BaseTraceFilter& filter, Trace& trace), (this, std::cref(ray), mask, std::cref(filter), std::ref(trace)))
 
-    void traceRay(const Ray& ray, unsigned int mask, const TraceFilter& filter, Trace& trace) noexcept
+    void traceRay(const Ray& ray, unsigned int mask, const BaseTraceFilter& filter, Trace& trace) noexcept
     {
 #ifdef TRACE_STATS
         static int tracesThisFrame, lastFrame;

@@ -27,7 +27,7 @@ bool doesMeleeHit(Entity* activeWeapon, int index, const Vector angles) noexcept
     Vector vecSwingEnd = vecSwingStart + vecForward * swingRange;
 
     Trace trace;
-    interfaces->engineTrace->traceRay({ vecSwingStart, vecSwingEnd, vecSwingMins, vecSwingMaxs }, MASK_SHOT, { localPlayer.get() }, trace);
+    interfaces->engineTrace->traceRay({ vecSwingStart, vecSwingEnd, vecSwingMins, vecSwingMaxs }, MASK_SHOT, TraceFilterSkipOne{ localPlayer.get() }, trace);
     return trace.entity && trace.entity->index() == index;
 }
 
@@ -36,19 +36,19 @@ bool canBackstab(Entity* entity, Vector angles, Vector entityAngles) noexcept
     Vector vecToTarget;
     vecToTarget = entity->getWorldSpaceCenter() - localPlayer->getWorldSpaceCenter();
     vecToTarget.z = 0.0f;
-    vecToTarget = vecToTarget.normalized();
+    vecToTarget.normalizeInPlace();
 
     // Get owner forward view vector
     Vector vecOwnerForward;
     Vector::fromAngleAll(angles, &vecOwnerForward, NULL, NULL);
     vecOwnerForward.z = 0.0f;
-    vecOwnerForward = vecOwnerForward.normalized();
+    vecOwnerForward.normalizeInPlace();
 
     // Get target forward view vector
     Vector vecTargetForward;
     Vector::fromAngleAll(entityAngles, &vecTargetForward, NULL, NULL);
     vecTargetForward.z = 0.0f;
-    vecTargetForward = vecTargetForward.normalized();
+    vecTargetForward.normalizeInPlace();
 
     // Make sure owner is behind, facing and aiming at target's back
     float posVsTargetViewDot = vecToTarget.dotProduct(vecTargetForward);

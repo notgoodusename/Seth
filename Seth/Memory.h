@@ -55,12 +55,13 @@ public:
 
     void(__thiscall* calcAbsoluteVelocity)(void*);
     int(__thiscall* getNextThinkTick)(void*, const char*);
+    bool(_cdecl* passServerEntityFilter)(void* touch, void* pass);
     void(__thiscall* setAbsOrigin)(Entity*, const Vector&);
     void(__thiscall* setAbsAngle)(Entity*, const Vector&);
     void(__thiscall* setCollisionBounds)(void*, const Vector& mins, const Vector& maxs);
     void(__thiscall* setNextThink)(void*, float, const char*);
-
-    std::add_pointer_t<void _cdecl(const char* msg, ...)> logDirect;
+    bool(__stdcall* shouldCollide)(int, int);
+    bool(_cdecl* standardFilterRules)(void*, int);
     bool(__thiscall* physicsRunThink)(void*, int);
 
     int* predictionRandomSeed;
@@ -70,6 +71,8 @@ public:
     std::uintptr_t estimateAbsVelocity;
     std::uintptr_t enableWorldFog;
     std::uintptr_t sendDatagram;
+
+    std::add_pointer_t<void _cdecl(const char* msg, ...)> logDirect;
 private:
 };
 

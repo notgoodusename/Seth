@@ -173,9 +173,6 @@
     <ClCompile Include="imgui\imgui_freetype.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="SDK\EngineTrace.cpp">
-      <Filter>SDK</Filter>
-    </ClCompile>
     <ClCompile Include="SDK\BitBuffer.cpp">
       <Filter>SDK</Filter>
     </ClCompile>
@@ -216,6 +213,12 @@
       <Filter>Hacks\Aimbot</Filter>
     </ClCompile>
     <ClCompile Include="Hacks\Glow.cpp">
+      <Filter>Hacks</Filter>
+    </ClCompile>
+    <ClCompile Include="SDK\EngineTrace.cpp">
+      <Filter>SDK</Filter>
+    </ClCompile>
+    <ClCompile Include="Hacks\MovementRebuild.cpp">
       <Filter>Hacks</Filter>
     </ClCompile>
   </ItemGroup>
@@ -528,6 +531,12 @@
     </ClInclude>
     <ClInclude Include="SDK\Texture.h">
       <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\PhysicsSurfaceProps.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="Hacks\MovementRebuild.h">
+      <Filter>Hacks</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

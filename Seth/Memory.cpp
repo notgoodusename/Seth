@@ -94,11 +94,14 @@ Memory::Memory() noexcept
 
     calcAbsoluteVelocity = relativeToAbsolute<decltype(calcAbsoluteVelocity)>(findPattern(CLIENT_DLL, "\xE8????\xD9\xE8\x8D\x45\xEC") + 1);
     getNextThinkTick = reinterpret_cast<decltype(getNextThinkTick)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\x8B\x45\x08\x56\x8B\xF1\x85\xC0\x75\x13"));
+    passServerEntityFilter = reinterpret_cast<decltype(passServerEntityFilter)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\x56\x8B\x75?\x85\xF6\x75?\xB0?"));
     setAbsOrigin = reinterpret_cast<decltype(setAbsOrigin)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\x56\x57\x8B\xF1\xE8????\x8B\x7D\x08\xF3\x0F\x10\x07"));
     setAbsAngle = reinterpret_cast<decltype(setAbsAngle)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\x83\xEC\x60\x56\x57\x8B\xF1"));
     setCollisionBounds = relativeToAbsolute<decltype(setCollisionBounds)>(findPattern(CLIENT_DLL, "\xE8????\x0F\xB6\x4E\x40") + 1);
     setNextThink = reinterpret_cast<decltype(setNextThink)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\xF3\x0F\x10\x45?\x0F\x2E\x05????\x53"));
-    logDirect = reinterpret_cast<decltype(logDirect)>(GetProcAddress(GetModuleHandleA("tier0.dll"), "Msg"));
+    shouldCollide = reinterpret_cast<decltype(shouldCollide)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\x8B\x55?\x56\x8B\x75?\x3B\xF2"));
+    standardFilterRules = reinterpret_cast<decltype(standardFilterRules)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\x8B\x4D?\x56\x8B\x01\xFF\x50?\x8B\xF0\x85\xF6\x75?\xB0?\x5E\x5D\xC3"));
+
     physicsRunThink = reinterpret_cast<decltype(physicsRunThink)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\x53\x8B\xD9\x56\x57\x8B\x83????\xC1"));
 
     predictionRandomSeed = *reinterpret_cast<int**>(findPattern(CLIENT_DLL, "\xC7\x05????????\x5D\xC3\x8B\x40\x34") + 2);
@@ -108,6 +111,8 @@ Memory::Memory() noexcept
     estimateAbsVelocity = findPattern(CLIENT_DLL, "\x55\x8B\xEC\x83\xEC?\x56\x8B\xF1\xE8????\x3B\xF0\x75?\x8B\xCE\xE8????\x8B\x45?\xD9\x86????\xD9\x18\xD9\x86????\xD9\x58?\xD9\x86????\xD9\x58?\x5E\x8B\xE5\x5D\xC2");
     enableWorldFog = findPattern(CLIENT_DLL, "\x55\x8B\xEC\x8B\x0D????\x83\xEC\x0C\x8B\x01\x53\x56\xFF\x90????\x8B\xF0\x85\xF6\x74\x07\x8B\x06\x8B\xCE\xFF\x50\x08");
     sendDatagram = findPattern(ENGINE_DLL, "\x55\x8B\xEC\xB8????\xE8????\xA1????\x53\x56\x8B\xD9");;
+
+    logDirect = reinterpret_cast<decltype(logDirect)>(GetProcAddress(GetModuleHandleA("tier0.dll"), "Msg"));
 
     localPlayer.init(*reinterpret_cast<Entity***>(findPattern(CLIENT_DLL, "\xA1????\x33\xC9\x83\xC4\x04")+1));
 }

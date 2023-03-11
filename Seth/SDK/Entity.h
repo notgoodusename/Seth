@@ -113,12 +113,14 @@ public:
 
     VIRTUAL_METHOD(int&, handle, 2, (), (this))
     VIRTUAL_METHOD(Collideable*, getCollideable, 3, (), (this))
+    VIRTUAL_METHOD(Entity*, getBaseEntity, 7, (), (this))
 
     VIRTUAL_METHOD(const Vector&, getAbsOrigin, 9, (), (this))
     VIRTUAL_METHOD(Vector&, getAbsAngle, 10, (), (this))
     VIRTUAL_METHOD(int, getMaxHealth, 107, (), (this))
 
     VIRTUAL_METHOD(void, think, 121, (), (this))
+    VIRTUAL_METHOD(bool, shouldCollide, 145, (int group, int mask), (this, group, mask))
     VIRTUAL_METHOD(void, setSequence, 189, (int sequence), (this, sequence))
     VIRTUAL_METHOD(void, studioFrameAdvance, 190, (), (this))
     VIRTUAL_METHOD(void, updateClientSideAnimation, 193, (), (this))
@@ -167,7 +169,7 @@ public:
             return false;
 
         Trace trace;
-        interfaces->engineTrace->traceRay({ localPlayer->getEyePosition(), position.notNull() ? position : getBonePosition(6) }, MASK_SHOT | CONTENTS_HITBOX, { localPlayer.get() }, trace);
+        interfaces->engineTrace->traceRay({ localPlayer->getEyePosition(), position.notNull() ? position : getBonePosition(6) }, MASK_SHOT | CONTENTS_HITBOX, TraceFilterSkipOne{ localPlayer.get() }, trace);
         return trace.entity == this || trace.fraction > 0.97f;
     }
 
@@ -184,6 +186,21 @@ public:
         vel.x = *reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + 0x15C);
         vel.y = *reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + 0x160);
         vel.z = *reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + 0x164);
+    }
+
+    Vector getAbsVelocity() noexcept
+    {
+        Vector out;
+        getAbsVelocity(out);
+        return out;
+    }
+
+    float getMaxSpeed() noexcept
+    {
+        float speed = maxSpeed();
+        if (flags() & (1 << 1))
+            speed /= 3.0f;
+        return speed;
     }
 
     const char* getModelName() noexcept
@@ -318,6 +335,11 @@ public:
     {
         *reinterpret_cast<int*>(reinterpret_cast<uintptr_t>(this) + 0x59C) = UINT_MAX; //m_iMostRecentModelBoneCounter = g_iModelBoneCounter - 1
         *reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + 0x860) = -FLT_MAX; //m_flLastBoneSetupTime = -FLT_MAX
+    }
+
+    int& collisionGroup() noexcept
+    {
+        return *reinterpret_cast<int*>(reinterpret_cast<uintptr_t>(this) + 896);
     }
 
     int& EFlags() noexcept
@@ -483,6 +505,7 @@ public:
     NETVAR(fallVelocity, "CBasePlayer", "m_flFallVelocity", float)
     NETVAR(groundEntity, "CBasePlayer", "m_hGroundEntity", int)
     NETVAR(health, "CBasePlayer", "m_iHealth", int)
+    NETVAR(maxSpeed, "CBaseEntity", "m_flMaxspeed", float)
 
     NETVAR(activeWeapon, "CBaseCombatCharacter", "m_hActiveWeapon", int)
     NETVAR(nextAttack, "CBaseCombatCharacter", "m_flNextAttack", float)

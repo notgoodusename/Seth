@@ -129,6 +129,20 @@ struct Vector {
         return Vector{ x + add, y + add, z + add };
     }
 
+    float normalizeInPlace() noexcept
+    {
+        auto vectorNormalize = [](Vector& vector)
+        {
+            float radius = std::sqrtf(std::powf(vector.x, 2) + std::powf(vector.y, 2) + std::powf(vector.z, 2));
+            radius = 1.f / (radius + FLT_EPSILON);
+
+            vector *= radius;
+
+            return radius;
+        };
+        return vectorNormalize(*this);
+    };
+
     Vector normalized() noexcept
     {
         auto vectorNormalize = [](Vector& vector)

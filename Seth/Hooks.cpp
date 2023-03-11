@@ -26,6 +26,7 @@
 #include "Hacks/EnginePrediction.h"
 #include "Hacks/Glow.h"
 #include "Hacks/Misc.h"
+#include "Hacks/MovementRebuild.h"
 #include "Hacks/StreamProofESP.h"
 #include "Hacks/Visuals.h"
 
@@ -194,6 +195,7 @@ static bool __fastcall createMove(void* thisPointer, void*, float inputSampleTim
 static void __stdcall frameStageNotify(FrameStage stage) noexcept
 {
     static auto backtrackInit = (Backtrack::init(), false);
+    static auto movementRebuildInit = (MovementRebuild::init(), false);
 
     if (stage == FrameStage::START)
         GameData::update();
