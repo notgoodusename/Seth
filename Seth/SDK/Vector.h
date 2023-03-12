@@ -131,16 +131,13 @@ struct Vector {
 
     float normalizeInPlace() noexcept
     {
-        auto vectorNormalize = [](Vector& vector)
-        {
-            float radius = std::sqrtf(std::powf(vector.x, 2) + std::powf(vector.y, 2) + std::powf(vector.z, 2));
-            radius = 1.f / (radius + FLT_EPSILON);
-
-            vector *= radius;
-
-            return radius;
-        };
-        return vectorNormalize(*this);
+        const float ln = length();
+        if (isnan(ln) || ln == 0.f)
+            return 0;
+        x /= ln;
+        y /= ln;
+        z /= ln;
+        return ln;
     };
 
     Vector normalized() noexcept
@@ -175,7 +172,7 @@ struct Vector {
         return *this;
     }
 
-    auto length() const noexcept
+    float length() const noexcept
     {
         return std::sqrt(x * x + y * y + z * z);
     }
