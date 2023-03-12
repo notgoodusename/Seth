@@ -347,6 +347,12 @@ public:
         return *reinterpret_cast<int*>(reinterpret_cast<uintptr_t>(this) + 0x1A0);
     }
 
+
+    MoveType& moveType() noexcept
+    {
+        return *reinterpret_cast<MoveType*>(reinterpret_cast<uintptr_t>(this) + 0x1A4);
+    }
+
     int& getButtons() noexcept
     {
         return *reinterpret_cast<int*>(reinterpret_cast<uintptr_t>(this) + 0x1180);
@@ -459,7 +465,6 @@ public:
 
     NETVAR(modelIndex, "CBaseEntity", "m_nModelIndex", unsigned)
     NETVAR(origin, "CBaseEntity", "m_vecOrigin", Vector)
-    NETVAR_OFFSET(moveType, "CBaseEntity", "m_nRenderMode", 1, MoveType)
     NETVAR(simulationTime, "CBaseEntity", "m_flSimulationTime", float)
     NETVAR(ownerEntity, "CBaseEntity", "m_hOwnerEntity", int)
     NETVAR(spotted, "CBaseEntity", "m_bSpotted", bool)

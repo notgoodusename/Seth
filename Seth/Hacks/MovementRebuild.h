@@ -24,9 +24,12 @@ namespace MovementRebuild
 		Entity* groundEntity;
 		Vector velocity;
 		Vector position;
+		Vector obbMins;
+		Vector obbMaxs;
 		Vector eyeAngles;
 		float sideMove;
 		float forwardMove;
+		float upMove;
 		float surfaceFriction;
 		int waterLevel;
 		float maxSpeed;
@@ -70,7 +73,7 @@ namespace MovementRebuild
 
 	int	clipVelocity(Vector& in, Vector& normal, Vector& out, float overbounce) noexcept;
 
-	int checkStuck() noexcept;
+	int stuck() noexcept;
 
 	bool checkWater() noexcept;
 

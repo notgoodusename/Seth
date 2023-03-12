@@ -1,17 +1,19 @@
 #include "MovementRebuild.h"
 #include "../SDK/PhysicsSurfaceProps.h"
 
+//https://github.com/emilyinure/haven-tf2
+
 MovementRebuild::info mv;
 MovementRebuild::Cvars cvars;
 
 Vector MovementRebuild::getPlayerMins() noexcept
 {
-	return mv.player->obbMins() * mv.player->modelScale();
+	return mv.obbMins;
 }
 
 Vector MovementRebuild::getPlayerMaxs() noexcept
 {
-	return mv.player->obbMaxs() * mv.player->modelScale();
+	return mv.obbMaxs;
 }
 
 void MovementRebuild::tracePlayerBBox(const Vector& start, const Vector& end, unsigned int mask, int collisionGroup, Trace& pm) noexcept
@@ -28,7 +30,45 @@ unsigned int MovementRebuild::playerSolidMask(bool brushOnly) noexcept
 {
 	return (brushOnly) ? MASK_PLAYERSOLID_BRUSHONLY : MASK_PLAYERSOLID;
 }
+/*
+std::vector<Vector> predictedPath;
 
+void MovementRebuild::draw() noexcept
+{
+	static std::vector<Vector> points = predictedPath;
+	if (!predictedPath.empty())
+		points = predictedPath;
+	if (!localPlayer || !localPlayer->isAlive())
+		return;
+
+	if (points.empty() || points.size() <= 3U)
+		return;
+
+	const auto color = Helpers::calculateColor(Color4());
+
+	auto drawList = ImGui::GetBackgroundDrawList();
+
+	Vector prev = points[0];
+	ImVec2 nadeStart, nadeEnd;
+
+	std::vector<std::pair<ImVec2, ImVec2>> screenPoints;
+
+	//	draw nade path
+	for (auto& origin : points)
+	{
+		if (Helpers::worldToScreen(prev, nadeStart) && Helpers::worldToScreen(origin, nadeEnd))
+		{
+			screenPoints.emplace_back(std::pair<ImVec2, ImVec2>{ nadeStart, nadeEnd });
+			prev = origin;
+		}
+	}
+
+	for (auto& point : screenPoints)
+	{
+		drawList->AddLine(ImVec2(point.first.x, point.first.y), ImVec2(point.second.x, point.second.y), color, 1.5f);
+	}
+}
+*/
 void MovementRebuild::init() noexcept
 {
 	cvars.accelerate = interfaces->cvar->findVar("sv_accelerate");
@@ -54,18 +94,26 @@ void MovementRebuild::run(Entity* player, int ticks) noexcept
 	mv.waterLevel = player->waterLevel();
 
 	mv.maxSpeed = player->getMaxSpeed();
+	
+	mv.obbMins = player->obbMins()* player->modelScale();
+	mv.obbMaxs = player->obbMaxs()* player->modelScale();
 
+	//THE BIG ONE
+	//This is the most important part of movement rebuild
+	//Assigning the correct forwardmove, sidemove and upmove values
+	//TODO: improve this
 	Vector direction = mv.velocity.toAngle();
 	direction.y = mv.eyeAngles.y - direction.y;
 
 	const auto finalDirection = Vector::fromAngle(direction) * mv.velocity.length2D();
-	mv.forwardMove = finalDirection.x;
-	mv.sideMove = finalDirection.y;
+	mv.forwardMove = finalDirection.x * (450.0f / mv.maxSpeed);
+	mv.sideMove = finalDirection.y * (450.0f / mv.maxSpeed);
+	mv.upMove = finalDirection.z;
 
 	if (player->moveType() != MoveType::WALK)
 		return;
 
-	if (checkStuck())
+	if (stuck())
 		return;
 
 	for (int i = 0; i < ticks; i++)
@@ -107,7 +155,7 @@ void MovementRebuild::waterMove() noexcept
 	}
 
 	// Sinking after no other movement occurs
-	if (!mv.forwardMove && !mv.sideMove)
+	if (!mv.forwardMove && !mv.sideMove && !mv.upMove)
 	{
 		wishvel[2] -= 60;		// drift towards bottom
 	}
@@ -116,7 +164,7 @@ void MovementRebuild::waterMove() noexcept
 		// exaggerate upward movement along forward as well
 		float upwardMovememnt = mv.forwardMove * forward.z * 2;
 		upwardMovememnt = std::clamp(upwardMovememnt, 0.f, mv.maxSpeed);
-		//wishvel[2] += mv->m_flUpMove + upwardMovememnt;
+		wishvel[2] += mv.upMove + upwardMovememnt;
 	}
 
 	// Copy it over and determine speed
@@ -388,11 +436,8 @@ void MovementRebuild::walkMove() noexcept
 	//
 	// Clamp to server defined max speed
 	//
-	if ((wishspeed != 0.0f) && (wishspeed > mv.maxSpeed))
-	{
-		wishvel *= (mv.maxSpeed / wishspeed);
-		wishspeed = mv.maxSpeed;
-	}
+
+	wishspeed = std::clamp(wishspeed, 0.0f, mv.maxSpeed);
 
 	// Set pmove velocity
 	mv.velocity[2] = 0.0f;
@@ -558,7 +603,7 @@ int MovementRebuild::clipVelocity(Vector& in, Vector& normal, Vector& out, float
 	return blocked;
 }
 
-int MovementRebuild::checkStuck() noexcept
+int MovementRebuild::stuck() noexcept
 {
 	Trace trace;
 
