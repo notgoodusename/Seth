@@ -33,6 +33,7 @@ public:
     MinHook engine;
     MinHook modelRender;
     MinHook panel;
+    MinHook prediction;
     MinHook surface;
 private:
     HMODULE moduleHandle;

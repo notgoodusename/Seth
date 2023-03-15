@@ -6,5 +6,5 @@ class Entity;
 
 class MoveHelper {
 public:
-	//Empty
+    VIRTUAL_METHOD(void, setHost, 0, (Entity* host), (this, host))
 };

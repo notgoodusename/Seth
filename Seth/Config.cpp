@@ -470,6 +470,7 @@ static void from_json(const json& j, Config::Misc& m)
     read(j, "Bunny hop", m.bunnyHop);
     read(j, "Edge Jump", m.edgeJump);
     read(j, "Edge Jump Key", m.edgeJumpKey);
+    read(j, "Fast stop", m.fastStop);
     read(j, "Auto accept", m.autoAccept);
     read(j, "Reveal votes", m.revealVotes);
     read<value_t::object>(j, "Spectator list", m.spectatorList);
@@ -909,6 +910,7 @@ static void to_json(json& j, const Config::Misc& o)
 
     WRITE("Edge Jump", edgeJump);
     WRITE("Edge Jump Key", edgeJumpKey);
+    WRITE("Fast Stop", fastStop);
     WRITE("Auto accept", autoAccept);
     WRITE("Reveal votes", revealVotes);
     WRITE("Spectator list", spectatorList);
@@ -916,7 +918,6 @@ static void to_json(json& j, const Config::Misc& o)
     WRITE("Player list", playerList);
     WRITE("Watermark", watermark);
     WRITE("Offscreen Enemies", offscreenEnemies);
-    WRITE("Fast Stop", fastStop);
     WRITE("Sv pure bypass", svPureBypass);
     WRITE("Unlock hidden cvars", unhideConvars);
     WRITE("Logger", logger);

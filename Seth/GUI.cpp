@@ -896,7 +896,7 @@ void GUI::renderMiscWindow() noexcept
     ImGui::PushID("Edge Jump Key");
     ImGui::hotkey2("", config->misc.edgeJumpKey);
     ImGui::PopID();
-
+    ImGui::Checkbox("Fast stop", &config->misc.fastStop);
     ImGui::Checkbox("Auto accept", &config->misc.autoAccept);
     ImGui::Checkbox("Reveal votes", &config->misc.revealVotes);
 

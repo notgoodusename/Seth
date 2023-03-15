@@ -14,6 +14,7 @@
 #include "Engine.h"
 #include "EngineTrace.h"
 #include "EntityList.h"
+#include "GameRules.h"
 #include "GlobalVars.h"
 #include "LocalPlayer.h"
 #include "matrix3x4.h"
@@ -286,8 +287,10 @@ public:
     float getSwingRange() noexcept
     {
         if (weaponId() == WeaponId::SWORD)
-            return 72; // swords are typically 72
-        return 48;
+            return 72.0f; // swords are typically 72
+        if (itemDefinitionIndex() == Soldier_t_TheDisciplinaryAction)
+            return 91.0f; //Wtf is this range fr
+        return 48.0f;
     }
 
     Vector getWorldSpaceCenter() noexcept
@@ -346,7 +349,6 @@ public:
     {
         return *reinterpret_cast<int*>(reinterpret_cast<uintptr_t>(this) + 0x1A0);
     }
-
 
     MoveType& moveType() noexcept
     {
@@ -408,7 +410,30 @@ public:
 
     void runPostThink() noexcept
     {
-        postThink();
+        interfaces->mdlCache->beginLock();
+
+        if (isAlive())
+        {
+            /*
+            if (flags() & (1 << 1))
+                memory->setCollisionBounds(getCollideable(), memory->gameRules->getViewVectors()->duckHullMin, memory->gameRules->getViewVectors()->duckHullMax);
+            else
+                memory->setCollisionBounds(getCollideable(), memory->gameRules->getViewVectors()->hullMin, memory->gameRules->getViewVectors()->hullMax);
+            */
+
+            if (flags() & 1)
+                fallVelocity() = 0.0f;
+
+            // Don't allow bogus sequence on player
+            if (sequence() == -1)
+                setSequence(0);
+
+            studioFrameAdvance();
+        }
+
+        // Even if dead simulate entities
+        memory->simulatePlayerSimulatedEntities(this);
+        interfaces->mdlCache->endLock();
     }
 
     bool isInReload() noexcept
@@ -547,6 +572,7 @@ public:
 
     VIRTUAL_METHOD(const Vector&, obbMins, 3, (), (this))
     VIRTUAL_METHOD(const Vector&, obbMaxs, 4, (), (this))
+
 
     void setCollisionBounds(const Vector& mins, const Vector& maxs) noexcept
     {

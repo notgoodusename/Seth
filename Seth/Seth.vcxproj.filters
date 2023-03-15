@@ -538,5 +538,8 @@
     <ClInclude Include="Hacks\MovementRebuild.h">
       <Filter>Hacks</Filter>
     </ClInclude>
+    <ClInclude Include="SDK\GameRules.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

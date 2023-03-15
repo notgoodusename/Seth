@@ -3,6 +3,9 @@
 
 bool TraceFilterSimple::shouldHitEntity(Entity* handleEntity, int contentsMask)
 {
+    if (!handleEntity)
+        return false;
+
     if (!memory->standardFilterRules(handleEntity, contentsMask))
         return false;
 
@@ -31,6 +34,9 @@ bool TraceFilterSimple::shouldHitEntity(Entity* handleEntity, int contentsMask)
 
 bool TraceFilterIgnoreTeammates::shouldHitEntity(Entity* handleEntity, int contentsMask)
 {
+    if (!handleEntity)
+        return false;
+
     const auto baseEntity = handleEntity->getBaseEntity();
     if (!baseEntity)
         return false;
@@ -43,6 +49,9 @@ bool TraceFilterIgnoreTeammates::shouldHitEntity(Entity* handleEntity, int conte
 
 bool TraceFilterIgnorePlayers::shouldHitEntity(Entity* handleEntity, int contentsMask)
 {
+    if (!handleEntity)
+        return false;
+
     const auto baseEntity = handleEntity->getBaseEntity();
     if (!baseEntity)
         return false;

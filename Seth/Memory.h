@@ -13,6 +13,7 @@ class ClientState;
 class Entity;
 class GameEventDescriptor;
 class GameEventManager;
+class GameRules;
 class Input;
 class ItemSystem;
 class KeyValues;
@@ -46,6 +47,7 @@ public:
 
     ClientMode* clientMode;
     ClientState* clientState;
+    GameRules* gameRules;
     GlobalVars* globalVars;
     Input* input;
     MoveHelper* moveHelper;
@@ -61,6 +63,7 @@ public:
     void(__thiscall* setCollisionBounds)(void*, const Vector& mins, const Vector& maxs);
     void(__thiscall* setNextThink)(void*, float, const char*);
     bool(__stdcall* shouldCollide)(int, int);
+    void(__thiscall* simulatePlayerSimulatedEntities)(void*);
     bool(_cdecl* standardFilterRules)(void*, int);
     bool(__thiscall* physicsRunThink)(void*, int);
 

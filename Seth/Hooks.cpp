@@ -147,7 +147,6 @@ static bool __fastcall createMove(void* thisPointer, void*, float inputSampleTim
     if (!cmd || !cmd->commandNumber)
         return result;
 
-    static auto previousViewAngles{ cmd->viewangles };
     auto currentViewAngles{ cmd->viewangles };
     const auto currentCmd{ *cmd };
 
@@ -165,13 +164,6 @@ static bool __fastcall createMove(void* thisPointer, void*, float inputSampleTim
 
     Misc::edgejump(cmd);
 
-    auto viewAnglesDelta{ cmd->viewangles - previousViewAngles };
-    viewAnglesDelta.normalize();
-    viewAnglesDelta.x = std::clamp(viewAnglesDelta.x, -255.0f, 255.0f);
-    viewAnglesDelta.y = std::clamp(viewAnglesDelta.y, -255.0f, 255.0f);
-
-    cmd->viewangles = previousViewAngles + viewAnglesDelta;
-
     cmd->viewangles.normalize();
 
     if ((currentViewAngles != cmd->viewangles
@@ -187,8 +179,6 @@ static bool __fastcall createMove(void* thisPointer, void*, float inputSampleTim
     cmd->forwardmove = std::clamp(cmd->forwardmove, -450.0f, 450.0f);
     cmd->sidemove = std::clamp(cmd->sidemove, -450.0f, 450.0f);
     cmd->upmove = std::clamp(cmd->upmove, -320.0f, 320.0f);
-
-    previousViewAngles = cmd->viewangles;
     return false;
 }
 
@@ -370,6 +360,8 @@ void Hooks::install() noexcept
     panel.init(interfaces->panel);
     panel.hookAt(41, paintTraverse);
 
+    prediction.init(interfaces->prediction);
+
     surface.init(interfaces->surface);
     surface.hookAt(62, lockCursor);
 
@@ -391,17 +383,22 @@ static DWORD WINAPI unload(HMODULE moduleHandle) noexcept
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
 
+    //IDK why, dont ask me why, but release crashes because of engineprediction on unhook
+    //Debug doesnt tho, so this check is needed to unhook on release, also unhooking on release will lag your game
+    //prob some exception being skipped lol
+#ifdef _DEBUG
     _CRT_INIT(moduleHandle, DLL_PROCESS_DETACH, nullptr);
-
+#endif
     FreeLibraryAndExitThread(moduleHandle, 0);
 }
 
 void Hooks::uninstall() noexcept
 {
-    resetAll(1);
-
     MH_DisableHook(MH_ALL_HOOKS);
+    MH_RemoveHook(MH_ALL_HOOKS);
     MH_Uninitialize();
+
+    resetAll(1);
 
     Netvars::restore();
 

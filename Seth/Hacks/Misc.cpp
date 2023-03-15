@@ -120,7 +120,7 @@ void Misc::bunnyHop(UserCmd* cmd) noexcept
     static auto wasLastTimeOnGround{ localPlayer->isOnGround() };
 
     if (config->misc.bunnyHop && !localPlayer->isOnGround() 
-        && localPlayer->moveType() != MoveType::LADDER && localPlayer->moveType() != MoveType::NOCLIP && localPlayer->moveType() != MoveType::OBSERVER
+        && localPlayer->moveType() != MoveType::NOCLIP
         && !localPlayer->isInBumperKart() && !localPlayer->isAGhost() && !localPlayer->isSwimming() && localPlayer->isAlive()
         && !wasLastTimeOnGround)
         cmd->buttons &= ~UserCmd::IN_JUMP;
@@ -173,7 +173,7 @@ void Misc::autoStrafe(UserCmd* cmd, Vector& currentViewAngles) noexcept
     }
 
     //If we are on ground, noclip or in a ladder return
-    if (localPlayer->isOnGround() || localPlayer->moveType() == MoveType::NOCLIP || localPlayer->moveType() == MoveType::LADDER)
+    if (localPlayer->isOnGround() || localPlayer->moveType() == MoveType::NOCLIP)
         return;
 
     if (localPlayer->isInBumperKart() || localPlayer->isAGhost() || localPlayer->isSwimming())
@@ -205,7 +205,7 @@ void Misc::edgejump(UserCmd* cmd) noexcept
     if (!localPlayer || !localPlayer->isAlive() || localPlayer->isOnGround() || localPlayer->isSwimming())
         return;
 
-    if (const auto mt = localPlayer->moveType(); mt == MoveType::LADDER || mt == MoveType::NOCLIP)
+    if (const auto mt = localPlayer->moveType(); mt == MoveType::NOCLIP)
         return;
 
     if (EnginePrediction::wasOnGround())
@@ -217,12 +217,11 @@ void Misc::fastStop(UserCmd* cmd) noexcept
     if (!config->misc.fastStop)
         return;
 
-
     if (!localPlayer || !localPlayer->isAlive() || localPlayer->isTaunting() ||
         localPlayer->isInBumperKart() || localPlayer->isAGhost() || localPlayer->isSwimming() || localPlayer->isCharging())
         return;
 
-    if (localPlayer->moveType() == MoveType::NOCLIP || localPlayer->moveType() == MoveType::LADDER || !localPlayer->isOnGround() || cmd->buttons & UserCmd::IN_JUMP)
+    if (localPlayer->moveType() == MoveType::NOCLIP || !localPlayer->isOnGround() || cmd->buttons & UserCmd::IN_JUMP)
         return;
 
     if (cmd->buttons & (UserCmd::IN_MOVELEFT | UserCmd::IN_MOVERIGHT | UserCmd::IN_FORWARD | UserCmd::IN_BACK))

@@ -85,6 +85,7 @@ Memory::Memory() noexcept
 
     clientMode = **reinterpret_cast<ClientMode***>(findPattern(CLIENT_DLL, "\x8B\x0D????\x8B\x02\xD9\x05") + 2);
     clientState = *reinterpret_cast<ClientState**>(findPattern(ENGINE_DLL, "\x68????\xE8????\x83\xC4\x08\x5F\x5E\x5B\x5D\xC3") + 1);
+    gameRules = *reinterpret_cast<GameRules**>(findPattern(CLIENT_DLL, "\x8B\x0D????\x8D\x78\x30\x8B\x11\xFF\x52\x7C\x83\xC0\x24\xEB\x14\xFF\x50\x7C\x8B\x0D????\x8D\x78\x18\x8B\x11\xFF\x52\x7C\x83\xC0\x0C\x57\x50\x8D\x8B????\xE8????\x53") + 2);
     globalVars = *reinterpret_cast<GlobalVars**>(findPattern(ENGINE_DLL, "\xA1????\x8B\x11\x68") + 0x8);
     input = **reinterpret_cast<Input***>(findPattern(CLIENT_DLL, "\x8B\x0D????\x56\x8B\x01\xFF\x50\x24\x8B\x45\xFC") + 2);
     moveHelper = **reinterpret_cast<MoveHelper***>(findPattern(CLIENT_DLL, "\x8B\x0D????\x8B\x01\xFF\x50\x28\x56\x8B\xC8") + 2);
@@ -100,8 +101,8 @@ Memory::Memory() noexcept
     setCollisionBounds = relativeToAbsolute<decltype(setCollisionBounds)>(findPattern(CLIENT_DLL, "\xE8????\x0F\xB6\x4E\x40") + 1);
     setNextThink = reinterpret_cast<decltype(setNextThink)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\xF3\x0F\x10\x45?\x0F\x2E\x05????\x53"));
     shouldCollide = reinterpret_cast<decltype(shouldCollide)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\x8B\x55?\x56\x8B\x75?\x3B\xF2"));
+    simulatePlayerSimulatedEntities = relativeToAbsolute<decltype(simulatePlayerSimulatedEntities)>(findPattern(CLIENT_DLL, "\xE8????\x8B\x06\x8B\xCE\x5E\x5B") + 1);
     standardFilterRules = reinterpret_cast<decltype(standardFilterRules)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\x8B\x4D?\x56\x8B\x01\xFF\x50?\x8B\xF0\x85\xF6\x75?\xB0?\x5E\x5D\xC3"));
-
     physicsRunThink = reinterpret_cast<decltype(physicsRunThink)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\x53\x8B\xD9\x56\x57\x8B\x83????\xC1"));
 
     predictionRandomSeed = *reinterpret_cast<int**>(findPattern(CLIENT_DLL, "\xC7\x05????????\x5D\xC3\x8B\x40\x34") + 2);
