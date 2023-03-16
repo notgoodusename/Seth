@@ -414,12 +414,10 @@ public:
 
         if (isAlive())
         {
-            /*
             if (flags() & (1 << 1))
-                memory->setCollisionBounds(getCollideable(), memory->gameRules->getViewVectors()->duckHullMin, memory->gameRules->getViewVectors()->duckHullMax);
+                memory->setCollisionBounds(getCollideable(), Vector{ -16.0f, -16.0f, 0.0f}, Vector{ 16.0f, 16.0f, 36.0f });
             else
-                memory->setCollisionBounds(getCollideable(), memory->gameRules->getViewVectors()->hullMin, memory->gameRules->getViewVectors()->hullMax);
-            */
+                memory->setCollisionBounds(getCollideable(), Vector{ -16.0f, -16.0f, 0.0f }, Vector{ 16.0f, 16.0f, 72.0f });
 
             if (flags() & 1)
                 fallVelocity() = 0.0f;
