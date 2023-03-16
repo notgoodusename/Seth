@@ -44,14 +44,12 @@ static void initializeMaterials() noexcept
         kv->setString("$selfillumfresnel", "1");
         kv->setString("$selfillumfresnelminmaxexp", "[-0.25 1 1]");
         shaded = interfaces->materialSystem->createMaterial("shaded", kv);
-        shaded->incrementReferenceCount();
     }
 
     {
         const auto kv = new KeyValues("UnlitGeneric");
         kv->setString("$basetexture", "vgui/white_additive");
         flat = interfaces->materialSystem->createMaterial("flat", kv);
-        flat->incrementReferenceCount();
     }
 
     {
@@ -64,7 +62,6 @@ static void initializeMaterials() noexcept
         kv->setString("$phongfresnelranges", "[0 0.05 0.1]");
         kv->setString("$alpha", ".8");
         glow = interfaces->materialSystem->createMaterial("glow", kv);
-        glow->incrementReferenceCount();
     }
 }
 
