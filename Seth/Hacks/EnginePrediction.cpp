@@ -70,15 +70,15 @@ void EnginePrediction::run(UserCmd* cmd) noexcept
     localPlayer->updateButtonState(cmd->buttons);
     localPlayer->setLocalViewAngles(cmd->viewangles);
 
-    localPlayer->runPreThink();
-    localPlayer->runThink();
+    //localPlayer->runPreThink();
+    //localPlayer->runThink();
 
     memory->moveHelper->setHost(localPlayer.get());
     interfaces->prediction->setupMove(localPlayer.get(), cmd, memory->moveHelper, &moveData);
     interfaces->gameMovement->processMovement(localPlayer.get(), &moveData);
     interfaces->prediction->finishMove(localPlayer.get(), cmd, &moveData);
 
-    localPlayer->runPostThink();
+    //localPlayer->runPostThink();
 
     interfaces->gameMovement->finishTrackPredictionErrors(localPlayer.get());
     memory->moveHelper->setHost(nullptr);
