@@ -660,9 +660,7 @@ bool MovementRebuild::checkWater() noexcept
 
 void MovementRebuild::startGravity() noexcept
 {
-	float gravity = 1.0f;
-
-	//TODO: m_flGravity is prob a netvar
+	const float gravity = (mv.player->conditionEx2() & TFCondEx2_Parachute) ? 0.224f : 1.0f;
 
 	// Add gravity so they'll be in the correct position during movement
 	// yes, this 0.5 looks wrong, but it's not.  
@@ -680,9 +678,7 @@ void MovementRebuild::startGravity() noexcept
 
 void MovementRebuild::finishGravity() noexcept
 {
-	float gravity = 1.0f;
-
-	//TODO: m_flGravity is prob a netvar
+	const float gravity = (mv.player->conditionEx2() & TFCondEx2_Parachute) ? 0.224f : 1.0f;
 
 	// Get the correct velocity for the end of the dt 
 	mv.velocity[2] -= (gravity * cvars.gravity->getFloat() * 0.5f * memory->globalVars->intervalPerTick);
