@@ -96,33 +96,31 @@ bool Chams::render(void* state, const ModelRenderInfo& info, matrix3x4* customBo
     this->info = &info;
     this->customBoneToWorld = customBoneToWorld;
 
-
-    auto modelNameOriginal = interfaces->modelInfo->getModelName(info.model);
-    std::string_view modelName(modelNameOriginal);
-
-    if (modelName.starts_with("models/buildables/"))
+    const auto entity = interfaces->entityList->getEntity(info.entityIndex);
+    if (localPlayer && entity)
     {
-        const auto entity = interfaces->entityList->getEntity(info.entityIndex);
-        if (entity && !entity->isDormant())
-            renderBuilding(entity);
-    }
-    else if(modelName.starts_with("models/halloween/") || modelName.starts_with("models/items/"))
-    {
-        const auto entity = interfaces->entityList->getEntity(info.entityIndex);
-        if (entity && !entity->isDormant())
-            renderWorld(entity);
-    }
-    else if (modelName.starts_with("models/bots/"))
-    {
-        const auto entity = interfaces->entityList->getEntity(info.entityIndex);
-        if (entity && !entity->isDormant() && !entity->isPlayer())
-            renderNPCs(entity);
-    }
-    else
-    {
-        const auto entity = interfaces->entityList->getEntity(info.entityIndex);
-        if (entity && !entity->isDormant() && entity->isPlayer())
-            renderPlayer(entity);
+        auto modelNameOriginal = interfaces->modelInfo->getModelName(info.model);
+        std::string_view modelName(modelNameOriginal);
+        if (modelName.starts_with("models/buildables/"))
+        {
+            if (!entity->isDormant())
+                renderBuilding(entity);
+        }
+        else if (modelName.starts_with("models/halloween/") || modelName.starts_with("models/items/"))
+        {
+            if (!entity->isDormant() && entity->isObject())
+                renderWorld(entity);
+        }
+        else if (modelName.starts_with("models/bots/"))
+        {
+            if (!entity->isDormant() && !entity->isPlayer() && entity->isNPC())
+                renderNPCs(entity);
+        }
+        else
+        {
+            if (!entity->isDormant() && entity->isPlayer())
+                renderPlayer(entity);
+        }
     }
 
     return appliedChams;
@@ -130,10 +128,7 @@ bool Chams::render(void* state, const ModelRenderInfo& info, matrix3x4* customBo
 
 void Chams::renderBuilding(Entity* building) noexcept
 {
-    if (!localPlayer)
-        return;
-
-    if (building->objectCarried() || building->objectHealth() <= 0)
+    if (!building || building->objectHealth() <= 0) //this line causes a random crash idk why tho, object carried comparasion crashes
         return;
 
     if (!areAnyMaterialsEnabled(config->buildingChams.all))
@@ -151,9 +146,6 @@ void Chams::renderBuilding(Entity* building) noexcept
 
 void Chams::renderWorld(Entity* worldEntity) noexcept
 {
-    if (!localPlayer)
-        return;
-
     if (!areAnyMaterialsEnabled(config->worldChams.all) &&
         !areAnyMaterialsEnabled(config->worldChams.ammoPacks) &&
         !areAnyMaterialsEnabled(config->worldChams.healthPacks) &&
@@ -196,17 +188,11 @@ void Chams::renderWorld(Entity* worldEntity) noexcept
 
 void Chams::renderNPCs(Entity* npc) noexcept
 {
-    if (!localPlayer)
-        return;
-
     applyChams(config->chams["NPCs"].materials);
 }
 
 void Chams::renderPlayer(Entity* player) noexcept
 {
-    if (!localPlayer)
-        return;
-
     const auto health = player->health();
     const auto maxHealth = player->getMaxHealth();
     

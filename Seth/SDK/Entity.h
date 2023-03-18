@@ -139,6 +139,22 @@ public:
         return getClassId() == ClassId::TFPlayer;
     }
 
+    bool isObject() noexcept
+    {
+        return getClassId() == ClassId::ObjectSentrygun ||
+            getClassId() == ClassId::ObjectDispenser ||
+            getClassId() == ClassId::ObjectTeleporter;
+    }
+
+    bool isNPC() noexcept
+    {
+        return getClassId() == ClassId::HeadlessHatman ||
+            getClassId() == ClassId::TFTankBoss ||
+            getClassId() == ClassId::Merasmus ||
+            getClassId() == ClassId::Zombie ||
+            getClassId() == ClassId::EyeballBoss;
+    }
+
     bool isAlive() noexcept
     {
         return lifeState() == 0;
