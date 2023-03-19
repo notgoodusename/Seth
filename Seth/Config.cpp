@@ -910,7 +910,7 @@ static void to_json(json& j, const Config::Misc& o)
 
     WRITE("Edge Jump", edgeJump);
     WRITE("Edge Jump Key", edgeJumpKey);
-    WRITE("Fast Stop", fastStop);
+    WRITE("Fast stop", fastStop);
     WRITE("Auto accept", autoAccept);
     WRITE("Reveal votes", revealVotes);
     WRITE("Spectator list", spectatorList);
