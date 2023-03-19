@@ -103,12 +103,12 @@ bool Chams::render(void* state, const ModelRenderInfo& info, matrix3x4* customBo
         std::string_view modelName(modelNameOriginal);
         if (modelName.starts_with("models/buildables/"))
         {
-            if (!entity->isDormant())
+            if (!entity->isDormant() && entity->isObject())
                 renderBuilding(entity);
         }
         else if (modelName.starts_with("models/halloween/") || modelName.starts_with("models/items/"))
         {
-            if (!entity->isDormant() && entity->isObject())
+            if (!entity->isDormant())
                 renderWorld(entity);
         }
         else if (modelName.starts_with("models/bots/"))
