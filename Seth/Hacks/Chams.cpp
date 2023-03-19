@@ -128,7 +128,7 @@ bool Chams::render(void* state, const ModelRenderInfo& info, matrix3x4* customBo
 
 void Chams::renderBuilding(Entity* building) noexcept
 {
-    if (!building || building->objectHealth() <= 0) //this line causes a random crash idk why tho, object carried comparasion crashes
+    if (!building || building->objectCarried() || building->objectHealth() <= 0)
         return;
 
     if (!areAnyMaterialsEnabled(config->buildingChams.all))
