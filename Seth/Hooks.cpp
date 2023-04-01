@@ -89,7 +89,9 @@ static HRESULT __stdcall present(IDirect3DDevice9* device, const RECT* src, cons
         StreamProofESP::render();
 
         Misc::showKeybinds();
+        Misc::spectatorList();
 
+        Aimbot::updateInput();
         Visuals::updateInput();
         StreamProofESP::updateInput();
         Misc::updateInput();

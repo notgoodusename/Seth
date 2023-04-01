@@ -176,6 +176,7 @@ static void from_json(const json& j, Player& p)
     read<value_t::object>(j, "Weapon", p.weapon);
     read<value_t::object>(j, "Health Bar", p.healthBar);
     read<value_t::object>(j, "Skeleton", p.skeleton);
+    read(j, "Disable on cloaked", p.disableOnCloaked);
 }
 
 static void from_json(const json& j, OffscreenEnemies& o)
@@ -227,6 +228,12 @@ static void from_json(const json& j, Config::Aimbot::Hitscan& h)
 static void from_json(const json& j, Config::Aimbot::Projectile& p)
 {
     read(j, "Enabled", p.enabled);
+    read(j, "Aimlock", p.aimlock);
+    read(j, "Silent", p.silent);
+    read(j, "Ignore cloaked", p.ignoreCloaked);
+    read(j, "Sort method", p.sortMethod);
+    read(j, "Fov", p.fov);
+    read(j, "Max time", p.maxTime);
 }
 
 static void from_json(const json& j, Config::Aimbot::Melee& m)
@@ -618,6 +625,7 @@ static void to_json(json& j, const Player& o, const Player& dummy = {})
     WRITE("Weapon", weapon);
     WRITE("Health Bar", healthBar);
     WRITE("Skeleton", skeleton);
+    WRITE("Disable on cloaked", disableOnCloaked);
 }
 
 static void to_json(json& j, const Buildings& o, const Buildings& dummy = {})
@@ -681,6 +689,12 @@ static void to_json(json& j, const Config::Aimbot::Hitscan& o, const Config::Aim
 static void to_json(json& j, const Config::Aimbot::Projectile& o, const Config::Aimbot::Projectile& dummy = {})
 {
     WRITE("Enabled", enabled);
+    WRITE("Aimlock", aimlock);
+    WRITE("Silent", silent);
+    WRITE("Ignore cloaked", ignoreCloaked);
+    WRITE("Sort method", sortMethod);
+    WRITE("Fov", fov);
+    WRITE("Max time", maxTime);
 }
 
 static void to_json(json& j, const Config::Aimbot::Melee& o, const Config::Aimbot::Melee& dummy = {})

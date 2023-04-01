@@ -112,6 +112,95 @@ void Misc::showKeybinds() noexcept
     ImGui::End();
 }
 
+void Misc::spectatorList() noexcept
+{
+    if (!config->misc.spectatorList.enabled)
+        return;
+
+    if (config->misc.spectatorList.pos != ImVec2{}) {
+        ImGui::SetNextWindowPos(config->misc.spectatorList.pos);
+        config->misc.spectatorList.pos = {};
+    }
+
+    ImGui::SetNextWindowSize({ 250.f, 0.f }, ImGuiCond_Once);
+    ImGui::SetNextWindowSizeConstraints({ 250.f, 0.f }, { 250.f, 1000.f });
+    ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
+    if (!gui->isOpen())
+        windowFlags |= ImGuiWindowFlags_NoInputs;
+    if (config->misc.spectatorList.noTitleBar)
+        windowFlags |= ImGuiWindowFlags_NoTitleBar;
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowTitleAlign, { 0.5f, 0.5f });
+    ImGui::Begin("Spectator list", nullptr, windowFlags);
+    ImGui::PopStyleVar();
+
+    if (interfaces->engine->isInGame() && localPlayer)
+    {
+        if (localPlayer->isAlive())
+        {
+            for (int i = 1; i <= interfaces->engine->getMaxClients(); ++i) {
+                const auto entity = interfaces->entityList->getEntity(i);
+                if (!entity || entity->isDormant() || entity->isAlive() || entity->getObserverTarget() != localPlayer.get())
+                    continue;
+
+                PlayerInfo playerInfo;
+
+                if (!interfaces->engine->getPlayerInfo(i, playerInfo))
+                    continue;
+
+                auto obsMode{ "" };
+
+                switch (entity->getObserverMode()) {
+                case ObsMode::InEye:
+                    obsMode = "1st";
+                    break;
+                case ObsMode::Chase:
+                    obsMode = "3rd";
+                    break;
+                case ObsMode::Roaming:
+                    obsMode = "Freecam";
+                    break;
+                default:
+                    continue;
+                }
+
+                ImGui::TextWrapped("%s - %s", playerInfo.name, obsMode);
+            }
+        }
+        else if (auto observer = localPlayer->getObserverTarget(); !localPlayer->isAlive() && observer && observer->isAlive())
+        {
+            for (int i = 1; i <= interfaces->engine->getMaxClients(); ++i) {
+                const auto entity = interfaces->entityList->getEntity(i);
+                if (!entity || entity->isDormant() || entity->isAlive() || entity == localPlayer.get() || entity->getObserverTarget() != observer)
+                    continue;
+
+                PlayerInfo playerInfo;
+
+                if (!interfaces->engine->getPlayerInfo(i, playerInfo))
+                    continue;
+
+                auto obsMode{ "" };
+
+                switch (entity->getObserverMode()) {
+                case ObsMode::InEye:
+                    obsMode = "1st";
+                    break;
+                case ObsMode::Chase:
+                    obsMode = "3rd";
+                    break;
+                case ObsMode::Roaming:
+                    obsMode = "Freecam";
+                    break;
+                default:
+                    continue;
+                }
+
+                ImGui::TextWrapped("%s - %s", playerInfo.name, obsMode);
+            }
+        }
+    }
+    ImGui::End();
+}
+
 void Misc::bunnyHop(UserCmd* cmd) noexcept
 {
     if (!localPlayer)

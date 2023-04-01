@@ -236,6 +236,16 @@ void GUI::renderAimbotWindow() noexcept
         case 1:
             ImGui::SameLine();
             ImGui::Checkbox("Enabled", &config->aimbot.projectile.enabled);
+            ImGui::Checkbox("Aimlock", &config->aimbot.projectile.aimlock);
+            ImGui::Checkbox("Silent", &config->aimbot.projectile.silent);
+            ImGui::Checkbox("Ignore cloaked", &config->aimbot.projectile.ignoreCloaked);
+            ImGui::Checkbox("Auto shoot", &config->aimbot.projectile.autoShoot);
+            ImGui::Combo("Sort method", &config->aimbot.projectile.sortMethod, "Distance\0Fov\0");
+
+            ImGui::NextColumn();
+            ImGui::PushItemWidth(240.0f);
+            ImGui::SliderFloat("Fov", &config->aimbot.projectile.fov, 0.0f, 255.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
+            ImGui::SliderFloat("Max time", &config->aimbot.projectile.maxTime, 0.2f, 5.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
             break;
         case 2:
         {

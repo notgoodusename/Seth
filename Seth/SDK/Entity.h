@@ -305,7 +305,7 @@ public:
         if (weaponId() == WeaponId::SWORD)
             return 72.0f; // swords are typically 72
         if (itemDefinitionIndex() == Soldier_t_TheDisciplinaryAction)
-            return 91.0f; //Wtf is this range fr
+            return 91.2f; //Wtf is this range fr, its basiccally 90% extra of range
         return 48.0f;
     }
 
@@ -559,6 +559,8 @@ public:
     NETVAR(clip, "CBaseCombatWeapon", "m_iClip1", int)
     NETVAR(nextSecondaryAttack, "CBaseCombatWeapon","m_flNextSecondaryAttack", float)
     NETVAR(nextPrimaryAttack, "CBaseCombatWeapon", "m_flNextPrimaryAttack", float)
+
+    NETVAR(chargeTime, "CTFPipebombLauncher", "m_flChargeBeginTime", float)
 
     NETVAR(itemDefinitionIndex, "CEconEntity", "m_iItemDefinitionIndex", int)
 };

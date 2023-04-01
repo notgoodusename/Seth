@@ -21,6 +21,8 @@ namespace Misc
 
     void showKeybinds() noexcept;
 
+    void spectatorList() noexcept;
+
     void updateInput() noexcept;
     void reset(int resetType) noexcept;
 }

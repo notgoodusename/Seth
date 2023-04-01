@@ -85,15 +85,25 @@ public:
             bool waitForCharge{ false };
             int sortMethod{ 0 };
             int hitboxes{ 0 };
-            float fov{ 0.0f };
+            float fov{ 255.0f };
             float smooth{ 1.0f };
         } hitscan;
         struct Projectile {
             constexpr auto operator!=(const Projectile& p) const noexcept
             {
-                return enabled != p.enabled;
+                return enabled != p.enabled || ignoreCloaked != p.ignoreCloaked ||
+                    aimlock != p.aimlock || silent != p.silent || autoShoot != p.autoShoot ||
+                    sortMethod != p.sortMethod || fov != p.fov
+                    || maxTime != p.maxTime;
             }
             bool enabled{ false };
+            bool aimlock{ false };
+            bool silent{ false };
+            bool ignoreCloaked{ true };
+            bool autoShoot{ false };
+            int sortMethod{ 0 };
+            float fov{ 255.0f };
+            float maxTime{ 5.0f };
         } projectile;
         struct Melee {
             constexpr auto operator!=(const Melee& m) const noexcept
@@ -113,7 +123,7 @@ public:
             bool autoHit{ false };
             bool autoBackstab{ true };
             int sortMethod{ 0 };
-            float fov{ 0.0f };
+            float fov{ 255.0f };
         } melee;
     } aimbot;
     KeyBind aimbotKey{ std::string("aimbot") };

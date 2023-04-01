@@ -102,6 +102,19 @@ void runKnife(Entity* activeWeapon, UserCmd* cmd) noexcept
     const auto& cfg = config->aimbot.melee;
 
     auto enemies = Aimbot::getEnemies();
+
+    switch (cfg.sortMethod)
+    {
+    case 0:
+        std::sort(enemies.begin(), enemies.end(), [&](const Aimbot::Enemy& a, const Aimbot::Enemy& b) { return a.distance < b.distance; });
+        break;
+    case 1:
+        std::sort(enemies.begin(), enemies.end(), [&](const Aimbot::Enemy& a, const Aimbot::Enemy& b) { return a.fov < b.fov; });
+        break;
+    default:
+        break;
+    }
+
     float bestSimulationTime{ -1.0f };
     auto bestFov = cfg.fov;
     Vector bestTarget{ };
@@ -245,6 +258,10 @@ void AimbotMelee::run(Entity* activeWeapon, UserCmd* cmd) noexcept
     if (activeWeapon->nextPrimaryAttack() > memory->globalVars->serverTime() && activeWeapon->nextSecondaryAttack() > memory->globalVars->serverTime())
         return;
 
+    //The knife has no delay to register a hit
+    if (activeWeapon->isKnife())
+        return runKnife(activeWeapon, cmd);
+
     auto enemies = Aimbot::getEnemies();
 
     switch (cfg.sortMethod)
@@ -258,10 +275,6 @@ void AimbotMelee::run(Entity* activeWeapon, UserCmd* cmd) noexcept
     default:
         break;
     }
-
-    //The knife has no delay to register a hit
-    if (activeWeapon->isKnife())
-        return runKnife(activeWeapon, cmd);
 
     auto bestFov = cfg.fov;
     Vector bestTarget{ };
@@ -282,93 +295,68 @@ void AimbotMelee::run(Entity* activeWeapon, UserCmd* cmd) noexcept
         Vector backupAbsAngle = entity->getAbsAngle();
         Vector backupEyeAngle = entity->eyeAngles();
 
-        for (int cycle = 0; cycle < 2; cycle++)
+        float currentSimulationTime = -1.0f;
+
+        if ((config->backtrack.enabled || config->backtrack.fakeLatency) && cfg.targetBacktrack)
         {
-            float currentSimulationTime = -1.0f;
+            const auto records = Animations::getBacktrackRecords(entity->index());
+            if (!records || records->empty() || records->size() <= 3U)
+                continue;
 
-            if (config->backtrack.enabled || config->backtrack.fakeLatency)
+            auto bestBacktrackDistance = FLT_MAX;
+            int bestTick = -1;
+            for (size_t i = 0; i < records->size(); i++)
             {
-                if (!cfg.targetBacktrack && cycle == 1)
-                    continue;
-
-                const auto records = Animations::getBacktrackRecords(entity->index());
-                if (!records || records->empty() || records->size() <= 3U)
-                    continue;
-
-                int bestTick = -1;
-                if (cycle == 0)
+                //We gotta make sure if we fire now it will be correct when registering 0.2 seconds later and can register right now
+                if (Backtrack::valid(records->at(i).simulationTime - 0.2121f) && Backtrack::valid(records->at(i).simulationTime))
                 {
-                    for (size_t i = 3; i < records->size(); i++)
+                    const auto distance{ localPlayerOrigin.distTo(entity->getAbsOrigin()) };
+
+                    if (distance < bestBacktrackDistance)
                     {
-                        //We gotta make sure if we fire now it will be correct when registering 0.2 seconds later and can register right now
-                        if (Backtrack::valid(records->at(i).simulationTime - 0.2121f) && Backtrack::valid(records->at(i).simulationTime))
-                        {
-                            bestTick = static_cast<int>(i);
-                            break;
-                        }
+                        bestTick = i;
+                        bestBacktrackDistance = distance;
                     }
                 }
-                else
-                {
-                    auto bestBacktrackDistance = FLT_MAX;
-                    for (int i = static_cast<int>(records->size() - 1U); i >= 3; i--)
-                    {
-                        if (Backtrack::valid(records->at(i).simulationTime - 0.2121f) && Backtrack::valid(records->at(i).simulationTime))
-                        {
-                            const auto distance{ localPlayerOrigin.distTo(entity->getAbsOrigin()) };
-
-                            if (distance < bestBacktrackDistance)
-                            {
-                                bestTick = i;
-                                bestBacktrackDistance = distance;
-                            }
-                        }
-                    }
-                }
-
-                if (bestTick <= -1)
-                    continue;
-
-                memcpy(entity->getBoneCache().memory, records->at(bestTick).matrix, std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
-                memory->setAbsOrigin(entity, records->at(bestTick).origin);
-                entity->eyeAngles() = records->at(bestTick).eyeAngle;
-                memory->setCollisionBounds(entity->getCollideable(), records->at(bestTick).mins, records->at(bestTick).maxs);
-
-                currentSimulationTime = records->at(bestTick).simulationTime;
-            }
-            else
-            {
-                if (cycle == 1)
-                    continue;
-
-                memcpy(entity->getBoneCache().memory, player.matrix.data(), std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
-                memory->setAbsOrigin(entity, player.origin);
-                entity->eyeAngles() = player.eyeAngle;
-                memory->setCollisionBounds(entity->getCollideable(), player.mins, player.maxs);
-
-                currentSimulationTime = player.simulationTime;
             }
 
-            meleeRecord.matrix = entity->getBoneCache().memory;
-            meleeRecord.mins = entity->getCollideable()->obbMins();
-            meleeRecord.maxs = entity->getCollideable()->obbMaxs();
-            meleeRecord.origin = entity->getAbsOrigin();
-            meleeRecord.eyeAngle = entity->eyeAngles();
+            if (bestTick <= -1)
+                continue;
 
-            bestTarget = getMeleeTarget(cmd, entity, entity->getBoneCache().memory, activeWeapon, bestFov, localPlayerEyePosition);
-            applyMatrix(entity, backupBoneCache, backupOrigin, backupEyeAngle, backupMins, backupMaxs);
-            if (bestTarget.notNull())
-            {
-                meleeRecord.target = bestTarget;
-                meleeRecord.index = target.id;
-                meleeRecord.simulationTime = currentSimulationTime;
-                meleeRecord.commandNumber = cmd->commandNumber + static_cast<int>(round(0.2121f / memory->globalVars->intervalPerTick));
-                cmd->buttons |= UserCmd::IN_ATTACK;
-                break;
-            }
+            memcpy(entity->getBoneCache().memory, records->at(bestTick).matrix, std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
+            memory->setAbsOrigin(entity, records->at(bestTick).origin);
+            entity->eyeAngles() = records->at(bestTick).eyeAngle;
+            memory->setCollisionBounds(entity->getCollideable(), records->at(bestTick).mins, records->at(bestTick).maxs);
+
+            currentSimulationTime = records->at(bestTick).simulationTime;
         }
+        else
+        {
+            memcpy(entity->getBoneCache().memory, player.matrix.data(), std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
+            memory->setAbsOrigin(entity, player.origin);
+            entity->eyeAngles() = player.eyeAngle;
+            memory->setCollisionBounds(entity->getCollideable(), player.mins, player.maxs);
+
+            currentSimulationTime = player.simulationTime;
+        }
+
+        meleeRecord.matrix = entity->getBoneCache().memory;
+        meleeRecord.mins = entity->getCollideable()->obbMins();
+        meleeRecord.maxs = entity->getCollideable()->obbMaxs();
+        meleeRecord.origin = entity->getAbsOrigin();
+        meleeRecord.eyeAngle = entity->eyeAngles();
+
+        bestTarget = getMeleeTarget(cmd, entity, entity->getBoneCache().memory, activeWeapon, bestFov, localPlayerEyePosition);
+        applyMatrix(entity, backupBoneCache, backupOrigin, backupEyeAngle, backupMins, backupMaxs);
         if (bestTarget.notNull())
+        {
+            meleeRecord.target = bestTarget;
+            meleeRecord.index = target.id;
+            meleeRecord.simulationTime = currentSimulationTime;
+            meleeRecord.commandNumber = cmd->commandNumber + static_cast<int>(round(0.2121f / memory->globalVars->intervalPerTick));
+            cmd->buttons |= UserCmd::IN_ATTACK;
             break;
+        }
     }
 }
 

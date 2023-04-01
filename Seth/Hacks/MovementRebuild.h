@@ -8,7 +8,9 @@
 namespace MovementRebuild
 {
 	void init() noexcept;
-	void run(Entity* player, int ticks) noexcept;
+
+	void setEntity(Entity* player) noexcept;
+	Vector runPlayerMove() noexcept;
 
 	Vector getPlayerMins() noexcept;
 	Vector getPlayerMaxs() noexcept;
@@ -45,8 +47,6 @@ namespace MovementRebuild
 		ConVar* maxVelocity;
 		ConVar* optimizedMovement;
 	};
-
-	void playerMove() noexcept;
 
 	void waterMove() noexcept;
 

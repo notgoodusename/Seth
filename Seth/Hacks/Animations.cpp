@@ -57,12 +57,8 @@ void Animations::handlePlayers(FrameStage stage) noexcept
             player.clear();
         }
 
-        bool runPostUpdate = false;
-
         if (player.simulationTime != entity->simulationTime())
         {
-            runPostUpdate = true;
-
             player.origin = entity->origin();
             player.eyeAngle = entity->eyeAngles();
             player.absAngle = entity->getAbsAngle();
@@ -71,21 +67,12 @@ void Animations::handlePlayers(FrameStage stage) noexcept
             player.mins = entity->getCollideable()->obbMins();
             player.maxs = entity->getCollideable()->obbMaxs();
             player.gotMatrix = entity->setupBones(player.matrix.data(), entity->getBoneCache().size, 0x7FF00, memory->globalVars->currenttime);
-        }
 
-        //Backtrack records
-        if (!config->backtrack.enabled && !config->backtrack.fakeLatency)
-        {
-            player.backtrackRecords.clear();
-            continue;
-        }
-
-        if (runPostUpdate)
-        {
-            if (!player.backtrackRecords.empty() && (player.backtrackRecords.front().simulationTime == entity->simulationTime()))
+            //Handle backtrack
+            if (!player.gotMatrix)
                 continue;
 
-            if (!player.gotMatrix)
+            if (!player.backtrackRecords.empty() && (player.backtrackRecords.front().simulationTime == entity->simulationTime()))
                 continue;
 
             Players::Record record{ };

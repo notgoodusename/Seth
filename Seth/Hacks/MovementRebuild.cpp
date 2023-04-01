@@ -30,45 +30,7 @@ unsigned int MovementRebuild::playerSolidMask(bool brushOnly) noexcept
 {
 	return (brushOnly) ? MASK_PLAYERSOLID_BRUSHONLY : MASK_PLAYERSOLID;
 }
-/*
-std::vector<Vector> predictedPath;
 
-void MovementRebuild::draw() noexcept
-{
-	static std::vector<Vector> points = predictedPath;
-	if (!predictedPath.empty())
-		points = predictedPath;
-	if (!localPlayer || !localPlayer->isAlive())
-		return;
-
-	if (points.empty() || points.size() <= 3U)
-		return;
-
-	const auto color = Helpers::calculateColor(Color4());
-
-	auto drawList = ImGui::GetBackgroundDrawList();
-
-	Vector prev = points[0];
-	ImVec2 nadeStart, nadeEnd;
-
-	std::vector<std::pair<ImVec2, ImVec2>> screenPoints;
-
-	//	draw nade path
-	for (auto& origin : points)
-	{
-		if (Helpers::worldToScreen(prev, nadeStart) && Helpers::worldToScreen(origin, nadeEnd))
-		{
-			screenPoints.emplace_back(std::pair<ImVec2, ImVec2>{ nadeStart, nadeEnd });
-			prev = origin;
-		}
-	}
-
-	for (auto& point : screenPoints)
-	{
-		drawList->AddLine(ImVec2(point.first.x, point.first.y), ImVec2(point.second.x, point.second.y), color, 1.5f);
-	}
-}
-*/
 void MovementRebuild::init() noexcept
 {
 	cvars.accelerate = interfaces->cvar->findVar("sv_accelerate");
@@ -81,49 +43,32 @@ void MovementRebuild::init() noexcept
 	cvars.optimizedMovement = interfaces->cvar->findVar("sv_optimizedmovement");
 }
 
-void MovementRebuild::run(Entity* player, int ticks) noexcept
+void MovementRebuild::setEntity(Entity* player) noexcept
 {
 	mv.player = player;
-
 	mv.groundEntity = player->getGroundEntity();
 	mv.velocity = player->velocity();
 	mv.position = player->origin();
 	mv.eyeAngles = player->eyeAngles();
-
 	mv.surfaceFriction = 1.0f;
 	mv.waterLevel = player->waterLevel();
-
 	mv.maxSpeed = player->getMaxSpeed();
-	
-	mv.obbMins = player->obbMins()* player->modelScale();
-	mv.obbMaxs = player->obbMaxs()* player->modelScale();
 
+	mv.obbMins = player->obbMins() * player->modelScale();
+	mv.obbMaxs = player->obbMaxs() * player->modelScale();
 	//THE BIG ONE
 	//This is the most important part of movement rebuild
 	//Assigning the correct forwardmove, sidemove and upmove values
 	//TODO: improve this
 	Vector direction = mv.velocity.toAngle();
 	direction.y = mv.eyeAngles.y - direction.y;
-
 	const auto finalDirection = Vector::fromAngle(direction) * mv.velocity.length2D();
 	mv.forwardMove = finalDirection.x * (450.0f / mv.maxSpeed);
 	mv.sideMove = finalDirection.y * (450.0f / mv.maxSpeed);
 	mv.upMove = finalDirection.z;
-
-	if (player->moveType() != MoveType::WALK)
-		return;
-
-	if (stuck())
-		return;
-
-	for (int i = 0; i < ticks; i++)
-	{
-		// Run the command.
-		playerMove();
-	}
 }
 
-void MovementRebuild::playerMove() noexcept
+Vector MovementRebuild::runPlayerMove() noexcept
 {
 	if (!cvars.optimizedMovement->getInt())
 		categorizePosition();
@@ -131,6 +76,7 @@ void MovementRebuild::playerMove() noexcept
 		setGroundEntity(NULL);
 
 	fullWalkMove();
+	return mv.position;
 }
 
 void MovementRebuild::waterMove() noexcept
