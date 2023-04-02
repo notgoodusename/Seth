@@ -122,7 +122,7 @@ Vector getProjectileWeaponAimOffset(Entity* weapon, Entity* entity) noexcept
         case Sniper_m_FestiveHuntsman:
         case Sniper_m_TheFortifiedCompound:
             //Close to Head
-            offset.z = entity->obbMaxs().z * 0.85f;
+            offset.z = entity->obbMaxs().z;
             break;
         default:
             break;
@@ -457,36 +457,40 @@ Vector getProjectileTarget(UserCmd* cmd, Entity* entity, Vector offset, float& b
     return Vector{ 0.0f, 0.0f, 0.0f };
 }
 
-float travelTime(Vector source, Vector destination, AimbotProjectile::ProjectileWeaponInfo projectileInfo, Vector& out) noexcept
+bool calculateProjectileInfo(Vector source, Vector destination, AimbotProjectile::ProjectileWeaponInfo projectileInfo, float& time, Vector& angle) noexcept
 {
     static auto gravityConvar = interfaces->cvar->findVar("sv_gravity");
-    if (projectileInfo.gravity * gravityConvar->getFloat() == 0.0f)
+    const float gravity = projectileInfo.gravity * gravityConvar->getFloat();
+    if (gravity == 0.0f)
     {
+        angle = calculateRelativeAngle(source, destination, Vector{ 0.0f, 0.0f, 0.0f });
         source -= projectileInfo.offset;
-        return source.distTo(destination) / projectileInfo.speed;
+        time = source.distTo(destination) / projectileInfo.speed;
+        return true;
     }
 
-    const float gravity = projectileInfo.gravity * gravityConvar->getFloat();
     const Vector delta = destination - source;
     const float distance = delta.length2D();
     const float projectileSpeed = projectileInfo.speed;
 
     const float root = std::powf(projectileSpeed, 4) - gravity * (gravity * std::powf(distance, 2) + 2.f * delta.z * std::powf(projectileSpeed, 2));
     if (root < 0.f)
-        return -1.0f;
+        return false;
 
     const float pitch = std::atanf((std::powf(projectileSpeed, 2) - std::sqrtf(root)) / (gravity * distance));
     const float yaw = std::atan2f(delta.y, delta.x);
 
-    out = Vector{ -Helpers::rad2deg(pitch), Helpers::rad2deg(yaw), 0.0f };
+    angle = Vector{ -Helpers::rad2deg(pitch), Helpers::rad2deg(yaw), 0.0f };
+    time = distance / (cos(pitch) * projectileSpeed);
 
-    return distance / (cos(pitch) * projectileSpeed);
+    return true;
 }
 
 bool doesProjectileHit(AimbotProjectile::ProjectileWeaponInfo projectileInfo, Vector source, Vector destination) noexcept
 {
     static auto gravityConvar = interfaces->cvar->findVar("sv_gravity");
-    if (projectileInfo.gravity * gravityConvar->getFloat() == 0.0f)
+    const float gravity = projectileInfo.gravity * gravityConvar->getFloat();
+    if (gravity == 0.0f)
     {
         Trace trace;
         //This trace should use hullSize, but whatever
@@ -550,10 +554,10 @@ void AimbotProjectile::run(Entity* activeWeapon, UserCmd* cmd) noexcept
 
     const int latencyTicks = static_cast<int>(round(network->getLatency(0) / memory->globalVars->intervalPerTick));
 
-    const auto projectileInfo = getProjectileWeaponInfo(activeWeapon);
+    const auto projectileWeaponInfo = getProjectileWeaponInfo(activeWeapon);
     const auto& localPlayerOrigin = localPlayer->getAbsOrigin();
     const auto& localPlayerEyePosition = localPlayer->getEyePosition();
-    const int maxTicks = timeToTicks(projectileInfo.maxTime == 0.f ? cfg.maxTime : projectileInfo.maxTime);
+    const int maxTicks = timeToTicks(projectileWeaponInfo.maxTime == 0.f ? cfg.maxTime : projectileWeaponInfo.maxTime);
     for (const auto& target : enemies)
     {
         auto entity{ interfaces->entityList->getEntity(target.id) };
@@ -570,54 +574,44 @@ void AimbotProjectile::run(Entity* activeWeapon, UserCmd* cmd) noexcept
 
         MovementRebuild::setEntity(entity);
 
-        //runPlayerMove is expensive, due to tracerays
-
         //We should first position the dude correctly
         //So given the last origin we predict our ping first
-        for (int n = 0; n < latencyTicks; n++)
+        for (int i = 1; i <= latencyTicks; i++)
         {
             MovementRebuild::runPlayerMove();
         }
 
-        bool t = false;
-        for (int n = 0; n < maxTicks; n++)
+        bool foundTarget = false;
+        for (int step = 1; step <= maxTicks; step++)
         {
             Vector position = MovementRebuild::runPlayerMove() + aimOffset;
-            float currentTime = static_cast<float>(n + 1) * memory->globalVars->intervalPerTick;
+            float currentTime = static_cast<float>(step) * memory->globalVars->intervalPerTick;
 
             Vector angle{ 0.0f, 0.0f, 0.0f };
-            float time = travelTime(localPlayerEyePosition, position, projectileInfo, angle); //this is for weapon that have 0 gravity
-            if (currentTime < time || time == -1.0f)
-                continue;
-            //We calculate the trajectorie of the projectile and if it doesnt hit we just continue or end it, since if we continue for an x amount of ticks
-            //we would be overcompensating
-            //bool doesProjectileHit = false;
-            if (!doesProjectileHit(projectileInfo, localPlayerEyePosition - projectileInfo.offset, position))
+            float time = 0.0f;
+            if (!calculateProjectileInfo(localPlayerEyePosition, position, projectileWeaponInfo, time, angle))
                 continue;
 
-            //We already know that it can hit, so now given we calc angle and fire
+            if (time > currentTime)
+                continue;
+
+            //We calculate the trajectorie of the projectile and if it doesnt hit we just continue
+            if (!doesProjectileHit(projectileWeaponInfo, localPlayerEyePosition - projectileWeaponInfo.offset, position))
+                continue;
+
+            //We already know that it can hit, so we set angle and fire
             //TODO: Compensate for weapon offset? idk how
-            if (angle.null())
-            {
-                angle = calculateRelativeAngle(localPlayerEyePosition, position, cmd->viewangles);
-                cmd->viewangles += angle;
-            }
-            else
-            {
-                cmd->viewangles = angle;
-            }
+            cmd->viewangles = angle;
 
             if (cfg.autoShoot)
-            {
                 cmd->buttons |= UserCmd::IN_ATTACK;
-            }
 
             if (!cfg.silent)
                 interfaces->engine->setViewAngles(cmd->viewangles);
-            t = true;
+            foundTarget = true;
             break;
         }
-        if (t)
+        if (foundTarget)
             break;
     }
 }
