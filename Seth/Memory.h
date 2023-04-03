@@ -55,6 +55,8 @@ public:
     KeyValues* (__thiscall* keyValuesInitialize)(KeyValues*, char*);
     KeyValues* (__thiscall* keyValuesFindKey)(KeyValues* keyValues, const char* keyName, bool create);
 
+    
+    float(__cdecl* attributeHookValue)(float, const char*, void*, void*, bool);
     void(__thiscall* calcAbsoluteVelocity)(void*);
     int(__thiscall* getNextThinkTick)(void*, const char*);
     bool(_cdecl* passServerEntityFilter)(void* touch, void* pass);

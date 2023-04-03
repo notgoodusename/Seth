@@ -92,7 +92,8 @@ Memory::Memory() noexcept
 
     keyValuesInitialize = reinterpret_cast<decltype(keyValuesInitialize)>(findPattern(ENGINE_DLL, "\xFF\x15????\x83\xC4\x08\x89\x06\x8B\xC6") - 0x42);
     keyValuesFindKey = reinterpret_cast<decltype(keyValuesFindKey)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\x81\xEC????\x56\x8B\x75\x08\x57\x8B\xF9\x85\xF6\x0F\x84????\x80\x3E\x00\x0F\x84????"));
-
+    
+    attributeHookValue = relativeToAbsolute<decltype(attributeHookValue)>(findPattern(CLIENT_DLL, "\xE8????\xDA\x4D\xFC") + 1);
     calcAbsoluteVelocity = relativeToAbsolute<decltype(calcAbsoluteVelocity)>(findPattern(CLIENT_DLL, "\xE8????\xD9\xE8\x8D\x45\xEC") + 1);
     getNextThinkTick = reinterpret_cast<decltype(getNextThinkTick)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\x8B\x45\x08\x56\x8B\xF1\x85\xC0\x75\x13"));
     passServerEntityFilter = reinterpret_cast<decltype(passServerEntityFilter)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\x56\x8B\x75?\x85\xF6\x75?\xB0?"));

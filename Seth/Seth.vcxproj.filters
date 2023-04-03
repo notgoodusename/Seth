@@ -221,6 +221,9 @@
     <ClCompile Include="Hacks\MovementRebuild.cpp">
       <Filter>Hacks</Filter>
     </ClCompile>
+    <ClCompile Include="SDK\AttributeManager.cpp">
+      <Filter>SDK</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GUI.h">
@@ -539,6 +542,9 @@
       <Filter>Hacks</Filter>
     </ClInclude>
     <ClInclude Include="SDK\GameRules.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\AttributeManager.h">
       <Filter>SDK</Filter>
     </ClInclude>
   </ItemGroup>
