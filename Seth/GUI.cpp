@@ -190,8 +190,6 @@ void GUI::renderAimbotWindow() noexcept
             if (ImGui::IsItemHovered())
                 ImGui::SetTooltip("This option disables smoothing, if you want to keep it use triggerbot");
             ImGui::Checkbox("Auto scope", &config->aimbot.hitscan.autoScope);
-            ImGui::Checkbox("Auto rev", &config->aimbot.hitscan.autoRev);
-            ImGui::Checkbox("Auto extinguish team", &config->aimbot.hitscan.autoExtinguishTeam);
             ImGui::Checkbox("Wait for headshot", &config->aimbot.hitscan.waitForHeadshot);
             ImGui::Checkbox("Wait for charge", &config->aimbot.hitscan.waitForHeadshot);
 
@@ -237,6 +235,7 @@ void GUI::renderAimbotWindow() noexcept
             ImGui::SameLine();
             ImGui::Checkbox("Enabled", &config->aimbot.projectile.enabled);
             ImGui::Checkbox("Aimlock", &config->aimbot.projectile.aimlock);
+            ImGui::Checkbox("Friendly fire", &config->aimbot.projectile.friendlyFire);
             ImGui::Checkbox("Silent", &config->aimbot.projectile.silent);
             ImGui::Checkbox("Ignore cloaked", &config->aimbot.projectile.ignoreCloaked);
             ImGui::Checkbox("Auto shoot", &config->aimbot.projectile.autoShoot);

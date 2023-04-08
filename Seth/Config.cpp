@@ -215,8 +215,6 @@ static void from_json(const json& j, Config::Aimbot::Hitscan& h)
     read(j, "Scoped only", h.scopedOnly);
     read(j, "Auto shoot", h.autoShoot);
     read(j, "Auto scope", h.autoScope);
-    read(j, "Auto rev", h.autoRev);
-    read(j, "Auto extinguish team", h.autoExtinguishTeam);
     read(j, "Wait for headshot", h.waitForHeadshot);
     read(j, "Wait for charge", h.waitForHeadshot);
     read(j, "Sort method", h.sortMethod);
@@ -230,6 +228,7 @@ static void from_json(const json& j, Config::Aimbot::Projectile& p)
     read(j, "Enabled", p.enabled);
     read(j, "Aimlock", p.aimlock);
     read(j, "Silent", p.silent);
+    read(j, "Friendly fire", p.friendlyFire);
     read(j, "Ignore cloaked", p.ignoreCloaked);
     read(j, "Sort method", p.sortMethod);
     read(j, "Fov", p.fov);
@@ -676,8 +675,6 @@ static void to_json(json& j, const Config::Aimbot::Hitscan& o, const Config::Aim
     WRITE("Scoped only", scopedOnly);
     WRITE("Auto shoot", autoScope);
     WRITE("Auto scope", autoScope);
-    WRITE("Auto rev", autoRev);
-    WRITE("Auto extinguish team", autoExtinguishTeam);
     WRITE("Wait for headshot", waitForHeadshot);
     WRITE("Wait for charge", waitForHeadshot);
     WRITE("Sort method", sortMethod);
@@ -691,6 +688,7 @@ static void to_json(json& j, const Config::Aimbot::Projectile& o, const Config::
     WRITE("Enabled", enabled);
     WRITE("Aimlock", aimlock);
     WRITE("Silent", silent);
+    WRITE("Friendly fire", friendlyFire);
     WRITE("Ignore cloaked", ignoreCloaked);
     WRITE("Sort method", sortMethod);
     WRITE("Fov", fov);

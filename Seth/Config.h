@@ -65,8 +65,7 @@ public:
                 return enabled != h.enabled || aimlock != h.aimlock || silent != h.silent
                     || friendlyFire != h.friendlyFire || ignoreCloaked != h.ignoreCloaked
                     || scopedOnly != h.scopedOnly || targetBacktrack != h.targetBacktrack || autoShoot != h.autoShoot
-                    || autoScope != h.autoScope || autoRev != h.autoRev 
-                    || autoExtinguishTeam != h.autoExtinguishTeam || waitForHeadshot != h.waitForHeadshot
+                    || autoScope != h.autoScope || waitForHeadshot != h.waitForHeadshot
                     || waitForCharge != h.waitForCharge || sortMethod != h.sortMethod
                     || hitboxes != h.hitboxes || fov != h.fov || smooth != h.smooth;
             }
@@ -79,8 +78,6 @@ public:
             bool targetBacktrack{ true };
             bool autoShoot{ false };
             bool autoScope{ false };
-            bool autoRev{ false };
-            bool autoExtinguishTeam{ false };
             bool waitForHeadshot{ false };
             bool waitForCharge{ false };
             int sortMethod{ 0 };
@@ -91,14 +88,15 @@ public:
         struct Projectile {
             constexpr auto operator!=(const Projectile& p) const noexcept
             {
-                return enabled != p.enabled || ignoreCloaked != p.ignoreCloaked ||
-                    aimlock != p.aimlock || silent != p.silent || autoShoot != p.autoShoot ||
+                return enabled != p.enabled || aimlock != p.aimlock || silent != p.silent || friendlyFire != p.friendlyFire ||
+                    ignoreCloaked != p.ignoreCloaked || autoShoot != p.autoShoot ||
                     sortMethod != p.sortMethod || fov != p.fov
                     || maxTime != p.maxTime;
             }
             bool enabled{ false };
             bool aimlock{ false };
             bool silent{ false };
+            bool friendlyFire{ false };
             bool ignoreCloaked{ true };
             bool autoShoot{ false };
             int sortMethod{ 0 };
