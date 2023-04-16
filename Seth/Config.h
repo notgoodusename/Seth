@@ -128,11 +128,13 @@ public:
     ColorToggleOutline aimbotFov{ 1.0f, 1.0f, 1.0f, 0.25f };
 
     struct Triggerbot {
-        bool enabled = false;
-        bool friendlyFire = false;
-        bool scopedOnly = true;
-        int hitboxes = 0;
-        int shotDelay = 0;
+        bool enabled{ false };
+        bool friendlyFire{ false };
+        bool targetBacktrack{ true };
+        bool scopedOnly{ true };
+        bool ignoreCloaked{ true };
+        int hitboxes{ 0 };
+        int shotDelay{ 0 };
     } triggerbot;
     KeyBind triggerbotKey{ std::string("triggerbot") };
 

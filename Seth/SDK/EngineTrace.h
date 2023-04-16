@@ -259,7 +259,8 @@ public:
         static int tracesThisFrame, lastFrame;
 
         if (lastFrame != memory->globalVars->framecount) {
-            memory->debugMsg("traces: frame - %d | count - %d\n", lastFrame, tracesThisFrame);
+            std::string msg = "traces: frame - " + std::to_string(lastFrame) + " | count - " + std::to_string(tracesThisFrame) + "\n";
+            memory->logDirect(msg.c_str());
             tracesThisFrame = 0;
             lastFrame = memory->globalVars->framecount;
         }

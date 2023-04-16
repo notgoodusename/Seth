@@ -4,8 +4,9 @@
 #include "../Backtrack.h"
 
 #include "../../SDK/UserCmd.h"
-#include "../../SDK/Vector.h"
+#include "../../SDK/Math.h"
 #include "../../SDK/ModelInfo.h"
+#include "../../SDK/Vector.h"
 
 Vector getHitscanTarget(UserCmd* cmd, Entity* entity, matrix3x4 matrix[MAXSTUDIOBONES], std::array<bool, Hitboxes::LeftUpperArm> hitbox, float& bestFov, Vector localPlayerEyePosition) noexcept
 {
@@ -32,7 +33,7 @@ Vector getHitscanTarget(UserCmd* cmd, Entity* entity, matrix3x4 matrix[MAXSTUDIO
 
         for (auto& bonePosition : Aimbot::multiPoint(entity, matrix, hitbox, localPlayerEyePosition, j))
         {
-            const Vector angle{ calculateRelativeAngle(localPlayerEyePosition, bonePosition, cmd->viewangles) };
+            const Vector angle{ Math::calculateRelativeAngle(localPlayerEyePosition, bonePosition, cmd->viewangles) };
             const float fov{ angle.length2D() };
             if (fov > bestFov)
                 continue;
@@ -150,7 +151,7 @@ void AimbotHitscan::run(Entity* activeWeapon, UserCmd* cmd) noexcept
                     {
                         if (Backtrack::valid(records->at(i).simulationTime))
                         {
-                            const Vector angle{ calculateRelativeAngle(localPlayerEyePosition, records->at(i).matrix[0].origin() , cmd->viewangles) };
+                            const Vector angle{ Math::calculateRelativeAngle(localPlayerEyePosition, records->at(i).matrix[0].origin() , cmd->viewangles) };
                             const float fov{ angle.length2D() };
 
                             if (fov < bestBacktrackFov)
@@ -196,7 +197,7 @@ void AimbotHitscan::run(Entity* activeWeapon, UserCmd* cmd) noexcept
 
     if (bestTarget.notNull())
     {
-        auto angle = calculateRelativeAngle(localPlayerEyePosition, bestTarget, cmd->viewangles);
+        auto angle = Math::calculateRelativeAngle(localPlayerEyePosition, bestTarget, cmd->viewangles);
 
         if (cfg.autoShoot)
             cmd->buttons |= UserCmd::IN_ATTACK;

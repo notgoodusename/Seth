@@ -290,7 +290,9 @@ void GUI::renderTriggerbotWindow() noexcept
         case 0:
         {
             ImGui::Checkbox("Friendly fire", &config->triggerbot.friendlyFire);
+            ImGui::Checkbox("Target backtrack", &config->triggerbot.targetBacktrack);
             ImGui::Checkbox("Scoped only", &config->triggerbot.scopedOnly);
+            ImGui::Checkbox("Ignore cloaked", &config->triggerbot.ignoreCloaked);
             ImGui::SetNextItemWidth(85.0f);
 
             for (size_t i = 0; i < ARRAYSIZE(hitbox); i++)
@@ -322,7 +324,6 @@ void GUI::renderTriggerbotWindow() noexcept
                     config->triggerbot.hitboxes &= ~(1 << i);
                 }
             }
-            ImGui::PushItemWidth(220.0f);
             ImGui::PushItemWidth(220.0f);
             ImGui::SliderInt("Shot delay", &config->triggerbot.shotDelay, 0, 250, "%d ms");
         }

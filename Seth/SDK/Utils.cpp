@@ -29,8 +29,3 @@ void applyMatrix(Entity* entity, matrix3x4* boneCacheData, Vector origin, Vector
     entity->eyeAngles() = eyeAngle;
     memory->setCollisionBounds(entity->getCollideable(), mins, maxs);
 }
-
-Vector calculateRelativeAngle(const Vector& source, const Vector& destination, const Vector& viewAngles) noexcept
-{
-    return ((destination - source).toAngle() - viewAngles).normalize();
-}

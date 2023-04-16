@@ -40,6 +40,7 @@
     <ClCompile Include="Hacks\Glow.cpp" />
     <ClCompile Include="Hacks\MovementRebuild.cpp" />
     <ClCompile Include="Hacks\StreamProofESP.cpp" />
+    <ClCompile Include="Hacks\Triggerbot.cpp" />
     <ClCompile Include="Hacks\Visuals.cpp" />
     <ClCompile Include="Helpers.cpp" />
     <ClCompile Include="Hooks\MinHook.cpp" />
@@ -57,6 +58,7 @@
     <ClCompile Include="SDK\AttributeManager.cpp" />
     <ClCompile Include="SDK\EngineTrace.cpp" />
     <ClCompile Include="SDK\KeyValues.cpp" />
+    <ClCompile Include="SDK\Math.cpp" />
     <ClCompile Include="Seth.cpp" />
     <ClCompile Include="GUI.cpp" />
     <ClCompile Include="Hacks\Misc.cpp" />
@@ -93,6 +95,7 @@
     <ClInclude Include="Hacks\Misc.h" />
     <ClInclude Include="Hacks\MovementRebuild.h" />
     <ClInclude Include="Hacks\StreamProofESP.h" />
+    <ClInclude Include="Hacks\Triggerbot.h" />
     <ClInclude Include="Hacks\Visuals.h" />
     <ClInclude Include="Helpers.h" />
     <ClInclude Include="Hooks\MinHook.h" />
@@ -153,6 +156,7 @@
     <ClInclude Include="SDK\Material.h" />
     <ClInclude Include="SDK\MaterialRenderContext.h" />
     <ClInclude Include="SDK\MaterialSystem.h" />
+    <ClInclude Include="SDK\Math.h" />
     <ClInclude Include="SDK\matrix3x4.h" />
     <ClInclude Include="SDK\MDLCache.h" />
     <ClInclude Include="SDK\MemAlloc.h" />

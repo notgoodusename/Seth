@@ -28,6 +28,7 @@
 #include "Hacks/Misc.h"
 #include "Hacks/MovementRebuild.h"
 #include "Hacks/StreamProofESP.h"
+#include "Hacks/Triggerbot.h"
 #include "Hacks/Visuals.h"
 
 #include "SDK/ClassId.h"
@@ -94,6 +95,7 @@ static HRESULT __stdcall present(IDirect3DDevice9* device, const RECT* src, cons
         Aimbot::updateInput();
         Visuals::updateInput();
         StreamProofESP::updateInput();
+        Triggerbot::updateInput();
         Misc::updateInput();
         Chams::updateInput();
 
@@ -163,6 +165,7 @@ static bool __fastcall createMove(void* thisPointer, void*, float inputSampleTim
 
     Backtrack::run(cmd);
     Aimbot::run(cmd);
+    Triggerbot::run(cmd);
 
     Misc::edgejump(cmd);
 

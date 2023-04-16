@@ -6,6 +6,7 @@
 #include "../Backtrack.h"
 
 #include "../../SDK/UserCmd.h"
+#include "../../SDK/Math.h"
 #include "../../SDK/ModelInfo.h"
 #include "../../SDK/Vector.h"
 
@@ -13,10 +14,6 @@ std::vector<Aimbot::Enemy> enemies;
 
 void Aimbot::run(UserCmd* cmd) noexcept
 {
-    if (!config->aimbotKey.isActive() || 
-        (!config->aimbot.hitscan.enabled && !config->aimbot.projectile.enabled && !config->aimbot.melee.enabled))
-        return;
-
     if (!localPlayer || !localPlayer->isAlive() || localPlayer->isTaunting() || localPlayer->isBonked() || localPlayer->isFeignDeathReady()
         || localPlayer->isCloaked() || localPlayer->isInBumperKart() || localPlayer->isAGhost())
         return;
@@ -30,20 +27,24 @@ void Aimbot::run(UserCmd* cmd) noexcept
     const auto& localPlayerOrigin = localPlayer->getAbsOrigin();
     const auto& localPlayerEyePosition = localPlayer->getEyePosition();
     for (int i = 1; i <= interfaces->engine->getMaxClients(); ++i) {
-        const auto player = Animations::getPlayer(i);
-        if (!player.gotMatrix)
-            continue;
-
         const auto entity{ interfaces->entityList->getEntity(i) };
         if (!entity || entity == localPlayer.get() || entity->isDormant() || !entity->isAlive())
             continue;
 
-        const auto angle{ calculateRelativeAngle(localPlayerEyePosition, player.matrix[6].origin(), cmd->viewangles) };
+        const auto player = Animations::getPlayer(i);
+        if (!player.gotMatrix)
+            continue;
+
+        const auto angle{ Math::calculateRelativeAngle(localPlayerEyePosition, player.matrix[6].origin(), cmd->viewangles) };
         const auto fov{ angle.length2D() }; //fov
         const auto health{ entity->health() }; //health
         const auto distance{ localPlayerOrigin.distTo(entity->getAbsOrigin()) }; //distance
         enemies.emplace_back(i, health, distance, fov);
     }
+
+    if (!config->aimbotKey.isActive() ||
+        (!config->aimbot.hitscan.enabled && !config->aimbot.projectile.enabled && !config->aimbot.melee.enabled))
+        return;
 
     if (enemies.empty())
         return;
@@ -98,7 +99,7 @@ std::vector<Vector> Aimbot::multiPoint(Entity* entity, const matrix3x4 matrix[MA
     if (doNotRunMultipoint)
         return vecArray;
 
-    Vector currentAngles = calculateRelativeAngle(center, localEyePos, Vector{});
+    Vector currentAngles = Math::calculateRelativeAngle(center, localEyePos, Vector{});
 
     Vector forward;
     Vector::fromAngle(currentAngles, &forward);

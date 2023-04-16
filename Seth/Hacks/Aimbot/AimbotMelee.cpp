@@ -4,8 +4,9 @@
 #include "../Backtrack.h"
 
 #include "../../SDK/UserCmd.h"
-#include "../../SDK/Vector.h"
+#include "../../SDK/Math.h"
 #include "../../SDK/ModelInfo.h"
+#include "../../SDK/Vector.h"
 
 bool doesMeleeHit(Entity* activeWeapon, int index, const Vector angles) noexcept
 {
@@ -78,7 +79,7 @@ Vector getMeleeTarget(UserCmd* cmd, Entity* entity, matrix3x4 matrix[MAXSTUDIOBO
 
     for (auto& bonePosition : Aimbot::multiPoint(entity, matrix, hitbox, localPlayerEyePosition, 0, true))
     {
-        const Vector angle{ calculateRelativeAngle(localPlayerEyePosition, bonePosition, cmd->viewangles) };
+        const Vector angle{ Math::calculateRelativeAngle(localPlayerEyePosition, bonePosition, cmd->viewangles) };
         const float fov{ angle.length2D() };
         if (fov > bestFov)
             continue;
@@ -186,7 +187,7 @@ void runKnife(Entity* activeWeapon, UserCmd* cmd) noexcept
 
     if (bestTarget.notNull())
     {
-        const auto angle = calculateRelativeAngle(localPlayerEyePosition, bestTarget, cmd->viewangles);
+        const auto angle = Math::calculateRelativeAngle(localPlayerEyePosition, bestTarget, cmd->viewangles);
 
         if (cfg.autoHit)
             cmd->buttons |= UserCmd::IN_ATTACK;
@@ -230,7 +231,7 @@ void AimbotMelee::run(Entity* activeWeapon, UserCmd* cmd) noexcept
         if (entity)
         {
             //We gotta recalculate to aim correctly
-            const auto angle = calculateRelativeAngle(localPlayer->getEyePosition(), meleeRecord.target, cmd->viewangles);
+            const auto angle = Math::calculateRelativeAngle(localPlayer->getEyePosition(), meleeRecord.target, cmd->viewangles);
 
             matrix3x4* backupBoneCache = entity->getBoneCache().memory;
             Vector backupMins = entity->getCollideable()->obbMins();

@@ -5,8 +5,9 @@
 #include "../MovementRebuild.h"
 
 #include "../../SDK/UserCmd.h"
-#include "../../SDK/Vector.h"
+#include "../../SDK/Math.h"
 #include "../../SDK/ModelInfo.h"
+#include "../../SDK/Vector.h"
 
 Vector getProjectileWeaponAimOffset(Entity* weapon, Entity* entity) noexcept
 {
@@ -442,7 +443,7 @@ Vector getProjectileTarget(UserCmd* cmd, Entity* entity, Vector offset, float& b
 {
     const auto origin = entity->origin() + offset;
 
-    const Vector angle{ calculateRelativeAngle(localPlayerEyePosition, origin, cmd->viewangles) };
+    const Vector angle{ Math::calculateRelativeAngle(localPlayerEyePosition, origin, cmd->viewangles) };
     const float fov{ angle.length2D() };
     if (fov > bestFov)
         return Vector{ 0.0f, 0.0f, 0.0f };
@@ -463,7 +464,7 @@ bool calculateProjectileInfo(Vector source, Vector destination, AimbotProjectile
     const float gravity = projectileInfo.gravity * gravityConvar->getFloat();
     if (gravity == 0.0f)
     {
-        angle = calculateRelativeAngle(source, destination, Vector{ 0.0f, 0.0f, 0.0f });
+        angle = Math::calculateRelativeAngle(source, destination, Vector{ 0.0f, 0.0f, 0.0f });
         source -= projectileInfo.offset;
         time = source.distTo(destination) / projectileInfo.speed;
         return true;
@@ -505,8 +506,6 @@ bool doesProjectileHit(AimbotProjectile::ProjectileWeaponInfo projectileInfo, Ve
     }
     //TODO: Complete this func
     //Get hullSize of every projectile pls
-    //Trace ray for gravity 0
-    //Everything else we need to figure it out somehow
     return true;
 }
 

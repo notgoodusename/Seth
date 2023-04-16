@@ -8,6 +8,7 @@
 #include "../SDK/FrameStage.h"
 #include "../SDK/LocalPlayer.h"
 #include "../SDK/NetworkChannel.h"
+#include "../SDK/Math.h"
 #include "../SDK/UserCmd.h"
 #include "../SDK/Utils.h"
 
@@ -69,7 +70,7 @@ void Backtrack::run(UserCmd* cmd) noexcept
             if (Backtrack::valid(player.backtrackRecords.at(j).simulationTime))
             {
                 for (auto position : player.backtrackRecords.at(j).positions) {
-                    auto angle = calculateRelativeAngle(localPlayerEyePosition, position, cmd->viewangles);
+                    auto angle = Math::calculateRelativeAngle(localPlayerEyePosition, position, cmd->viewangles);
                     auto fov = std::hypotf(angle.x, angle.y);
                     if (fov < bestFov) {
                         bestFov = fov;
