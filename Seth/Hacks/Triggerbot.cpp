@@ -9,7 +9,7 @@
 #include "../SDK/LocalPlayer.h"
 #include "../SDK/Math.h"
 
-bool getTriggerbotTarget(UserCmd* cmd, Entity* entity, matrix3x4 matrix[MAXSTUDIOBONES], std::array<bool, Hitboxes::LeftUpperArm> hitbox, Vector startPos, Vector endPos) noexcept
+bool getTriggerbotTarget(UserCmd* cmd, Entity* activeWeapon, Entity* entity, matrix3x4 matrix[MAXSTUDIOBONES], std::array<bool, Hitboxes::LeftUpperArm> hitbox, Vector startPos, Vector endPos, bool mustBackstab) noexcept
 {
     const Model* model = entity->getModel();
     if (!model)
@@ -22,6 +22,9 @@ bool getTriggerbotTarget(UserCmd* cmd, Entity* entity, matrix3x4 matrix[MAXSTUDI
     StudioHitboxSet* set = hdr->getHitboxSet(0);
     if (!set)
         return false;
+
+    if (mustBackstab && Math::canBackstab(entity, cmd->viewangles, entity->eyeAngles()))
+        return Math::doesMeleeHit(activeWeapon, entity->index(), cmd->viewangles);
 
     for (size_t j = 0; j < hitbox.size(); j++)
     {
@@ -60,6 +63,9 @@ void Triggerbot::run(UserCmd* cmd) noexcept
     if (weaponType != WeaponType::HITSCAN && weaponType != WeaponType::MELEE)
         return;
 
+    if (activeWeapon->nextPrimaryAttack() > memory->globalVars->serverTime())
+        return;
+
     static auto lastTime = 0.0f;
     static auto lastContact = 0.0f;
 
@@ -88,10 +94,19 @@ void Triggerbot::run(UserCmd* cmd) noexcept
     bool gotTarget = false;
     float bestSimulationTime = -1.0f;
 
+    float range = 8192.0f;
+    if (weaponType == WeaponType::MELEE)
+    {
+        range = activeWeapon->getSwingRange();
+
+        if (localPlayer->modelScale() > 1.0f)
+            range *= localPlayer->modelScale();
+    }
+
     const auto& localPlayerOrigin = localPlayer->getAbsOrigin();
     const auto& localPlayerEyePosition = localPlayer->getEyePosition();
     const auto startPos = localPlayerEyePosition;
-    const auto endPos = startPos + Vector::fromAngle(cmd->viewangles) * 8192.0f;
+    const auto endPos = startPos + Vector::fromAngle(cmd->viewangles) * range;
     for (const auto& target : enemies)
     {
         auto entity{ interfaces->entityList->getEntity(target.id) };
@@ -152,7 +167,7 @@ void Triggerbot::run(UserCmd* cmd) noexcept
             bestSimulationTime = player.simulationTime;
         }
 
-        gotTarget = getTriggerbotTarget(cmd, entity, entity->getBoneCache().memory, hitbox, startPos, endPos);
+        gotTarget = getTriggerbotTarget(cmd, activeWeapon, entity, entity->getBoneCache().memory, hitbox, startPos, endPos, activeWeapon->isKnife() && weaponType == WeaponType::MELEE);
         applyMatrix(entity, backupBoneCache, backupOrigin, backupEyeAngle, backupMins, backupMaxs);
         if (gotTarget)
             break;

@@ -270,8 +270,8 @@ void GUI::renderAimbotWindow() noexcept
 
 void GUI::renderTriggerbotWindow() noexcept
 {
-    static const char* hitboxes[]{ "Head","Chest","Stomach","Arms","Legs" };
-    static bool hitbox[ARRAYSIZE(hitboxes)] = { false, false, false, false, false };
+    static const char* hitboxes[]{ "Head","Chest","Stomach" };
+    static bool hitbox[ARRAYSIZE(hitboxes)] = { false, false, false };
     static std::string previewvalue = "";
 
     ImGui::hotkey2("Key", config->triggerbotKey, 80.0f);

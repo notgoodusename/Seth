@@ -559,5 +559,14 @@
     <ClInclude Include="SDK\Math.h">
       <Filter>SDK</Filter>
     </ClInclude>
+    <ClInclude Include="SDK\Attribute.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\UtlMemory.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\WeaponDefinitions.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

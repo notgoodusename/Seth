@@ -116,6 +116,7 @@
     <ClInclude Include="Resources\Resource.h" />
     <ClInclude Include="SDK\Angle.h" />
     <ClInclude Include="SDK\AttributeManager.h" />
+    <ClInclude Include="SDK\Attribute.h" />
     <ClInclude Include="SDK\BitBuffer.h" />
     <ClInclude Include="SDK\Client.h" />
     <ClInclude Include="SDK\ClientMode.h" />
@@ -178,11 +179,13 @@
     <ClInclude Include="SDK\Texture.h" />
     <ClInclude Include="SDK\TFWeapons.h" />
     <ClInclude Include="SDK\UserCmd.h" />
+    <ClInclude Include="SDK\UtlMemory.h" />
     <ClInclude Include="SDK\UtlVector.h" />
     <ClInclude Include="SDK\Vector.h" />
     <ClInclude Include="SDK\Utils.h" />
     <ClInclude Include="SDK\ViewSetup.h" />
     <ClInclude Include="SDK\VirtualMethod.h" />
+    <ClInclude Include="SDK\WeaponDefinitions.h" />
     <ClInclude Include="SDK\WeaponId.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="CustomTexture.h" />

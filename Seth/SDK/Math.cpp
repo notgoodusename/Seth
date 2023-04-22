@@ -1,6 +1,59 @@
+#include "Entity.h"
 #include "Math.h"
 #include "ModelInfo.h"
+#include "LocalPlayer.h"
 #include "Vector.h"
+
+bool Math::canBackstab(Entity* entity, Vector angles, Vector entityAngles) noexcept
+{
+    Vector vecToTarget;
+    vecToTarget = entity->getWorldSpaceCenter() - localPlayer->getWorldSpaceCenter();
+    vecToTarget.z = 0.0f;
+    vecToTarget.normalizeInPlace();
+
+    // Get owner forward view vector
+    Vector vecOwnerForward;
+    Vector::fromAngleAll(angles, &vecOwnerForward, NULL, NULL);
+    vecOwnerForward.z = 0.0f;
+    vecOwnerForward.normalizeInPlace();
+
+    // Get target forward view vector
+    Vector vecTargetForward;
+    Vector::fromAngleAll(entityAngles, &vecTargetForward, NULL, NULL);
+    vecTargetForward.z = 0.0f;
+    vecTargetForward.normalizeInPlace();
+
+    // Make sure owner is behind, facing and aiming at target's back
+    float posVsTargetViewDot = vecToTarget.dotProduct(vecTargetForward);
+    float posVsOwnerViewDot = vecToTarget.dotProduct(vecOwnerForward);
+    float viewAnglesDot = vecTargetForward.dotProduct(vecOwnerForward);
+
+    return (posVsTargetViewDot > 0.f && posVsOwnerViewDot > 0.5 && viewAnglesDot > -0.3f);
+}
+
+bool Math::doesMeleeHit(Entity* activeWeapon, int index, const Vector angles) noexcept
+{
+    static Vector vecSwingMins(-18, -18, -18);
+    static Vector vecSwingMaxs(18, 18, 18);
+
+    if (!localPlayer)
+        return false;
+
+    float swingRange = activeWeapon->getSwingRange();
+    if (swingRange <= 0.0f)
+        return false;
+
+    if (localPlayer->modelScale() > 1.0f)
+        swingRange *= localPlayer->modelScale();
+
+    Vector vecForward = Vector::fromAngle(angles);
+    Vector vecSwingStart = localPlayer->getEyePosition();
+    Vector vecSwingEnd = vecSwingStart + vecForward * swingRange;
+
+    Trace trace;
+    interfaces->engineTrace->traceRay({ vecSwingStart, vecSwingEnd, vecSwingMins, vecSwingMaxs }, MASK_SHOT, TraceFilterSkipOne{ localPlayer.get() }, trace);
+    return trace.entity && trace.entity->index() == index;
+}
 
 Vector Math::calculateRelativeAngle(const Vector& source, const Vector& destination, const Vector& viewAngles) noexcept
 {
