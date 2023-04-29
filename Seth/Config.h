@@ -234,6 +234,21 @@ public:
     } visuals;
 
 
+    struct SkinChanger
+    {
+        struct SkinChangerAttribute
+        {
+            int fromIndex{ -1 };
+            int toIndex{ -1 };
+            int effect{ 0 };
+            int particleEffect{ 0 };
+            int sheen{ 0 };
+            bool ancientPowers{ false };
+            bool styleOverride{ false };
+        };
+        std::vector<SkinChangerAttribute> attributes;
+    } skinChanger;
+
     struct Misc {
         Misc() { menuKey.keyMode = KeyMode::Toggle; }
 

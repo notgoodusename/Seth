@@ -27,6 +27,7 @@
 #include "Hacks/Glow.h"
 #include "Hacks/Misc.h"
 #include "Hacks/MovementRebuild.h"
+#include "Hacks/SkinChanger.h"
 #include "Hacks/StreamProofESP.h"
 #include "Hacks/Triggerbot.h"
 #include "Hacks/Visuals.h"
@@ -201,7 +202,13 @@ static void __stdcall frameStageNotify(FrameStage stage) noexcept
     if (interfaces->engine->isInGame()) {
         Animations::handlePlayers(stage);
     }
+    if (stage == FrameStage::NET_UPDATE_POSTDATAUPDATE_START) {
+        SkinChanger::run();
+    }
 
+    if (stage == FrameStage::NET_UPDATE_START) {
+        Misc::unlockHiddenCvars();
+    }
     hooks->client.callOriginal<void, 35>(stage);
 }
 

@@ -14,6 +14,7 @@
 #include "imguiCustom.h"
 
 #include "Hacks/Misc.h"
+#include "Hacks/SkinChanger.h"
 
 #include "GUI.h"
 #include "Config.h"
@@ -1056,6 +1057,37 @@ void GUI::renderMiscWindow() noexcept
     ImGui::Columns(1);
 }
 
+void GUI::renderSkinChangerWindow() noexcept
+{
+    static Config::SkinChanger::SkinChangerAttribute attribute;
+    ImGui::InputInt("From index", &attribute.fromIndex);
+    ImGui::InputInt("To index", &attribute.toIndex);
+    ImGui::InputInt("Effect", &attribute.effect);
+    ImGui::InputInt("Particle effect", &attribute.particleEffect);
+    ImGui::InputInt("Sheen", &attribute.sheen);
+    ImGui::Checkbox("Ancient", &attribute.ancientPowers);
+    ImGui::Checkbox("Style override", &attribute.styleOverride);
+
+    if (ImGui::Button("Add"))
+        config->skinChanger.attributes.push_back(attribute);
+
+    if (ImGui::Button("Clear"))
+        config->skinChanger.attributes.clear();
+
+    if (ImGui::Button("Update"))
+        SkinChanger::forceFullUpdate();
+
+    static int currentConfig = -1;
+
+    if (static_cast<std::size_t>(currentConfig) >= config->skinChanger.attributes.size())
+        currentConfig = -1;
+
+    ImGui::ListBox("", &currentConfig, [](void* data, int idx, const char** out_text) {
+        *out_text = std::to_string(config->skinChanger.attributes[idx].fromIndex).c_str();
+        return true;
+        }, &config->skinChanger.attributes, config->skinChanger.attributes.size(), 5);
+}
+
 void GUI::renderConfigWindow() noexcept
 {
     ImGui::Columns(2, nullptr, false);
@@ -1282,6 +1314,7 @@ void GUI::renderGuiStyle() noexcept
                         case 3: //Misc
                             ImGui::SetCursorPosY(10);
                             if (ImGui::Button("Main                    ", ImVec2{ 80, 20 })) activeSubTabMisc = 1;
+                            if (ImGui::Button("Skins                   ", ImVec2{ 80, 20 })) activeSubTabMisc = 2;
                             break;
                         default:
                             break;
@@ -1353,6 +1386,10 @@ void GUI::renderGuiStyle() noexcept
                                 case 1:
                                     //Main
                                     renderMiscWindow();
+                                    break;
+                                case 2:
+                                    //Skin
+                                    renderSkinChangerWindow();
                                     break;
                                 default:
                                     break;

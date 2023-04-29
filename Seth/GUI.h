@@ -27,6 +27,7 @@ private:
     void renderStreamProofESPWindow() noexcept;
     void renderVisualsWindow() noexcept;
     void renderMiscWindow() noexcept;
+    void renderSkinChangerWindow() noexcept;
     void renderConfigWindow() noexcept;
 
     struct {

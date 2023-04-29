@@ -230,6 +230,9 @@
     <ClCompile Include="SDK\Math.cpp">
       <Filter>SDK</Filter>
     </ClCompile>
+    <ClCompile Include="Hacks\SkinChanger.cpp">
+      <Filter>Hacks</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GUI.h">
@@ -565,8 +568,8 @@
     <ClInclude Include="SDK\UtlMemory.h">
       <Filter>SDK</Filter>
     </ClInclude>
-    <ClInclude Include="SDK\WeaponDefinitions.h">
-      <Filter>SDK</Filter>
+    <ClInclude Include="Hacks\SkinChanger.h">
+      <Filter>Hacks</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
