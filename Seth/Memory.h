@@ -75,6 +75,7 @@ public:
     std::uintptr_t clLoadWhitelist;
     std::uintptr_t estimateAbsVelocity;
     std::uintptr_t enableWorldFog;
+    std::uintptr_t tfPlayerInventoryGetMaxItemCount;
     std::uintptr_t sendDatagram;
 
     std::add_pointer_t<void _cdecl(const char* msg, ...)> logDirect;

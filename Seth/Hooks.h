@@ -26,6 +26,7 @@ public:
     MinHook clLoadWhitelist;
     MinHook estimateAbsVelocity;
     MinHook enableWorldFog;
+    MinHook tfPlayerInventoryGetMaxItemCount;
     MinHook sendDatagram;
 
     MinHook client;

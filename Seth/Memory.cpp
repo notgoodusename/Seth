@@ -112,6 +112,7 @@ Memory::Memory() noexcept
     clLoadWhitelist = relativeToAbsolute<decltype(clLoadWhitelist)>(findPattern(ENGINE_DLL, "\xE8????\x83\xC4\x08\x8B\xF0\x56") + 1);
     estimateAbsVelocity = findPattern(CLIENT_DLL, "\x55\x8B\xEC\x83\xEC?\x56\x8B\xF1\xE8????\x3B\xF0\x75?\x8B\xCE\xE8????\x8B\x45?\xD9\x86????\xD9\x18\xD9\x86????\xD9\x58?\xD9\x86????\xD9\x58?\x5E\x8B\xE5\x5D\xC2");
     enableWorldFog = findPattern(CLIENT_DLL, "\x55\x8B\xEC\x8B\x0D????\x83\xEC\x0C\x8B\x01\x53\x56\xFF\x90????\x8B\xF0\x85\xF6\x74\x07\x8B\x06\x8B\xCE\xFF\x50\x08");
+    tfPlayerInventoryGetMaxItemCount = findPattern(CLIENT_DLL, "\x8B\x49\x68\x56");
     sendDatagram = findPattern(ENGINE_DLL, "\x55\x8B\xEC\xB8????\xE8????\xA1????\x53\x56\x8B\xD9");;
 
     logDirect = reinterpret_cast<decltype(logDirect)>(GetProcAddress(GetModuleHandleA("tier0.dll"), "Msg"));

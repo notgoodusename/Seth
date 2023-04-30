@@ -263,6 +263,7 @@ public:
         bool fastStop{ false };
         bool svPureBypass{ true };
         bool unhideConvars{ false };
+        bool backpackExpander{ false };
 
         struct SpectatorList {
             bool enabled = false;

@@ -486,6 +486,7 @@ static void from_json(const json& j, Config::Misc& m)
     read<value_t::object>(j, "Offscreen Enemies", m.offscreenEnemies);
     read(j, "Sv pure bypass", m.svPureBypass);
     read(j, "Unlock hidden cvars", m.unhideConvars);
+    read(j, "Backpack expander", m.backpackExpander);
     read<value_t::object>(j, "Logger", m.logger);
     read<value_t::object>(j, "Logger options", m.loggerOptions);
 }
@@ -932,6 +933,7 @@ static void to_json(json& j, const Config::Misc& o)
     WRITE("Offscreen Enemies", offscreenEnemies);
     WRITE("Sv pure bypass", svPureBypass);
     WRITE("Unlock hidden cvars", unhideConvars);
+    WRITE("Backpack expander", backpackExpander);
     WRITE("Logger", logger);
     WRITE("Logger options", loggerOptions);
 }

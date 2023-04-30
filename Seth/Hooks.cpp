@@ -309,6 +309,14 @@ static void __cdecl enableWorldFogHook() noexcept
     return original();
 }
 
+static int __fastcall tfPlayerInventoryGetMaxItemCountHook(void* thisPointer) noexcept
+{
+    static auto original = hooks->tfPlayerInventoryGetMaxItemCount.getOriginal<int>();
+    if (config->misc.backpackExpander)
+        return 3000;
+    return original(thisPointer);
+}
+
 void resetAll(int resetType) noexcept
 {
     Aimbot::reset();
@@ -355,6 +363,7 @@ void Hooks::install() noexcept
     clLoadWhitelist.detour(memory->clLoadWhitelist, clLoadWhitelistHook);
     estimateAbsVelocity.detour(memory->estimateAbsVelocity, estimateAbsVelocityHook);
     enableWorldFog.detour(memory->enableWorldFog, enableWorldFogHook);
+    tfPlayerInventoryGetMaxItemCount.detour(memory->tfPlayerInventoryGetMaxItemCount, tfPlayerInventoryGetMaxItemCountHook);
     sendDatagram.detour(memory->sendDatagram, sendDatagramHook);
 
     client.init(interfaces->client);
