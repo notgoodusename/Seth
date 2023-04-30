@@ -1,5 +1,7 @@
 #pragma once
 #include <cassert>
+#include <corecrt_malloc.h>
+
 
 template <typename T>
 class UtlVector {
