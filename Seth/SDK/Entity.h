@@ -99,6 +99,8 @@ class Entity {
 public:
     VIRTUAL_METHOD(void, release, 1, (), (this + sizeof(uintptr_t) * 2))
     VIRTUAL_METHOD(ClientClass*, getClientClass, 2, (), (this + sizeof(uintptr_t) * 2))
+    VIRTUAL_METHOD(void, preDataUpdate, 6, (int updateType), (this + sizeof(uintptr_t) * 2, updateType))
+    VIRTUAL_METHOD(void, postDataUpdate, 7, (int updateType), (this + sizeof(uintptr_t) * 2, updateType))
     VIRTUAL_METHOD(bool, isDormant, 8, (), (this + sizeof(uintptr_t) * 2))
     VIRTUAL_METHOD(int, index, 9, (), (this + sizeof(uintptr_t) * 2))
 
