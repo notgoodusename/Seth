@@ -571,5 +571,11 @@
     <ClInclude Include="Hacks\SkinChanger.h">
       <Filter>Hacks</Filter>
     </ClInclude>
+    <ClInclude Include="SDK\EconItem.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\ItemSchema.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

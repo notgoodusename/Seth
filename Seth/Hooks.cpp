@@ -202,7 +202,8 @@ static void __stdcall frameStageNotify(FrameStage stage) noexcept
     if (interfaces->engine->isInGame()) {
         Animations::handlePlayers(stage);
     }
-    if (stage == FrameStage::NET_UPDATE_POSTDATAUPDATE_START) {
+
+    if (stage == FrameStage::START) {
         SkinChanger::run();
     }
 

@@ -10,12 +10,13 @@
 
 class ClientMode;
 class ClientState;
+class EconItemDefinition;
 class Entity;
 class GameEventDescriptor;
 class GameEventManager;
 class GameRules;
 class Input;
-class ItemSystem;
+class ItemSchema;
 class KeyValues;
 class MemAlloc;
 class MoveHelper;
@@ -50,6 +51,7 @@ public:
     GameRules* gameRules;
     GlobalVars* globalVars;
     Input* input;
+    std::add_pointer_t<ItemSchema* __cdecl()> itemSchema;
     MoveHelper* moveHelper;
 
     KeyValues* (__thiscall* keyValuesInitialize)(KeyValues*, char*);
@@ -58,6 +60,7 @@ public:
     
     float(__cdecl* attributeHookValue)(float, const char*, void*, void*, bool);
     void(__thiscall* calcAbsoluteVelocity)(void*);
+    EconItemDefinition*( __thiscall* getItemDefinition)(void*, int);
     int(__thiscall* getNextThinkTick)(void*, const char*);
     bool(_cdecl* passServerEntityFilter)(void* touch, void* pass);
     void(__thiscall* setAbsOrigin)(Entity*, const Vector&);

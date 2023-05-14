@@ -1060,33 +1060,33 @@ void GUI::renderMiscWindow() noexcept
 
 void GUI::renderSkinChangerWindow() noexcept
 {
-    static Config::SkinChanger::SkinChangerAttribute attribute;
-    ImGui::InputInt("From index", &attribute.fromIndex);
-    ImGui::InputInt("To index", &attribute.toIndex);
-    ImGui::InputInt("Effect", &attribute.effect);
-    ImGui::InputInt("Particle effect", &attribute.particleEffect);
-    ImGui::InputInt("Sheen", &attribute.sheen);
-    ImGui::Checkbox("Ancient", &attribute.ancientPowers);
-    ImGui::Checkbox("Style override", &attribute.styleOverride);
+    static itemSetting item;
+    ImGui::InputInt("From index", &item.itemId);
+    ImGui::InputInt("To index", &item.definitionOverrideIndex);
+    ImGui::Combo("Particle effect", &item.particleEffect, "None\0Community Sparkle\0Hot\0Isotope\0Cool\0Energy Orb\0");
+    ImGui::Combo("Unusual effect", &item.unusualEffect, "None\0Community Sparkle\0Hot\0Isotope\0Cool\0Energy Orb\0");
+    ImGui::Combo("Killstreak", &item.killStreak, "None\0Fire Horns\0Cerebral Discharge\0Tornado\0Flames\0Singularity\0Incinerator\0Hypno-Beam\0");
+    ImGui::Combo("Killstreak tier", &item.killStreakTier, "None\0Killstreak\0Specialized Killstreak\0Professional Killstreak\0");
+    ImGui::Combo("Sheen", &item.sheen, "None\0Team shine\0Deadly daffodil\0Manndarin\0Mean green\0Agonizing emerald\0Villainous violet\0Hot rod\0");
+    ImGui::Checkbox("Festivizied", &item.festivizied);
+    ImGui::Checkbox("Australium", &item.australium);
 
     if (ImGui::Button("Add"))
-        config->skinChanger.attributes.push_back(attribute);
+        config->skinChanger.push_back(item);
 
     if (ImGui::Button("Clear"))
-        config->skinChanger.attributes.clear();
-
-    if (ImGui::Button("Update"))
-        SkinChanger::forceFullUpdate();
+        config->skinChanger.clear();
 
     static int currentConfig = -1;
 
-    if (static_cast<std::size_t>(currentConfig) >= config->skinChanger.attributes.size())
+    if (static_cast<std::size_t>(currentConfig) >= config->skinChanger.size())
         currentConfig = -1;
 
     ImGui::ListBox("", &currentConfig, [](void* data, int idx, const char** out_text) {
-        *out_text = std::to_string(config->skinChanger.attributes[idx].fromIndex).c_str();
+        std::string text = std::to_string(config->skinChanger[idx].itemId);
+        *out_text = text.c_str();
         return true;
-        }, &config->skinChanger.attributes, config->skinChanger.attributes.size(), 5);
+        }, &config->skinChanger, config->skinChanger.size(), 5);
 }
 
 void GUI::renderConfigWindow() noexcept

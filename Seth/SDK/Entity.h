@@ -99,6 +99,8 @@ class Entity {
 public:
     VIRTUAL_METHOD(void, release, 1, (), (this + sizeof(uintptr_t) * 2))
     VIRTUAL_METHOD(ClientClass*, getClientClass, 2, (), (this + sizeof(uintptr_t) * 2))
+    VIRTUAL_METHOD(void, onPreDataChanged, 4, (int updateType), (this + sizeof(uintptr_t) * 2, updateType))
+    VIRTUAL_METHOD(void, onDataChanged, 5, (int updateType), (this + sizeof(uintptr_t) * 2, updateType))
     VIRTUAL_METHOD(void, preDataUpdate, 6, (int updateType), (this + sizeof(uintptr_t) * 2, updateType))
     VIRTUAL_METHOD(void, postDataUpdate, 7, (int updateType), (this + sizeof(uintptr_t) * 2, updateType))
     VIRTUAL_METHOD(bool, isDormant, 8, (), (this + sizeof(uintptr_t) * 2))
@@ -120,6 +122,8 @@ public:
 
     VIRTUAL_METHOD(const Vector&, getAbsOrigin, 9, (), (this))
     VIRTUAL_METHOD(Vector&, getAbsAngle, 10, (), (this))
+    VIRTUAL_METHOD(void, updateVisibility, 91, (), (this))
+    VIRTUAL_METHOD(void*, onNewModel, 94, (), (this))
     VIRTUAL_METHOD(int, getMaxHealth, 107, (), (this))
 
     VIRTUAL_METHOD(void, think, 121, (), (this))
@@ -535,6 +539,9 @@ public:
 
     NETVAR(weapons, "CBaseCombatCharacter", "m_hMyWeapons", int[64])
 
+    NETVAR(owner, "CBaseViewModel", "m_hOwner", int)
+    NETVAR(weapon, "CBaseViewModel", "m_hWeapon", int)
+
     NETVAR(viewModel, "CBasePlayer", "m_hViewModel[0]", int)
     NETVAR(fov, "CBasePlayer", "m_iFOV", int)
     NETVAR(fovStart, "CBasePlayer", "m_iFOVStart", int)
@@ -561,6 +568,7 @@ public:
     NETVAR(clip, "CBaseCombatWeapon", "m_iClip1", int)
     NETVAR(nextSecondaryAttack, "CBaseCombatWeapon","m_flNextSecondaryAttack", float)
     NETVAR(nextPrimaryAttack, "CBaseCombatWeapon", "m_flNextPrimaryAttack", float)
+    NETVAR(state, "CBaseCombatWeapon", "m_iState ", int)
 
     NETVAR(chargeTime, "CTFPipebombLauncher", "m_flChargeBeginTime", float)
 

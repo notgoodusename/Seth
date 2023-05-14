@@ -82,6 +82,11 @@ public:
 	}
 
 	template <class T>
+	inline void destruct(T* pMemory) {
+		pMemory->~T();
+	}
+
+	template <class T>
 	inline void copyConstruct(T* pMemory, T const& src) {
 		::new(pMemory) T(src);
 	}
@@ -98,6 +103,14 @@ public:
 
 	template< class T >
 	inline int addToTail(T const& src) {
-		return insertBefore(size, src);
+		return insertBefore<T>(size, src);
+	}
+	
+	template< class T >
+	void removeAll() {
+		for (int i = size; --i >= 0;)
+			destruct<T>(&element<T>(i));
+
+		size = 0;
 	}
 };

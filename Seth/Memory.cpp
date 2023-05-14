@@ -88,6 +88,7 @@ Memory::Memory() noexcept
     gameRules = *reinterpret_cast<GameRules**>(findPattern(CLIENT_DLL, "\x8B\x0D????\x8D\x78\x30\x8B\x11\xFF\x52\x7C\x83\xC0\x24\xEB\x14\xFF\x50\x7C\x8B\x0D????\x8D\x78\x18\x8B\x11\xFF\x52\x7C\x83\xC0\x0C\x57\x50\x8D\x8B????\xE8????\x53") + 2);
     globalVars = *reinterpret_cast<GlobalVars**>(findPattern(ENGINE_DLL, "\xA1????\x8B\x11\x68") + 0x8);
     input = **reinterpret_cast<Input***>(findPattern(CLIENT_DLL, "\x8B\x0D????\x56\x8B\x01\xFF\x50\x24\x8B\x45\xFC") + 2);
+    itemSchema = relativeToAbsolute<decltype(itemSchema)>(findPattern(CLIENT_DLL, "\xE8????\x8A\x4F\x15") + 1);
     moveHelper = **reinterpret_cast<MoveHelper***>(findPattern(CLIENT_DLL, "\x8B\x0D????\x8B\x01\xFF\x50\x28\x56\x8B\xC8") + 2);
 
     keyValuesInitialize = reinterpret_cast<decltype(keyValuesInitialize)>(findPattern(ENGINE_DLL, "\xFF\x15????\x83\xC4\x08\x89\x06\x8B\xC6") - 0x42);
@@ -95,6 +96,7 @@ Memory::Memory() noexcept
     
     attributeHookValue = relativeToAbsolute<decltype(attributeHookValue)>(findPattern(CLIENT_DLL, "\xE8????\xDA\x4D\xFC") + 1);
     calcAbsoluteVelocity = relativeToAbsolute<decltype(calcAbsoluteVelocity)>(findPattern(CLIENT_DLL, "\xE8????\xD9\xE8\x8D\x45\xEC") + 1);
+    getItemDefinition = relativeToAbsolute<decltype(getItemDefinition)>(findPattern(CLIENT_DLL, "\xE8????\x0F\xB6\x40\x15") + 1);
     getNextThinkTick = reinterpret_cast<decltype(getNextThinkTick)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\x8B\x45\x08\x56\x8B\xF1\x85\xC0\x75\x13"));
     passServerEntityFilter = reinterpret_cast<decltype(passServerEntityFilter)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\x56\x8B\x75?\x85\xF6\x75?\xB0?"));
     setAbsOrigin = reinterpret_cast<decltype(setAbsOrigin)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\x56\x57\x8B\xF1\xE8????\x8B\x7D\x08\xF3\x0F\x10\x07"));

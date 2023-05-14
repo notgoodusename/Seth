@@ -11,6 +11,8 @@ enum AttributeId
 	itemStyleOverride = 542,
 	ancientPowers = 150,
 	isFestive = 2053,
+	killStreak = 2013,
+	killStreakTier = 2025,
 	sheen = 2014,
 	unusualEffect = 134,
 	particleEffect = 370
@@ -24,7 +26,7 @@ public:
 	float value;
 	PAD(4)
 
-	inline Attribute(unsigned short attributeDefinitionIndex, float value) noexcept
+	Attribute(unsigned short attributeDefinitionIndex, float value) noexcept
 	{
 		this->attributeDefinitionIndex = attributeDefinitionIndex;
 		this->value = value;
@@ -37,7 +39,7 @@ public:
 	PAD(4)
 	UtlVector<Attribute> attributes;
 
-	inline void addAttribute(int index, float value) noexcept
+	void addAttribute(int index, float value) noexcept
 	{
 		//15 = MAX_ATTRIBUTES
 		if (attributes.size > 14)
@@ -46,5 +48,6 @@ public:
 		Attribute attribute(index, value);
 
 		attributes.addToTail(attribute);
+		//memory->notifyManagerOfAttributeValueChanges(this);
 	}
 };
