@@ -29,7 +29,7 @@
 #include "Hacks/MovementRebuild.h"
 #include "Hacks/SkinChanger.h"
 #include "Hacks/StreamProofESP.h"
-#include "Hacks/Triggerbot.h"
+#include "Hacks/Triggerbot/Triggerbot.h"
 #include "Hacks/Visuals.h"
 
 #include "SDK/ClassId.h"

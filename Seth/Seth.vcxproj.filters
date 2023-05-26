@@ -36,6 +36,9 @@
     <Filter Include="Hacks\Aimbot">
       <UniqueIdentifier>{2022a0b7-f69c-4b31-94a7-3dcabede5475}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Hacks\Triggerbot">
+      <UniqueIdentifier>{17b602df-f5de-4a92-8a3c-ff6ee0691c6a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GUI.cpp">
@@ -224,9 +227,6 @@
     <ClCompile Include="SDK\AttributeManager.cpp">
       <Filter>SDK</Filter>
     </ClCompile>
-    <ClCompile Include="Hacks\Triggerbot.cpp">
-      <Filter>Hacks</Filter>
-    </ClCompile>
     <ClCompile Include="SDK\Math.cpp">
       <Filter>SDK</Filter>
     </ClCompile>
@@ -235,6 +235,15 @@
     </ClCompile>
     <ClCompile Include="Hacks\Crithack.cpp">
       <Filter>Hacks</Filter>
+    </ClCompile>
+    <ClCompile Include="Hacks\Triggerbot\Triggerbot.cpp">
+      <Filter>Hacks\Triggerbot</Filter>
+    </ClCompile>
+    <ClCompile Include="Hacks\Triggerbot\TriggerbotHitscan.cpp">
+      <Filter>Hacks\Triggerbot</Filter>
+    </ClCompile>
+    <ClCompile Include="Hacks\Triggerbot\TriggerbotMelee.cpp">
+      <Filter>Hacks\Triggerbot</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -559,9 +568,6 @@
     <ClInclude Include="SDK\AttributeManager.h">
       <Filter>SDK</Filter>
     </ClInclude>
-    <ClInclude Include="Hacks\Triggerbot.h">
-      <Filter>Hacks</Filter>
-    </ClInclude>
     <ClInclude Include="SDK\Math.h">
       <Filter>SDK</Filter>
     </ClInclude>
@@ -582,6 +588,15 @@
     </ClInclude>
     <ClInclude Include="Hacks\Crithack.h">
       <Filter>Hacks</Filter>
+    </ClInclude>
+    <ClInclude Include="Hacks\Triggerbot\Triggerbot.h">
+      <Filter>Hacks\Triggerbot</Filter>
+    </ClInclude>
+    <ClInclude Include="Hacks\Triggerbot\TriggerbotHitscan.h">
+      <Filter>Hacks\Triggerbot</Filter>
+    </ClInclude>
+    <ClInclude Include="Hacks\Triggerbot\TriggerbotMelee.h">
+      <Filter>Hacks\Triggerbot</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

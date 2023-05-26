@@ -1,15 +1,16 @@
-#include "Aimbot/Aimbot.h"
-#include "Animations.h"
-#include "Backtrack.h"
+#include "../Aimbot/Aimbot.h"
+#include "../Animations.h"
+#include "../Backtrack.h"
 #include "Triggerbot.h"
+#include "TriggerbotMelee.h"
 
-#include "../Config.h"
+#include "../../Config.h"
 
-#include "../SDK/Entity.h"
-#include "../SDK/LocalPlayer.h"
-#include "../SDK/Math.h"
+#include "../../SDK/Entity.h"
+#include "../../SDK/Math.h"
+#include "../../SDK/ModelInfo.h"
 
-bool getTriggerbotTarget(UserCmd* cmd, Entity* activeWeapon, Entity* entity, matrix3x4 matrix[MAXSTUDIOBONES], std::array<bool, Hitboxes::LeftUpperArm> hitbox, Vector startPos, Vector endPos, bool mustBackstab) noexcept
+bool getTriggerbotMeleeTarget(UserCmd* cmd, Entity* activeWeapon, Entity* entity, bool mustBackstab) noexcept
 {
     const Model* model = entity->getModel();
     if (!model)
@@ -22,69 +23,23 @@ bool getTriggerbotTarget(UserCmd* cmd, Entity* activeWeapon, Entity* entity, mat
     StudioHitboxSet* set = hdr->getHitboxSet(0);
     if (!set)
         return false;
+    
+    if (mustBackstab)
+        return Math::canBackstab(entity, cmd->viewangles, entity->eyeAngles()) && Math::doesMeleeHit(activeWeapon, entity->index(), cmd->viewangles);
 
-    if (mustBackstab && Math::canBackstab(entity, cmd->viewangles, entity->eyeAngles()))
-        return Math::doesMeleeHit(activeWeapon, entity->index(), cmd->viewangles);
-
-    for (size_t j = 0; j < hitbox.size(); j++)
-    {
-        if (!hitbox[j])
-            continue;
-
-        if (Math::hitboxIntersection(matrix, j, set, startPos, endPos))
-        {
-            Trace trace;
-            interfaces->engineTrace->traceRay({ startPos, endPos }, MASK_SHOT | CONTENTS_HITBOX, TraceFilterSkipOne{ localPlayer.get() }, trace);
-            if (!trace.entity)
-                continue;
-
-            return trace.entity == entity || trace.fraction > 0.97f;
-        }
-    }
-
-    return false;
+    return Math::doesMeleeHit(activeWeapon, entity->index(), cmd->viewangles);
 }
 
-void Triggerbot::run(UserCmd* cmd) noexcept
+void TriggerbotMelee::run(Entity* activeWeapon, UserCmd* cmd, float& lastTime, float& lastContact) noexcept
 {
-    const auto& cfg = config->triggerbot;
-    if (!config->triggerbotKey.isActive() || !cfg.enabled)
+    const auto& cfg = config->meleeTriggerbot;
+    if (!cfg.enabled)
         return;
-
-    if (!localPlayer || !localPlayer->isAlive() || localPlayer->isTaunting() || localPlayer->isBonked() || localPlayer->isFeignDeathReady()
-        || localPlayer->isCloaked() || localPlayer->isInBumperKart() || localPlayer->isAGhost())
-        return;
-
-    const auto activeWeapon = localPlayer->getActiveWeapon();
-    if (!activeWeapon)
-        return;
-
-    const auto weaponType = activeWeapon->getWeaponType();
-    if (weaponType != WeaponType::HITSCAN && weaponType != WeaponType::MELEE)
-        return;
-
-    if (activeWeapon->nextPrimaryAttack() > memory->globalVars->serverTime())
-        return;
-
-    static auto lastTime = 0.0f;
-    static auto lastContact = 0.0f;
 
     const auto now = memory->globalVars->realtime;
 
     if (now - lastTime < cfg.shotDelay / 1000.0f)
         return;
-
-    std::array<bool, Hitboxes::LeftUpperArm> hitbox{ false };
-
-    hitbox[Hitboxes::Head] = (cfg.hitboxes & 1 << 0) == 1 << 0; // Head
-
-    hitbox[Hitboxes::Spine0] = (cfg.hitboxes & 1 << 1) == 1 << 1; //Body
-    hitbox[Hitboxes::Spine1] = (cfg.hitboxes & 1 << 1) == 1 << 1;
-    hitbox[Hitboxes::Spine2] = (cfg.hitboxes & 1 << 1) == 1 << 1;
-    hitbox[Hitboxes::Spine3] = (cfg.hitboxes & 1 << 1) == 1 << 1;
-
-    hitbox[Hitboxes::Pelvis] = (cfg.hitboxes & 1 << 2) == 1 << 2; //Pelvis
-
 
     //Yeah, this shit is hacky but it works well so who cares
     auto enemies = Aimbot::getEnemies();
@@ -94,14 +49,9 @@ void Triggerbot::run(UserCmd* cmd) noexcept
     bool gotTarget = false;
     float bestSimulationTime = -1.0f;
 
-    float range = 8192.0f;
-    if (weaponType == WeaponType::MELEE)
-    {
-        range = activeWeapon->getSwingRange();
-
-        if (localPlayer->modelScale() > 1.0f)
-            range *= localPlayer->modelScale();
-    }
+    float range = activeWeapon->getSwingRange();;
+    if (localPlayer->modelScale() > 1.0f)
+        range *= localPlayer->modelScale();
 
     const auto& localPlayerOrigin = localPlayer->getAbsOrigin();
     const auto& localPlayerEyePosition = localPlayer->getEyePosition();
@@ -167,7 +117,7 @@ void Triggerbot::run(UserCmd* cmd) noexcept
             bestSimulationTime = player.simulationTime;
         }
 
-        gotTarget = getTriggerbotTarget(cmd, activeWeapon, entity, entity->getBoneCache().memory, hitbox, startPos, endPos, activeWeapon->isKnife() && weaponType == WeaponType::MELEE);
+        gotTarget = getTriggerbotMeleeTarget(cmd, activeWeapon, entity, activeWeapon->isKnife() && cfg.autoBackstab);
         applyMatrix(entity, backupBoneCache, backupOrigin, backupEyeAngle, backupMins, backupMaxs);
         if (gotTarget)
             break;
@@ -179,14 +129,4 @@ void Triggerbot::run(UserCmd* cmd) noexcept
         lastTime = 0.0f;
         lastContact = now;
     }
-}
-
-void Triggerbot::updateInput() noexcept
-{
-	config->triggerbotKey.handleToggle();
-}
-
-void Triggerbot::reset() noexcept
-{
-
 }

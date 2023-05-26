@@ -281,24 +281,24 @@ void GUI::renderTriggerbotWindow() noexcept
     static int currentCategory{ 0 };
     ImGui::PushItemWidth(110.0f);
     ImGui::PushID(0);
-    ImGui::Combo("", &currentCategory, "Hitscan\0Projectile\0Melee\0");
+    ImGui::Combo("", &currentCategory, "Hitscan\0Melee\0");
     ImGui::PopID();
 
     ImGui::SameLine();
-    ImGui::Checkbox("Enabled", &config->triggerbot.enabled);
     switch (currentCategory)
     {
         case 0:
         {
-            ImGui::Checkbox("Friendly fire", &config->triggerbot.friendlyFire);
-            ImGui::Checkbox("Target backtrack", &config->triggerbot.targetBacktrack);
-            ImGui::Checkbox("Scoped only", &config->triggerbot.scopedOnly);
-            ImGui::Checkbox("Ignore cloaked", &config->triggerbot.ignoreCloaked);
+            ImGui::Checkbox("Enabled", &config->hitscanTriggerbot.enabled);
+            ImGui::Checkbox("Friendly fire", &config->hitscanTriggerbot.friendlyFire);
+            ImGui::Checkbox("Target backtrack", &config->hitscanTriggerbot.targetBacktrack);
+            ImGui::Checkbox("Scoped only", &config->hitscanTriggerbot.scopedOnly);
+            ImGui::Checkbox("Ignore cloaked", &config->hitscanTriggerbot.ignoreCloaked);
             ImGui::SetNextItemWidth(85.0f);
 
             for (size_t i = 0; i < ARRAYSIZE(hitbox); i++)
             {
-                hitbox[i] = (config->triggerbot.hitboxes & 1 << i) == 1 << i;
+                hitbox[i] = (config->hitscanTriggerbot.hitboxes & 1 << i) == 1 << i;
             }
 
             if (ImGui::BeginCombo("Hitbox", previewvalue.c_str()))
@@ -318,16 +318,26 @@ void GUI::renderTriggerbotWindow() noexcept
                 if (hitbox[i])
                 {
                     previewvalue += previewvalue.size() ? std::string(", ") + hitboxes[i] : hitboxes[i];
-                    config->triggerbot.hitboxes |= 1 << i;
+                    config->hitscanTriggerbot.hitboxes |= 1 << i;
                 }
                 else
                 {
-                    config->triggerbot.hitboxes &= ~(1 << i);
+                    config->hitscanTriggerbot.hitboxes &= ~(1 << i);
                 }
             }
             ImGui::PushItemWidth(220.0f);
-            ImGui::SliderInt("Shot delay", &config->triggerbot.shotDelay, 0, 250, "%d ms");
+            ImGui::SliderInt("Shot delay", &config->hitscanTriggerbot.shotDelay, 0, 250, "%d ms");
+            break;
         }
+        case 1:
+            ImGui::Checkbox("Enabled", &config->meleeTriggerbot.enabled);
+            ImGui::Checkbox("Friendly fire", &config->meleeTriggerbot.friendlyFire);
+            ImGui::Checkbox("Target backtrack", &config->meleeTriggerbot.targetBacktrack);
+            ImGui::Checkbox("Auto backstab", &config->meleeTriggerbot.autoBackstab);
+            ImGui::Checkbox("Ignore cloaked", &config->meleeTriggerbot.ignoreCloaked);
+            ImGui::PushItemWidth(220.0f);
+            ImGui::SliderInt("Shot delay", &config->meleeTriggerbot.shotDelay, 0, 250, "%d ms");
+            break;
     default:
         break;
     }
@@ -1150,7 +1160,7 @@ void GUI::renderConfigWindow() noexcept
                     switch (i) {
                     case 0: config->reset(); break;
                     case 1: config->aimbot = { }; config->aimbotKey.reset(); break;
-                    case 2: config->triggerbot = { }; config->triggerbotKey.reset();  break;
+                    case 2: config->hitscanTriggerbot = { }; config->meleeTriggerbot = { }; config->triggerbotKey.reset();  break;
                     case 3: config->backtrack = { };  break;
                     case 4: config->antiAim = { }; break;
                     case 6: config->fakelag = { }; break;

@@ -129,7 +129,7 @@ public:
     KeyBind aimbotKey{ std::string("aimbot") };
     ColorToggleOutline aimbotFov{ 1.0f, 1.0f, 1.0f, 0.25f };
 
-    struct Triggerbot {
+    struct HitscanTriggerbot {
         bool enabled{ false };
         bool friendlyFire{ false };
         bool targetBacktrack{ true };
@@ -137,7 +137,17 @@ public:
         bool ignoreCloaked{ true };
         int hitboxes{ 0 };
         int shotDelay{ 0 };
-    } triggerbot;
+    } hitscanTriggerbot;
+
+    struct MeleeTriggerbot {
+        bool enabled{ false };
+        bool friendlyFire{ false };
+        bool targetBacktrack{ true };
+        bool autoBackstab{ true };
+        bool ignoreCloaked{ true };
+        int shotDelay{ 0 };
+    } meleeTriggerbot;
+
     KeyBind triggerbotKey{ std::string("triggerbot") };
 
     struct Backtrack {

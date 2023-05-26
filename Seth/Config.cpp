@@ -249,12 +249,24 @@ static void from_json(const json& j, Config::Aimbot::Melee& m)
     read(j, "Fov", m.fov);
 }
 
-static void from_json(const json& j, Config::Triggerbot& t)
+static void from_json(const json& j, Config::HitscanTriggerbot& t)
 {
     read(j, "Enabled", t.enabled);
     read(j, "Friendly fire", t.friendlyFire);
+    read(j, "Target backtrack", t.targetBacktrack);
     read(j, "Scoped only", t.scopedOnly);
     read(j, "Hitboxes", t.hitboxes);
+    read(j, "Ignore cloaked", t.ignoreCloaked);
+    read(j, "Shot delay", t.shotDelay);
+}
+
+static void from_json(const json& j, Config::MeleeTriggerbot& t)
+{
+    read(j, "Enabled", t.enabled);
+    read(j, "Friendly fire", t.friendlyFire);
+    read(j, "Target backtrack", t.targetBacktrack);
+    read(j, "Auto backstab", t.autoBackstab);
+    read(j, "Ignore cloaked", t.ignoreCloaked);
     read(j, "Shot delay", t.shotDelay);
 }
 
@@ -515,7 +527,8 @@ void Config::load(const char8_t* name, bool incremental) noexcept
     read(j, "Aimbot Key", aimbotKey);
     read<value_t::object>(j, "Draw aimbot fov", aimbotFov);
 
-    read<value_t::object>(j, "Triggerbot", triggerbot);
+    read<value_t::object>(j, "Hitscan triggerbot", hitscanTriggerbot);
+    read<value_t::object>(j, "Melee triggerbot", meleeTriggerbot);
     read(j, "Triggerbot Key", triggerbotKey);
 
     read<value_t::object>(j, "Anti aim", antiAim);
@@ -710,12 +723,24 @@ static void to_json(json& j, const Config::Aimbot::Melee& o, const Config::Aimbo
     WRITE("Fov", fov);
 }
 
-static void to_json(json& j, const Config::Triggerbot& o, const Config::Triggerbot& dummy = {})
+static void to_json(json& j, const Config::HitscanTriggerbot& o, const Config::HitscanTriggerbot& dummy = {})
 {
     WRITE("Enabled", enabled);
     WRITE("Friendly fire", friendlyFire);
+    WRITE("Target backtrack", targetBacktrack);
     WRITE("Scoped only", scopedOnly);
     WRITE("Hitboxes", hitboxes);
+    WRITE("Ignore cloaked", ignoreCloaked);
+    WRITE("Shot delay", shotDelay);
+}
+
+static void to_json(json& j, const Config::MeleeTriggerbot& o, const Config::MeleeTriggerbot& dummy = {})
+{
+    WRITE("Enabled", enabled);
+    WRITE("Friendly fire", friendlyFire);
+    WRITE("Target backtrack", targetBacktrack);
+    WRITE("Auto backstab", autoBackstab);
+    WRITE("Ignore cloaked", ignoreCloaked);
     WRITE("Shot delay", shotDelay);
 }
 
@@ -994,7 +1019,8 @@ void Config::save(size_t id) const noexcept
         to_json(j["Aimbot Key"], aimbotKey, KeyBind::NONE);
         j["Draw aimbot fov"] = aimbotFov;
 
-        j["Triggerbot"] = triggerbot;
+        j["Hitscan Triggerbot"] = hitscanTriggerbot;
+        j["Melee Triggerbot"] = meleeTriggerbot;
         to_json(j["Triggerbot Key"], triggerbotKey, KeyBind::NONE);
 
         j["Anti aim"] = antiAim;
@@ -1049,7 +1075,8 @@ void Config::reset() noexcept
     fakelag = { };
     tickbase = { };
     backtrack = { };
-    triggerbot = { };
+    hitscanTriggerbot = { };
+    meleeTriggerbot = { };
     chams = { };
     buildingChams = { }; 
     worldChams = { };

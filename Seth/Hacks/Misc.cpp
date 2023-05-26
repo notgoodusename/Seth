@@ -40,7 +40,7 @@ const bool anyActiveKeybinds() noexcept
     const bool doubletap = config->tickbase.doubletap.canShowKeybind();
     const bool hideshots = config->tickbase.hideshots.canShowKeybind();
     const bool aimbot = config->aimbotKey.canShowKeybind();
-    const bool triggerBot = config->triggerbot.enabled && config->triggerbotKey.canShowKeybind();
+    const bool triggerBot = (config->hitscanTriggerbot.enabled || config->meleeTriggerbot.enabled) && config->triggerbotKey.canShowKeybind();
     const bool glow = config->glowKey.canShowKeybind();
     const bool chams = config->chamsKey.canShowKeybind();
     const bool esp = config->streamProofESP.key.canShowKeybind();
@@ -95,7 +95,7 @@ void Misc::showKeybinds() noexcept
     config->tickbase.hideshots.showKeybind();
 
     config->aimbotKey.showKeybind();
-    if (config->triggerbot.enabled)
+    if (config->hitscanTriggerbot.enabled || config->meleeTriggerbot.enabled)
         config->triggerbotKey.showKeybind();
     config->chamsKey.showKeybind();
     config->glowKey.showKeybind();
