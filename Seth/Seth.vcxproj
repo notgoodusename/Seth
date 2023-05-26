@@ -36,6 +36,7 @@
     <ClCompile Include="Hacks\Animations.cpp" />
     <ClCompile Include="Hacks\Backtrack.cpp" />
     <ClCompile Include="Hacks\Chams.cpp" />
+    <ClCompile Include="Hacks\Crithack.cpp" />
     <ClCompile Include="Hacks\EnginePrediction.cpp" />
     <ClCompile Include="Hacks\Glow.cpp" />
     <ClCompile Include="Hacks\MovementRebuild.cpp" />
@@ -91,6 +92,7 @@
     <ClInclude Include="Hacks\Animations.h" />
     <ClInclude Include="Hacks\Backtrack.h" />
     <ClInclude Include="Hacks\Chams.h" />
+    <ClInclude Include="Hacks\Crithack.h" />
     <ClInclude Include="Hacks\EnginePrediction.h" />
     <ClInclude Include="Hacks\Glow.h" />
     <ClInclude Include="Hacks\Misc.h" />
