@@ -262,11 +262,9 @@ static void __fastcall paintTraverse(void* thisPointer, void*, unsigned int vgui
 
     if (vguiFocusOverlayPanel == NULL)
     {
-        const char* szName = interfaces->panel->getName(vguiPanel);
-        if (szName[0] == 'F' && szName[5] == 'O' && szName[12] == 'P')
-        {
+        const char* name = interfaces->panel->getName(vguiPanel);
+        if (name[0] == 'F' && name[5] == 'O' && name[12] == 'P')
             vguiFocusOverlayPanel = vguiPanel;
-        }
     }
 
     if (vguiFocusOverlayPanel == vguiPanel)
