@@ -2,6 +2,8 @@
 
 #include "Vector.h"
 
+#define MASK_SIGNED 0x7FFFFFFF
+
 struct UserCmd {
     enum {
         IN_ATTACK = 1 << 0,

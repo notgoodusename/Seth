@@ -10,6 +10,7 @@
 #include "../SDK/FrameStage.h"
 #include "../SDK/GameMovement.h"
 #include "../SDK/GlobalVars.h"
+#include "../SDK/MD5.h"
 #include "../SDK/MoveHelper.h"
 #include "../SDK/Prediction.h"
 
@@ -48,17 +49,18 @@ void EnginePrediction::run(UserCmd* cmd) noexcept
     localPlayerVelocity = localPlayer->velocity();
     localPlayerWasOnGround = localPlayer->isOnGround();
 
-
     static MoveData moveData;
     memset(&moveData, 0, sizeof(MoveData));
 
     localPlayer->setCurrentCommand(cmd);
-    *memory->predictionRandomSeed = 0;
 
     const auto oldCurrenttime = memory->globalVars->currenttime;
     const auto oldFrametime = memory->globalVars->frametime;
     const auto oldIsFirstTimePredicted = interfaces->prediction->isFirstTimePredicted;
     const auto oldInPrediction = interfaces->prediction->inPrediction;
+    const auto oldSeed = *memory->predictionRandomSeed;
+
+    *memory->predictionRandomSeed = MD5_PseudoRandom(cmd->commandNumber) & MASK_SIGNED;;
 
     memory->globalVars->currenttime = memory->globalVars->serverTime();
     memory->globalVars->frametime = interfaces->prediction->enginePaused ? 0 : memory->globalVars->intervalPerTick;
@@ -84,7 +86,7 @@ void EnginePrediction::run(UserCmd* cmd) noexcept
     memory->moveHelper->setHost(nullptr);
 
     localPlayer->setCurrentCommand(nullptr);
-    *memory->predictionRandomSeed = -1;
+    *memory->predictionRandomSeed = oldSeed;
 
     memory->globalVars->currenttime = oldCurrenttime;
     memory->globalVars->frametime = oldFrametime;

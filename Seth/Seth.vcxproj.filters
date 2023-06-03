@@ -245,6 +245,9 @@
     <ClCompile Include="Hacks\Triggerbot\TriggerbotMelee.cpp">
       <Filter>Hacks\Triggerbot</Filter>
     </ClCompile>
+    <ClCompile Include="SDK\MD5.cpp">
+      <Filter>SDK</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GUI.h">
@@ -597,6 +600,9 @@
     </ClInclude>
     <ClInclude Include="Hacks\Triggerbot\TriggerbotMelee.h">
       <Filter>Hacks\Triggerbot</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\MD5.h">
+      <Filter>SDK</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

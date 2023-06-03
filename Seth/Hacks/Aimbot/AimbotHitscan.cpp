@@ -56,24 +56,11 @@ void AimbotHitscan::run(Entity* activeWeapon, UserCmd* cmd) noexcept
     if (!cfg.enabled)
         return;
 
-    if (!(cmd->buttons & UserCmd::IN_ATTACK || cfg.autoShoot || cfg.aimlock))
-        return;
-    //TODO: Fix decloaking on both functions
-    if (!activeWeapon->clip() || activeWeapon->nextPrimaryAttack() > memory->globalVars->serverTime() || activeWeapon->isInReload())
+    if (!cfg.autoShoot && !cfg.aimlock && !isAttacking(cmd, activeWeapon))
         return;
 
-    switch (activeWeapon->itemDefinitionIndex())
-    {
-        case Sniper_m_TheMachina:
-        case Sniper_m_ShootingStar:
-        {
-            if (!localPlayer->isScoped())
-                return;
-            break;
-        }
-        default:
-            break;
-    }
+    if (!canAttack(cmd, activeWeapon))
+        return;
 
     std::array<bool, Hitboxes::LeftUpperArm> hitbox{ false };
 

@@ -202,10 +202,10 @@ void AimbotMelee::run(Entity* activeWeapon, UserCmd* cmd) noexcept
         }
     }
 
-    if (!(cmd->buttons & UserCmd::IN_ATTACK || cfg.autoHit || cfg.aimlock))
+    if (!cfg.autoHit && !cfg.aimlock && !isAttacking(cmd, activeWeapon))
         return;
 
-    if (activeWeapon->nextPrimaryAttack() > memory->globalVars->serverTime() && activeWeapon->nextSecondaryAttack() > memory->globalVars->serverTime())
+    if (!canAttack(cmd, activeWeapon))
         return;
 
     //The knife has no delay to register a hit

@@ -63,6 +63,7 @@
     <ClCompile Include="SDK\EngineTrace.cpp" />
     <ClCompile Include="SDK\KeyValues.cpp" />
     <ClCompile Include="SDK\Math.cpp" />
+    <ClCompile Include="SDK\MD5.cpp" />
     <ClCompile Include="Seth.cpp" />
     <ClCompile Include="GUI.cpp" />
     <ClCompile Include="Hacks\Misc.cpp" />
@@ -169,6 +170,7 @@
     <ClInclude Include="SDK\MaterialSystem.h" />
     <ClInclude Include="SDK\Math.h" />
     <ClInclude Include="SDK\matrix3x4.h" />
+    <ClInclude Include="SDK\MD5.h" />
     <ClInclude Include="SDK\MDLCache.h" />
     <ClInclude Include="SDK\MemAlloc.h" />
     <ClInclude Include="SDK\ModelInfo.h" />

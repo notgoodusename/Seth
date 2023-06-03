@@ -464,6 +464,22 @@ public:
         return (inReload || reloadMode != 0);
     }
 
+    bool isCritBoosted() noexcept
+    {
+        int condition = this->condition(), conditionEx = this->conditionEx();
+
+        return (condition & TFCond_Kritzkrieged ||
+            conditionEx & TFCondEx_CritCanteen ||
+            conditionEx & TFCondEx_CritOnFirstBlood ||
+            conditionEx & TFCondEx_CritOnWin ||
+            conditionEx & TFCondEx_CritOnKill ||
+            conditionEx & TFCondEx_CritDemoCharge ||
+            conditionEx & TFCondEx_CritOnFlagCapture ||
+            conditionEx & TFCondEx_HalloweenCritCandy ||
+            conditionEx & TFCondEx_PyroCrits ||
+            hasCritTempRune());
+    }
+
     CONDITION(isCharging, condition(), TFCond_Charging)
     CONDITION(isScoped, condition(), TFCond_Zoomed)
     CONDITION(isUbered, condition(), TFCond_Ubercharged)

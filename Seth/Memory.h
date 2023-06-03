@@ -60,9 +60,14 @@ public:
     
     float(__cdecl* attributeHookValue)(float, const char*, void*, void*, bool);
     void(__thiscall* calcAbsoluteVelocity)(void*);
+    bool(__thiscall* calcIsAttackCriticalHelper)(void*);
+    bool(__thiscall* calcIsAttackCriticalHelperMelee)(void*);
     EconItemDefinition*( __thiscall* getItemDefinition)(void*, int);
     int(__thiscall* getNextThinkTick)(void*, const char*);
     bool(_cdecl* passServerEntityFilter)(void* touch, void* pass);
+    std::add_pointer_t<int __cdecl(const int, ...)> randomSeed;
+    std::add_pointer_t<int __cdecl(const int, const int, ...)> randomInt;
+    std::add_pointer_t<float __cdecl(const float, const float, ...)> randomFloat;
     void(__thiscall* setAbsOrigin)(Entity*, const Vector&);
     void(__thiscall* setAbsAngle)(Entity*, const Vector&);
     void(__thiscall* setCollisionBounds)(void*, const Vector& mins, const Vector& maxs);

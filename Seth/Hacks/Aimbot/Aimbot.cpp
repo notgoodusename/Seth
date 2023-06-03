@@ -52,19 +52,15 @@ void Aimbot::run(UserCmd* cmd) noexcept
     const auto weaponType = activeWeapon->getWeaponType();
     switch (weaponType)
     {
-        case WeaponType::UNKNOWN:
-            return;
         case WeaponType::HITSCAN:
             AimbotHitscan::run(activeWeapon, cmd);
-            return;
+            break;
         case WeaponType::PROJECTILE:
             AimbotProjectile::run(activeWeapon, cmd);
-            return;
+            break;
         case WeaponType::MELEE:
             AimbotMelee::run(activeWeapon, cmd);
-            return;
-        case WeaponType::THROWABLE:
-            return;
+            break;
         default:
             break;
     }

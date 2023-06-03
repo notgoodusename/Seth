@@ -509,16 +509,6 @@ bool doesProjectileHit(AimbotProjectile::ProjectileWeaponInfo projectileInfo, Ve
     return true;
 }
 
-bool isAttacking(Entity* activeWeapon, UserCmd* cmd)
-{
-    if (activeWeapon->weaponId() == WeaponId::COMPOUND_BOW
-        || activeWeapon->weaponId() == WeaponId::PIPEBOMBLAUNCHER)
-    {
-        return activeWeapon->chargeTime() > 0.0f && ((cmd->buttons & (UserCmd::IN_ATTACK)) != UserCmd::IN_ATTACK);
-    }
-    return cmd->buttons & UserCmd::IN_ATTACK;
-}
-
 void AimbotProjectile::run(Entity* activeWeapon, UserCmd* cmd) noexcept
 {
     const auto& cfg = config->aimbot.projectile;
@@ -529,10 +519,10 @@ void AimbotProjectile::run(Entity* activeWeapon, UserCmd* cmd) noexcept
     if (!network)
         return;
 
-    if (!cfg.autoShoot && !cfg.aimlock && !isAttacking(activeWeapon, cmd))
+    if (!cfg.autoShoot && !cfg.aimlock && !isAttacking(cmd, activeWeapon))
         return;
 
-    if (activeWeapon->nextPrimaryAttack() > memory->globalVars->serverTime())
+    if (!canAttack(cmd, activeWeapon))
         return;
 
     auto enemies = Aimbot::getEnemies();
@@ -560,7 +550,7 @@ void AimbotProjectile::run(Entity* activeWeapon, UserCmd* cmd) noexcept
     for (const auto& target : enemies)
     {
         auto entity{ interfaces->entityList->getEntity(target.id) };
-        if ((entity->isCloaked() && cfg.ignoreCloaked) || !entity->isEnemy(localPlayer.get()))
+        if ((entity->isCloaked() && cfg.ignoreCloaked) || (!entity->isEnemy(localPlayer.get()) && !cfg.friendlyFire))
             continue;
 
         //We cant predict entities that fly and shit
