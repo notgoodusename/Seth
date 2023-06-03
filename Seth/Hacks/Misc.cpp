@@ -40,20 +40,21 @@ const bool anyActiveKeybinds() noexcept
     const bool doubletap = config->tickbase.doubletap.canShowKeybind();
     const bool hideshots = config->tickbase.hideshots.canShowKeybind();
     const bool aimbot = config->aimbotKey.canShowKeybind();
-    const bool triggerBot = (config->hitscanTriggerbot.enabled || config->meleeTriggerbot.enabled) && config->triggerbotKey.canShowKeybind();
+    const bool triggerbot = (config->hitscanTriggerbot.enabled || config->meleeTriggerbot.enabled) && config->triggerbotKey.canShowKeybind();
     const bool glow = config->glowKey.canShowKeybind();
     const bool chams = config->chamsKey.canShowKeybind();
     const bool esp = config->streamProofESP.key.canShowKeybind();
 
     const bool thirdperson = config->visuals.thirdperson && config->visuals.thirdpersonKey.canShowKeybind();
-    const bool freeCam = config->visuals.freeCam && config->visuals.freeCamKey.canShowKeybind();
+    const bool freecam = config->visuals.freeCam && config->visuals.freeCamKey.canShowKeybind();
 
+    const bool crithack = config->misc.critHack && config->misc.forceCritHack.canShowKeybind();
     const bool edgejump = config->misc.edgeJump && config->misc.edgeJumpKey.canShowKeybind();
 
     return aimbot || antiAimManualForward || antiAimManualBackward || antiAimManualRight  || antiAimManualLeft 
         || doubletap || hideshots
-        || triggerBot || chams || glow || esp
-        || thirdperson || freeCam || edgejump;
+        || triggerbot || chams || glow || esp
+        || thirdperson || freecam || crithack || edgejump;
 }
 
 void Misc::showKeybinds() noexcept
@@ -105,6 +106,9 @@ void Misc::showKeybinds() noexcept
         config->visuals.thirdpersonKey.showKeybind();
     if (config->visuals.freeCam)
         config->visuals.freeCamKey.showKeybind();
+
+    if (config->misc.critHack)
+        config->misc.forceCritHack.showKeybind();
 
     if (config->misc.edgeJump)
         config->misc.edgeJumpKey.showKeybind();

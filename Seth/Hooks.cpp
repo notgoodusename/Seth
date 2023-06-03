@@ -23,6 +23,7 @@
 #include "Hacks/Animations.h"
 #include "Hacks/Backtrack.h"
 #include "Hacks/Chams.h"
+#include "Hacks/Crithack.h"
 #include "Hacks/EnginePrediction.h"
 #include "Hacks/Glow.h"
 #include "Hacks/Misc.h"
@@ -169,6 +170,8 @@ static bool __fastcall createMove(void* thisPointer, void*, float inputSampleTim
     Triggerbot::run(cmd);
 
     Misc::edgejump(cmd);
+
+    //Crithack::run(cmd);
 
     cmd->viewangles.normalize();
 

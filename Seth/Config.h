@@ -254,6 +254,8 @@ public:
         bool antiAfkKick{ false };
         bool autoStrafe{ false };
         bool bunnyHop{ false };
+        bool critHack{ false };
+        KeyBind forceCritHack{ std::string("crithack") };
         bool edgeJump{ false };
         KeyBind edgeJumpKey{ std::string("edgejump") };
         bool autoAccept{ false };
