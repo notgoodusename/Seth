@@ -317,9 +317,12 @@ static void renderPlayerBox(const PlayerData& playerData, const Player& config) 
 
     if (config.healthBar.enabled)
     {
-        const auto textSize = ImGui::CalcTextSize(std::to_string(playerData.health).c_str());
-        const auto position = bbox.min - ImVec2{ 5.0f + (textSize.x/2.0f), 0.0f } + ImVec2{ 0.0f, std::clamp((static_cast<float>(playerData.maxHealth) - static_cast<float>(playerData.health)) / static_cast<float>(playerData.maxHealth), 0.0f, 1.0f) * height };
-        renderText(playerData.distanceToLocal, config.textCullDistance, Color4(), std::to_string(playerData.health).c_str(), { position.x , position.y });
+        const std::string healthString = playerData.health > playerData.maxHealth ? "+" + std::to_string(playerData.health - playerData.maxHealth) : std::to_string(playerData.health);
+        const auto textSize = ImGui::CalcTextSize((healthString).c_str());
+        const auto position = bbox.min - ImVec2{ 10.0f + (textSize.x/2.0f), -2.5f - (textSize.y / 2.0f) }
+        + ImVec2{ 0.0f, std::clamp((static_cast<float>(playerData.maxHealth) - static_cast<float>(playerData.health)) / static_cast<float>(playerData.maxHealth), 0.0f, 1.0f) * height };
+        renderText(playerData.distanceToLocal, config.textCullDistance, Color4(),
+            (healthString).c_str(), {position.x , position.y});
     }
 
     if (config.name.enabled) {
