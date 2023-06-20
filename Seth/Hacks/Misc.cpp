@@ -423,12 +423,13 @@ void Misc::drawPlayerList() noexcept
     ImGui::SetNextWindowSize(ImVec2(300.0f, 300.0f), ImGuiCond_Once);
 
     if (ImGui::Begin("Player List", nullptr, windowFlags)) {
-        if (ImGui::beginTable("", 5, ImGuiTableFlags_Borders | ImGuiTableFlags_Hideable | ImGuiTableFlags_ScrollY | ImGuiTableFlags_Resizable)) {
+        if (ImGui::beginTable("", 6, ImGuiTableFlags_Borders | ImGuiTableFlags_Hideable | ImGuiTableFlags_ScrollY | ImGuiTableFlags_Resizable)) {
             ImGui::TableSetupColumn("Index", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide);
             ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 120.0f);
             ImGui::TableSetupColumn("Steam ID", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoResize);
             ImGui::TableSetupColumn("Class", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoResize);
             ImGui::TableSetupColumn("Health", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoResize);
+            ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide);
             ImGui::TableSetupScrollFreeze(0, 1);
             ImGui::TableSetColumnEnabled(2, config->misc.playerList.steamID);
             ImGui::TableSetColumnEnabled(3, config->misc.playerList.className);
@@ -472,6 +473,45 @@ void Misc::drawPlayerList() noexcept
                         ImGui::TextColored({ 1.0f, 0.0f, 0.0f, 1.0f }, "%s", "Dead");
                     else
                         ImGui::Text("%d HP", player.health);
+                }
+
+                if (ImGui::TableNextColumn()) {
+                    if (ImGui::smallButtonFullWidth("...", false))
+                        ImGui::OpenPopup("##options");
+
+                    if (ImGui::BeginPopup("##options", ImGuiWindowFlags_AlwaysUseWindowPadding)) {
+                        if (GameData::local().exists && player.team == GameData::local().team 
+                            && player.steamID != 0)
+                        {
+                            if (ImGui::Button("Set to high priority"))
+                            {
+
+                            }
+
+                            if (ImGui::Button("Set to low priority"))
+                            {
+
+                            }
+
+                            if (ImGui::Button("Set to no priority"))
+                            {
+
+                            }
+
+                            if (ImGui::Button("Reset priority"))
+                            {
+
+                            }
+
+                            if (ImGui::Button("Kick"))
+                            {
+                                const std::string cmd = "callvote kick " + std::to_string(player.userId);
+                                interfaces->engine->clientCmdUnrestricted(cmd.c_str());
+                            }
+                        }
+
+                        ImGui::EndPopup();
+                    }
                 }
 
                 ImGui::PopID();
