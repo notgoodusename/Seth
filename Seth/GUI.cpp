@@ -960,6 +960,7 @@ void GUI::renderMiscWindow() noexcept
 
     if (ImGui::BeginPopup("")) {
         ImGui::Checkbox("Steam ID", &config->misc.playerList.steamID);
+        ImGui::Checkbox("Class name", &config->misc.playerList.className);
         ImGui::Checkbox("Health", &config->misc.playerList.health);
         ImGui::EndPopup();
     }

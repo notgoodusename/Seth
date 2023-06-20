@@ -29,6 +29,7 @@
 #include "../SDK/Surface.h"
 #include "../SDK/UserCmd.h"
 
+#include "../GameData.h"
 #include "../imguiCustom.h"
 
 const bool anyActiveKeybinds() noexcept
@@ -209,7 +210,7 @@ void Misc::bunnyHop(UserCmd* cmd) noexcept
 {
     if (!localPlayer)
         return;
-
+    //TODO: Fix double jump on scout
     static auto wasLastTimeOnGround{ localPlayer->isOnGround() };
 
     if (config->misc.bunnyHop && !localPlayer->isOnGround() 
@@ -396,6 +397,91 @@ void Misc::unlockHiddenCvars() noexcept {
     }
 
     toggle = config->misc.unhideConvars;
+}
+
+void Misc::drawPlayerList() noexcept
+{
+    if (!config->misc.playerList.enabled)
+        return;
+
+    if (config->misc.playerList.pos != ImVec2{}) {
+        ImGui::SetNextWindowPos(config->misc.playerList.pos);
+        config->misc.playerList.pos = {};
+    }
+
+    ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
+    if (!gui->isOpen())
+    {
+        windowFlags |= ImGuiWindowFlags_NoInputs;
+        return;
+    }
+
+    GameData::Lock lock;
+    if ((GameData::players().empty()) && !gui->isOpen())
+        return;
+
+    ImGui::SetNextWindowSize(ImVec2(300.0f, 300.0f), ImGuiCond_Once);
+
+    if (ImGui::Begin("Player List", nullptr, windowFlags)) {
+        if (ImGui::beginTable("", 5, ImGuiTableFlags_Borders | ImGuiTableFlags_Hideable | ImGuiTableFlags_ScrollY | ImGuiTableFlags_Resizable)) {
+            ImGui::TableSetupColumn("Index", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide);
+            ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 120.0f);
+            ImGui::TableSetupColumn("Steam ID", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoResize);
+            ImGui::TableSetupColumn("Class", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoResize);
+            ImGui::TableSetupColumn("Health", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoResize);
+            ImGui::TableSetupScrollFreeze(0, 1);
+            ImGui::TableSetColumnEnabled(2, config->misc.playerList.steamID);
+            ImGui::TableSetColumnEnabled(3, config->misc.playerList.className);
+            ImGui::TableSetColumnEnabled(4, config->misc.playerList.health);
+
+            ImGui::TableHeadersRow();
+
+            std::vector<std::reference_wrapper<const PlayerData>> playersOrdered{ GameData::players().begin(), GameData::players().end() };
+            std::ranges::sort(playersOrdered, [](const PlayerData& a, const PlayerData& b) {
+                // enemies first
+                if (a.enemy != b.enemy)
+                    return a.enemy && !b.enemy;
+
+                return a.handle < b.handle;
+                });
+
+            ImGui::PushFont(gui->getUnicodeFont());
+
+            for (const PlayerData& player : playersOrdered) {
+                ImGui::TableNextRow();
+                ImGui::PushID(ImGui::TableGetRowIndex());
+
+                if (ImGui::TableNextColumn())
+                    ImGui::Text("%d", player.userId);
+
+                if (ImGui::TableNextColumn())
+                {
+                    ImGui::Image(player.getAvatarTexture(), { ImGui::GetTextLineHeight(), ImGui::GetTextLineHeight() });
+                    ImGui::SameLine();
+                    ImGui::textEllipsisInTableCell(player.name.c_str());
+                }
+
+                if (ImGui::TableNextColumn() && ImGui::smallButtonFullWidth("Copy", player.steamID == 0))
+                    ImGui::SetClipboardText(std::to_string(player.steamID).c_str());
+
+                if (ImGui::TableNextColumn())
+                    ImGui::Text(player.className.c_str());
+
+                if (ImGui::TableNextColumn()) {
+                    if (!player.alive)
+                        ImGui::TextColored({ 1.0f, 0.0f, 0.0f, 1.0f }, "%s", "Dead");
+                    else
+                        ImGui::Text("%d HP", player.health);
+                }
+
+                ImGui::PopID();
+            }
+
+            ImGui::PopFont();
+            ImGui::EndTable();
+        }
+    }
+    ImGui::End();
 }
 
 void Misc::fixMovement(UserCmd* cmd, float yaw) noexcept

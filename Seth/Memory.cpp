@@ -90,10 +90,10 @@ Memory::Memory() noexcept
     input = **reinterpret_cast<Input***>(findPattern(CLIENT_DLL, "\x8B\x0D????\x56\x8B\x01\xFF\x50\x24\x8B\x45\xFC") + 2);
     itemSchema = relativeToAbsolute<decltype(itemSchema)>(findPattern(CLIENT_DLL, "\xE8????\x8A\x4F\x15") + 1);
     moveHelper = **reinterpret_cast<MoveHelper***>(findPattern(CLIENT_DLL, "\x8B\x0D????\x8B\x01\xFF\x50\x28\x56\x8B\xC8") + 2);
+    memAlloc = *reinterpret_cast<MemAlloc**>(GetProcAddress(GetModuleHandleA(TIER0_DLL), "g_pMemAlloc"));
 
     keyValuesInitialize = reinterpret_cast<decltype(keyValuesInitialize)>(findPattern(ENGINE_DLL, "\xFF\x15????\x83\xC4\x08\x89\x06\x8B\xC6") - 0x42);
     keyValuesFindKey = reinterpret_cast<decltype(keyValuesFindKey)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\x81\xEC????\x56\x8B\x75\x08\x57\x8B\xF9\x85\xF6\x0F\x84????\x80\x3E\x00\x0F\x84????"));
-    
     attributeHookValue = relativeToAbsolute<decltype(attributeHookValue)>(findPattern(CLIENT_DLL, "\xE8????\xDA\x4D\xFC") + 1);
     calcAbsoluteVelocity = relativeToAbsolute<decltype(calcAbsoluteVelocity)>(findPattern(CLIENT_DLL, "\xE8????\xD9\xE8\x8D\x45\xEC") + 1);
     calcIsAttackCriticalHelper = reinterpret_cast<decltype(calcIsAttackCriticalHelper)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\x83\xEC\x18\x56\x57\x6A\x00\x68????\x68????\x6A\x00\x8B\xF9\xE8????\x50\xE8????\x8B\xF0\x83\xC4\x14\x89\x75\xEC"));

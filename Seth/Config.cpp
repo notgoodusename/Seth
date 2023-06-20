@@ -421,6 +421,7 @@ static void from_json(const json& j, Config::Misc::PlayerList& o)
 {
     read(j, "Enabled", o.enabled);
     read(j, "Steam ID", o.steamID);
+    read(j, "Class name", o.className);
     read(j, "Health", o.health);
     read<value_t::object>(j, "Pos", o.pos);
 }
@@ -872,6 +873,7 @@ static void to_json(json& j, const Config::Misc::PlayerList& o, const Config::Mi
 {
     WRITE("Enabled", enabled);
     WRITE("Steam ID", steamID);
+    WRITE("Class name", className);
     WRITE("Health", health);
 
     if (const auto window = ImGui::FindWindowByName("Player List")) {

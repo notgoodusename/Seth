@@ -248,6 +248,9 @@
     <ClCompile Include="SDK\MD5.cpp">
       <Filter>SDK</Filter>
     </ClCompile>
+    <ClCompile Include="SteamInterfaces.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GUI.h">
@@ -603,6 +606,15 @@
     </ClInclude>
     <ClInclude Include="SDK\MD5.h">
       <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\Steam.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="Resources\avatar_default.h">
+      <Filter>Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="SteamInterfaces.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

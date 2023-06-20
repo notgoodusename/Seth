@@ -80,6 +80,7 @@
     <ClCompile Include="SDK\GlobalVars.cpp" />
     <ClCompile Include="SDK\Utils.cpp" />
     <ClCompile Include="CustomTexture.cpp" />
+    <ClCompile Include="SteamInterfaces.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Config.h" />
@@ -122,6 +123,7 @@
     <ClInclude Include="MinHook\trampoline.h" />
     <ClInclude Include="Netvars.h" />
     <ClInclude Include="nlohmann\json.hpp" />
+    <ClInclude Include="Resources\avatar_default.h" />
     <ClInclude Include="Resources\Resource.h" />
     <ClInclude Include="SDK\Angle.h" />
     <ClInclude Include="SDK\AttributeManager.h" />
@@ -186,6 +188,7 @@
     <ClInclude Include="SDK\Recv.h" />
     <ClInclude Include="SDK\RenderView.h" />
     <ClInclude Include="SDK\Server.h" />
+    <ClInclude Include="SDK\Steam.h" />
     <ClInclude Include="SDK\Stencil.h" />
     <ClInclude Include="SDK\Surface.h" />
     <ClInclude Include="SDK\Texture.h" />
@@ -200,6 +203,7 @@
     <ClInclude Include="SDK\WeaponId.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="CustomTexture.h" />
+    <ClInclude Include="SteamInterfaces.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

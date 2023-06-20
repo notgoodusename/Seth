@@ -34,6 +34,12 @@ namespace GameData
         static inline std::mutex mutex;
     };
 
+    void clearTextures() noexcept;
+    void clearUnusedAvatars() noexcept;
+
+    //Lock-free
+    int getNetOutgoingLatency() noexcept;
+
     // You have to acquire Lock before using these getters
     const Matrix4x4& toScreenMatrix() noexcept;
     const LocalPlayerData& local() noexcept;
@@ -83,6 +89,7 @@ struct PlayerData : BaseData {
     PlayerData& operator=(PlayerData&&) = default;
 
     void update(Entity* entity) noexcept;
+    ImTextureID getAvatarTexture() const noexcept;
     float fadingAlpha() const noexcept;
 
     bool dormant;
@@ -91,10 +98,13 @@ struct PlayerData : BaseData {
     float lastContactTime = 0.0f;
     int health;
     int maxHealth;
+    int userId;
     int handle;
     bool isCloaked;
     Team team;
+    std::uint64_t steamID;
     std::string name;
+    std::string className;
     Vector origin;
     std::string activeWeapon;
     std::vector<std::pair<Vector, Vector>> bones;

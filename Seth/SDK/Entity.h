@@ -237,6 +237,14 @@ public:
     }
 
     std::string getPlayerName() noexcept;
+    auto getUserId() noexcept
+    {
+        if (PlayerInfo playerInfo; interfaces->engine->getPlayerInfo(index(), playerInfo))
+            return playerInfo.userId;
+
+        return -1;
+    }
+    std::uint64_t getSteamId() noexcept;
 
     Vector getEyePosition() noexcept
     {

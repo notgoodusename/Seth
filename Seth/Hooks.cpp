@@ -18,6 +18,7 @@
 #include "Hooks.h"
 #include "Interfaces.h"
 #include "Memory.h"
+#include "SteamInterfaces.h"
 
 #include "Hacks/Aimbot/Aimbot.h"
 #include "Hacks/Animations.h"
@@ -101,6 +102,8 @@ static HRESULT __stdcall present(IDirect3DDevice9* device, const RECT* src, cons
         Misc::updateInput();
         Chams::updateInput();
 
+        Misc::drawPlayerList();
+
         gui->handleToggle();
 
         if (gui->isOpen())
@@ -115,12 +118,15 @@ static HRESULT __stdcall present(IDirect3DDevice9* device, const RECT* src, cons
         device->EndScene();
     }
 
+    GameData::clearUnusedAvatars();
+
     return hooks->originalPresent(device, src, dest, windowOverride, dirtyRegion);
 }
 
 static HRESULT __stdcall reset(IDirect3DDevice9* device, D3DPRESENT_PARAMETERS* params) noexcept
 {
     ImGui_ImplDX9_InvalidateDeviceObjects();
+    GameData::clearTextures();
     return hooks->originalReset(device, params);
 }
 
@@ -152,6 +158,10 @@ static bool __fastcall createMove(void* thisPointer, void*, float inputSampleTim
 
     if (!cmd || !cmd->commandNumber)
         return result;
+
+    uintptr_t* framePointer;
+    __asm mov framePointer, ebp;
+    bool& sendPacket = *reinterpret_cast<bool*>(*framePointer - 0x1);
 
     auto currentViewAngles{ cmd->viewangles };
     const auto currentCmd{ *cmd };
@@ -193,6 +203,7 @@ static bool __fastcall createMove(void* thisPointer, void*, float inputSampleTim
 
 static void __stdcall frameStageNotify(FrameStage stage) noexcept
 {
+    static auto animationInit = (Animations::init(), false);
     static auto backtrackInit = (Backtrack::init(), false);
     static auto movementRebuildInit = (MovementRebuild::init(), false);
 
@@ -319,6 +330,15 @@ static int __fastcall tfPlayerInventoryGetMaxItemCountHook(void* thisPointer) no
     return original(thisPointer);
 }
 
+static void __fastcall addToCritBucketHook(void* thisPointer, void*, const float amount) noexcept
+{
+    if (Crithack::protectData())
+        return;
+
+    //reinterpret_cast<void(__fastcall*)(void*, void*, float)>(offset.trp_add_to_crit_bucket)(ecx, edx, amount);
+}
+
+
 void resetAll(int resetType) noexcept
 {
     Aimbot::reset();
@@ -346,6 +366,7 @@ Hooks::Hooks(HMODULE moduleHandle) noexcept
 
     // interfaces and memory shouldn't be initialized in wndProc because they show MessageBox on error which would cause deadlock
     interfaces = std::make_unique<const Interfaces>();
+    steamInterfaces = std::make_unique<const SteamInterfaces>();
     memory = std::make_unique<const Memory>();
 
     window = FindWindowW(L"Valve001", nullptr);
@@ -360,6 +381,8 @@ void Hooks::install() noexcept
     **reinterpret_cast<decltype(reset)***>(memory->reset) = reset;
 
     MH_Initialize();
+
+    //TODO: disable extrapolation (shit sucks)
 
     calcViewModelView.detour(memory->calcViewModelView, calcViewModelViewHook);
     clLoadWhitelist.detour(memory->clLoadWhitelist, clLoadWhitelistHook);

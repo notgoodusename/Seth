@@ -299,6 +299,7 @@ public:
         struct PlayerList {
             bool enabled = false;
             bool steamID = false;
+            bool className = false;
             bool health = true;
 
             ImVec2 pos;

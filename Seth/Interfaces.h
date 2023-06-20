@@ -32,6 +32,7 @@ class Prediction;
 class RenderView;
 class Surface;
 class Server;
+class SteamClient;
 class SoundEmitter;
 class StudioRender;
 
@@ -65,7 +66,7 @@ type* name = reinterpret_cast<type*>(find(moduleName, version));
     GAME_INTERFACE(Surface, surface, VGUIMATSURFACE_DLL, "VGUI_Surface030")
     GAME_INTERFACE(EngineSound, sound, ENGINE_DLL, "IEngineSoundClient003")
     GAME_INTERFACE(Server, server, SERVER_DLL, "ServerGameDLL012")
-    GAME_INTERFACE(SoundEmitter, soundEmitter, SOUNDEMITTERSYSTEM_DLL, "VSoundEmitter002")
+    GAME_INTERFACE(SteamClient, steamClient, STEAMCLIENT, "SteamClient017")
     GAME_INTERFACE(StudioRender, studioRender, STUDIORENDER_DLL, "VStudioRender025")
 
 #undef GAME_INTERFACE

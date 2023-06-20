@@ -8,8 +8,6 @@
 #include "Vector.h"
 #include "VirtualMethod.h"
 
-struct SteamAPIContext;
-
 struct Matrix4x4
 {
 private:
@@ -63,7 +61,6 @@ public:
     VIRTUAL_METHOD(bool, isPaused, 84, (), (this))
     VIRTUAL_METHOD(bool, isHLTV, 86, (), (this))
     VIRTUAL_METHOD(void, clientCmdUnrestricted, 106, (const char* cmd), (this, cmd))
-    VIRTUAL_METHOD(const SteamAPIContext*, getSteamAPIContext, 185, (), (this))
 
     auto getViewAngles() noexcept
     {

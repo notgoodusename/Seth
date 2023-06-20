@@ -10,6 +10,7 @@ constexpr auto INPUTSYSTEM_DLL = "inputsystem";
 constexpr auto MATERIALSYSTEM_DLL = "materialsystem";
 constexpr auto SOUNDEMITTERSYSTEM_DLL = "soundemittersystem";
 constexpr auto STEAMNETWORKINGSOCKETS_DLL = "steamnetworkingsockets";
+constexpr auto STEAMCLIENT = "steamclient";
 constexpr auto STUDIORENDER_DLL = "studiorender";
 constexpr auto TIER0_DLL = "tier0";
 constexpr auto VGUI2_DLL = "vgui2";

@@ -53,6 +53,7 @@ public:
     Input* input;
     std::add_pointer_t<ItemSchema* __cdecl()> itemSchema;
     MoveHelper* moveHelper;
+    MemAlloc* memAlloc;
 
     KeyValues* (__thiscall* keyValuesInitialize)(KeyValues*, char*);
     KeyValues* (__thiscall* keyValuesFindKey)(KeyValues* keyValues, const char* keyName, bool create);

@@ -8,7 +8,14 @@
 #include "GameData.h"
 #include "Interfaces.h"
 #include "Memory.h"
+#include "SteamInterfaces.h"
 
+#include "Resources/avatar_default.h"
+
+#define STBI_ONLY_PNG
+#define STBI_NO_FAILURE_STRINGS
+#define STBI_NO_STDIO
+#define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
 #include "SDK/Client.h"
@@ -21,7 +28,9 @@
 #include "SDK/Localize.h"
 #include "SDK/LocalPlayer.h"
 #include "SDK/ModelInfo.h"
+#include "SDK/NetworkChannel.h"
 #include "SDK/RenderView.h"
+#include "SDK/Steam.h"
 #include "SDK/ViewSetup.h"
 
 static Matrix4x4 viewMatrix;
@@ -30,6 +39,7 @@ static std::vector<PlayerData> playerData;
 static std::vector<BuildingsData> buildingsData;
 static std::vector<NPCData> npcData;
 static std::vector<WorldData> worldData;
+static std::atomic_int netOutgoingLatency;
 
 static auto playerByHandleWritable(int handle) noexcept
 {
@@ -43,6 +53,14 @@ static float nextPlayerVisibilityUpdateTime = 0.0f;
 static bool shouldUpdatePlayerVisibility() noexcept
 {
     return nextPlayerVisibilityUpdateTime <= memory->globalVars->realtime;
+}
+
+static void updateNetLatency() noexcept
+{
+    if (const auto networkChannel = interfaces->engine->getNetworkChannel())
+        netOutgoingLatency = (std::max)(static_cast<int>(networkChannel->getLatency(0) * 1000.0f), 0);
+    else
+        netOutgoingLatency = 0;
 }
 
 void GameData::update() noexcept
@@ -146,6 +164,35 @@ void GameData::update() noexcept
         nextPlayerVisibilityUpdateTime = memory->globalVars->realtime + playerVisibilityUpdateDelay;
 }
 
+struct PlayerAvatar {
+    mutable CustomTexture texture;
+    std::unique_ptr<std::uint8_t[]> rgba;
+};
+
+static std::unordered_map<int, PlayerAvatar> playerAvatars;
+
+static void clearAvatarTextures() noexcept;
+
+void GameData::clearTextures() noexcept
+{
+    Lock lock;
+
+    clearAvatarTextures();
+    for (const auto& [handle, avatar] : playerAvatars)
+        avatar.texture.clear();
+}
+
+void GameData::clearUnusedAvatars() noexcept
+{
+    Lock lock;
+    std::erase_if(playerAvatars, [](const auto& pair) { return std::ranges::find(std::as_const(playerData), pair.first, &PlayerData::handle) == playerData.cend(); });
+}
+
+int GameData::getNetOutgoingLatency() noexcept
+{
+    return netOutgoingLatency;
+}
+
 const Matrix4x4& GameData::toScreenMatrix() noexcept
 {
     return viewMatrix;
@@ -215,8 +262,17 @@ BaseData::BaseData(Entity* entity) noexcept
     coordinateFrame = entity->toWorldTransform();
 }
 
-PlayerData::PlayerData(Entity* entity) noexcept : BaseData{ entity }, handle{ entity->handle() }
+PlayerData::PlayerData(Entity* entity) noexcept : BaseData{ entity }, userId{ entity->getUserId() }, steamID{ entity->getSteamId() }, handle{ entity->handle() }
 {
+    if (steamID) {
+        const auto avatar = steamInterfaces->friends->getSmallFriendAvatar(steamID);
+        constexpr auto rgbaDataSize = 4 * 32 * 32;
+
+        PlayerAvatar playerAvatar;
+        playerAvatar.rgba = std::make_unique<std::uint8_t[]>(rgbaDataSize);
+        if (steamInterfaces->utils->getImageRGBA(avatar, playerAvatar.rgba.get(), rgbaDataSize))
+            playerAvatars[handle] = std::move(playerAvatar);
+    }
     update(entity);
 }
 
@@ -228,6 +284,40 @@ void PlayerData::update(Entity* entity) noexcept
     dormant = entity->isDormant();
     if (dormant) {
         return;
+    }
+
+    switch (entity->getPlayerClass())
+    {
+        case TFClass::SCOUT:
+            className = "Scout";
+            break;
+        case TFClass::SNIPER:
+            className = "Sniper";
+            break;
+        case TFClass::SOLDIER:
+            className = "Soldier";
+            break;
+        case TFClass::DEMOMAN:
+            className = "Demoman";
+            break;
+        case TFClass::MEDIC:
+            className = "Medic";
+            break;
+        case TFClass::HEAVY:
+            className = "Heavy";
+            break;
+        case TFClass::PYRO:
+            className = "Pyro";
+            break;
+        case TFClass::SPY:
+            className = "Spy";
+            break;
+        case TFClass::ENGINEER:
+            className = "Engineer";
+            break;
+        default:
+            className = "";
+            break;
     }
 
     team = entity->teamNumber();
@@ -276,6 +366,56 @@ void PlayerData::update(Entity* entity) noexcept
 
         bones.emplace_back(boneMatrices[i].origin(), boneMatrices[bone->parent].origin());
     }
+}
+
+struct PNGTexture {
+    template <std::size_t N>
+    PNGTexture(const std::array<char, N>& png) noexcept : pngData{ png.data() }, pngDataSize{ png.size() } {}
+
+    ImTextureID getTexture() const noexcept
+    {
+        if (!texture.get()) {
+            int width, height;
+            stbi_set_flip_vertically_on_load_thread(false);
+
+            if (const auto data = stbi_load_from_memory((const stbi_uc*)pngData, pngDataSize, &width, &height, nullptr, STBI_rgb_alpha)) {
+                texture.init(width, height, data);
+                stbi_image_free(data);
+            }
+            else {
+                assert(false);
+            }
+        }
+
+        return texture.get();
+    }
+
+    void clearTexture() const noexcept { texture.clear(); }
+
+private:
+    const char* pngData;
+    std::size_t pngDataSize;
+
+    mutable CustomTexture texture;
+};
+
+static const PNGTexture avatarDefault{ Resource::avatar_default };
+
+static void clearAvatarTextures() noexcept
+{
+    avatarDefault.clearTexture();
+}
+
+ImTextureID PlayerData::getAvatarTexture() const noexcept
+{
+    const auto it = std::as_const(playerAvatars).find(handle);
+    if (it == playerAvatars.cend())
+        return avatarDefault.getTexture();
+
+    const auto& avatar = it->second;
+    if (!avatar.texture.get())
+        avatar.texture.init(32, 32, avatar.rgba.get());
+    return avatar.texture.get();
 }
 
 float PlayerData::fadingAlpha() const noexcept

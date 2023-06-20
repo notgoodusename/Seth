@@ -30,6 +30,11 @@ void applyMatrix(Entity* entity, matrix3x4* boneCacheData, Vector origin, Vector
     memory->setCollisionBounds(entity->getCollideable(), mins, maxs);
 }
 
+bool getBit(uint64_t number, int position) noexcept
+{
+    return number & (1 << position);
+}
+
 bool canAttack(UserCmd* cmd, Entity* activeWeapon) noexcept
 {
 	if (!localPlayer || !localPlayer->isAlive() || localPlayer->isTaunting() || localPlayer->isBonked() || localPlayer->isFeignDeathReady()

@@ -17,7 +17,8 @@ static std::array<Animations::Players, 65> players{};
 
 void Animations::init() noexcept
 {
-
+    static auto extrapolate = interfaces->cvar->findVar("cl_extrapolate");
+    extrapolate->setValue(0);
 }
 
 void Animations::reset() noexcept
@@ -28,7 +29,6 @@ void Animations::reset() noexcept
 
 void Animations::handlePlayers(FrameStage stage) noexcept
 {
-    static auto gravity = interfaces->cvar->findVar("sv_gravity");
     if (stage != FrameStage::NET_UPDATE_END)
         return;
 
@@ -57,7 +57,7 @@ void Animations::handlePlayers(FrameStage stage) noexcept
             player.clear();
         }
 
-        if (player.simulationTime != entity->simulationTime())
+        if (player.simulationTime < entity->simulationTime())
         {
             player.origin = entity->origin();
             player.eyeAngle = entity->eyeAngles();

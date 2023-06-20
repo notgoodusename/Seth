@@ -17,6 +17,7 @@ namespace Misc
     void viewModelChanger(Vector& eyePosition, Vector& eyeAngles) noexcept;
     void initHiddenCvars() noexcept;
     void unlockHiddenCvars() noexcept;
+    void drawPlayerList() noexcept;
     void fixMovement(UserCmd* cmd, float yaw) noexcept;
 
     void showKeybinds() noexcept;
