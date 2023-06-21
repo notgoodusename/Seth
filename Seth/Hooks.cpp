@@ -338,6 +338,17 @@ static void __fastcall addToCritBucketHook(void* thisPointer, void*, const float
     //reinterpret_cast<void(__fastcall*)(void*, void*, float)>(offset.trp_add_to_crit_bucket)(ecx, edx, amount);
 }
 
+static void __cdecl interpolateServerEntitiesHook() noexcept
+{
+    static auto original = reinterpret_cast<void(__cdecl*)()>(hooks->interpolateServerEntities.getDetour());
+    
+    static auto extrapolate = interfaces->cvar->findVar("cl_extrapolate");
+    
+    const auto backupValue = extrapolate->getFloat();
+    extrapolate->setValue(0);
+    original();
+    extrapolate->setValue(backupValue);
+}
 
 void resetAll(int resetType) noexcept
 {
@@ -388,6 +399,7 @@ void Hooks::install() noexcept
     clLoadWhitelist.detour(memory->clLoadWhitelist, clLoadWhitelistHook);
     estimateAbsVelocity.detour(memory->estimateAbsVelocity, estimateAbsVelocityHook);
     enableWorldFog.detour(memory->enableWorldFog, enableWorldFogHook);
+    interpolateServerEntities.detour(memory->interpolateServerEntities, interpolateServerEntitiesHook);
     tfPlayerInventoryGetMaxItemCount.detour(memory->tfPlayerInventoryGetMaxItemCount, tfPlayerInventoryGetMaxItemCountHook);
     sendDatagram.detour(memory->sendDatagram, sendDatagramHook);
 

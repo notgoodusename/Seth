@@ -278,6 +278,7 @@ PlayerData::PlayerData(Entity* entity) noexcept : BaseData{ entity }, userId{ en
 
 void PlayerData::update(Entity* entity) noexcept
 {
+    //TODO: use playerResource
     name = entity->getPlayerName();
     const auto idx = entity->index();
 

@@ -84,6 +84,7 @@ public:
     std::uintptr_t clLoadWhitelist;
     std::uintptr_t estimateAbsVelocity;
     std::uintptr_t enableWorldFog;
+    std::uintptr_t interpolateServerEntities;
     std::uintptr_t tfPlayerInventoryGetMaxItemCount;
     std::uintptr_t sendDatagram;
 

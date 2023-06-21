@@ -17,8 +17,7 @@ static std::array<Animations::Players, 65> players{};
 
 void Animations::init() noexcept
 {
-    static auto extrapolate = interfaces->cvar->findVar("cl_extrapolate");
-    extrapolate->setValue(0);
+
 }
 
 void Animations::reset() noexcept
