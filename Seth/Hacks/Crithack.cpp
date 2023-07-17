@@ -18,11 +18,13 @@ std::unordered_map<int, std::deque<int>> critTicks;
 std::unordered_map<int, std::deque<int>> skipTicks;
 
 bool protect{ false };
+int lastCommandNumberScanned{ 0 };
 bool outOfSync{ false };
 int cachedDamage{ 0 };
 int critDamage{ 0 };
 int meleeDamage{ 0 };
 int roundDamage{ 0 };
+
 
 bool canWeaponRandomCrit(Entity* activeWeapon) noexcept
 {
@@ -80,20 +82,34 @@ void updateCmds(UserCmd* cmd, Entity* activeWeapon) noexcept
 
 	if (invalidCritCmds || invalidSkipCmds || static_cast<int>(critTicks.size()) < maxPossibleCritsSize())
 	{
-		//fill at max 3 crits
-		for (int i = cmd->commandNumber + 200, limitTillEnd = 3; i < cmd->commandNumber + 100000 + 200 && limitTillEnd > 0; i++)
+		if (!lastCommandNumberScanned || lastCommandNumberScanned <= cmd->commandNumber)
+			lastCommandNumberScanned = cmd->commandNumber + 200;
+
+		int initialCommandNumber = lastCommandNumberScanned;
+		int currentCommandsScanned = 0;
+
+		if (lastCommandNumberScanned == INT_MAX || lastCommandNumberScanned < 0)
+			return;
+
+		//just scan till its full
+		for (int i = lastCommandNumberScanned; i < lastCommandNumberScanned + 100000; i++)
 		{
+			if (i == INT_MAX || i < 0)
+				break;
+
 			if (isPureCritCommand(activeWeapon, i, 1, true))
 			{
 				critTicks[activeWeapon->index()].push_back(i);
-				limitTillEnd--;
 			}
 			else if (isPureCritCommand(activeWeapon, i, 9998, false))
 				skipTicks[activeWeapon->index()].push_back(i);
 
-			if (limitTillEnd == 0)
+			currentCommandsScanned = initialCommandNumber - i + 1;
+
+			if (static_cast<int>(critTicks[activeWeapon->index()].size()) >= maxPossibleCritsSize())
 				break;
 		}
+		lastCommandNumberScanned += currentCommandsScanned;
 	}
 }
 
@@ -196,6 +212,14 @@ void Crithack::run(UserCmd* cmd) noexcept
 	}
 }
 
+void Crithack::draw() noexcept
+{
+	if (!config->misc.critHack)
+		return;
+
+
+}
+
 bool Crithack::protectData() noexcept
 {
 	return protect;
@@ -206,4 +230,5 @@ void Crithack::reset() noexcept
 	critTicks.clear();
 	skipTicks.clear();
 	protect = false;
+	lastCommandNumberScanned = 0;
 }

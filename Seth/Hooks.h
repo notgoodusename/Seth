@@ -22,10 +22,13 @@ public:
     void install() noexcept;
     void uninstall() noexcept;
 
+    MinHook addToCritBucket;
+    MinHook calculateChargeCap;
     MinHook calcViewModelView;
     MinHook clLoadWhitelist;
     MinHook estimateAbsVelocity;
     MinHook enableWorldFog;
+    MinHook isAllowedToWithdrawFromCritBucket;
     MinHook interpolateServerEntities;
     MinHook tfPlayerInventoryGetMaxItemCount;
     MinHook sendDatagram;

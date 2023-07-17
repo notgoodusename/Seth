@@ -103,6 +103,7 @@ static HRESULT __stdcall present(IDirect3DDevice9* device, const RECT* src, cons
         Chams::updateInput();
 
         Misc::drawPlayerList();
+        Crithack::draw();
 
         gui->handleToggle();
 
@@ -332,10 +333,31 @@ static int __fastcall tfPlayerInventoryGetMaxItemCountHook(void* thisPointer) no
 
 static void __fastcall addToCritBucketHook(void* thisPointer, void*, const float amount) noexcept
 {
+    static auto original = hooks->addToCritBucket.getOriginal<void>(amount);
     if (Crithack::protectData())
         return;
 
-    //reinterpret_cast<void(__fastcall*)(void*, void*, float)>(offset.trp_add_to_crit_bucket)(ecx, edx, amount);
+    original(thisPointer, amount);
+}
+
+static bool __fastcall isAllowedToWithdrawFromCritBucketHook(void* thisPointer, void*, float damage) noexcept
+{
+    static auto original = hooks->isAllowedToWithdrawFromCritBucket.getOriginal<bool>(damage);
+    if (Crithack::protectData())
+        return true;
+
+    original(thisPointer, damage);
+}
+
+static float __fastcall calculateChargeCapHook(void* thisPointer, void*) noexcept
+{
+    static auto original = hooks->calculateChargeCap.getOriginal<float>();
+
+    const float backupFrametime = memory->globalVars->frametime;
+    memory->globalVars->frametime = 0.0f;
+    float finalValue = original(thisPointer);
+    memory->globalVars->frametime = backupFrametime;
+    return finalValue;
 }
 
 static void __cdecl interpolateServerEntitiesHook() noexcept
@@ -355,6 +377,7 @@ void resetAll(int resetType) noexcept
     Aimbot::reset();
     Animations::reset();
     Backtrack::reset();
+    Crithack::reset();
     Misc::reset(resetType);
     EnginePrediction::reset();
     Visuals::reset(resetType);
@@ -393,13 +416,14 @@ void Hooks::install() noexcept
 
     MH_Initialize();
 
-    //TODO: disable extrapolation (shit sucks)
-
+    addToCritBucket.detour(memory->addToCritBucket, addToCritBucketHook);
+    calculateChargeCap.detour(memory->calculateChargeCap, calculateChargeCapHook);
     calcViewModelView.detour(memory->calcViewModelView, calcViewModelViewHook);
     clLoadWhitelist.detour(memory->clLoadWhitelist, clLoadWhitelistHook);
     estimateAbsVelocity.detour(memory->estimateAbsVelocity, estimateAbsVelocityHook);
     enableWorldFog.detour(memory->enableWorldFog, enableWorldFogHook);
     interpolateServerEntities.detour(memory->interpolateServerEntities, interpolateServerEntitiesHook);
+    isAllowedToWithdrawFromCritBucket.detour(memory->isAllowedToWithdrawFromCritBucket, isAllowedToWithdrawFromCritBucketHook);
     tfPlayerInventoryGetMaxItemCount.detour(memory->tfPlayerInventoryGetMaxItemCount, tfPlayerInventoryGetMaxItemCountHook);
     sendDatagram.detour(memory->sendDatagram, sendDatagramHook);
 
