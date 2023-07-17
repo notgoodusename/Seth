@@ -98,7 +98,10 @@ void TriggerbotMelee::run(Entity* activeWeapon, UserCmd* cmd, float& lastTime, f
             }
 
             if (bestTick <= -1)
+            {
+                applyMatrix(entity, backupBoneCache, backupOrigin, backupEyeAngle, backupMins, backupMaxs);
                 continue;
+            }
 
             memcpy(entity->getBoneCache().memory, records->at(bestTick).matrix, std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
             memory->setAbsOrigin(entity, records->at(bestTick).origin);
