@@ -346,7 +346,7 @@ static bool __fastcall isAllowedToWithdrawFromCritBucketHook(void* thisPointer, 
     if (Crithack::protectData())
         return true;
 
-    original(thisPointer, damage);
+    return original(thisPointer, damage);
 }
 
 static float __fastcall calculateChargeCapHook(void* thisPointer, void*) noexcept

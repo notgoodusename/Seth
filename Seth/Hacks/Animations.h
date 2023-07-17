@@ -16,8 +16,6 @@ namespace Animations
 	void init() noexcept;
 	void reset() noexcept;
 
-	float getExtraTicks() noexcept;
-
 	void handlePlayers(FrameStage) noexcept;
 
 	struct Players

@@ -7,6 +7,7 @@
 #include "../Memory.h"
 #include "../Netvars.h"
 
+#include "AnimState.h"
 #include "ClientClass.h"
 #include "CommandContext.h"
 #include "Conditions.h"
@@ -234,6 +235,11 @@ public:
     Entity* getActiveWeapon() noexcept
     {
         return reinterpret_cast<Entity*>(interfaces->entityList->getEntityFromHandle(activeWeapon()));
+    }
+
+    TFPlayerAnimState* getAnimState() noexcept
+    {
+        return *reinterpret_cast<TFPlayerAnimState**>(this + 0x1D00);
     }
 
     std::string getPlayerName() noexcept;

@@ -125,7 +125,9 @@
     <ClInclude Include="nlohmann\json.hpp" />
     <ClInclude Include="Resources\avatar_default.h" />
     <ClInclude Include="Resources\Resource.h" />
+    <ClInclude Include="SDK\Activity.h" />
     <ClInclude Include="SDK\Angle.h" />
+    <ClInclude Include="SDK\AnimState.h" />
     <ClInclude Include="SDK\AttributeManager.h" />
     <ClInclude Include="SDK\Attribute.h" />
     <ClInclude Include="SDK\BitBuffer.h" />
