@@ -2,6 +2,7 @@
 #include "AimbotHitscan.h"
 #include "../Animations.h"
 #include "../Backtrack.h"
+#include "../TargetSystem.h"
 
 #include "../../SDK/UserCmd.h"
 #include "../../SDK/Math.h"
@@ -73,31 +74,21 @@ void AimbotHitscan::run(Entity* activeWeapon, UserCmd* cmd) noexcept
 
     hitbox[Hitboxes::Pelvis] = (cfg.hitboxes & 1 << 2) == 1 << 2; //Pelvis
 
-    auto enemies = Aimbot::getEnemies();
-
-    switch (cfg.sortMethod)
-    {
-    case 0:
-        std::sort(enemies.begin(), enemies.end(), [&](const Aimbot::Enemy& a, const Aimbot::Enemy& b) { return a.distance < b.distance; });
-        break;
-    case 1:
-        std::sort(enemies.begin(), enemies.end(), [&](const Aimbot::Enemy& a, const Aimbot::Enemy& b) { return a.fov < b.fov; });
-        break;
-    default:
-        break;
-    }
+    const auto enemies = TargetSystem::getTargets(cfg.sortMethod);
 
     auto bestFov = cfg.fov;
     auto bestSimulationTime = -1.0f;
     Vector bestTarget{ };
     const auto localPlayerEyePosition = localPlayer->getEyePosition();
+
+    const auto players = Animations::getPlayers();
     for (const auto& target : enemies)
     {
         auto entity{ interfaces->entityList->getEntity(target.id) };
         if ((entity->isCloaked() && cfg.ignoreCloaked) || (!entity->isEnemy(localPlayer.get()) && !cfg.friendlyFire))
             continue;
 
-        auto player = Animations::getPlayer(target.id);
+        auto player = players[target.id];
 
         matrix3x4* backupBoneCache = entity->getBoneCache().memory;
         Vector backupMins = entity->getCollideable()->obbMins();

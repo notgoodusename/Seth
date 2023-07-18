@@ -16,6 +16,8 @@ namespace Animations
 	void init() noexcept;
 	void reset() noexcept;
 
+	void update(UserCmd*, bool&) noexcept;
+
 	void handlePlayers(FrameStage) noexcept;
 
 	struct Players
@@ -63,9 +65,14 @@ namespace Animations
 			backtrackRecords.clear();
 		}
 	};
-	Players getPlayer(int index) noexcept;
-	Players* setPlayer(int index) noexcept;
-	std::array<Animations::Players, 65> getPlayers() noexcept;
-	std::array<Animations::Players, 65>* setPlayers() noexcept;
+
+	bool isSkippingAnimStateUpdate() noexcept;
+	bool isLocalUpdating() noexcept;
+	bool isPlayerUpdating() noexcept;
+
+	const float getLocalSimulationTime() noexcept;
+	const float getPlayerSimulationTime(int index) noexcept;
+
+	const std::array<Animations::Players, 65>& getPlayers() noexcept;
 	const std::deque<Players::Record>* getBacktrackRecords(int index) noexcept;
 }

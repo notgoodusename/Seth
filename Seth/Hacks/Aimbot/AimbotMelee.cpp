@@ -2,6 +2,7 @@
 #include "AimbotMelee.h"
 #include "../Animations.h"
 #include "../Backtrack.h"
+#include "../TargetSystem.h"
 
 #include "../../SDK/UserCmd.h"
 #include "../../SDK/Math.h"
@@ -51,19 +52,7 @@ void runKnife(Entity* activeWeapon, UserCmd* cmd) noexcept
 {
     const auto& cfg = config->aimbot.melee;
 
-    auto enemies = Aimbot::getEnemies();
-
-    switch (cfg.sortMethod)
-    {
-    case 0:
-        std::sort(enemies.begin(), enemies.end(), [&](const Aimbot::Enemy& a, const Aimbot::Enemy& b) { return a.distance < b.distance; });
-        break;
-    case 1:
-        std::sort(enemies.begin(), enemies.end(), [&](const Aimbot::Enemy& a, const Aimbot::Enemy& b) { return a.fov < b.fov; });
-        break;
-    default:
-        break;
-    }
+    const auto enemies = TargetSystem::getTargets(cfg.sortMethod);
 
     float bestSimulationTime{ -1.0f };
     auto bestFov = cfg.fov;
@@ -71,13 +60,14 @@ void runKnife(Entity* activeWeapon, UserCmd* cmd) noexcept
     const auto& localPlayerOrigin = localPlayer->getAbsOrigin();
     const auto& localPlayerEyePosition = localPlayer->getEyePosition();
 
+    const auto players = Animations::getPlayers();
     for (const auto& target : enemies)
     {
         auto entity{ interfaces->entityList->getEntity(target.id) };
         if ((entity->isCloaked() && cfg.ignoreCloaked) || (!entity->isEnemy(localPlayer.get()) && !cfg.friendlyFire))
             continue;
 
-        auto player = Animations::getPlayer(target.id);
+        auto player = players[target.id];
 
         matrix3x4* backupBoneCache = entity->getBoneCache().memory;
         Vector backupMins = entity->getCollideable()->obbMins();
@@ -212,31 +202,21 @@ void AimbotMelee::run(Entity* activeWeapon, UserCmd* cmd) noexcept
     if (activeWeapon->isKnife())
         return runKnife(activeWeapon, cmd);
 
-    auto enemies = Aimbot::getEnemies();
-
-    switch (cfg.sortMethod)
-    {
-    case 0:
-        std::sort(enemies.begin(), enemies.end(), [&](const Aimbot::Enemy& a, const Aimbot::Enemy& b) { return a.distance < b.distance; });
-        break;
-    case 1:
-        std::sort(enemies.begin(), enemies.end(), [&](const Aimbot::Enemy& a, const Aimbot::Enemy& b) { return a.fov < b.fov; });
-        break;
-    default:
-        break;
-    }
+    const auto enemies = TargetSystem::getTargets(cfg.sortMethod);
 
     auto bestFov = cfg.fov;
     Vector bestTarget{ };
     const auto& localPlayerOrigin = localPlayer->getAbsOrigin();
     const auto& localPlayerEyePosition = localPlayer->getEyePosition();
+
+    const auto players = Animations::getPlayers();
     for (const auto& target : enemies)
     {
         auto entity{ interfaces->entityList->getEntity(target.id) };
         if ((entity->isCloaked() && cfg.ignoreCloaked) || (!entity->isEnemy(localPlayer.get()) && !cfg.friendlyFire))
             continue;
 
-        auto player = Animations::getPlayer(target.id);
+        auto player = players[target.id];
 
         matrix3x4* backupBoneCache = entity->getBoneCache().memory;
         Vector backupMins = entity->getCollideable()->obbMins();

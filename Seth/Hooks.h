@@ -28,10 +28,13 @@ public:
     MinHook clLoadWhitelist;
     MinHook estimateAbsVelocity;
     MinHook enableWorldFog;
+    MinHook frameAdvance;
     MinHook isAllowedToWithdrawFromCritBucket;
     MinHook interpolateServerEntities;
     MinHook tfPlayerInventoryGetMaxItemCount;
     MinHook sendDatagram;
+    MinHook updateClientSideAnimation;
+    MinHook updateTFAnimState;
 
     MinHook client;
     MinHook clientMode;

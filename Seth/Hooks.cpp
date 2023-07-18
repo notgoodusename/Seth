@@ -31,6 +31,7 @@
 #include "Hacks/MovementRebuild.h"
 #include "Hacks/SkinChanger.h"
 #include "Hacks/StreamProofESP.h"
+#include "Hacks/TargetSystem.h"
 #include "Hacks/Triggerbot/Triggerbot.h"
 #include "Hacks/Visuals.h"
 
@@ -176,6 +177,8 @@ static bool __fastcall createMove(void* thisPointer, void*, float inputSampleTim
     EnginePrediction::update();
     EnginePrediction::run(cmd);
 
+    TargetSystem::updateTargets(cmd);
+
     Backtrack::run(cmd);
     Aimbot::run(cmd);
     Triggerbot::run(cmd);
@@ -199,6 +202,7 @@ static bool __fastcall createMove(void* thisPointer, void*, float inputSampleTim
     cmd->forwardmove = std::clamp(cmd->forwardmove, -450.0f, 450.0f);
     cmd->sidemove = std::clamp(cmd->sidemove, -450.0f, 450.0f);
     cmd->upmove = std::clamp(cmd->upmove, -320.0f, 320.0f);
+    Animations::update(cmd, sendPacket);
     return false;
 }
 
@@ -365,11 +369,48 @@ static void __cdecl interpolateServerEntitiesHook() noexcept
     static auto original = reinterpret_cast<void(__cdecl*)()>(hooks->interpolateServerEntities.getDetour());
     
     static auto extrapolate = interfaces->cvar->findVar("cl_extrapolate");
-    
-    const auto backupValue = extrapolate->getFloat();
     extrapolate->setValue(0);
     original();
-    extrapolate->setValue(backupValue);
+}
+
+static float __fastcall frameAdvanceHook(void* thisPointer, void*, float interval) noexcept
+{
+    static auto original = hooks->frameAdvance.getOriginal<float>(interval);
+
+    const auto entity = reinterpret_cast<Entity*>(thisPointer);
+
+    if (!entity || !localPlayer || !entity->isPlayer() ||!entity->isAlive() || interfaces->engine->isHLTV())
+        return original(thisPointer, interval);
+
+    if (entity != localPlayer.get())
+    {
+        if (entity->simulationTime() > Animations::getPlayerSimulationTime(entity->index()) && Animations::isPlayerUpdating())
+            return original(thisPointer, entity->simulationTime() - Animations::getPlayerSimulationTime(entity->index()));
+    }
+    else if (entity == localPlayer.get())
+    {
+        if (entity->simulationTime() > Animations::getLocalSimulationTime() && Animations::isLocalUpdating())
+            return original(thisPointer, entity->simulationTime() - Animations::getLocalSimulationTime());
+    }
+    return 0.0f;
+}
+
+static void __fastcall updateTFAnimStateHook(void* thisPointer, void*, float eyePitch, float eyeYaw) noexcept
+{
+    static auto original = hooks->updateTFAnimState.getOriginal<void>(eyePitch, eyeYaw);
+
+    const auto animState = reinterpret_cast<TFPlayerAnimState*>(thisPointer);
+    if (!animState)
+        return;
+
+    const auto entity = reinterpret_cast<Entity*>(animState->player);
+    if (!entity || !localPlayer)
+        return;
+
+    if (entity == localPlayer.get() && Animations::isSkippingAnimStateUpdate())
+        return;
+
+    return original(thisPointer, eyePitch, eyeYaw);
 }
 
 void resetAll(int resetType) noexcept
@@ -380,6 +421,7 @@ void resetAll(int resetType) noexcept
     Crithack::reset();
     Misc::reset(resetType);
     EnginePrediction::reset();
+    TargetSystem::reset();
     Visuals::reset(resetType);
 }
 
@@ -422,9 +464,11 @@ void Hooks::install() noexcept
     clLoadWhitelist.detour(memory->clLoadWhitelist, clLoadWhitelistHook);
     estimateAbsVelocity.detour(memory->estimateAbsVelocity, estimateAbsVelocityHook);
     enableWorldFog.detour(memory->enableWorldFog, enableWorldFogHook);
+    frameAdvance.detour(memory->frameAdvance, frameAdvanceHook);
     interpolateServerEntities.detour(memory->interpolateServerEntities, interpolateServerEntitiesHook);
     isAllowedToWithdrawFromCritBucket.detour(memory->isAllowedToWithdrawFromCritBucket, isAllowedToWithdrawFromCritBucketHook);
     tfPlayerInventoryGetMaxItemCount.detour(memory->tfPlayerInventoryGetMaxItemCount, tfPlayerInventoryGetMaxItemCountHook);
+    updateTFAnimState.detour(memory->updateTFAnimState, updateTFAnimStateHook);
     sendDatagram.detour(memory->sendDatagram, sendDatagramHook);
 
     client.init(interfaces->client);

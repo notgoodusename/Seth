@@ -29,8 +29,6 @@
 #include "VirtualMethod.h"
 #include "WeaponId.h"
 
-struct AnimState;
-
 enum class MoveType {
     NONE = 0,
     ISOMETRIC,
@@ -240,6 +238,23 @@ public:
     TFPlayerAnimState* getAnimState() noexcept
     {
         return *reinterpret_cast<TFPlayerAnimState**>(this + 0x1D00);
+    }
+
+    float* getPoseParameter() noexcept
+    {
+        static auto m_flPoseParameter = Netvars::get(fnv::hash("CBaseAnimating->m_flPoseParameter"));
+        return reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + m_flPoseParameter);
+    }
+
+    std::array<float, 24>& poseParameters() noexcept
+    {
+        static auto m_flPoseParameter = Netvars::get(fnv::hash("CBaseAnimating->m_flPoseParameter"));
+        return *reinterpret_cast<std::add_pointer_t<std::array<float, 24>>>(reinterpret_cast<uintptr_t>(this) + m_flPoseParameter);
+    }
+
+    void updateTFAnimState(TFPlayerAnimState* animState, Vector angle) noexcept
+    {
+        reinterpret_cast<void(__thiscall*)(void*, float, float)>(memory->updateTFAnimState)(animState, angle.y, angle.x);
     }
 
     std::string getPlayerName() noexcept;

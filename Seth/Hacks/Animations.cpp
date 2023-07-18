@@ -13,7 +13,16 @@
 #include "../SDK/MemAlloc.h"
 #include "../SDK/Vector.h"
 
-static std::array<Animations::Players, 65> players{};
+bool updatingLocal{ true };
+bool updatingPlayer{ true };
+bool sendPacket{ true };
+
+bool skipAnimStateUpdate{ false };
+
+float simulationTime{ 0.0f };
+Vector viewangles{};
+
+std::array<Animations::Players, 65> players{};
 
 void Animations::init() noexcept
 {
@@ -22,8 +31,59 @@ void Animations::init() noexcept
 
 void Animations::reset() noexcept
 {
+    updatingLocal = true;
+    updatingPlayer = true;
+    sendPacket = true;
+    skipAnimStateUpdate = false;
+    simulationTime = 0.0f;
     for (auto& record : players)
         record.clear();
+}
+
+void Animations::update(UserCmd* cmd, bool& _sendPacket) noexcept
+{
+    if (!localPlayer || !localPlayer->isAlive())
+        return;
+
+    if (interfaces->engine->isHLTV())
+        return;
+
+    if (!localPlayer->getAnimState())
+        return;
+
+    viewangles = cmd->viewangles;
+    sendPacket = _sendPacket;
+
+    const auto netChannel = interfaces->engine->getNetworkChannel();
+    if (!netChannel)
+        return;
+
+    if(!simulationTime)
+        simulationTime = localPlayer->simulationTime();
+
+    static auto savedAbsAngle = localPlayer.get()->getAbsAngle();
+    static auto savedPoses = localPlayer->poseParameters();
+
+    if ((sendPacket && netChannel->chokedPackets <= 0) 
+        || netChannel->chokedPackets == 1)
+    {
+        //We update hitboxes
+        updatingLocal = true;
+        
+        localPlayer->updateTFAnimState(localPlayer->getAnimState(), viewangles);
+        skipAnimStateUpdate = true;
+        localPlayer->updateClientSideAnimation();
+        skipAnimStateUpdate = false;
+
+        simulationTime = localPlayer->simulationTime();
+        updatingLocal = false;
+
+        savedPoses = localPlayer->poseParameters();
+        savedAbsAngle = localPlayer.get()->getAbsAngle();
+    }
+
+    localPlayer->poseParameters() = savedPoses;
+    memory->setAbsAngle(localPlayer.get(), Vector{ 0.0f, savedAbsAngle.y, 0.0f });
 }
 
 void Animations::handlePlayers(FrameStage stage) noexcept
@@ -62,10 +122,15 @@ void Animations::handlePlayers(FrameStage stage) noexcept
             player.eyeAngle = entity->eyeAngles();
             player.absAngle = entity->getAbsAngle();
 
-            player.simulationTime = entity->simulationTime();
             player.mins = entity->getCollideable()->obbMins();
             player.maxs = entity->getCollideable()->obbMaxs();
             player.gotMatrix = entity->setupBones(player.matrix.data(), entity->getBoneCache().size, 0x7FF00, memory->globalVars->currenttime);
+
+            updatingPlayer = true;
+            entity->updateClientSideAnimation();
+            updatingPlayer = false;
+
+            player.simulationTime = entity->simulationTime();
 
             //Handle backtrack
             if (!player.gotMatrix)
@@ -94,28 +159,34 @@ void Animations::handlePlayers(FrameStage stage) noexcept
     }
 }
 
-Animations::Players Animations::getPlayer(int index) noexcept
+bool Animations::isSkippingAnimStateUpdate() noexcept
 {
-    if (index >= static_cast<int>(players.size()))
-        return {};
-    return players.at(index);
+    return skipAnimStateUpdate;
 }
 
-Animations::Players* Animations::setPlayer(int index) noexcept
+bool Animations::isLocalUpdating() noexcept
 {
-    if (index >= static_cast<int>(players.size()))
-        return {};
-    return &players.at(index);
+    return updatingLocal;
 }
 
-std::array<Animations::Players, 65> Animations::getPlayers() noexcept
+bool Animations::isPlayerUpdating() noexcept
+{
+    return updatingPlayer;
+}
+
+const float Animations::getLocalSimulationTime() noexcept
+{
+    return simulationTime;
+}
+
+const float Animations::getPlayerSimulationTime(int index) noexcept
+{
+    return players[index].simulationTime;
+}
+
+const std::array<Animations::Players, 65>& Animations::getPlayers() noexcept
 {
     return players;
-}
-
-std::array<Animations::Players, 65>* Animations::setPlayers() noexcept
-{
-    return &players;
 }
 
 const std::deque<Animations::Players::Record>* Animations::getBacktrackRecords(int index) noexcept

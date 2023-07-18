@@ -3,6 +3,7 @@
 #include "../Animations.h"
 #include "../Backtrack.h"
 #include "../MovementRebuild.h"
+#include "../TargetSystem.h"
 
 #include "../../SDK/UserCmd.h"
 #include "../../SDK/Math.h"
@@ -525,19 +526,7 @@ void AimbotProjectile::run(Entity* activeWeapon, UserCmd* cmd) noexcept
     if (!canAttack(cmd, activeWeapon))
         return;
 
-    auto enemies = Aimbot::getEnemies();
-
-    switch (cfg.sortMethod)
-    {
-    case 0:
-        std::sort(enemies.begin(), enemies.end(), [&](const Aimbot::Enemy& a, const Aimbot::Enemy& b) { return a.distance < b.distance; });
-        break;
-    case 1:
-        std::sort(enemies.begin(), enemies.end(), [&](const Aimbot::Enemy& a, const Aimbot::Enemy& b) { return a.fov < b.fov; });
-        break;
-    default:
-        break;
-    }
+    const auto enemies = TargetSystem::getTargets(cfg.sortMethod);
 
     auto bestFov = cfg.fov;
 

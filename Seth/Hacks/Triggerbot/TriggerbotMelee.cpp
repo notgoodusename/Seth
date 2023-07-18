@@ -1,6 +1,7 @@
 #include "../Aimbot/Aimbot.h"
 #include "../Animations.h"
 #include "../Backtrack.h"
+#include "../TargetSystem.h"
 #include "Triggerbot.h"
 #include "TriggerbotMelee.h"
 
@@ -41,10 +42,7 @@ void TriggerbotMelee::run(Entity* activeWeapon, UserCmd* cmd, float& lastTime, f
     if (now - lastTime < cfg.shotDelay / 1000.0f)
         return;
 
-    //Yeah, this shit is hacky but it works well so who cares
-    auto enemies = Aimbot::getEnemies();
-
-    std::sort(enemies.begin(), enemies.end(), [&](const Aimbot::Enemy& a, const Aimbot::Enemy& b) { return a.fov < b.fov; });
+    const auto enemies = TargetSystem::getTargets(SortType::Fov);
 
     bool gotTarget = false;
     float bestSimulationTime = -1.0f;
@@ -57,13 +55,15 @@ void TriggerbotMelee::run(Entity* activeWeapon, UserCmd* cmd, float& lastTime, f
     const auto& localPlayerEyePosition = localPlayer->getEyePosition();
     const auto startPos = localPlayerEyePosition;
     const auto endPos = startPos + Vector::fromAngle(cmd->viewangles) * range;
+
+    const auto players = Animations::getPlayers();
     for (const auto& target : enemies)
     {
         auto entity{ interfaces->entityList->getEntity(target.id) };
         if ((entity->isCloaked() && cfg.ignoreCloaked) || (!entity->isEnemy(localPlayer.get()) && !cfg.friendlyFire))
             continue;
 
-        auto player = Animations::getPlayer(target.id);
+        auto player = players[target.id];
 
         matrix3x4* backupBoneCache = entity->getBoneCache().memory;
         Vector backupMins = entity->getCollideable()->obbMins();

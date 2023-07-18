@@ -55,8 +55,9 @@ void Backtrack::run(UserCmd* cmd) noexcept
     int bestTargetIndex{ };
     int bestRecord{ };
 
+    const auto players = Animations::getPlayers();
     for (int i = 1; i <= interfaces->engine->getMaxClients(); i++) {
-        const auto player = Animations::getPlayer(i);
+        const auto player = players[i];
         if (!player.gotMatrix || player.backtrackRecords.empty())
             continue;
 
@@ -69,7 +70,7 @@ void Backtrack::run(UserCmd* cmd) noexcept
         {
             if (Backtrack::valid(player.backtrackRecords.at(j).simulationTime))
             {
-                for (auto position : player.backtrackRecords.at(j).positions) {
+                for (auto& position : player.backtrackRecords.at(j).positions) {
                     auto angle = Math::calculateRelativeAngle(localPlayerEyePosition, position, cmd->viewangles);
                     auto fov = std::hypotf(angle.x, angle.y);
                     if (fov < bestFov) {
@@ -82,7 +83,7 @@ void Backtrack::run(UserCmd* cmd) noexcept
         }
     }
 
-    const auto player = Animations::getPlayer(bestTargetIndex);
+    const auto& player = players[bestTargetIndex];
     if (!player.gotMatrix)
         return;
 

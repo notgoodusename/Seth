@@ -66,6 +66,7 @@ public:
     EconItemDefinition*( __thiscall* getItemDefinition)(void*, int);
     int(__thiscall* getNextThinkTick)(void*, const char*);
     bool(_cdecl* passServerEntityFilter)(void* touch, void* pass);
+    bool(__thiscall* physicsRunThink)(void*, int);
     std::add_pointer_t<int __cdecl(const int, ...)> randomSeed;
     std::add_pointer_t<int __cdecl(const int, const int, ...)> randomInt;
     std::add_pointer_t<float __cdecl(const float, const float, ...)> randomFloat;
@@ -76,7 +77,6 @@ public:
     bool(__stdcall* shouldCollide)(int, int);
     void(__thiscall* simulatePlayerSimulatedEntities)(void*);
     bool(_cdecl* standardFilterRules)(void*, int);
-    bool(__thiscall* physicsRunThink)(void*, int);
 
     int* predictionRandomSeed;
 
@@ -86,10 +86,13 @@ public:
     std::uintptr_t clLoadWhitelist;
     std::uintptr_t estimateAbsVelocity;
     std::uintptr_t enableWorldFog;
+    std::uintptr_t frameAdvance;
     std::uintptr_t interpolateServerEntities;
     std::uintptr_t isAllowedToWithdrawFromCritBucket;
     std::uintptr_t tfPlayerInventoryGetMaxItemCount;
     std::uintptr_t sendDatagram;
+    std::uintptr_t updateClientSideAnimation;
+    std::uintptr_t updateTFAnimState;
 
     std::add_pointer_t<void _cdecl(const char* msg, ...)> logDirect;
 private:

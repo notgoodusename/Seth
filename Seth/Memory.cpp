@@ -100,6 +100,7 @@ Memory::Memory() noexcept
     getItemDefinition = relativeToAbsolute<decltype(getItemDefinition)>(findPattern(CLIENT_DLL, "\xE8????\x0F\xB6\x40\x15") + 1);
     getNextThinkTick = reinterpret_cast<decltype(getNextThinkTick)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\x8B\x45\x08\x56\x8B\xF1\x85\xC0\x75\x13"));
     passServerEntityFilter = reinterpret_cast<decltype(passServerEntityFilter)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\x56\x8B\x75?\x85\xF6\x75?\xB0?"));
+    physicsRunThink = reinterpret_cast<decltype(physicsRunThink)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\x53\x8B\xD9\x56\x57\x8B\x83????\xC1"));
     randomSeed = reinterpret_cast<decltype(randomSeed)>(GetProcAddress(GetModuleHandleA(VSTDLIB_DLL), "RandomSeed"));
     randomInt = reinterpret_cast<decltype(randomInt)>(GetProcAddress(GetModuleHandleA(VSTDLIB_DLL), "RandomInt"));
     randomFloat = reinterpret_cast<decltype(randomFloat)>(GetProcAddress(GetModuleHandleA(VSTDLIB_DLL), "RandomFloat"));
@@ -110,7 +111,6 @@ Memory::Memory() noexcept
     shouldCollide = reinterpret_cast<decltype(shouldCollide)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\x8B\x55?\x56\x8B\x75?\x3B\xF2"));
     simulatePlayerSimulatedEntities = relativeToAbsolute<decltype(simulatePlayerSimulatedEntities)>(findPattern(CLIENT_DLL, "\xE8????\x8B\x06\x8B\xCE\x5E\x5B") + 1);
     standardFilterRules = reinterpret_cast<decltype(standardFilterRules)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\x8B\x4D?\x56\x8B\x01\xFF\x50?\x8B\xF0\x85\xF6\x75?\xB0?\x5E\x5D\xC3"));
-    physicsRunThink = reinterpret_cast<decltype(physicsRunThink)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\x53\x8B\xD9\x56\x57\x8B\x83????\xC1"));
 
     predictionRandomSeed = *reinterpret_cast<int**>(findPattern(CLIENT_DLL, "\xC7\x05????????\x5D\xC3\x8B\x40\x34") + 2);
 
@@ -120,10 +120,13 @@ Memory::Memory() noexcept
     clLoadWhitelist = relativeToAbsolute<decltype(clLoadWhitelist)>(findPattern(ENGINE_DLL, "\xE8????\x83\xC4\x08\x8B\xF0\x56") + 1);
     estimateAbsVelocity = findPattern(CLIENT_DLL, "\x55\x8B\xEC\x83\xEC?\x56\x8B\xF1\xE8????\x3B\xF0\x75?\x8B\xCE\xE8????\x8B\x45?\xD9\x86????\xD9\x18\xD9\x86????\xD9\x58?\xD9\x86????\xD9\x58?\x5E\x8B\xE5\x5D\xC2");
     enableWorldFog = findPattern(CLIENT_DLL, "\x55\x8B\xEC\x8B\x0D????\x83\xEC\x0C\x8B\x01\x53\x56\xFF\x90????\x8B\xF0\x85\xF6\x74\x07\x8B\x06\x8B\xCE\xFF\x50\x08");
+    frameAdvance = relativeToAbsolute<decltype(frameAdvance)>(findPattern(CLIENT_DLL, "\xE8????\x80\xBF?????\xD9\x55\x08") + 1);
     interpolateServerEntities = findPattern(CLIENT_DLL, "\x55\x8B\xEC\x83\xEC\x30\x8B\x0D????\x53");
     isAllowedToWithdrawFromCritBucket = findPattern(CLIENT_DLL, "\x55\x8B\xEC\x56\x8B\xF1\x0F\xB7\x86????\xFF\x86????\x50\xE8????\x83\xC4\x04\x80\xB8?????\x74\x0A\xF3\x0F\x10\x15");
     tfPlayerInventoryGetMaxItemCount = findPattern(CLIENT_DLL, "\x8B\x49\x68\x56");
-    sendDatagram = findPattern(ENGINE_DLL, "\x55\x8B\xEC\xB8????\xE8????\xA1????\x53\x56\x8B\xD9");;
+    sendDatagram = findPattern(ENGINE_DLL, "\x55\x8B\xEC\xB8????\xE8????\xA1????\x53\x56\x8B\xD9");
+    updateClientSideAnimation = findPattern(CLIENT_DLL, "\x56\x8B\xF1\x80\xBE?????\x74\x27");
+    updateTFAnimState = findPattern(CLIENT_DLL, "\x55\x8B\xEC\x81\xEC????\x53\x57\x8B\xF9\x8B\x9F????");
 
     logDirect = reinterpret_cast<decltype(logDirect)>(GetProcAddress(GetModuleHandleA("tier0.dll"), "Msg"));
 
