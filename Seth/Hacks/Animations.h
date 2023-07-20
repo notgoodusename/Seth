@@ -14,6 +14,7 @@ enum class FrameStage;
 namespace Animations
 {
 	void init() noexcept;
+	void updateLocalAngles(UserCmd* cmd) noexcept;
 	void reset() noexcept;
 
 	void handlePlayers(FrameStage) noexcept;
@@ -64,8 +65,7 @@ namespace Animations
 		}
 	};
 
-	bool isSkippingAnimStateUpdate() noexcept;
-	bool isLocalUpdating() noexcept;
+	Vector getLocalViewangles() noexcept;
 
 	const std::array<Animations::Players, 65>& getPlayers() noexcept;
 	const std::deque<Players::Record>* getBacktrackRecords(int index) noexcept;

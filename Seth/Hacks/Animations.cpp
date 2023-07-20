@@ -13,6 +13,8 @@
 #include "../SDK/MemAlloc.h"
 #include "../SDK/Vector.h"
 
+Vector viewAngles{};
+
 std::array<Animations::Players, 65> players{};
 
 void Animations::init() noexcept
@@ -20,8 +22,14 @@ void Animations::init() noexcept
 
 }
 
+void Animations::updateLocalAngles(UserCmd* cmd) noexcept
+{
+    viewAngles = cmd->viewangles;
+}
+
 void Animations::reset() noexcept
 {
+    viewAngles = Vector{};
     for (auto& record : players)
         record.clear();
 }
@@ -92,6 +100,11 @@ void Animations::handlePlayers(FrameStage stage) noexcept
                 player.backtrackRecords.pop_back();
         }
     }
+}
+
+Vector Animations::getLocalViewangles() noexcept
+{
+    return viewAngles;
 }
 
 const std::array<Animations::Players, 65>& Animations::getPlayers() noexcept

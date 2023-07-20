@@ -203,6 +203,7 @@ static bool __fastcall createMove(void* thisPointer, void*, float inputSampleTim
     cmd->forwardmove = std::clamp(cmd->forwardmove, -450.0f, 450.0f);
     cmd->sidemove = std::clamp(cmd->sidemove, -450.0f, 450.0f);
     cmd->upmove = std::clamp(cmd->upmove, -320.0f, 320.0f);
+    Animations::updateLocalAngles(cmd);
     return false;
 }
 
@@ -394,9 +395,9 @@ static float __fastcall frameAdvanceHook(void* thisPointer, void*, float interva
     return 0.0f;
 }
 
-static void __fastcall updateTFAnimStateHook(void* thisPointer, void*, float eyePitch, float eyeYaw) noexcept
+static void __fastcall updateTFAnimStateHook(void* thisPointer, void*, float eyeYaw, float eyePitch) noexcept
 {
-    static auto original = hooks->updateTFAnimState.getOriginal<void>(eyePitch, eyeYaw);
+    static auto original = hooks->updateTFAnimState.getOriginal<void>(eyeYaw, eyePitch);
 
     const auto animState = reinterpret_cast<TFPlayerAnimState*>(thisPointer);
     if (!animState)
@@ -406,10 +407,10 @@ static void __fastcall updateTFAnimStateHook(void* thisPointer, void*, float eye
     if (!entity || !localPlayer)
         return;
 
-    if (entity == localPlayer.get() && Animations::isSkippingAnimStateUpdate())
-        return;
+    if (entity == localPlayer.get())
+        return original(thisPointer, Animations::getLocalViewangles().y, Animations::getLocalViewangles().x);
 
-    return original(thisPointer, eyePitch, eyeYaw);
+    return original(thisPointer, eyeYaw, eyePitch);
 }
 
 void resetAll(int resetType) noexcept
