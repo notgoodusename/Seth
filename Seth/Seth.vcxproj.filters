@@ -254,6 +254,9 @@
     <ClCompile Include="Hacks\TargetSystem.cpp">
       <Filter>Hacks</Filter>
     </ClCompile>
+    <ClCompile Include="StrayElements.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GUI.h">
@@ -589,9 +592,6 @@
     <ClInclude Include="Hacks\SkinChanger.h">
       <Filter>Hacks</Filter>
     </ClInclude>
-    <ClInclude Include="SDK\EconItem.h">
-      <Filter>SDK</Filter>
-    </ClInclude>
     <ClInclude Include="SDK\ItemSchema.h">
       <Filter>SDK</Filter>
     </ClInclude>
@@ -627,6 +627,9 @@
     </ClInclude>
     <ClInclude Include="Hacks\TargetSystem.h">
       <Filter>Hacks</Filter>
+    </ClInclude>
+    <ClInclude Include="StrayElements.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

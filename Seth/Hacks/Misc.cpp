@@ -429,7 +429,7 @@ void Misc::drawPlayerList() noexcept
             ImGui::TableSetupColumn("Steam ID", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoResize);
             ImGui::TableSetupColumn("Class", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoResize);
             ImGui::TableSetupColumn("Health", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoResize);
-            ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide);
+            ImGui::TableSetupColumn("Extra", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide);
             ImGui::TableSetupScrollFreeze(0, 1);
             ImGui::TableSetColumnEnabled(2, config->misc.playerList.steamID);
             ImGui::TableSetColumnEnabled(3, config->misc.playerList.className);
@@ -466,7 +466,40 @@ void Misc::drawPlayerList() noexcept
                     ImGui::SetClipboardText(std::to_string(player.steamID).c_str());
 
                 if (ImGui::TableNextColumn())
-                    ImGui::Text(player.className.c_str());
+                {
+                    std::string className = "unknown";
+                    switch (player.classID)
+                    {
+                    case TFClass::SCOUT:
+                        className = "Scout";
+                        break;
+                    case TFClass::SNIPER:
+                        className = "Sniper";
+                        break;
+                    case TFClass::SOLDIER:
+                        className = "Soldier";
+                        break;
+                    case TFClass::DEMOMAN:
+                        className = "Demoman";
+                        break;
+                    case TFClass::MEDIC:
+                        className = "Medic";
+                        break;
+                    case TFClass::HEAVY:
+                        className = "Heavy";
+                        break;
+                    case TFClass::PYRO:
+                        className = "Pyro";
+                        break;
+                    case TFClass::SPY:
+                        className = "Spy";
+                        break;
+                    case TFClass::ENGINEER:
+                        className = "Engineer";
+                        break;
+                    }
+                    ImGui::Text(className.c_str());
+                }
 
                 if (ImGui::TableNextColumn()) {
                     if (!player.alive)

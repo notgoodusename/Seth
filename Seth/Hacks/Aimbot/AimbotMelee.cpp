@@ -155,6 +155,9 @@ public:
     matrix3x4* matrix;
 } meleeRecord;
 
+//TODO: Need optimizing
+//Remove all distant players if not in reach, using an if check
+
 void AimbotMelee::run(Entity* activeWeapon, UserCmd* cmd) noexcept
 {
     const auto& cfg = config->aimbot.melee;

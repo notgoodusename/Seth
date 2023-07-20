@@ -18,6 +18,7 @@
 #include "Hooks.h"
 #include "Interfaces.h"
 #include "Memory.h"
+#include "StrayElements.h"
 #include "SteamInterfaces.h"
 
 #include "Hacks/Aimbot/Aimbot.h"
@@ -202,7 +203,6 @@ static bool __fastcall createMove(void* thisPointer, void*, float inputSampleTim
     cmd->forwardmove = std::clamp(cmd->forwardmove, -450.0f, 450.0f);
     cmd->sidemove = std::clamp(cmd->sidemove, -450.0f, 450.0f);
     cmd->upmove = std::clamp(cmd->upmove, -320.0f, 320.0f);
-    Animations::update(cmd, sendPacket);
     return false;
 }
 
@@ -382,15 +382,14 @@ static float __fastcall frameAdvanceHook(void* thisPointer, void*, float interva
     if (!entity || !localPlayer || !entity->isPlayer() ||!entity->isAlive() || interfaces->engine->isHLTV())
         return original(thisPointer, interval);
 
-    if (entity != localPlayer.get())
+    static std::array<float, 65> simTimes = { 0.0f };
+
+    if (entity->simulationTime() != simTimes[entity->index()])
     {
-        if (entity->simulationTime() > Animations::getPlayerSimulationTime(entity->index()) && Animations::isPlayerUpdating())
-            return original(thisPointer, entity->simulationTime() - Animations::getPlayerSimulationTime(entity->index()));
-    }
-    else if (entity == localPlayer.get())
-    {
-        if (entity->simulationTime() > Animations::getLocalSimulationTime() && Animations::isLocalUpdating())
-            return original(thisPointer, entity->simulationTime() - Animations::getLocalSimulationTime());
+        float newInterval = entity->simulationTime() - simTimes[entity->index()];
+        simTimes[entity->index()] = entity->simulationTime();
+        if (newInterval > 0.0f)
+            return original(thisPointer, newInterval);
     }
     return 0.0f;
 }
@@ -422,6 +421,7 @@ void resetAll(int resetType) noexcept
     Misc::reset(resetType);
     EnginePrediction::reset();
     TargetSystem::reset();
+    StrayElements::clear();
     Visuals::reset(resetType);
 }
 

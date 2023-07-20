@@ -51,6 +51,7 @@ namespace GameData
 }
 
 enum class Team;
+enum class TFClass;
 
 struct LocalPlayerData {
     void update() noexcept;
@@ -104,7 +105,7 @@ struct PlayerData : BaseData {
     Team team;
     std::uint64_t steamID;
     std::string name;
-    std::string className;
+    TFClass classID;
     Vector origin;
     std::string activeWeapon;
     std::vector<std::pair<Vector, Vector>> bones;

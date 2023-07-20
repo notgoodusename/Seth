@@ -82,6 +82,7 @@
     <ClCompile Include="SDK\Utils.cpp" />
     <ClCompile Include="CustomTexture.cpp" />
     <ClCompile Include="SteamInterfaces.cpp" />
+    <ClCompile Include="StrayElements.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Config.h" />
@@ -140,7 +141,6 @@
     <ClInclude Include="SDK\Conditions.h" />
     <ClInclude Include="SDK\ConVar.h" />
     <ClInclude Include="SDK\DebugOverlay.h" />
-    <ClInclude Include="SDK\EconItem.h" />
     <ClInclude Include="SDK\EngineTrace.h" />
     <ClInclude Include="SDK\Entity.h" />
     <ClInclude Include="SDK\ClientClass.h" />
@@ -208,6 +208,7 @@
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="CustomTexture.h" />
     <ClInclude Include="SteamInterfaces.h" />
+    <ClInclude Include="StrayElements.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

@@ -8,6 +8,7 @@
 #include "GameData.h"
 #include "Interfaces.h"
 #include "Memory.h"
+#include "StrayElements.h"
 #include "SteamInterfaces.h"
 
 #include "Resources/avatar_default.h"
@@ -29,6 +30,7 @@
 #include "SDK/LocalPlayer.h"
 #include "SDK/ModelInfo.h"
 #include "SDK/NetworkChannel.h"
+#include "SDK/PlayerResource.h"
 #include "SDK/RenderView.h"
 #include "SDK/Steam.h"
 #include "SDK/ViewSetup.h"
@@ -40,6 +42,7 @@ static std::vector<BuildingsData> buildingsData;
 static std::vector<NPCData> npcData;
 static std::vector<WorldData> worldData;
 static std::atomic_int netOutgoingLatency;
+static TFPlayerResource* playerResource = nullptr;
 
 static auto playerByHandleWritable(int handle) noexcept
 {
@@ -122,7 +125,11 @@ void GameData::update() noexcept
                 case ClassId::TFAmmoPack:
                     worldData.emplace_back(entity);
                     break;
-                case ClassId::TFProjectile_Rocket:
+                case ClassId::TFPlayerResource:
+                    //i wanted to do it with a memory pattern but whatever
+                    StrayElements::getPlayerResource() = reinterpret_cast<TFPlayerResource*>(entity);
+                    break;
+               /* case ClassId::TFProjectile_Rocket:
                 case ClassId::TFGrenadePipebombProjectile:
                 case ClassId::TFProjectile_Jar:
                 case ClassId::TFProjectile_JarGas:
@@ -139,6 +146,7 @@ void GameData::update() noexcept
                 case ClassId::TFStunBall:
                 case ClassId::TFBall_Ornament:
                     break;
+                    */
                 case ClassId::HeadlessHatman:
                 case ClassId::TFTankBoss:
                 case ClassId::Merasmus:
@@ -278,50 +286,25 @@ PlayerData::PlayerData(Entity* entity) noexcept : BaseData{ entity }, userId{ en
 
 void PlayerData::update(Entity* entity) noexcept
 {
-    //TODO: use playerResource
     name = entity->getPlayerName();
     const auto idx = entity->index();
 
     dormant = entity->isDormant();
     if (dormant) {
+        if (const auto pr = StrayElements::getPlayerResource()) {
+            alive = pr->isAlive(idx);
+            if (!alive)
+                lastContactTime = 0.0f;
+            health = pr->getHealth(idx);
+            maxHealth = pr->getMaxHealth(idx);
+            team = static_cast<Team>(pr->getTeam(idx));
+            classID = static_cast<TFClass>(pr->getPlayerClass(idx));
+        }
         return;
     }
 
-    switch (entity->getPlayerClass())
-    {
-        case TFClass::SCOUT:
-            className = "Scout";
-            break;
-        case TFClass::SNIPER:
-            className = "Sniper";
-            break;
-        case TFClass::SOLDIER:
-            className = "Soldier";
-            break;
-        case TFClass::DEMOMAN:
-            className = "Demoman";
-            break;
-        case TFClass::MEDIC:
-            className = "Medic";
-            break;
-        case TFClass::HEAVY:
-            className = "Heavy";
-            break;
-        case TFClass::PYRO:
-            className = "Pyro";
-            break;
-        case TFClass::SPY:
-            className = "Spy";
-            break;
-        case TFClass::ENGINEER:
-            className = "Engineer";
-            break;
-        default:
-            className = "";
-            break;
-    }
-
     team = entity->teamNumber();
+    classID = entity->getPlayerClass();
     static_cast<BaseData&>(*this) = { entity };
     origin = entity->getAbsOrigin();
     alive = entity->isAlive();
@@ -337,7 +320,7 @@ void PlayerData::update(Entity* entity) noexcept
     isCloaked = entity->isCloaked();
 
     if (const auto weapon = entity->getActiveWeapon())
-        activeWeapon = interfaces->localize->findAsUTF8(weapon->getPrintName());
+        activeWeapon = interfaces->localize->findAsUTF8(weapon->getPrintName()); //TODO: Optimize
 
     if (!alive)
         return;

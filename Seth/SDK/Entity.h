@@ -257,7 +257,14 @@ public:
         reinterpret_cast<void(__thiscall*)(void*, float, float)>(memory->updateTFAnimState)(animState, angle.y, angle.x);
     }
 
-    std::string getPlayerName() noexcept;
+    void getPlayerName(char(&out)[128]) noexcept;
+    [[nodiscard]] std::string getPlayerName() noexcept
+    {
+        char name[128];
+        getPlayerName(name);
+        return name;
+    }
+
     auto getUserId() noexcept
     {
         if (PlayerInfo playerInfo; interfaces->engine->getPlayerInfo(index(), playerInfo))

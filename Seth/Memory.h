@@ -21,7 +21,7 @@ class KeyValues;
 class MemAlloc;
 class MoveHelper;
 class PlantedC4;
-class PlayerResource;
+class TFPlayerResource;
 class ViewRender;
 class ViewRenderBeams;
 class WeaponSystem;
