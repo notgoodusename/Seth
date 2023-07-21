@@ -6,14 +6,17 @@
 #include "Entity.h"
 #include "GlobalVars.h"
 
-void Entity::getPlayerName(char(&out)[128]) noexcept
+const char* Entity::getPlayerName() noexcept
 {
-    if (!StrayElements::getPlayerResource()) {
-        strcpy(out, "unknown");
-        return;
-    }
+    PlayerInfo playerInfo;
+    if (!interfaces->engine->getPlayerInfo(index(), playerInfo) || !StrayElements::getPlayerResource())
+        return "unknown";
 
-    strcpy(out, StrayElements::getPlayerResource()->getPlayerName(index()));
+    const auto name = StrayElements::getPlayerResource()->getPlayerName(index());
+    if(!name)
+        return "unknown";
+
+    return name;
 }
 
 //i was just browsing around ida looking for sm else, and i found that getSteamId is a virtual method, kill me

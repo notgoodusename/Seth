@@ -257,13 +257,7 @@ public:
         reinterpret_cast<void(__thiscall*)(void*, float, float)>(memory->updateTFAnimState)(animState, angle.y, angle.x);
     }
 
-    void getPlayerName(char(&out)[128]) noexcept;
-    [[nodiscard]] std::string getPlayerName() noexcept
-    {
-        char name[128];
-        getPlayerName(name);
-        return name;
-    }
+    const char* getPlayerName() noexcept;
 
     auto getUserId() noexcept
     {
@@ -648,9 +642,10 @@ public:
     Vector vecSurroundingMins;
     Vector vecSurroundingMaxs;
 
-    VIRTUAL_METHOD(const Vector&, obbMins, 3, (), (this))
-    VIRTUAL_METHOD(const Vector&, obbMaxs, 4, (), (this))
-
+    VIRTUAL_METHOD(const Vector&, obbMinsPreScaled, 1, (), (this))
+    VIRTUAL_METHOD(const Vector&, obbMaxsPreScaled, 2, (), (this))
+    VIRTUAL_METHOD(const Vector&, obbMinss, 3, (), (this))
+    VIRTUAL_METHOD(const Vector&, obbMaxss, 4, (), (this))
 
     void setCollisionBounds(const Vector& mins, const Vector& maxs) noexcept
     {

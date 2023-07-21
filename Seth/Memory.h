@@ -72,7 +72,7 @@ public:
     std::add_pointer_t<float __cdecl(const float, const float, ...)> randomFloat;
     void(__thiscall* setAbsOrigin)(Entity*, const Vector&);
     void(__thiscall* setAbsAngle)(Entity*, const Vector&);
-    void(__thiscall* setCollisionBounds)(void*, const Vector& mins, const Vector& maxs);
+    void(__thiscall* setCollisionBounds)(void*, const Vector& preScaledMins, const Vector& preScaledMaxs);
     void(__thiscall* setNextThink)(void*, float, const char*);
     bool(__stdcall* shouldCollide)(int, int);
     void(__thiscall* simulatePlayerSimulatedEntities)(void*);

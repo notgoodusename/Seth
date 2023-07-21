@@ -459,7 +459,7 @@ void Misc::drawPlayerList() noexcept
                 {
                     ImGui::Image(player.getAvatarTexture(), { ImGui::GetTextLineHeight(), ImGui::GetTextLineHeight() });
                     ImGui::SameLine();
-                    ImGui::textEllipsisInTableCell(player.name.c_str());
+                    ImGui::textEllipsisInTableCell(player.name);
                 }
 
                 if (ImGui::TableNextColumn() && ImGui::smallButtonFullWidth("Copy", player.steamID == 0))
