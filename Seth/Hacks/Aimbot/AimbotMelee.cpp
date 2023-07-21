@@ -70,8 +70,8 @@ void runKnife(Entity* activeWeapon, UserCmd* cmd) noexcept
         auto player = players[target.id];
 
         matrix3x4* backupBoneCache = entity->getBoneCache().memory;
-        Vector backupMins = entity->getCollideable()->obbMins();
-        Vector backupMaxs = entity->getCollideable()->obbMaxs();
+        Vector backupPrescaledMins = entity->getCollideable()->obbMinsPreScaled();
+        Vector backupPrescaledMaxs = entity->getCollideable()->obbMaxsPreScaled();
         Vector backupOrigin = entity->getAbsOrigin();
         Vector backupAbsAngle = entity->getAbsAngle();
         Vector backupEyeAngle = entity->eyeAngles();
@@ -92,7 +92,7 @@ void runKnife(Entity* activeWeapon, UserCmd* cmd) noexcept
                     memory->setCollisionBounds(entity->getCollideable(), records->at(i).mins, records->at(i).maxs);
 
                     bestTarget = getMeleeTarget(cmd, entity, entity->getBoneCache().memory, activeWeapon, bestFov, localPlayerEyePosition, cfg.autoBackstab, records->at(i).eyeAngle);
-                    applyMatrix(entity, backupBoneCache, backupOrigin, backupEyeAngle, backupMins, backupMaxs);
+                    applyMatrix(entity, backupBoneCache, backupOrigin, backupEyeAngle, backupPrescaledMins, backupPrescaledMaxs);
 
                     if (bestTarget.notNull())
                     {
@@ -111,7 +111,7 @@ void runKnife(Entity* activeWeapon, UserCmd* cmd) noexcept
 
             bestTarget = getMeleeTarget(cmd, entity, entity->getBoneCache().memory, activeWeapon, bestFov, localPlayerEyePosition, cfg.autoBackstab, player.eyeAngle);
 
-            applyMatrix(entity, backupBoneCache, backupOrigin, backupEyeAngle, backupMins, backupMaxs);
+            applyMatrix(entity, backupBoneCache, backupOrigin, backupEyeAngle, backupPrescaledMins, backupPrescaledMaxs);
 
             if (bestTarget.notNull())
             {
@@ -176,8 +176,8 @@ void AimbotMelee::run(Entity* activeWeapon, UserCmd* cmd) noexcept
             const auto angle = Math::calculateRelativeAngle(localPlayer->getEyePosition(), meleeRecord.target, cmd->viewangles);
 
             matrix3x4* backupBoneCache = entity->getBoneCache().memory;
-            Vector backupMins = entity->getCollideable()->obbMins();
-            Vector backupMaxs = entity->getCollideable()->obbMaxs();
+            Vector backupPrescaledMins = entity->getCollideable()->obbMinsPreScaled();
+            Vector backupPrescaledMaxs = entity->getCollideable()->obbMaxsPreScaled();
             Vector backupOrigin = entity->getAbsOrigin();
             Vector backupAbsAngle = entity->getAbsAngle();
             Vector backupEyeAngle = entity->eyeAngles();
@@ -191,7 +191,7 @@ void AimbotMelee::run(Entity* activeWeapon, UserCmd* cmd) noexcept
                 if (!cfg.silent)
                     interfaces->engine->setViewAngles(cmd->viewangles);
             }
-            applyMatrix(entity, backupBoneCache, backupOrigin, backupEyeAngle, backupMins, backupMaxs);
+            applyMatrix(entity, backupBoneCache, backupOrigin, backupEyeAngle, backupPrescaledMins, backupPrescaledMaxs);
         }
     }
 
@@ -222,8 +222,8 @@ void AimbotMelee::run(Entity* activeWeapon, UserCmd* cmd) noexcept
         auto player = players[target.id];
 
         matrix3x4* backupBoneCache = entity->getBoneCache().memory;
-        Vector backupMins = entity->getCollideable()->obbMins();
-        Vector backupMaxs = entity->getCollideable()->obbMaxs();
+        Vector backupPrescaledMins = entity->getCollideable()->obbMinsPreScaled();
+        Vector backupPrescaledMaxs = entity->getCollideable()->obbMaxsPreScaled();
         Vector backupOrigin = entity->getAbsOrigin();
         Vector backupAbsAngle = entity->getAbsAngle();
         Vector backupEyeAngle = entity->eyeAngles();
@@ -274,13 +274,13 @@ void AimbotMelee::run(Entity* activeWeapon, UserCmd* cmd) noexcept
         }
 
         meleeRecord.matrix = entity->getBoneCache().memory;
-        meleeRecord.mins = entity->getCollideable()->obbMins();
-        meleeRecord.maxs = entity->getCollideable()->obbMaxs();
+        meleeRecord.mins = entity->getCollideable()->obbMinsPreScaled();
+        meleeRecord.maxs = entity->getCollideable()->obbMaxsPreScaled();
         meleeRecord.origin = entity->getAbsOrigin();
         meleeRecord.eyeAngle = entity->eyeAngles();
 
         bestTarget = getMeleeTarget(cmd, entity, entity->getBoneCache().memory, activeWeapon, bestFov, localPlayerEyePosition);
-        applyMatrix(entity, backupBoneCache, backupOrigin, backupEyeAngle, backupMins, backupMaxs);
+        applyMatrix(entity, backupBoneCache, backupOrigin, backupEyeAngle, backupPrescaledMins, backupPrescaledMaxs);
         if (bestTarget.notNull())
         {
             meleeRecord.target = bestTarget;

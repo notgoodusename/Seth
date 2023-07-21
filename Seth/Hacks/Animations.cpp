@@ -71,8 +71,8 @@ void Animations::handlePlayers(FrameStage stage) noexcept
             player.absAngle = entity->getAbsAngle();
             player.simulationTime = entity->simulationTime();
 
-            player.mins = entity->getCollideable()->obbMins();
-            player.maxs = entity->getCollideable()->obbMaxs();
+            player.mins = entity->getCollideable()->obbMinsPreScaled();
+            player.maxs = entity->getCollideable()->obbMaxsPreScaled();
             player.gotMatrix = entity->setupBones(player.matrix.data(), entity->getBoneCache().size, 0x7FF00, memory->globalVars->currenttime);
 
             //Handle backtrack

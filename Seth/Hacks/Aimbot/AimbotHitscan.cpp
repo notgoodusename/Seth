@@ -91,8 +91,8 @@ void AimbotHitscan::run(Entity* activeWeapon, UserCmd* cmd) noexcept
         auto player = players[target.id];
 
         matrix3x4* backupBoneCache = entity->getBoneCache().memory;
-        Vector backupMins = entity->getCollideable()->obbMins();
-        Vector backupMaxs = entity->getCollideable()->obbMaxs();
+        Vector backupPrescaledMins = entity->getCollideable()->obbMinsPreScaled();
+        Vector backupPrescaledMaxs = entity->getCollideable()->obbMaxsPreScaled();
         Vector backupOrigin = entity->getAbsOrigin();
         Vector backupAbsAngle = entity->getAbsAngle();
         Vector backupEyeAngle = entity->eyeAngles();
@@ -165,7 +165,7 @@ void AimbotHitscan::run(Entity* activeWeapon, UserCmd* cmd) noexcept
             }
 
             bestTarget = getHitscanTarget(cmd, entity, entity->getBoneCache().memory, hitbox, bestFov, localPlayerEyePosition);
-            applyMatrix(entity, backupBoneCache, backupOrigin, backupEyeAngle, backupMins, backupMaxs);
+            applyMatrix(entity, backupBoneCache, backupOrigin, backupEyeAngle, backupPrescaledMins, backupPrescaledMaxs);
             if (bestTarget.notNull())
                 break;
         }

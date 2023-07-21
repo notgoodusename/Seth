@@ -644,8 +644,8 @@ public:
 
     VIRTUAL_METHOD(const Vector&, obbMinsPreScaled, 1, (), (this))
     VIRTUAL_METHOD(const Vector&, obbMaxsPreScaled, 2, (), (this))
-    VIRTUAL_METHOD(const Vector&, obbMinss, 3, (), (this))
-    VIRTUAL_METHOD(const Vector&, obbMaxss, 4, (), (this))
+    VIRTUAL_METHOD(const Vector&, obbMins, 3, (), (this))
+    VIRTUAL_METHOD(const Vector&, obbMaxs, 4, (), (this))
 
     void setCollisionBounds(const Vector& mins, const Vector& maxs) noexcept
     {

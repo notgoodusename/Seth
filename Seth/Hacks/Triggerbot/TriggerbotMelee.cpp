@@ -66,8 +66,8 @@ void TriggerbotMelee::run(Entity* activeWeapon, UserCmd* cmd, float& lastTime, f
         auto player = players[target.id];
 
         matrix3x4* backupBoneCache = entity->getBoneCache().memory;
-        Vector backupMins = entity->getCollideable()->obbMins();
-        Vector backupMaxs = entity->getCollideable()->obbMaxs();
+        Vector backupPrescaledMins = entity->getCollideable()->obbMinsPreScaled();
+        Vector backupPrescaledMaxs = entity->getCollideable()->obbMaxsPreScaled();
         Vector backupOrigin = entity->getAbsOrigin();
         Vector backupAbsAngle = entity->getAbsAngle();
         Vector backupEyeAngle = entity->eyeAngles();
@@ -99,7 +99,7 @@ void TriggerbotMelee::run(Entity* activeWeapon, UserCmd* cmd, float& lastTime, f
 
             if (bestTick <= -1)
             {
-                applyMatrix(entity, backupBoneCache, backupOrigin, backupEyeAngle, backupMins, backupMaxs);
+                applyMatrix(entity, backupBoneCache, backupOrigin, backupEyeAngle, backupPrescaledMins, backupPrescaledMaxs);
                 continue;
             }
 
@@ -121,7 +121,7 @@ void TriggerbotMelee::run(Entity* activeWeapon, UserCmd* cmd, float& lastTime, f
         }
 
         gotTarget = getTriggerbotMeleeTarget(cmd, activeWeapon, entity, activeWeapon->isKnife() && cfg.autoBackstab);
-        applyMatrix(entity, backupBoneCache, backupOrigin, backupEyeAngle, backupMins, backupMaxs);
+        applyMatrix(entity, backupBoneCache, backupOrigin, backupEyeAngle, backupPrescaledMins, backupPrescaledMaxs);
         if (gotTarget)
             break;
     }
