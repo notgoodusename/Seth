@@ -26,6 +26,7 @@ public:
     MinHook calculateChargeCap;
     MinHook calcViewModelView;
     MinHook clLoadWhitelist;
+    MinHook customTextureOnItemProxyOnBindInternal;
     MinHook estimateAbsVelocity;
     MinHook enableWorldFog;
     MinHook frameAdvance;

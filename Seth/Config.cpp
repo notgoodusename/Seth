@@ -377,6 +377,7 @@ static void from_json(const json& j, Config::StreamProofESP& e)
 static void from_json(const json& j, Config::Visuals& v)
 {
     read(j, "Disable post-processing", v.disablePostProcessing);
+    read(j, "Disable custom decals", v.disableCustomDecals);
     read(j, "Inverse ragdoll gravity", v.inverseRagdollGravity);
     read(j, "No fog", v.noFog);
     read(j, "No scope overlay", v.noScopeOverlay);
@@ -970,6 +971,7 @@ static void to_json(json& j, const Config::Visuals& o)
     const Config::Visuals dummy;
 
     WRITE("Disable post-processing", disablePostProcessing);
+    WRITE("Disable custom decals", disableCustomDecals);
     WRITE("Inverse ragdoll gravity", inverseRagdollGravity);
     WRITE("No fog", noFog);
     WRITE("No scope overlay", noScopeOverlay);

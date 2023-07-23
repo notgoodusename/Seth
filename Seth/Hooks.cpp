@@ -413,6 +413,15 @@ static void __fastcall updateTFAnimStateHook(void* thisPointer, void*, float eye
     return original(thisPointer, eyeYaw, eyePitch);
 }
 
+static void __fastcall customTextureOnItemProxyOnBindInternalHook(void* thisPointer, void*, void* scriptItem) noexcept
+{
+    static auto original = hooks->customTextureOnItemProxyOnBindInternal.getOriginal<void>(scriptItem);
+    if (config->visuals.disableCustomDecals)
+        return;
+
+    original(thisPointer, scriptItem);
+}
+
 void resetAll(int resetType) noexcept
 {
     Aimbot::reset();
@@ -463,6 +472,7 @@ void Hooks::install() noexcept
     calculateChargeCap.detour(memory->calculateChargeCap, calculateChargeCapHook);
     calcViewModelView.detour(memory->calcViewModelView, calcViewModelViewHook);
     clLoadWhitelist.detour(memory->clLoadWhitelist, clLoadWhitelistHook);
+    customTextureOnItemProxyOnBindInternal.detour(memory->customTextureOnItemProxyOnBindInternal, customTextureOnItemProxyOnBindInternalHook);
     estimateAbsVelocity.detour(memory->estimateAbsVelocity, estimateAbsVelocityHook);
     enableWorldFog.detour(memory->enableWorldFog, enableWorldFogHook);
     frameAdvance.detour(memory->frameAdvance, frameAdvanceHook);

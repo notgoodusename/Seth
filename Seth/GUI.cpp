@@ -853,6 +853,7 @@ void GUI::renderVisualsWindow() noexcept
     ImGui::Columns(2, nullptr, false);
     ImGui::SetColumnOffset(1, 280.0f);
     ImGui::Checkbox("Disable post-processing", &config->visuals.disablePostProcessing);
+    ImGui::Checkbox("Disable custom decals", &config->visuals.disableCustomDecals);
     ImGui::Checkbox("Inverse ragdoll gravity", &config->visuals.inverseRagdollGravity);
     ImGui::Checkbox("No fog", &config->visuals.noFog);
 

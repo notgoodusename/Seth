@@ -218,6 +218,7 @@ public:
 
     struct Visuals {
         bool disablePostProcessing{ false };
+        bool disableCustomDecals{ false };
         bool inverseRagdollGravity{ false };
         bool noFog{ false };
         bool noScopeOverlay{ false };
@@ -261,6 +262,7 @@ public:
         bool autoAccept{ false };
         bool revealVotes{ false };
         bool fastStop{ false };
+        bool disableCustomDecals{ false };
         bool svPureBypass{ true };
         bool unhideConvars{ false };
         bool backpackExpander{ false };
