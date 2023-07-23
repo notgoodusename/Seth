@@ -631,5 +631,8 @@
     <ClInclude Include="StrayElements.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Resources\pride_flag.h">
+      <Filter>Resources</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
