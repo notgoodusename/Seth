@@ -32,6 +32,7 @@ public:
     MinHook frameAdvance;
     MinHook isAllowedToWithdrawFromCritBucket;
     MinHook interpolateServerEntities;
+    MinHook newMatchFoundDashboardStateOnUpdate;
     MinHook tfPlayerInventoryGetMaxItemCount;
     MinHook sendDatagram;
     MinHook updateClientSideAnimation;

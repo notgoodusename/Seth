@@ -422,6 +422,18 @@ static void __fastcall customTextureOnItemProxyOnBindInternalHook(void* thisPoin
     original(thisPointer, scriptItem);
 }
 
+static void __fastcall newMatchFoundDashboardStateOnUpdateHook(void* thisPointer, void*) noexcept
+{
+    static auto original = hooks->newMatchFoundDashboardStateOnUpdate.getOriginal<void>();
+
+    auto autoJoinTime = reinterpret_cast<double*>(reinterpret_cast<uintptr_t>(thisPointer) + 424);
+
+    if (config->misc.autoAccept)
+        *autoJoinTime = -10.0;
+
+    original(thisPointer);
+}
+
 void resetAll(int resetType) noexcept
 {
     Aimbot::reset();
@@ -478,6 +490,7 @@ void Hooks::install() noexcept
     frameAdvance.detour(memory->frameAdvance, frameAdvanceHook);
     interpolateServerEntities.detour(memory->interpolateServerEntities, interpolateServerEntitiesHook);
     isAllowedToWithdrawFromCritBucket.detour(memory->isAllowedToWithdrawFromCritBucket, isAllowedToWithdrawFromCritBucketHook);
+    newMatchFoundDashboardStateOnUpdate.detour(memory->newMatchFoundDashboardStateOnUpdate, newMatchFoundDashboardStateOnUpdateHook);
     tfPlayerInventoryGetMaxItemCount.detour(memory->tfPlayerInventoryGetMaxItemCount, tfPlayerInventoryGetMaxItemCountHook);
     updateTFAnimState.detour(memory->updateTFAnimState, updateTFAnimStateHook);
     sendDatagram.detour(memory->sendDatagram, sendDatagramHook);

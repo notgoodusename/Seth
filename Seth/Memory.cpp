@@ -124,6 +124,7 @@ Memory::Memory() noexcept
     frameAdvance = relativeToAbsolute<decltype(frameAdvance)>(findPattern(CLIENT_DLL, "\xE8????\x80\xBF?????\xD9\x55\x08") + 1);
     interpolateServerEntities = findPattern(CLIENT_DLL, "\x55\x8B\xEC\x83\xEC\x30\x8B\x0D????\x53");
     isAllowedToWithdrawFromCritBucket = findPattern(CLIENT_DLL, "\x55\x8B\xEC\x56\x8B\xF1\x0F\xB7\x86????\xFF\x86????\x50\xE8????\x83\xC4\x04\x80\xB8?????\x74\x0A\xF3\x0F\x10\x15");
+    newMatchFoundDashboardStateOnUpdate = findPattern(CLIENT_DLL, "\x55\x8B\xEC\x83\xEC\x0C\x56\x8B\xF1\xE8????\x8B\x86????");
     tfPlayerInventoryGetMaxItemCount = findPattern(CLIENT_DLL, "\x8B\x49\x68\x56");
     sendDatagram = findPattern(ENGINE_DLL, "\x55\x8B\xEC\xB8????\xE8????\xA1????\x53\x56\x8B\xD9");
     updateClientSideAnimation = findPattern(CLIENT_DLL, "\x56\x8B\xF1\x80\xBE?????\x74\x27");

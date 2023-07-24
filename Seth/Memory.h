@@ -90,6 +90,7 @@ public:
     std::uintptr_t frameAdvance;
     std::uintptr_t interpolateServerEntities;
     std::uintptr_t isAllowedToWithdrawFromCritBucket;
+    std::uintptr_t newMatchFoundDashboardStateOnUpdate;
     std::uintptr_t tfPlayerInventoryGetMaxItemCount;
     std::uintptr_t sendDatagram;
     std::uintptr_t updateClientSideAnimation;
