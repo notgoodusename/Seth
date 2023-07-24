@@ -233,6 +233,13 @@ static void __stdcall frameStageNotify(FrameStage stage) noexcept
     hooks->client.callOriginal<void, 35>(stage);
 }
 
+static bool __fastcall dispatchUserMessage(void* thisPointer, void*, int messageType, bufferRead* data) noexcept
+{
+    static auto original = hooks->client.getOriginal<bool, 36>(messageType, argument, secondArgument, data);
+
+    return original(thisPointer, messageType, argument, secondArgument, data);
+}
+
 static bool __fastcall doPostScreenEffects(void* thisPointer, void*, const ViewSetup* setup) noexcept
 {
     if (interfaces->engine->isInGame())
@@ -508,6 +515,7 @@ void Hooks::install() noexcept
     client.init(interfaces->client);
     client.hookAt(7, levelShutDown);
     client.hookAt(35, frameStageNotify);
+    client.hookAt(36, dispatchUserMessage);
 
     clientMode.init(memory->clientMode);
     clientMode.hookAt(16, overrideView);
