@@ -27,6 +27,7 @@ public:
     MinHook calcViewModelView;
     MinHook clLoadWhitelist;
     MinHook customTextureOnItemProxyOnBindInternal;
+    MinHook doEnginePostProcessing;
     MinHook estimateAbsVelocity;
     MinHook enableWorldFog;
     MinHook frameAdvance;

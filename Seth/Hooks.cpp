@@ -434,6 +434,15 @@ static void __fastcall newMatchFoundDashboardStateOnUpdateHook(void* thisPointer
     original(thisPointer);
 }
 
+static void __cdecl doEnginePostProcessingHook(int x, int y, int w, int h, bool flashlightIsOn, bool postVGui) noexcept
+{
+    static auto original = reinterpret_cast<void(__cdecl*)(int, int, int, int, bool, bool)>(hooks->doEnginePostProcessing.getDetour());
+    if (config->visuals.disablePostProcessing)
+        return;
+
+    original(x, y, w, h, flashlightIsOn, postVGui);
+}
+
 void resetAll(int resetType) noexcept
 {
     Aimbot::reset();
@@ -485,6 +494,7 @@ void Hooks::install() noexcept
     calcViewModelView.detour(memory->calcViewModelView, calcViewModelViewHook);
     clLoadWhitelist.detour(memory->clLoadWhitelist, clLoadWhitelistHook);
     customTextureOnItemProxyOnBindInternal.detour(memory->customTextureOnItemProxyOnBindInternal, customTextureOnItemProxyOnBindInternalHook);
+    doEnginePostProcessing.detour(memory->doEnginePostProcessing, doEnginePostProcessingHook);
     estimateAbsVelocity.detour(memory->estimateAbsVelocity, estimateAbsVelocityHook);
     enableWorldFog.detour(memory->enableWorldFog, enableWorldFogHook);
     frameAdvance.detour(memory->frameAdvance, frameAdvanceHook);
