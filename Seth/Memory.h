@@ -22,7 +22,6 @@ class MemAlloc;
 class MoveHelper;
 class PlantedC4;
 class TFPlayerResource;
-class ViewRender;
 class ViewRenderBeams;
 class WeaponSystem;
 template <typename Key, typename Value>
@@ -33,6 +32,7 @@ class UtlVector;
 struct ActiveChannels;
 struct Channel;
 struct CStudioHdr;
+struct Frustum;
 struct GlobalVars;
 struct GlowObjectManager;
 struct PanoramaEventRegistration;
@@ -57,14 +57,15 @@ public:
 
     KeyValues* (__thiscall* keyValuesInitialize)(KeyValues*, char*);
     KeyValues* (__thiscall* keyValuesFindKey)(KeyValues* keyValues, const char* keyName, bool create);
-
     
     float(__cdecl* attributeHookValue)(float, const char*, void*, void*, bool);
     void(__thiscall* calcAbsoluteVelocity)(void*);
     bool(__thiscall* calcIsAttackCriticalHelper)(void*);
     bool(__thiscall* calcIsAttackCriticalHelperMelee)(void*);
+    bool(_cdecl* cullBox)(const Vector&, const Vector&, const Frustum&);
     EconItemDefinition*( __thiscall* getItemDefinition)(void*, int);
     int(__thiscall* getNextThinkTick)(void*, const char*);
+    void(_cdecl* generatePerspectiveFrustum)(const Vector&, const Vector&, const Vector&, const Vector&, float zNear, float zFar, float fovX, float fovY, Frustum&);
     bool(_cdecl* passServerEntityFilter)(void* touch, void* pass);
     bool(__thiscall* physicsRunThink)(void*, int);
     std::add_pointer_t<int __cdecl(const int, ...)> randomSeed;

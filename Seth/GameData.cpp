@@ -36,6 +36,7 @@
 #include "SDK/ViewSetup.h"
 
 static Matrix4x4 viewMatrix;
+static Frustum frustum;
 static LocalPlayerData localPlayerData;
 static std::vector<PlayerData> playerData;
 static std::vector<BuildingsData> buildingsData;
@@ -91,6 +92,11 @@ void GameData::update() noexcept
         Matrix4x4 worldToView = {}, viewToProjection = {}, worldToProjection = {}, worldToPixels = {};
         interfaces->renderView->getMatricesForView(viewSetup, &worldToView, &viewToProjection, &worldToProjection, &worldToPixels);
         viewMatrix = worldToProjection;
+
+        Vector forward, right, up;
+        Vector::fromAngleAll(viewSetup.angles, &forward, &right, &up);
+        float fovY = Helpers::calcFovY(viewSetup.fov, viewSetup.aspectRatio);
+        memory->generatePerspectiveFrustum(viewSetup.origin, forward, right, up, viewSetup.zNear, viewSetup.zFar, viewSetup.fov, fovY, frustum);
     }
 
     const auto highestEntityIndex = interfaces->entityList->getHighestEntityIndex();
@@ -307,6 +313,7 @@ void PlayerData::update(Entity* entity) noexcept
     classID = entity->getPlayerClass();
     static_cast<BaseData&>(*this) = { entity };
     origin = entity->getAbsOrigin();
+    inViewFrustum = !memory->cullBox(obbMins + origin, obbMaxs + origin, frustum);// we need to recalculate the frustum fucking valve,  !interfaces->engine->cullBox(obbMins + origin, obbMaxs + origin);
     alive = entity->isAlive();
     lastContactTime = alive ? memory->globalVars->realtime : 0.0f;
 
@@ -322,7 +329,7 @@ void PlayerData::update(Entity* entity) noexcept
     if (const auto weapon = entity->getActiveWeapon())
         activeWeapon = interfaces->localize->findAsUTF8(weapon->getPrintName()); //TODO: Optimize
 
-    if (!alive)
+    if (!alive || !inViewFrustum)
         return;
 
     const auto model = entity->getModel();

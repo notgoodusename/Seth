@@ -10,6 +10,7 @@
 #include "Config.h"
 
 struct Color4;
+struct Frustum;
 struct Vector;
 
 namespace Helpers
@@ -30,6 +31,8 @@ namespace Helpers
     float approachAngle(float target, float value, float speed) noexcept;
     float remapValClamped(float val, float A, float B, float C, float D) noexcept;
     float normalizeYaw(float yaw) noexcept;
+
+    float calcFovY(float fovX, float aspectRatio) noexcept;
 
     bool worldToScreen(const Vector& in, ImVec2& out, bool floor = false) noexcept;
 

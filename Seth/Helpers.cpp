@@ -278,6 +278,17 @@ float Helpers::normalizeYaw(float yaw) noexcept
     return yaw;
 }
 
+float Helpers::calcFovY(float fovX, float aspectRatio) noexcept
+{
+    if (fovX < 1 || fovX > 179)
+        fovX = 90;	// error, set to 90
+
+    // The short and sweet version.
+    float val = std::atan(std::tan(deg2rad(fovX) * 0.5f) / aspectRatio);
+    val = rad2deg(val) * 2.0f;
+    return val;
+}
+
 bool Helpers::worldToScreen(const Vector& in, ImVec2& out, bool floor) noexcept
 {
     const auto& matrix = GameData::toScreenMatrix().as3x4();

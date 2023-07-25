@@ -96,6 +96,7 @@ struct PlayerData : BaseData {
     bool dormant;
     bool enemy = false;
     bool alive;
+    bool inViewFrustum;
     float lastContactTime = 0.0f;
     int health;
     int maxHealth;

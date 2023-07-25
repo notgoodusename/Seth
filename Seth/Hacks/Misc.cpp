@@ -557,6 +557,115 @@ void Misc::drawPlayerList() noexcept
     ImGui::End();
 }
 
+// ImGui::ShadeVertsLinearColorGradientKeepAlpha() modified to do interpolation in HSV
+static void shadeVertsHSVColorGradientKeepAlpha(ImDrawList* draw_list, int vert_start_idx, int vert_end_idx, ImVec2 gradient_p0, ImVec2 gradient_p1, ImU32 col0, ImU32 col1)
+{
+    ImVec2 gradient_extent = gradient_p1 - gradient_p0;
+    float gradient_inv_length2 = 1.0f / ImLengthSqr(gradient_extent);
+    ImDrawVert* vert_start = draw_list->VtxBuffer.Data + vert_start_idx;
+    ImDrawVert* vert_end = draw_list->VtxBuffer.Data + vert_end_idx;
+
+    ImVec4 col0HSV = ImGui::ColorConvertU32ToFloat4(col0);
+    ImVec4 col1HSV = ImGui::ColorConvertU32ToFloat4(col1);
+    ImGui::ColorConvertRGBtoHSV(col0HSV.x, col0HSV.y, col0HSV.z, col0HSV.x, col0HSV.y, col0HSV.z);
+    ImGui::ColorConvertRGBtoHSV(col1HSV.x, col1HSV.y, col1HSV.z, col1HSV.x, col1HSV.y, col1HSV.z);
+    ImVec4 colDelta = col1HSV - col0HSV;
+
+    for (ImDrawVert* vert = vert_start; vert < vert_end; vert++)
+    {
+        float d = ImDot(vert->pos - gradient_p0, gradient_extent);
+        float t = ImClamp(d * gradient_inv_length2, 0.0f, 1.0f);
+
+        float h = col0HSV.x + colDelta.x * t;
+        float s = col0HSV.y + colDelta.y * t;
+        float v = col0HSV.z + colDelta.z * t;
+
+        ImVec4 rgb;
+        ImGui::ColorConvertHSVtoRGB(h, s, v, rgb.x, rgb.y, rgb.z);
+        vert->col = (ImGui::ColorConvertFloat4ToU32(rgb) & ~IM_COL32_A_MASK) | (vert->col & IM_COL32_A_MASK);
+    }
+}
+
+void Misc::drawOffscreenEnemies(ImDrawList* drawList) noexcept
+{
+    if (!config->misc.offscreenEnemies.enabled)
+        return;
+
+    const auto yaw = Helpers::deg2rad(interfaces->engine->getViewAngles().y);
+
+    GameData::Lock lock;
+    for (auto& player : GameData::players()) {
+        if ((player.dormant && player.fadingAlpha() == 0.0f) || !player.alive || !player.enemy || player.inViewFrustum || (config->misc.offscreenEnemies.disableOnCloaked && player.isCloaked))
+            continue;
+
+        const auto positionDiff = GameData::local().origin - player.origin;
+
+        auto x = std::cos(yaw) * positionDiff.y - std::sin(yaw) * positionDiff.x;
+        auto y = std::cos(yaw) * positionDiff.x + std::sin(yaw) * positionDiff.y;
+        if (const auto len = std::sqrt(x * x + y * y); len != 0.0f) {
+            x /= len;
+            y /= len;
+        }
+
+        constexpr auto avatarRadius = 13.0f;
+        constexpr auto triangleSize = 10.0f;
+
+        const auto pos = ImGui::GetIO().DisplaySize / 2 + ImVec2{ x, y } *200;
+        const auto trianglePos = pos + ImVec2{ x, y } *(avatarRadius + (config->misc.offscreenEnemies.healthBar.enabled ? 5 : 3));
+
+        Helpers::setAlphaFactor(player.fadingAlpha());
+        const auto white = Helpers::calculateColor(255, 255, 255, 255);
+        const auto background = Helpers::calculateColor(0, 0, 0, 80);
+        const auto color = Helpers::calculateColor(config->misc.offscreenEnemies);
+        const auto healthBarColor = config->misc.offscreenEnemies.healthBar.type == HealthBar::HealthBased ? Helpers::healthColor(std::clamp(player.health / 100.0f, 0.0f, 1.0f)) : Helpers::calculateColor(config->misc.offscreenEnemies.healthBar);
+        Helpers::setAlphaFactor(1.0f);
+
+        const ImVec2 trianglePoints[]{
+            trianglePos + ImVec2{  0.4f * y, -0.4f * x } *triangleSize,
+            trianglePos + ImVec2{  1.0f * x,  1.0f * y } *triangleSize,
+            trianglePos + ImVec2{ -0.4f * y,  0.4f * x } *triangleSize
+        };
+
+        drawList->AddConvexPolyFilled(trianglePoints, 3, color);
+        drawList->AddCircleFilled(pos, avatarRadius + 1, white & IM_COL32_A_MASK, 40);
+
+        const auto texture = player.getAvatarTexture();
+
+        const bool pushTextureId = drawList->_TextureIdStack.empty() || texture != drawList->_TextureIdStack.back();
+        if (pushTextureId)
+            drawList->PushTextureID(texture);
+
+        const int vertStartIdx = drawList->VtxBuffer.Size;
+        drawList->AddCircleFilled(pos, avatarRadius, white, 40);
+        const int vertEndIdx = drawList->VtxBuffer.Size;
+        ImGui::ShadeVertsLinearUV(drawList, vertStartIdx, vertEndIdx, pos - ImVec2{ avatarRadius, avatarRadius }, pos + ImVec2{ avatarRadius, avatarRadius }, { 0, 0 }, { 1, 1 }, true);
+
+        if (pushTextureId)
+            drawList->PopTextureID();
+
+        if (config->misc.offscreenEnemies.healthBar.enabled) {
+            const auto radius = avatarRadius + 2;
+            const auto healthFraction = std::clamp(player.health / 100.0f, 0.0f, 1.0f);
+
+            drawList->AddCircle(pos, radius, background, 40, 3.0f);
+
+            const int vertStartIdx = drawList->VtxBuffer.Size;
+            if (healthFraction == 1.0f) { // sometimes PathArcTo is missing one top pixel when drawing a full circle, so draw it with AddCircle
+                drawList->AddCircle(pos, radius, healthBarColor, 40, 2.0f);
+            }
+            else {
+                constexpr float pi = std::numbers::pi_v<float>;
+                drawList->PathArcTo(pos, radius - 0.5f, pi / 2 - pi * healthFraction, pi / 2 + pi * healthFraction, 40);
+                drawList->PathStroke(healthBarColor, false, 2.0f);
+            }
+            const int vertEndIdx = drawList->VtxBuffer.Size;
+
+            if (config->misc.offscreenEnemies.healthBar.type == HealthBar::Gradient)
+                shadeVertsHSVColorGradientKeepAlpha(drawList, vertStartIdx, vertEndIdx, pos - ImVec2{ 0.0f, radius }, pos + ImVec2{ 0.0f, radius }, IM_COL32(0, 255, 0, 255), IM_COL32(255, 0, 0, 255));
+        }
+    }
+}
+
 void Misc::fixMovement(UserCmd* cmd, float yaw) noexcept
 {
     float oldYaw = yaw + (yaw < 0.0f ? 360.0f : 0.0f);

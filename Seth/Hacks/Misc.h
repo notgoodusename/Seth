@@ -19,6 +19,7 @@ namespace Misc
     void unlockHiddenCvars() noexcept;
     void drawPlayerList() noexcept;
     void fixMovement(UserCmd* cmd, float yaw) noexcept;
+    void drawOffscreenEnemies(ImDrawList* drawList) noexcept;
 
     void showKeybinds() noexcept;
 

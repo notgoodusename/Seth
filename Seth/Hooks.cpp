@@ -94,6 +94,7 @@ static HRESULT __stdcall present(IDirect3DDevice9* device, const RECT* src, cons
     if (const auto& displaySize = ImGui::GetIO().DisplaySize; displaySize.x > 0.0f && displaySize.y > 0.0f) {
         StreamProofESP::render();
 
+        Misc::drawOffscreenEnemies(ImGui::GetBackgroundDrawList());
         Misc::showKeybinds();
         Misc::spectatorList();
 
@@ -235,9 +236,9 @@ static void __stdcall frameStageNotify(FrameStage stage) noexcept
 
 static bool __fastcall dispatchUserMessage(void* thisPointer, void*, int messageType, bufferRead* data) noexcept
 {
-    static auto original = hooks->client.getOriginal<bool, 36>(messageType, argument, secondArgument, data);
+    static auto original = hooks->client.getOriginal<bool, 36>(messageType, data);
 
-    return original(thisPointer, messageType, argument, secondArgument, data);
+    return original(thisPointer, messageType, data);
 }
 
 static bool __fastcall doPostScreenEffects(void* thisPointer, void*, const ViewSetup* setup) noexcept

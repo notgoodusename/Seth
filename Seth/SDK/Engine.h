@@ -8,6 +8,25 @@
 #include "Vector.h"
 #include "VirtualMethod.h"
 
+#define FRUSTUM_NUMPLANES 6
+
+struct CPlane
+{
+public:
+    Vector normal;
+    float dist;
+    unsigned char type;
+    unsigned char signbits;
+    PAD(2)
+};
+
+struct Frustum
+{
+public:
+    CPlane plane[FRUSTUM_NUMPLANES];
+    Vector absNormal[FRUSTUM_NUMPLANES];
+};
+
 struct Matrix4x4
 {
 private:
@@ -50,7 +69,7 @@ public:
     VIRTUAL_METHOD(int, getMaxClients, 21, (), (this))
     VIRTUAL_METHOD(bool, isInGame, 26, (), (this))
     VIRTUAL_METHOD(bool, isConnected, 27, (), (this))
-    VIRTUAL_METHOD(bool, isDrawingLoadingImage, 27, (), (this))
+    VIRTUAL_METHOD(bool, isDrawingLoadingImage, 28, (), (this))
     VIRTUAL_METHOD(bool, cullBox, 33, (const Vector& mins, const Vector& maxs), (this, std::cref(mins), std::cref(maxs)))
     VIRTUAL_METHOD(const char*, getGameDirectory, 35, (), (this))
     VIRTUAL_METHOD(const Matrix4x4&, worldToScreenMatrix, 36, (), (this))

@@ -983,6 +983,7 @@ void GUI::renderMiscWindow() noexcept
             ImGui::SameLine();
             ImGuiCustom::colorPicker("", static_cast<Color4&>(config->misc.offscreenEnemies.healthBar));
         }
+        ImGui::Checkbox("Disable on cloaked", &config->misc.offscreenEnemies.disableOnCloaked);
         ImGui::EndPopup();
     }
     ImGui::PopID();
