@@ -27,6 +27,7 @@
 #include "Hacks/Chams.h"
 #include "Hacks/Crithack.h"
 #include "Hacks/EnginePrediction.h"
+#include "Hacks/Fakelag.h"
 #include "Hacks/Glow.h"
 #include "Hacks/Misc.h"
 #include "Hacks/MovementRebuild.h"
@@ -186,6 +187,8 @@ static bool __fastcall createMove(void* thisPointer, void*, float inputSampleTim
     Triggerbot::run(cmd);
 
     Misc::edgejump(cmd);
+
+    Fakelag::run(sendPacket);
 
     //Crithack::run(cmd);
 
