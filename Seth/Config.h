@@ -219,7 +219,6 @@ public:
     struct Visuals {
         bool disablePostProcessing{ false };
         bool disableCustomDecals{ false };
-        bool inverseRagdollGravity{ false };
         bool noFog{ false };
         bool noScopeOverlay{ false };
         bool thirdperson{ false };
