@@ -1,24 +1,81 @@
 #pragma once
+#include <deque>
 #include <vector>
+
+#include "../SDK/ModelInfo.h"
+#include "../SDK/Vector.h"
 
 struct UserCmd;
 
+struct LocalPlayerInfo;
+struct PlayerTarget;
+
 namespace TargetSystem
 {
-    void updateTargets(UserCmd*) noexcept;
+	void updateFrame() noexcept;
+	void updateTick(UserCmd* cmd) noexcept;
 
-    struct Enemy
-    {
-        int id;
-        float distance;
-        float fov;
+	void reset() noexcept;
 
-        Enemy(int id, float distance, float fov) noexcept : id(id), distance(distance), fov(fov) { }
-    };
+	class Lock {
+	public:
+		Lock() noexcept : lock{ mutex } {};
+	private:
+		std::scoped_lock<std::mutex> lock;
+		static inline std::mutex mutex;
+	};
 
-    const std::vector<Enemy>& getTargets(int sortType) noexcept;
+	// You have to acquire Lock before using these getters
+	const LocalPlayerInfo& local() noexcept;
+	const std::vector<PlayerTarget>& playerTargets(int sortType = -1) noexcept;
+	const PlayerTarget* playerByHandle(int handle) noexcept;
+};
 
-    void reset() noexcept;
+struct LocalPlayerInfo {
+	void update() noexcept;
+
+	int handle;
+	Vector origin, eyePosition, viewAngles;
+};
+
+struct Target
+{
+	Target(Entity* entity) noexcept;
+
+	int handle;
+	Vector obbMins, obbMaxs;
+};
+
+struct PlayerTarget : Target
+{
+	PlayerTarget(Entity* entity) noexcept;
+
+	void update(Entity* entity) noexcept;
+
+	struct Record {
+		std::deque<Vector> positions;
+		Vector origin;
+		Vector absAngle;
+		Vector eyeAngle;
+		Vector mins;
+		Vector maxs;
+		float simulationTime;
+		matrix3x4 matrix[MAXSTUDIOBONES];
+	};
+
+	std::deque<Record> backtrackRecords;
+
+	std::array<matrix3x4, MAXSTUDIOBONES> matrix;
+
+	Vector mins{}, maxs{};
+	Vector origin{}, absAngle{};
+	Vector eyeAngle{};
+
+	float simulationTime{ -1.0f };
+	bool gotMatrix{ false };
+
+	float distanceToLocal{ 0.0f };
+	float fovFromLocal{ 0.0f };
 };
 
 enum SortType

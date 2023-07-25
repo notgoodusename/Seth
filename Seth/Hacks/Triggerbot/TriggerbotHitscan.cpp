@@ -1,5 +1,4 @@
 #include "../Aimbot/Aimbot.h"
-#include "../Animations.h"
 #include "../Backtrack.h"
 #include "../TargetSystem.h"
 #include "Triggerbot.h"
@@ -66,9 +65,8 @@ void TriggerbotHitscan::run(Entity* activeWeapon, UserCmd* cmd, float& lastTime,
 
     hitbox[Hitboxes::Pelvis] = (cfg.hitboxes & 1 << 2) == 1 << 2; //Pelvis
 
-
     //Yeah, this shit is hacky but it works well so who cares
-    const auto enemies = TargetSystem::getTargets(SortType::Fov);
+    const auto enemies = TargetSystem::playerTargets(SortType::Fov);
 
     bool gotTarget = false;
     float bestSimulationTime = -1.0f;
@@ -80,14 +78,11 @@ void TriggerbotHitscan::run(Entity* activeWeapon, UserCmd* cmd, float& lastTime,
     const auto startPos = localPlayerEyePosition;
     const auto endPos = startPos + Vector::fromAngle(cmd->viewangles) * range;
 
-    const auto players = Animations::getPlayers();
     for (const auto& target : enemies)
     {
-        auto entity{ interfaces->entityList->getEntity(target.id) };
+        auto entity{ interfaces->entityList->getEntityFromHandle(target.handle) };
         if ((entity->isCloaked() && cfg.ignoreCloaked) || (!entity->isEnemy(localPlayer.get()) && !cfg.friendlyFire))
             continue;
-
-        auto player = players[target.id];
 
         matrix3x4* backupBoneCache = entity->getBoneCache().memory;
         Vector backupPrescaledMins = entity->getCollideable()->obbMinsPreScaled();
@@ -98,7 +93,7 @@ void TriggerbotHitscan::run(Entity* activeWeapon, UserCmd* cmd, float& lastTime,
 
         if ((config->backtrack.enabled || config->backtrack.fakeLatency) && cfg.targetBacktrack)
         {
-            auto records = Animations::getBacktrackRecords(entity->index());
+            auto records = &target.backtrackRecords;
             if (!records || records->empty() || records->size() <= 3U)
                 continue;
 
@@ -136,12 +131,12 @@ void TriggerbotHitscan::run(Entity* activeWeapon, UserCmd* cmd, float& lastTime,
         }
         else
         {
-            memcpy(entity->getBoneCache().memory, player.matrix.data(), std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
-            memory->setAbsOrigin(entity, player.origin);
-            entity->eyeAngles() = player.eyeAngle;
-            memory->setCollisionBounds(entity->getCollideable(), player.mins, player.maxs);
+            memcpy(entity->getBoneCache().memory, target.matrix.data(), std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
+            memory->setAbsOrigin(entity, target.origin);
+            entity->eyeAngles() = target.eyeAngle;
+            memory->setCollisionBounds(entity->getCollideable(), target.mins, target.maxs);
 
-            bestSimulationTime = player.simulationTime;
+            bestSimulationTime = target.simulationTime;
         }
 
         gotTarget = getTriggerbotHitscanTarget(cmd, activeWeapon, entity, entity->getBoneCache().memory, hitbox, startPos, endPos);

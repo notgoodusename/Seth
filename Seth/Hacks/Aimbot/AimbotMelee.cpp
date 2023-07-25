@@ -1,9 +1,9 @@
 #include "Aimbot.h"
 #include "AimbotMelee.h"
-#include "../Animations.h"
 #include "../Backtrack.h"
 #include "../TargetSystem.h"
 
+#include "../../SDK/Entity.h"
 #include "../../SDK/UserCmd.h"
 #include "../../SDK/Math.h"
 #include "../../SDK/ModelInfo.h"
@@ -52,7 +52,7 @@ void runKnife(Entity* activeWeapon, UserCmd* cmd) noexcept
 {
     const auto& cfg = config->aimbot.melee;
 
-    const auto enemies = TargetSystem::getTargets(cfg.sortMethod);
+    const auto enemies = TargetSystem::playerTargets(cfg.sortMethod);
 
     float bestSimulationTime{ -1.0f };
     auto bestFov = cfg.fov;
@@ -60,14 +60,11 @@ void runKnife(Entity* activeWeapon, UserCmd* cmd) noexcept
     const auto& localPlayerOrigin = localPlayer->getAbsOrigin();
     const auto& localPlayerEyePosition = localPlayer->getEyePosition();
 
-    const auto players = Animations::getPlayers();
     for (const auto& target : enemies)
     {
-        auto entity{ interfaces->entityList->getEntity(target.id) };
+        auto entity{ interfaces->entityList->getEntityFromHandle(target.handle) };
         if ((entity->isCloaked() && cfg.ignoreCloaked) || (!entity->isEnemy(localPlayer.get()) && !cfg.friendlyFire))
             continue;
-
-        auto player = players[target.id];
 
         matrix3x4* backupBoneCache = entity->getBoneCache().memory;
         Vector backupPrescaledMins = entity->getCollideable()->obbMinsPreScaled();
@@ -78,7 +75,7 @@ void runKnife(Entity* activeWeapon, UserCmd* cmd) noexcept
 
         if ((config->backtrack.enabled || config->backtrack.fakeLatency) && cfg.targetBacktrack)
         {
-            auto records = Animations::getBacktrackRecords(entity->index());
+            auto records = &target.backtrackRecords;
             if (!records || records->empty() || records->size() <= 3U)
                 continue;
 
@@ -104,18 +101,18 @@ void runKnife(Entity* activeWeapon, UserCmd* cmd) noexcept
         }
         else
         {
-            memcpy(entity->getBoneCache().memory, player.matrix.data(), std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
-            memory->setAbsOrigin(entity, player.origin);
-            entity->eyeAngles() = player.eyeAngle;
-            memory->setCollisionBounds(entity->getCollideable(), player.mins, player.maxs);
+            memcpy(entity->getBoneCache().memory, target.matrix.data(), std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
+            memory->setAbsOrigin(entity, target.origin);
+            entity->eyeAngles() = target.eyeAngle;
+            memory->setCollisionBounds(entity->getCollideable(), target.mins, target.maxs);
 
-            bestTarget = getMeleeTarget(cmd, entity, entity->getBoneCache().memory, activeWeapon, bestFov, localPlayerEyePosition, cfg.autoBackstab, player.eyeAngle);
+            bestTarget = getMeleeTarget(cmd, entity, entity->getBoneCache().memory, activeWeapon, bestFov, localPlayerEyePosition, cfg.autoBackstab, target.eyeAngle);
 
             applyMatrix(entity, backupBoneCache, backupOrigin, backupEyeAngle, backupPrescaledMins, backupPrescaledMaxs);
 
             if (bestTarget.notNull())
             {
-                bestSimulationTime = player.simulationTime;
+                bestSimulationTime = target.simulationTime;
                 break;
             }
         }
@@ -169,7 +166,7 @@ void AimbotMelee::run(Entity* activeWeapon, UserCmd* cmd) noexcept
     //If you miss its because of movement
     if (meleeRecord.commandNumber == cmd->commandNumber)
     {
-        const auto entity{ interfaces->entityList->getEntity(meleeRecord.index) };
+        const auto entity{ interfaces->entityList->getEntityFromHandle(meleeRecord.index) };
         if (entity)
         {
             //We gotta recalculate to aim correctly
@@ -205,21 +202,17 @@ void AimbotMelee::run(Entity* activeWeapon, UserCmd* cmd) noexcept
     if (activeWeapon->isKnife())
         return runKnife(activeWeapon, cmd);
 
-    const auto enemies = TargetSystem::getTargets(cfg.sortMethod);
+    const auto enemies = TargetSystem::playerTargets(cfg.sortMethod);
 
     auto bestFov = cfg.fov;
     Vector bestTarget{ };
     const auto& localPlayerOrigin = localPlayer->getAbsOrigin();
     const auto& localPlayerEyePosition = localPlayer->getEyePosition();
-
-    const auto players = Animations::getPlayers();
     for (const auto& target : enemies)
     {
-        auto entity{ interfaces->entityList->getEntity(target.id) };
+        auto entity{ interfaces->entityList->getEntityFromHandle(target.handle) };
         if ((entity->isCloaked() && cfg.ignoreCloaked) || (!entity->isEnemy(localPlayer.get()) && !cfg.friendlyFire))
             continue;
-
-        auto player = players[target.id];
 
         matrix3x4* backupBoneCache = entity->getBoneCache().memory;
         Vector backupPrescaledMins = entity->getCollideable()->obbMinsPreScaled();
@@ -232,7 +225,7 @@ void AimbotMelee::run(Entity* activeWeapon, UserCmd* cmd) noexcept
 
         if ((config->backtrack.enabled || config->backtrack.fakeLatency) && cfg.targetBacktrack)
         {
-            const auto records = Animations::getBacktrackRecords(entity->index());
+            const auto records = &target.backtrackRecords;
             if (!records || records->empty() || records->size() <= 3U)
                 continue;
 
@@ -265,12 +258,12 @@ void AimbotMelee::run(Entity* activeWeapon, UserCmd* cmd) noexcept
         }
         else
         {
-            memcpy(entity->getBoneCache().memory, player.matrix.data(), std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
-            memory->setAbsOrigin(entity, player.origin);
-            entity->eyeAngles() = player.eyeAngle;
-            memory->setCollisionBounds(entity->getCollideable(), player.mins, player.maxs);
+            memcpy(entity->getBoneCache().memory, target.matrix.data(), std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
+            memory->setAbsOrigin(entity, target.origin);
+            entity->eyeAngles() = target.eyeAngle;
+            memory->setCollisionBounds(entity->getCollideable(), target.mins, target.maxs);
 
-            currentSimulationTime = player.simulationTime;
+            currentSimulationTime = target.simulationTime;
         }
 
         meleeRecord.matrix = entity->getBoneCache().memory;
@@ -284,7 +277,7 @@ void AimbotMelee::run(Entity* activeWeapon, UserCmd* cmd) noexcept
         if (bestTarget.notNull())
         {
             meleeRecord.target = bestTarget;
-            meleeRecord.index = target.id;
+            meleeRecord.index = target.handle;
             meleeRecord.simulationTime = currentSimulationTime;
             meleeRecord.commandNumber = cmd->commandNumber + static_cast<int>(round(0.2121f / memory->globalVars->intervalPerTick));
             cmd->buttons |= UserCmd::IN_ATTACK;

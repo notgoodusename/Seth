@@ -1,7 +1,7 @@
 #include "../Config.h"
 
-#include "Animations.h"
 #include "Backtrack.h"
+#include "TargetSystem.h"
 
 #include "../SDK/ConVar.h"
 #include "../SDK/Entity.h"
@@ -59,40 +59,41 @@ void Backtrack::run(UserCmd* cmd) noexcept
     int bestTargetIndex{ };
     int bestRecord{ };
 
-    const auto players = Animations::getPlayers();
-    for (int i = 1; i <= interfaces->engine->getMaxClients(); i++) {
-        const auto player = players[i];
-        if (!player.gotMatrix || player.backtrackRecords.empty())
+    const auto enemies = TargetSystem::playerTargets();
+
+    for (const auto target : enemies) 
+    {
+        if (!target.gotMatrix || target.backtrackRecords.empty())
             continue;
 
-        auto entity = interfaces->entityList->getEntityFromHandle(player.handle);
+        const auto entity{ interfaces->entityList->getEntityFromHandle(target.handle) };
         if (!entity || entity->isDormant() || !entity->isAlive()
             || !entity->isEnemy(localPlayer.get()))
             continue;
 
-        for (int j = static_cast<int>(player.backtrackRecords.size() - 1); j >= 0; j--)
+        for (int j = static_cast<int>(target.backtrackRecords.size() - 1); j >= 0; j--)
         {
-            if (Backtrack::valid(player.backtrackRecords.at(j).simulationTime))
+            if (Backtrack::valid(target.backtrackRecords.at(j).simulationTime))
             {
-                for (auto& position : player.backtrackRecords.at(j).positions) {
+                for (auto& position : target.backtrackRecords.at(j).positions) {
                     auto angle = Math::calculateRelativeAngle(localPlayerEyePosition, position, cmd->viewangles);
                     auto fov = std::hypotf(angle.x, angle.y);
                     if (fov < bestFov) {
                         bestFov = fov;
                         bestRecord = j;
-                        bestTargetIndex = i;
+                        bestTargetIndex = target.handle;
                     }
                 }
             }
         }
     }
 
-    const auto& player = players[bestTargetIndex];
-    if (!player.gotMatrix)
+    const auto player = TargetSystem::playerByHandle(bestTargetIndex);
+    if (!player || !player->gotMatrix)
         return;
 
     if (bestRecord) {
-        const auto& record = player.backtrackRecords[bestRecord];
+        const auto& record = player->backtrackRecords[bestRecord];
         cmd->tickCount = timeToTicks(record.simulationTime + getLerp());
     }
 }

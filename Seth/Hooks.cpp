@@ -180,7 +180,7 @@ static bool __fastcall createMove(void* thisPointer, void*, float inputSampleTim
     EnginePrediction::update();
     EnginePrediction::run(cmd);
 
-    TargetSystem::updateTargets(cmd);
+    TargetSystem::updateTick(cmd);
 
     Backtrack::run(cmd);
     Aimbot::run(cmd);
@@ -223,9 +223,9 @@ static void __stdcall frameStageNotify(FrameStage stage) noexcept
     if (stage == FrameStage::RENDER_START) {
         Misc::unlockHiddenCvars();
     }
-    if (interfaces->engine->isInGame()) {
-        Animations::handlePlayers(stage);
-    }
+
+    if (stage == FrameStage::NET_UPDATE_END)
+        TargetSystem::updateFrame();
 
     if (stage == FrameStage::START) {
         SkinChanger::run();

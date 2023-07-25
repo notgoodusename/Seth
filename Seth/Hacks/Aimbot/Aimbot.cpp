@@ -2,9 +2,9 @@
 #include "AimbotHitscan.h"
 #include "AimbotMelee.h"
 #include "AimbotProjectile.h"
-#include "../Animations.h"
 #include "../Backtrack.h"
 
+#include "../../SDK/Entity.h"
 #include "../../SDK/UserCmd.h"
 #include "../../SDK/Math.h"
 #include "../../SDK/ModelInfo.h"

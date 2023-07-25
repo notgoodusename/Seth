@@ -1,10 +1,10 @@
 #include "Aimbot.h"
 #include "AimbotProjectile.h"
-#include "../Animations.h"
 #include "../Backtrack.h"
 #include "../MovementRebuild.h"
 #include "../TargetSystem.h"
 
+#include "../../SDK/Entity.h"
 #include "../../SDK/UserCmd.h"
 #include "../../SDK/Math.h"
 #include "../../SDK/ModelInfo.h"
@@ -526,7 +526,7 @@ void AimbotProjectile::run(Entity* activeWeapon, UserCmd* cmd) noexcept
     if (!canAttack(cmd, activeWeapon))
         return;
 
-    const auto enemies = TargetSystem::getTargets(cfg.sortMethod);
+    const auto enemies = TargetSystem::playerTargets(cfg.sortMethod);
 
     auto bestFov = cfg.fov;
 
@@ -538,7 +538,7 @@ void AimbotProjectile::run(Entity* activeWeapon, UserCmd* cmd) noexcept
     const int maxTicks = timeToTicks(projectileWeaponInfo.maxTime == 0.f ? cfg.maxTime : projectileWeaponInfo.maxTime);
     for (const auto& target : enemies)
     {
-        auto entity{ interfaces->entityList->getEntity(target.id) };
+        auto entity{ interfaces->entityList->getEntityFromHandle(target.handle) };
         if ((entity->isCloaked() && cfg.ignoreCloaked) || (!entity->isEnemy(localPlayer.get()) && !cfg.friendlyFire))
             continue;
 

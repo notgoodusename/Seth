@@ -6,9 +6,9 @@
 #include "../Hooks.h"
 #include "../Interfaces.h"
 
-#include "Animations.h"
 #include "Backtrack.h"
 #include "Chams.h"
+#include "TargetSystem.h"
 
 #include "../SDK/Entity.h"
 #include "../SDK/EntityList.h"
@@ -202,19 +202,22 @@ void Chams::renderPlayer(Entity* player) noexcept
         applyChams(config->chams["Enemies"].materials, health, maxHealth);
         if (config->backtrack.enabled)
         {
-            const auto records = Animations::getBacktrackRecords(player->index());
-            if (records && !records->empty() && records->size() >= 4U)
+            if (const auto playerTarget = TargetSystem::playerByHandle(player->handle()))
             {
-                int lastTick = -1;
-
-                for (int i = static_cast<int>(records->size() - 1U); i >= 3; i--)
+                const auto records = &playerTarget->backtrackRecords;
+                if (records && !records->empty() && records->size() >= 4U)
                 {
-                    if (player->simulationTime() > records->at(i).simulationTime && Backtrack::valid(records->at(i).simulationTime) && records->at(i).origin != player->origin())
+                    int lastTick = -1;
+
+                    for (int i = static_cast<int>(records->size() - 1U); i >= 3; i--)
                     {
-                        if (!appliedChams)
-                            hooks->modelRender.callOriginal<void, 19>(state, info, customBoneToWorld);
-                        applyChams(config->chams["Backtrack"].materials, health, maxHealth, records->at(i).matrix);
-                        interfaces->modelRender->forcedMaterialOverride(nullptr);
+                        if (player->simulationTime() > records->at(i).simulationTime && Backtrack::valid(records->at(i).simulationTime) && records->at(i).origin != player->origin())
+                        {
+                            if (!appliedChams)
+                                hooks->modelRender.callOriginal<void, 19>(state, info, customBoneToWorld);
+                            applyChams(config->chams["Backtrack"].materials, health, maxHealth, records->at(i).matrix);
+                            interfaces->modelRender->forcedMaterialOverride(nullptr);
+                        }
                     }
                 }
             }

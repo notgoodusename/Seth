@@ -1,4 +1,3 @@
-#include "Animations.h"
 #include "TargetSystem.h"
 
 #include "../SDK/Entity.h"
@@ -6,58 +5,156 @@
 #include "../SDK/UserCmd.h"
 #include "../SDK/Math.h"
 
-std::vector<TargetSystem::Enemy> enemies;
+LocalPlayerInfo localPlayerInfo;
+std::vector<PlayerTarget> playersTargets;
 
-void TargetSystem::updateTargets(UserCmd* cmd) noexcept
+static auto playerTargetByHandle(int handle) noexcept
 {
-    enemies.clear();
-
-    if (!localPlayer || !localPlayer->isAlive() || localPlayer->isTaunting() || localPlayer->isBonked() || localPlayer->isFeignDeathReady()
-        || localPlayer->isCloaked() || localPlayer->isInBumperKart() || localPlayer->isAGhost())
-        return;
-
-    const auto activeWeapon = localPlayer->getActiveWeapon();
-    if (!activeWeapon || !canAttack(cmd, activeWeapon))
-        return;
-
-    const auto& localPlayerOrigin = localPlayer->getAbsOrigin();
-    const auto& localPlayerEyePosition = localPlayer->getEyePosition();
-
-    for (int i = 1; i <= interfaces->engine->getMaxClients(); ++i) {
-        const auto entity{ interfaces->entityList->getEntity(i) };
-        if (!entity || entity == localPlayer.get() || entity->isDormant() || !entity->isAlive())
-            continue;
-
-        if (!entity->getBoneCache().memory)
-            continue;
-
-        const auto angle{ Math::calculateRelativeAngle(localPlayerEyePosition, entity->getBoneCache()[6].origin(), cmd->viewangles)};
-        const auto fov{ angle.length2D() }; //fov
-        const auto distance{ localPlayerOrigin.distTo(entity->getAbsOrigin()) }; //distance
-        enemies.emplace_back(i, distance, fov);
-    }
+    const auto it = std::ranges::find(playersTargets, handle, &PlayerTarget::handle);
+    return it != playersTargets.end() ? &(*it) : nullptr;
 }
 
-const std::vector<TargetSystem::Enemy>& TargetSystem::getTargets(int sortType) noexcept
+void TargetSystem::updateFrame() noexcept
 {
-    switch (sortType)
+    localPlayerInfo.update();
+
+    if (!localPlayer) {
+        playersTargets.clear();
+        return;
+    };
+
+    for (int i = 1; i <= interfaces->engine->getMaxClients(); i++)
     {
-    case 0:
-        std::sort(enemies.begin(), enemies.end(),
-            [&](const TargetSystem::Enemy& a, const TargetSystem::Enemy& b) { return a.distance < b.distance; });
-        break;
-    case 1:
-        std::sort(enemies.begin(), enemies.end(),
-            [&](const TargetSystem::Enemy& a, const TargetSystem::Enemy& b) { return a.fov < b.fov; });
-        break;
-    default:
-        break;
+        const auto entity = interfaces->entityList->getEntity(i);
+        if (!entity || !entity->isPlayer() || entity == localPlayer.get() || entity->isDormant() || !entity->isAlive())
+            continue;
+
+        if (const auto player = playerTargetByHandle(entity->handle())) {
+            player->update(entity);
+        }
+        else {
+            playersTargets.emplace_back(entity);
+        }
     }
 
-	return enemies;
+    std::erase_if(playersTargets, [](const auto& player) { return interfaces->entityList->getEntityFromHandle(player.handle) == nullptr; });
+}
+
+void TargetSystem::updateTick(UserCmd* cmd) noexcept
+{
+
 }
 
 void TargetSystem::reset() noexcept
 {
+    playersTargets.clear();
+}
 
+void LocalPlayerInfo::update() noexcept
+{
+    if (!localPlayer)
+        return;
+
+    handle = localPlayer->handle();
+
+    origin = localPlayer->getAbsOrigin();
+    eyePosition = localPlayer->getEyePosition();
+    viewAngles = interfaces->engine->getViewAngles();
+}
+
+Target::Target(Entity* entity) noexcept : handle{ entity->handle() }
+{
+    if (entity->isPlayer()) {
+        const auto collideable = entity->getCollideable();
+        obbMins = collideable->obbMins();
+        obbMaxs = collideable->obbMaxs();
+    }
+    else {
+        obbMins = entity->obbMins();
+        obbMaxs = entity->obbMaxs();
+    }
+}
+
+PlayerTarget::PlayerTarget(Entity* entity) noexcept : Target{ entity }
+{
+    update(entity);
+}
+
+void PlayerTarget::update(Entity* entity) noexcept
+{
+    if (simulationTime >= entity->simulationTime())
+        return;
+
+    Vector position{ };
+    if (entity->getBoneCache().memory)
+        position = entity->getBoneCache()[6].origin();
+    else
+        position = entity->getAbsOrigin();
+
+    const auto angle = Math::calculateRelativeAngle(localPlayerInfo.eyePosition, position, localPlayerInfo.viewAngles);
+    
+    distanceToLocal = entity->getAbsOrigin().distTo(localPlayerInfo.origin);
+    fovFromLocal = angle.length2D();
+
+    simulationTime = entity->simulationTime();
+    origin = entity->origin();
+    eyeAngle = entity->eyeAngles();
+    absAngle = entity->getAbsAngle();
+
+    mins = entity->getCollideable()->obbMinsPreScaled();
+    maxs = entity->getCollideable()->obbMaxsPreScaled();
+    gotMatrix = entity->setupBones(matrix.data(), entity->getBoneCache().size, 0x7FF00, memory->globalVars->currenttime);
+
+    //Handle backtrack
+    if (!gotMatrix)
+        return;
+
+    if (!backtrackRecords.empty() && (backtrackRecords.front().simulationTime == entity->simulationTime()))
+        return;
+
+    Record record{ };
+    record.origin = origin;
+    record.absAngle = absAngle;
+    record.eyeAngle = eyeAngle;
+    record.simulationTime = simulationTime;
+    record.mins = mins;
+    record.maxs = maxs;
+    std::copy(matrix.begin(), matrix.end(), record.matrix);
+    for (auto bone : { 6, 0 }) {
+        record.positions.push_back(record.matrix[bone].origin());
+    }
+
+    backtrackRecords.push_front(record);
+
+    while (backtrackRecords.size() > 3U && static_cast<int>(backtrackRecords.size()) > static_cast<int>(round(1.0f / memory->globalVars->intervalPerTick)))
+        backtrackRecords.pop_back();
+}
+
+const LocalPlayerInfo& TargetSystem::local() noexcept
+{
+    return localPlayerInfo;
+}
+
+const std::vector<PlayerTarget>& TargetSystem::playerTargets(int sortType) noexcept
+{
+    switch (sortType)
+    {
+    case 0:
+        std::sort(playersTargets.begin(), playersTargets.end(),
+            [&](const PlayerTarget& a, const PlayerTarget& b) { return a.distanceToLocal < b.distanceToLocal; });
+        break;
+    case 1:
+        std::sort(playersTargets.begin(), playersTargets.end(),
+            [&](const PlayerTarget& a, const PlayerTarget& b) { return a.fovFromLocal < b.fovFromLocal; });
+        break;
+    default:
+        return playersTargets;
+    }
+
+    return playersTargets;
+}
+
+const PlayerTarget* TargetSystem::playerByHandle(int handle) noexcept
+{
+    return playerTargetByHandle(handle);
 }
