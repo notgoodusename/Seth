@@ -257,6 +257,9 @@
     <ClCompile Include="StrayElements.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Hacks\Fakelag.cpp">
+      <Filter>Hacks</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GUI.h">
@@ -633,6 +636,9 @@
     </ClInclude>
     <ClInclude Include="Resources\pride_flag.h">
       <Filter>Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Hacks\Fakelag.h">
+      <Filter>Hacks</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

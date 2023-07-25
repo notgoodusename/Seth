@@ -43,10 +43,14 @@ void Backtrack::run(UserCmd* cmd) noexcept
     if (!config->backtrack.enabled)
         return;
 
-    if (!(cmd->buttons & UserCmd::IN_ATTACK))
+    if (!localPlayer || !localPlayer->isAlive())
         return;
 
-    if (!localPlayer || !localPlayer->isAlive())
+    const auto activeWeapon = localPlayer->getActiveWeapon();
+    if (!activeWeapon)
+        return;
+
+    if (!isAttacking(cmd, activeWeapon))
         return;
 
     auto localPlayerEyePosition = localPlayer->getEyePosition();

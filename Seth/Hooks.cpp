@@ -164,9 +164,9 @@ static bool __fastcall createMove(void* thisPointer, void*, float inputSampleTim
     if (!cmd || !cmd->commandNumber)
         return result;
 
-    uintptr_t* framePointer;
+    uintptr_t framePointer;
     __asm mov framePointer, ebp;
-    bool& sendPacket = *reinterpret_cast<bool*>(*framePointer - 0x1);
+    bool& sendPacket = *reinterpret_cast<bool*>(***reinterpret_cast<uintptr_t***>(framePointer) - 0x1);
 
     auto currentViewAngles{ cmd->viewangles };
     const auto currentCmd{ *cmd };

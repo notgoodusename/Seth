@@ -38,6 +38,7 @@
     <ClCompile Include="Hacks\Chams.cpp" />
     <ClCompile Include="Hacks\Crithack.cpp" />
     <ClCompile Include="Hacks\EnginePrediction.cpp" />
+    <ClCompile Include="Hacks\Fakelag.cpp" />
     <ClCompile Include="Hacks\Glow.cpp" />
     <ClCompile Include="Hacks\MovementRebuild.cpp" />
     <ClCompile Include="Hacks\SkinChanger.cpp" />
@@ -100,6 +101,7 @@
     <ClInclude Include="Hacks\Chams.h" />
     <ClInclude Include="Hacks\Crithack.h" />
     <ClInclude Include="Hacks\EnginePrediction.h" />
+    <ClInclude Include="Hacks\Fakelag.h" />
     <ClInclude Include="Hacks\Glow.h" />
     <ClInclude Include="Hacks\Misc.h" />
     <ClInclude Include="Hacks\MovementRebuild.h" />
