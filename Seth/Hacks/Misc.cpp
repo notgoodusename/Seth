@@ -420,6 +420,8 @@ void Misc::drawPlayerList() noexcept
     if ((GameData::players().empty()) && !gui->isOpen())
         return;
 
+    const auto& displaySize = ImGui::GetIO().DisplaySize;
+    ImGui::SetNextWindowSizeConstraints(ImVec2(0.0f, 0.0f), ImVec2(displaySize.x, displaySize.x / 2.5f));
     ImGui::SetNextWindowSize(ImVec2(300.0f, 300.0f), ImGuiCond_Once);
 
     if (ImGui::Begin("Player List", nullptr, windowFlags)) {
