@@ -218,22 +218,18 @@ static void __stdcall frameStageNotify(FrameStage stage) noexcept
     static auto movementRebuildInit = (MovementRebuild::init(), false);
 
     if (stage == FrameStage::START)
+    {
         GameData::update();
-
-    if (stage == FrameStage::RENDER_START) {
-        Misc::unlockHiddenCvars();
+        SkinChanger::run();
     }
 
     if (stage == FrameStage::NET_UPDATE_END)
         TargetSystem::updateFrame();
 
-    if (stage == FrameStage::START) {
-        SkinChanger::run();
-    }
-
-    if (stage == FrameStage::NET_UPDATE_START) {
+    if (stage == FrameStage::RENDER_START) {
         Misc::unlockHiddenCvars();
     }
+
     hooks->client.callOriginal<void, 35>(stage);
 }
 
@@ -394,14 +390,31 @@ static float __fastcall frameAdvanceHook(void* thisPointer, void*, float interva
     if (!entity || !localPlayer || !entity->isPlayer() ||!entity->isAlive() || interfaces->engine->isHLTV())
         return original(thisPointer, interval);
 
-    static std::array<float, 65> simTimes = { 0.0f };
-
-    if (entity->simulationTime() != simTimes[entity->index()])
+    if (entity == localPlayer.get())
     {
-        float newInterval = entity->simulationTime() - simTimes[entity->index()];
-        simTimes[entity->index()] = entity->simulationTime();
-        if (newInterval > 0.0f)
-            return original(thisPointer, newInterval);
+        const auto local = TargetSystem::local();
+
+        if (entity->simulationTime() != local.frameAdvanceSimulationTime)
+        {
+            float newInterval = entity->simulationTime() - local.frameAdvanceSimulationTime;
+            TargetSystem::updateFrameAdvance(entity->handle(), entity->simulationTime());
+            if (newInterval > 0.0f)
+                return original(thisPointer, newInterval);
+        }
+    }
+    else
+    {
+        const auto player = TargetSystem::playerByHandle(entity->handle());
+        if (!player)
+            return original(thisPointer, interval);
+
+        if (entity->simulationTime() != player->frameAdvanceSimulationTime)
+        {
+            float newInterval = entity->simulationTime() - player->frameAdvanceSimulationTime;
+            TargetSystem::updateFrameAdvance(entity->handle(), entity->simulationTime());
+            if (newInterval > 0.0f)
+                return original(thisPointer, newInterval);
+        }
     }
     return 0.0f;
 }

@@ -17,15 +17,8 @@ namespace TargetSystem
 
 	void reset() noexcept;
 
-	class Lock {
-	public:
-		Lock() noexcept : lock{ mutex } {};
-	private:
-		std::scoped_lock<std::mutex> lock;
-		static inline std::mutex mutex;
-	};
+	void updateFrameAdvance(int handle, float simulationTime) noexcept;
 
-	// You have to acquire Lock before using these getters
 	const LocalPlayerInfo& local() noexcept;
 	const std::vector<PlayerTarget>& playerTargets(int sortType = -1) noexcept;
 	const PlayerTarget* playerByHandle(int handle) noexcept;
@@ -36,6 +29,7 @@ struct LocalPlayerInfo {
 
 	int handle;
 	Vector origin, eyePosition, viewAngles;
+	float frameAdvanceSimulationTime{ 0.0f };
 };
 
 struct Target
@@ -76,6 +70,8 @@ struct PlayerTarget : Target
 
 	float distanceToLocal{ 0.0f };
 	float fovFromLocal{ 0.0f };
+
+	float frameAdvanceSimulationTime{ 0.0f };
 };
 
 enum SortType

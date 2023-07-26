@@ -21,7 +21,7 @@ void TargetSystem::updateFrame() noexcept
     if (!localPlayer) {
         playersTargets.clear();
         return;
-    };
+    }
 
     for (int i = 1; i <= interfaces->engine->getMaxClients(); i++)
     {
@@ -43,6 +43,18 @@ void TargetSystem::updateFrame() noexcept
 void TargetSystem::updateTick(UserCmd* cmd) noexcept
 {
 
+}
+
+void TargetSystem::updateFrameAdvance(int handle, float simulationTime) noexcept
+{
+    if (handle == localPlayerInfo.handle)
+    {
+        localPlayerInfo.frameAdvanceSimulationTime = simulationTime;
+    }
+    else if(const auto playerTarget = playerTargetByHandle(handle))
+    {
+        playerTarget->frameAdvanceSimulationTime = simulationTime;
+    }
 }
 
 void TargetSystem::reset() noexcept
