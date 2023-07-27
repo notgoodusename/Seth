@@ -381,6 +381,8 @@ static void __cdecl interpolateServerEntitiesHook() noexcept
     original();
 }
 
+std::unordered_map<int, float> simTimes;
+
 static float __fastcall frameAdvanceHook(void* thisPointer, void*, float interval) noexcept
 {
     static auto original = hooks->frameAdvance.getOriginal<float>(interval);
@@ -390,31 +392,17 @@ static float __fastcall frameAdvanceHook(void* thisPointer, void*, float interva
     if (!entity || !localPlayer || !entity->isPlayer() ||!entity->isAlive() || interfaces->engine->isHLTV())
         return original(thisPointer, interval);
 
-    if (entity == localPlayer.get())
+    if (simTimes.find(entity->handle()) == simTimes.end())
     {
-        const auto local = TargetSystem::local();
-
-        if (entity->simulationTime() != local.frameAdvanceSimulationTime)
-        {
-            float newInterval = entity->simulationTime() - local.frameAdvanceSimulationTime;
-            TargetSystem::updateFrameAdvance(entity->handle(), entity->simulationTime());
-            if (newInterval > 0.0f)
-                return original(thisPointer, newInterval);
-        }
+        simTimes[entity->handle()] = entity->simulationTime();
+        return original(thisPointer, interval);
     }
-    else
+    else if (entity->simulationTime() != simTimes[entity->handle()])
     {
-        const auto player = TargetSystem::playerByHandle(entity->handle());
-        if (!player)
-            return original(thisPointer, interval);
-
-        if (entity->simulationTime() != player->frameAdvanceSimulationTime)
-        {
-            float newInterval = entity->simulationTime() - player->frameAdvanceSimulationTime;
-            TargetSystem::updateFrameAdvance(entity->handle(), entity->simulationTime());
-            if (newInterval > 0.0f)
-                return original(thisPointer, newInterval);
-        }
+        float newInterval = entity->simulationTime() - simTimes[entity->handle()];
+        simTimes[entity->handle()] = entity->simulationTime();
+        if (newInterval > 0.0f)
+            return original(thisPointer, newInterval);
     }
     return 0.0f;
 }
@@ -478,6 +466,8 @@ void resetAll(int resetType) noexcept
     TargetSystem::reset();
     StrayElements::clear();
     Visuals::reset(resetType);
+
+    simTimes.clear();
 }
 
 static void __fastcall levelShutDown(void* thisPointer) noexcept
