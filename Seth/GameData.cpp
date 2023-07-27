@@ -43,7 +43,6 @@ static std::vector<BuildingsData> buildingsData;
 static std::vector<NPCData> npcData;
 static std::vector<WorldData> worldData;
 static std::atomic_int netOutgoingLatency;
-static TFPlayerResource* playerResource = nullptr;
 
 static auto playerByHandleWritable(int handle) noexcept
 {
@@ -313,12 +312,12 @@ void PlayerData::update(Entity* entity) noexcept
     classID = entity->getPlayerClass();
     static_cast<BaseData&>(*this) = { entity };
     origin = entity->getAbsOrigin();
-    inViewFrustum = !memory->cullBox(obbMins + origin, obbMaxs + origin, frustum);// we need to recalculate the frustum fucking valve,  !interfaces->engine->cullBox(obbMins + origin, obbMaxs + origin);
+    inViewFrustum = !memory->cullBox(obbMins + origin, obbMaxs + origin, frustum);// we need to recalculate the frustum fucking valve
     alive = entity->isAlive();
     lastContactTime = alive ? memory->globalVars->realtime : 0.0f;
 
     if (localPlayer) {
-        enemy = entity->isEnemy(localPlayer.get());
+        enemy = StrayElements::friendlyFire() ? true : localPlayerData.team != team;
     }
 
     health = entity->health();

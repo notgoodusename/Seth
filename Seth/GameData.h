@@ -105,7 +105,7 @@ struct PlayerData : BaseData {
     bool isCloaked;
     Team team;
     std::uint64_t steamID;
-    const char* name;
+    std::string name;
     TFClass classID;
     Vector origin;
     std::string activeWeapon;
