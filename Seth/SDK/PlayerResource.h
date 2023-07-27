@@ -6,24 +6,6 @@
 
 struct Vector;
 
-/*
-class PlayerResource
-{
-public:
-	
-	NETVAR(ping, "CPlayerResource", "m_iPing", void*)
-    NETVAR(score, "CPlayerResource", "m_iScore", void*)
-    NETVAR(deaths, "CPlayerResource", "m_iDeaths", void*)
-    NETVAR(connected, "CPlayerResource", "m_bConnected", void*)
-    NETVAR(team, "CPlayerResource", "m_iTeam", void*)
-    NETVAR(alive, "CPlayerResource", "m_bAlive", void*)
-    NETVAR(health, "CPlayerResource", "m_iHealth", void*)
-    NETVAR(accountID, "CPlayerResource", "m_iAccountID", void*)
-    NETVAR(valid, "CPlayerResource", "m_bValid", void*)
-    NETVAR(userID, "CPlayerResource", "m_iUserID", void*)
-};
-*/
-
 class TFPlayerResource
 {
 public:
@@ -82,10 +64,10 @@ public:
 		return *reinterpret_cast<bool*>(this + offset + index);
 	}
 
-	bool getUserID(int index) noexcept
+	int getUserID(int index) noexcept
 	{
 		static auto offset = Netvars::get(fnv::hash("CPlayerResource->m_iUserID"));
-		return *reinterpret_cast<bool*>(this + offset + index);
+		return *reinterpret_cast<int*>(this + offset + 4 * index);
 	}
 
 	const char* getPlayerName(int index) noexcept
