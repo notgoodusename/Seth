@@ -63,7 +63,7 @@ void Backtrack::run(UserCmd* cmd) noexcept
 
     for (const auto target : enemies) 
     {
-        if (!target.isValid || target.backtrackRecords.empty())
+        if (target.backtrackRecords.empty())
             continue;
 
         const auto entity{ interfaces->entityList->getEntityFromHandle(target.handle) };
