@@ -162,7 +162,7 @@ struct KillfeedChanger {
 struct OffscreenEnemies : ColorToggle {
     OffscreenEnemies() : ColorToggle{ { 1.0f, 0.26f, 0.21f, 1.0f } } {}
     HealthBar healthBar;
-    bool disableOnCloaked;
+    bool disableOnCloaked{ true };
 };
 
 struct AutoBuy {
