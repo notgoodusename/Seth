@@ -342,7 +342,7 @@ static void renderBuildingBox(const BuildingsData& buildingData, const Buildings
 {
     const BoundingBox bbox{ buildingData, config.box.scale };
 
-    if (!bbox)
+    if (!bbox || buildingData.carried)
         return;
 
     renderBox(bbox, config.box);

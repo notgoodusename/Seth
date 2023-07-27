@@ -138,6 +138,7 @@ struct BuildingsData : BaseData {
 
     bool enemy = false;
     bool alive;
+    bool carried;
     std::string name;
     std::string owner;
     int health;

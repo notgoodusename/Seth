@@ -421,6 +421,7 @@ BuildingsData::BuildingsData(Entity* building) noexcept : BaseData{ building }
     }
 
     alive = building->isAlive();
+    carried = building->objectCarried();
     health = building->objectHealth();
     maxHealth = building->objectMaxHealth();
 
