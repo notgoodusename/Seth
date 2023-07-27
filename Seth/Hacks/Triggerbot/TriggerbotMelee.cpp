@@ -58,7 +58,7 @@ void TriggerbotMelee::run(Entity* activeWeapon, UserCmd* cmd, float& lastTime, f
     for (const auto& target : enemies)
     {
         auto entity{ interfaces->entityList->getEntityFromHandle(target.handle) };
-        if ((entity->isCloaked() && cfg.ignoreCloaked) || (!entity->isEnemy(localPlayer.get()) && !cfg.friendlyFire))
+        if (!entity || (entity->isCloaked() && cfg.ignoreCloaked) || (!entity->isEnemy(localPlayer.get()) && !cfg.friendlyFire))
             continue;
 
         matrix3x4* backupBoneCache = entity->getBoneCache().memory;
