@@ -312,8 +312,8 @@ void PlayerData::update(Entity* entity) noexcept
     classID = entity->getPlayerClass();
     static_cast<BaseData&>(*this) = { entity };
     origin = entity->getAbsOrigin();
-    inViewFrustum = !memory->cullBox(obbMins + origin, obbMaxs + origin, frustum);// we need to recalculate the frustum fucking valve
     alive = entity->isAlive();
+    inViewFrustum = alive ? !memory->cullBox(obbMins + origin, obbMaxs + origin, frustum) : false;// we need to recalculate the frustum fucking valve
     lastContactTime = alive ? memory->globalVars->realtime : 0.0f;
 
     if (localPlayer) {
@@ -328,7 +328,7 @@ void PlayerData::update(Entity* entity) noexcept
     if (const auto weapon = entity->getActiveWeapon())
         activeWeapon = interfaces->localize->findAsUTF8(weapon->getPrintName()); //TODO: Optimize
 
-    if (!alive || !inViewFrustum)
+    if (!inViewFrustum)
         return;
 
     const auto model = entity->getModel();

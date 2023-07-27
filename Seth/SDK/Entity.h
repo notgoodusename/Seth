@@ -259,6 +259,7 @@ public:
     {
         char name[128];
         getPlayerName(name);
+        name[127] = '\0';
         return name;
     }
 

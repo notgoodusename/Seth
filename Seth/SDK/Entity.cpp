@@ -20,8 +20,7 @@ void Entity::getPlayerName(char(&out)[128]) noexcept
         return;
     }
 
-    strcpy(out, name + '\0');
-    out[127] = '\0';
+    strcpy(out, name);
 }
 
 std::uint64_t Entity::getSteamId() noexcept
