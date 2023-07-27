@@ -17,8 +17,6 @@ namespace TargetSystem
 
 	void reset() noexcept;
 
-	void updateFrameAdvance(int handle, float simulationTime) noexcept;
-
 	const LocalPlayerInfo& local() noexcept;
 	const std::vector<PlayerTarget>& playerTargets(int sortType = -1) noexcept;
 	const PlayerTarget* playerByHandle(int handle) noexcept;
@@ -29,7 +27,6 @@ struct LocalPlayerInfo {
 
 	int handle;
 	Vector origin, eyePosition, viewAngles;
-	float frameAdvanceSimulationTime{ 0.0f };
 };
 
 struct Target
@@ -47,7 +44,7 @@ struct PlayerTarget : Target
 	void update(Entity* entity) noexcept;
 
 	struct Record {
-		std::deque<Vector> positions;
+		std::vector<Vector> positions;
 		Vector origin;
 		Vector absAngle;
 		Vector eyeAngle;
@@ -66,12 +63,12 @@ struct PlayerTarget : Target
 	Vector eyeAngle{};
 
 	float simulationTime{ -1.0f };
-	bool gotMatrix{ false };
+	bool isValid{ false };
+	bool dormant{ false };
+	bool isAlive{ false };
 
 	float distanceToLocal{ 0.0f };
 	float fovFromLocal{ 0.0f };
-
-	float frameAdvanceSimulationTime{ 0.0f };
 };
 
 enum SortType

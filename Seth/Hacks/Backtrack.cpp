@@ -63,7 +63,7 @@ void Backtrack::run(UserCmd* cmd) noexcept
 
     for (const auto target : enemies) 
     {
-        if (!target.gotMatrix || target.backtrackRecords.empty())
+        if (!target.isValid || target.backtrackRecords.empty())
             continue;
 
         const auto entity{ interfaces->entityList->getEntityFromHandle(target.handle) };
@@ -89,7 +89,7 @@ void Backtrack::run(UserCmd* cmd) noexcept
     }
 
     const auto player = TargetSystem::playerByHandle(bestTargetIndex);
-    if (!player || !player->gotMatrix)
+    if (!player || !player->isValid)
         return;
 
     if (bestRecord) {

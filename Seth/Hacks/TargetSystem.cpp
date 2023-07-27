@@ -37,24 +37,12 @@ void TargetSystem::updateFrame() noexcept
         }
     }
 
-    std::erase_if(playersTargets, [](const auto& player) { return interfaces->entityList->getEntityFromHandle(player.handle) == nullptr; });
+    std::erase_if(playersTargets, [](const auto& player) { return interfaces->entityList->getEntityFromHandle(player.handle) == nullptr || player.handle == -1; });
 }
 
 void TargetSystem::updateTick(UserCmd* cmd) noexcept
 {
 
-}
-
-void TargetSystem::updateFrameAdvance(int handle, float simulationTime) noexcept
-{
-    if (handle == localPlayerInfo.handle)
-    {
-        localPlayerInfo.frameAdvanceSimulationTime = simulationTime;
-    }
-    else if(const auto playerTarget = playerTargetByHandle(handle))
-    {
-        playerTarget->frameAdvanceSimulationTime = simulationTime;
-    }
 }
 
 void TargetSystem::reset() noexcept
@@ -97,30 +85,41 @@ void PlayerTarget::update(Entity* entity) noexcept
     if (simulationTime >= entity->simulationTime())
         return;
 
-    Vector position{ };
-    if (entity->getBoneCache().memory)
-        position = entity->getBoneCache()[6].origin();
-    else
-        position = entity->getAbsOrigin();
+    simulationTime = entity->simulationTime();
 
-    const auto angle = Math::calculateRelativeAngle(localPlayerInfo.eyePosition, position, localPlayerInfo.viewAngles);
+    dormant = entity->isDormant();
+    if (dormant) {
+        handle = -1;
+        return;
+    }
+
+    isAlive = entity->isAlive();
+    if (!isAlive)
+    {
+        handle = -1;
+        return;
+    }
+
+    isValid = entity->setupBones(matrix.data(), entity->getBoneCache().size, 0x7FF00, memory->globalVars->currenttime);
+    if (!isValid)
+    {
+        handle = -1;
+        return;
+    }
+
+    const auto angle = Math::calculateRelativeAngle(localPlayerInfo.eyePosition, matrix[6].origin(), localPlayerInfo.viewAngles);
     
     distanceToLocal = entity->getAbsOrigin().distTo(localPlayerInfo.origin);
     fovFromLocal = angle.length2D();
 
-    simulationTime = entity->simulationTime();
     origin = entity->origin();
     eyeAngle = entity->eyeAngles();
     absAngle = entity->getAbsAngle();
 
     mins = entity->getCollideable()->obbMinsPreScaled();
     maxs = entity->getCollideable()->obbMaxsPreScaled();
-    gotMatrix = entity->setupBones(matrix.data(), entity->getBoneCache().size, 0x7FF00, memory->globalVars->currenttime);
 
     //Handle backtrack
-    if (!gotMatrix)
-        return;
-
     if (!backtrackRecords.empty() && (backtrackRecords.front().simulationTime == entity->simulationTime()))
         return;
 
