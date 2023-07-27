@@ -5,5 +5,6 @@
 namespace StrayElements
 {
 	TFPlayerResource*& getPlayerResource() noexcept;
+	bool friendlyFire() noexcept;
 	void clear() noexcept;
 }

@@ -165,10 +165,7 @@ public:
         return lifeState() == 0;
     }
 
-    bool isEnemy(Entity* entity) noexcept
-    {
-        return entity->teamNumber() != teamNumber();
-    }
+    bool isEnemy(Entity* entity) noexcept;
 
     bool isOnGround() noexcept
     {
@@ -257,7 +254,13 @@ public:
         reinterpret_cast<void(__thiscall*)(void*, float, float)>(memory->updateTFAnimState)(animState, angle.y, angle.x);
     }
 
-    const char* getPlayerName() noexcept;
+    void getPlayerName(char(&out)[128]) noexcept;
+    [[nodiscard]] std::string getPlayerName() noexcept
+    {
+        char name[128];
+        getPlayerName(name);
+        return name;
+    }
 
     auto getUserId() noexcept
     {
@@ -266,6 +269,7 @@ public:
 
         return -1;
     }
+
     std::uint64_t getSteamId() noexcept;
 
     Vector getEyePosition() noexcept
