@@ -64,8 +64,6 @@ struct PlayerTarget : Target
 
 	float simulationTime{ -1.0f };
 	bool isValid{ false };
-	bool dormant{ false };
-	bool isAlive{ false };
 
 	float distanceToLocal{ 0.0f };
 	float fovFromLocal{ 0.0f };

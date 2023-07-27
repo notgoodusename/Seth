@@ -26,7 +26,8 @@ void TargetSystem::updateFrame() noexcept
     for (int i = 1; i <= interfaces->engine->getMaxClients(); i++)
     {
         const auto entity = interfaces->entityList->getEntity(i);
-        if (!entity || !entity->isPlayer() || entity == localPlayer.get() || entity->isDormant() || !entity->isAlive())
+        if (!entity || !entity->isPlayer() || entity == localPlayer.get() 
+            || entity->isDormant() || !entity->isAlive())
             continue;
 
         if (const auto player = playerTargetByHandle(entity->handle())) {
@@ -37,7 +38,7 @@ void TargetSystem::updateFrame() noexcept
         }
     }
 
-    std::erase_if(playersTargets, [](const auto& player) { return interfaces->entityList->getEntityFromHandle(player.handle) == nullptr || player.handle == -1; });
+    std::erase_if(playersTargets, [](const auto& player) { return interfaces->entityList->getEntityFromHandle(player.handle) == nullptr || !player.isValid; });
 }
 
 void TargetSystem::updateTick(UserCmd* cmd) noexcept
@@ -87,25 +88,9 @@ void PlayerTarget::update(Entity* entity) noexcept
 
     simulationTime = entity->simulationTime();
 
-    dormant = entity->isDormant();
-    if (dormant) {
-        handle = -1;
-        return;
-    }
-
-    isAlive = entity->isAlive();
-    if (!isAlive)
-    {
-        handle = -1;
-        return;
-    }
-
     isValid = entity->setupBones(matrix.data(), entity->getBoneCache().size, 0x7FF00, memory->globalVars->currenttime);
     if (!isValid)
-    {
-        handle = -1;
         return;
-    }
 
     const auto angle = Math::calculateRelativeAngle(localPlayerInfo.eyePosition, matrix[6].origin(), localPlayerInfo.viewAngles);
     
