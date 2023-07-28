@@ -63,17 +63,9 @@ void LocalPlayerInfo::update() noexcept
     viewAngles = interfaces->engine->getViewAngles();
 }
 
-Target::Target(Entity* entity) noexcept : handle{ entity->handle() }
+Target::Target(Entity* entity) noexcept
 {
-    if (entity->isPlayer()) {
-        const auto collideable = entity->getCollideable();
-        obbMins = collideable->obbMins();
-        obbMaxs = collideable->obbMaxs();
-    }
-    else {
-        obbMins = entity->obbMins();
-        obbMaxs = entity->obbMaxs();
-    }
+    handle = entity->handle();
 }
 
 PlayerTarget::PlayerTarget(Entity* entity) noexcept : Target{ entity }

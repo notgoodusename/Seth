@@ -34,7 +34,6 @@ struct Target
 	Target(Entity* entity) noexcept;
 
 	int handle;
-	Vector obbMins, obbMaxs;
 };
 
 struct PlayerTarget : Target
