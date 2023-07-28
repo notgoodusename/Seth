@@ -198,6 +198,11 @@ public:
         *reinterpret_cast<UserCmd**>(reinterpret_cast<uintptr_t>(this) + m_hConstraintEntity - 4) = cmd;
     }
 
+    CStudioHdr* getModelPtr() noexcept
+    {
+        return *reinterpret_cast<CStudioHdr**>(reinterpret_cast<uintptr_t>(this) + 0x889);
+    }
+
     void getAbsVelocity(Vector& vel) noexcept
     {
         EFlags() |= (1 << 12);
