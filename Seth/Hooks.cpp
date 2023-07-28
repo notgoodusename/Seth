@@ -388,8 +388,7 @@ static float __fastcall frameAdvanceHook(void* thisPointer, void*, float interva
     static auto original = hooks->frameAdvance.getOriginal<float>(interval);
 
     const auto entity = reinterpret_cast<Entity*>(thisPointer);
-
-    if (!entity || !localPlayer || !entity->isPlayer() ||!entity->isAlive() || interfaces->engine->isHLTV())
+    if (!entity || !localPlayer || !entity->getModelPtr())
         return original(thisPointer, interval);
 
     if (simTimes.find(entity->handle()) == simTimes.end())
@@ -416,7 +415,7 @@ static void __fastcall updateTFAnimStateHook(void* thisPointer, void*, float eye
         return;
 
     const auto entity = reinterpret_cast<Entity*>(animState->player);
-    if (!entity || !localPlayer)
+    if (!entity || !localPlayer || !entity->getModelPtr())
         return;
 
     if (entity == localPlayer.get())
