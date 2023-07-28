@@ -103,6 +103,7 @@ struct PlayerData : BaseData {
     int userId;
     int handle;
     bool isCloaked;
+    float simulationTime = 0.0f;
     Team team;
     std::uint64_t steamID;
     std::string name;

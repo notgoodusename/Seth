@@ -308,25 +308,32 @@ void PlayerData::update(Entity* entity) noexcept
         return;
     }
 
-    team = entity->teamNumber();
-    classID = entity->getPlayerClass();
-    static_cast<BaseData&>(*this) = { entity };
-    origin = entity->getAbsOrigin();
-    alive = entity->isAlive();
-    inViewFrustum = alive ? !memory->cullBox(obbMins + origin, obbMaxs + origin, frustum) : false;// we need to recalculate the frustum fucking valve
-    lastContactTime = alive ? memory->globalVars->realtime : 0.0f;
+    bool playerNetworkUpdate = simulationTime != entity->simulationTime();
+    if (playerNetworkUpdate)
+        simulationTime = entity->simulationTime();
 
-    if (localPlayer) {
-        enemy = StrayElements::friendlyFire() ? true : localPlayerData.team != team;
+    if (playerNetworkUpdate)
+    {
+        team = entity->teamNumber();
+        classID = entity->getPlayerClass();
+        alive = entity->isAlive();
+
+        if (localPlayer)
+            enemy = StrayElements::friendlyFire() ? true : localPlayerData.team != team;
+
+        health = entity->health();
+        maxHealth = entity->getMaxHealth();
+
+        isCloaked = entity->isCloaked();
+
+        if (const auto weapon = entity->getActiveWeapon())
+            activeWeapon = interfaces->localize->findAsUTF8(weapon->getPrintName()); //TODO: Optimize
     }
 
-    health = entity->health();
-    maxHealth = entity->getMaxHealth();
-
-    isCloaked = entity->isCloaked();
-
-    if (const auto weapon = entity->getActiveWeapon())
-        activeWeapon = interfaces->localize->findAsUTF8(weapon->getPrintName()); //TODO: Optimize
+    static_cast<BaseData&>(*this) = { entity };
+    origin = entity->getAbsOrigin();
+    inViewFrustum = alive ? !memory->cullBox(obbMins + origin, obbMaxs + origin, frustum) : false;// we need to recalculate the frustum fucking valve
+    lastContactTime = alive ? memory->globalVars->realtime : 0.0f;
 
     if (!inViewFrustum)
         return;
