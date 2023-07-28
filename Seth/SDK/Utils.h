@@ -21,8 +21,6 @@ int getMaxUserCmdProcessTicks() noexcept;
 
 #define maxUserCmdProcessTicks getMaxUserCmdProcessTicks()
 
-bool getBit(uint64_t number, int position) noexcept;
-
 void applyMatrix(Entity* entity, matrix3x4* boneCacheData, Vector origin, Vector eyeAngle, Vector mins, Vector maxs) noexcept;
 
 bool canAttack(UserCmd* cmd, Entity* activeWeapon) noexcept;
