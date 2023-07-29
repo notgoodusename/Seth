@@ -381,7 +381,7 @@ static void __cdecl interpolateServerEntitiesHook() noexcept
     original();
 }
 
-std::unordered_map<int, float> simTimes;
+std::vector<std::pair<int, float>> simTimes;
 
 static float __fastcall frameAdvanceHook(void* thisPointer, void*, float interval) noexcept
 {
@@ -391,15 +391,22 @@ static float __fastcall frameAdvanceHook(void* thisPointer, void*, float interva
     if (!entity || !localPlayer || !entity->getModelPtr())
         return original(thisPointer, interval);
 
-    if (simTimes.find(entity->handle()) == simTimes.end())
+    const auto it = std::find_if(simTimes.begin(), simTimes.end(),
+        [&](const auto& pair) { return pair.first == entity->handle(); });
+
+    if (it == simTimes.end())
     {
-        simTimes[entity->handle()] = entity->simulationTime();
+        std::pair<int, float> newHandle;
+        newHandle.first = entity->handle();
+        newHandle.second = entity->simulationTime();
+        simTimes.push_back(newHandle);
+        std::sort(simTimes.begin(), simTimes.end());
         return original(thisPointer, interval);
     }
-    else if (entity->simulationTime() != simTimes[entity->handle()])
+    else if (entity->simulationTime() != it->second)
     {
-        float newInterval = entity->simulationTime() - simTimes[entity->handle()];
-        simTimes[entity->handle()] = entity->simulationTime();
+        const float newInterval = entity->simulationTime() - it->second;
+        it->second = entity->simulationTime();
         if (newInterval > 0.0f)
             return original(thisPointer, newInterval);
     }
