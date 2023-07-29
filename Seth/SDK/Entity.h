@@ -92,7 +92,28 @@ enum WeaponSlots {
     SLOT_MELEE
 };
 
+struct AnimationLayer
+{
+public:
+    int sequence;
+    float prevCycle;
+    float weight;
+    int order;
+    float playbackRate;
+    float cycle;
+
+    float animTime;
+    float fadeOutTime;
+
+    float blendIn;
+    float blendOut;
+
+    bool clientBlend;
+    PAD(3)
+};
+
 class Collideable;
+class IKContext;
 
 class Entity {
 public:
@@ -127,6 +148,10 @@ public:
 
     VIRTUAL_METHOD(void, think, 121, (), (this))
     VIRTUAL_METHOD(bool, shouldCollide, 145, (int group, int mask), (this, group, mask))
+
+    VIRTUAL_METHOD(void, updateIKLocks, 171, (float currentTime), (this, currentTime))
+    VIRTUAL_METHOD(void, calculateIKLocks, 172, (float currentTime), (this, currentTime))
+
     VIRTUAL_METHOD(void, setSequence, 189, (int sequence), (this, sequence))
     VIRTUAL_METHOD(void, studioFrameAdvance, 190, (), (this))
     VIRTUAL_METHOD(void, updateClientSideAnimation, 193, (), (this))
@@ -198,6 +223,21 @@ public:
         *reinterpret_cast<UserCmd**>(reinterpret_cast<uintptr_t>(this) + m_hConstraintEntity - 4) = cmd;
     }
 
+    int getAnimationLayersCount() noexcept
+    {
+        return *reinterpret_cast<int*>(reinterpret_cast<uintptr_t>(this) + 0x8B4);
+    }
+
+    AnimationLayer* animOverlays() noexcept
+    {
+        return *reinterpret_cast<AnimationLayer**>(reinterpret_cast<uintptr_t>(this) + 0x8A8);
+    }
+
+    AnimationLayer* getAnimationLayer(int overlay) noexcept
+    {
+        return &animOverlays()[overlay];
+    }
+
     CStudioHdr* getModelPtr() noexcept
     {
         return *reinterpret_cast<CStudioHdr**>(reinterpret_cast<uintptr_t>(this) + 0x889);
@@ -254,6 +294,12 @@ public:
         return *reinterpret_cast<std::add_pointer_t<std::array<float, 24>>>(reinterpret_cast<uintptr_t>(this) + m_flPoseParameter);
     }
 
+    std::array<float, 4>& encodedController() noexcept
+    {
+        static auto m_flEncodedController = Netvars::get(fnv::hash("CBaseAnimating->m_flEncodedController"));
+        return *reinterpret_cast<std::add_pointer_t<std::array<float, 4>>>(reinterpret_cast<uintptr_t>(this) + m_flEncodedController);
+    }
+
     void updateTFAnimState(TFPlayerAnimState* animState, Vector angle) noexcept
     {
         reinterpret_cast<void(__thiscall*)(void*, float, float)>(memory->updateTFAnimState)(animState, angle.y, angle.x);
@@ -288,6 +334,11 @@ public:
         const auto clientClass = getClientClass();
         return clientClass ? clientClass->classId : ClassId(0);
     }
+
+    IKContext*& IK() noexcept
+    {
+        return *reinterpret_cast<IKContext**>(reinterpret_cast<uintptr_t>(this) + 0x574);
+    }   
 
     UtlVector<matrix3x4>& getBoneCache() noexcept
     {
@@ -561,6 +612,7 @@ public:
 
     NETVAR(clientSideAnimation, "CBaseAnimating", "m_bClientSideAnimation", bool)
     NETVAR(hitboxSet, "CBaseAnimating", "m_nHitboxSet", int)
+    NETVAR(cycle, "CBaseAnimating", "m_flCycle", float)
     NETVAR(sequence, "CBaseAnimating", "m_nSequence", int)
     NETVAR(modelScale, "CBaseAnimating", "m_flModelScale", float)
 
