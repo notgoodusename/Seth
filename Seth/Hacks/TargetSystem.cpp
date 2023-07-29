@@ -108,9 +108,7 @@ void PlayerTarget::update(Entity* entity) noexcept
     record.mins = mins;
     record.maxs = maxs;
     std::copy(matrix.begin(), matrix.end(), record.matrix);
-    for (auto bone : { 6, 0 }) {
-        record.positions.push_back(record.matrix[bone].origin());
-    }
+    record.positions.push_back(record.matrix[6].origin());
 
     backtrackRecords.push_front(record);
 
