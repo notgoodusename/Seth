@@ -15,6 +15,7 @@
 
 #include "SDK/GlobalVars.h"
 #include "SDK/Engine.h"
+#include "SDK/Math.cpp"
 
 std::array<float, 3U> Helpers::rgbToHsv(float r, float g, float b) noexcept
 {
@@ -276,6 +277,12 @@ float Helpers::normalizeYaw(float yaw) noexcept
 
     yaw = (yaw < 0.f) ? yaw + (360.f * rot) : yaw - (360.f * rot);
     return yaw;
+}
+
+void Helpers::sinCos(float radians, float* sine, float* cosine) noexcept
+{
+    *sine = sin(radians);
+    *cosine = cos(radians);
 }
 
 float Helpers::calcFovY(float fovX, float aspectRatio) noexcept
