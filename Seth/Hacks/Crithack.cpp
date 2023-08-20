@@ -121,7 +121,7 @@ int nextTick(UserCmd* cmd, Entity* activeWeapon, bool skipTick = false, int loop
 	const auto backupEnd = 0xB60/*m_flLastRapidFireCritCheckTime*/ + sizeof(float);
 	const auto backupSize = backupEnd - backupStart;
 
-	static void* backup = memory->memAlloc->Alloc(backupSize);
+	static void* backup = memory->memAlloc->alloc(backupSize);
 
 	//backup weapon state
 	memcpy(backup, static_cast<void*>(activeWeapon + backupStart), backupSize);
