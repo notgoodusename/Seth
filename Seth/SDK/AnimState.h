@@ -5,59 +5,13 @@
 #include "UtlVector.h"
 #include "Vector.h"
 
-#define ANIM_LAYER_ACTIVE		0x0001
-#define ANIM_LAYER_AUTOKILL		0x0002
-#define ANIM_LAYER_KILLME		0x0004
-#define ANIM_LAYER_DONTRESTORE	0x0008
-#define ANIM_LAYER_CHECKACCESS	0x0010
-#define ANIM_LAYER_DYING		0x0020
-
-struct AnimationLayer
-{
-public:
-	int	flags;
-	bool sequenceFinished;
-	bool kooping;
-	int	sequence;
-	float cycle;
-	float prevCycle;
-	float weight;
-	float playbackRate;
-	float blendIn;
-	float blendOut;
-	float killRate;
-	float killDelay;
-	float layerAnimtime;
-	float layerFadeOuttime;
-
-	Activity activity;
-
-	int	priority;
-	int order;
-
-	bool isActive() noexcept { return ((flags & ANIM_LAYER_ACTIVE) != 0); }
-	bool isAutokill() noexcept { return ((flags & ANIM_LAYER_AUTOKILL) != 0); }
-	bool isKillMe() noexcept { return ((flags & ANIM_LAYER_KILLME) != 0); }
-	bool isAutoramp() noexcept { return (blendIn != 0.0 || blendOut != 0.0); }
-	void killMe() noexcept { flags |= ANIM_LAYER_KILLME; }
-	void dying() noexcept { flags |= ANIM_LAYER_DYING; }
-	bool isDying() noexcept { return ((flags & ANIM_LAYER_DYING) != 0); }
-	void dead() noexcept { flags &= ~ANIM_LAYER_DYING; }
-
-	float lastEventCheck;
-	float lastAccess;
-
-	// Network state changes get forwarded here.
-	void* ownerEntity;
-};
-
 struct GestureSlot
 {
 	int gestureSlot;
 	Activity activity;
 	bool autoKill;
 	bool active;
-	AnimationLayer* animLayer;
+	void* animLayer;
 };
 
 struct MultiPlayerPoseData

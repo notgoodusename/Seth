@@ -28,6 +28,7 @@ template <typename Key, typename Value>
 struct UtlMap;
 template <typename T>
 class UtlVector;
+class matrix3x4;
 
 struct ActiveChannels;
 struct Channel;
@@ -36,6 +37,7 @@ struct Frustum;
 struct GlobalVars;
 struct GlowObjectManager;
 struct PanoramaEventRegistration;
+struct Quaternion;
 struct Trace;
 struct Vector;
 
@@ -59,6 +61,12 @@ public:
     KeyValues* (__thiscall* keyValuesFindKey)(KeyValues* keyValues, const char* keyName, bool create);
     
     float(__cdecl* attributeHookValue)(float, const char*, void*, void*, bool);
+
+    void(__thiscall* boneSetupInitPose)(void*, Vector*, Quaternion*);
+    void(__thiscall* boneSetupAccumulatePose)(void*, Vector*, Quaternion*, int, float, float, float, void*);
+    void(__thiscall* boneSetupCalcAutoplaySequences)(void*, Vector*, Quaternion*, float, void*);
+    void(__thiscall* boneSetupCalcBoneAdj)(void*, Vector*, Quaternion*, const float*);
+    
     void(__thiscall* calcAbsoluteVelocity)(void*);
     bool(__thiscall* calcIsAttackCriticalHelper)(void*);
     bool(__thiscall* calcIsAttackCriticalHelperMelee)(void*);
@@ -66,6 +74,13 @@ public:
     EconItemDefinition*( __thiscall* getItemDefinition)(void*, int);
     int(__thiscall* getNextThinkTick)(void*, const char*);
     void(_cdecl* generatePerspectiveFrustum)(const Vector&, const Vector&, const Vector&, const Vector&, float zNear, float zFar, float fovX, float fovY, Frustum&);
+    
+    void(__thiscall* IKContextConstruct)(void*);
+    void(__thiscall* IKContextDeconstruct)(void*);
+    void(__thiscall* IKContextInit)(void*, const CStudioHdr*, const Vector&, const Vector&, float, int, int);
+    void(__thiscall* IKContextUpdateTargets)(void*, Vector*, Quaternion*, matrix3x4*, void*);
+    void(__thiscall* IKContextSolveDependencies)(void*, Vector*, Quaternion*, matrix3x4*, void*);
+
     bool(_cdecl* passServerEntityFilter)(void* touch, void* pass);
     bool(__thiscall* physicsRunThink)(void*, int);
     std::add_pointer_t<int __cdecl(const int, ...)> randomSeed;
@@ -77,6 +92,7 @@ public:
     void(__thiscall* setNextThink)(void*, float, const char*);
     bool(__stdcall* shouldCollide)(int, int);
     void(__thiscall* simulatePlayerSimulatedEntities)(void*);
+    void*(__thiscall* seqdesc)(void*, int);
     bool(_cdecl* standardFilterRules)(void*, int);
 
     int* predictionRandomSeed;

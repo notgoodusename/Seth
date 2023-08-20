@@ -260,6 +260,15 @@
     <ClCompile Include="Hacks\Fakelag.cpp">
       <Filter>Hacks</Filter>
     </ClCompile>
+    <ClCompile Include="SDK\BoneSetup.cpp">
+      <Filter>SDK</Filter>
+    </ClCompile>
+    <ClCompile Include="SDK\IKContext.cpp">
+      <Filter>SDK</Filter>
+    </ClCompile>
+    <ClCompile Include="SDK\CBoneSetup.cpp">
+      <Filter>SDK</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GUI.h">
@@ -639,6 +648,15 @@
     </ClInclude>
     <ClInclude Include="Hacks\Fakelag.h">
       <Filter>Hacks</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\Quaternion.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\CStudioHdr.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\CBoneSetup.h">
+      <Filter>SDK</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

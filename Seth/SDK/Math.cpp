@@ -4,6 +4,8 @@
 #include "LocalPlayer.h"
 #include "Vector.h"
 
+#include "../Helpers.h"
+
 bool Math::canBackstab(Entity* entity, Vector angles, Vector entityAngles) noexcept
 {
     Vector vecToTarget;

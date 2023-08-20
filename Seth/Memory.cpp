@@ -94,6 +94,12 @@ Memory::Memory() noexcept
     keyValuesInitialize = reinterpret_cast<decltype(keyValuesInitialize)>(findPattern(ENGINE_DLL, "\xFF\x15????\x83\xC4\x08\x89\x06\x8B\xC6") - 0x42);
     keyValuesFindKey = reinterpret_cast<decltype(keyValuesFindKey)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\x81\xEC????\x56\x8B\x75\x08\x57\x8B\xF9\x85\xF6\x0F\x84????\x80\x3E\x00\x0F\x84????"));
     attributeHookValue = relativeToAbsolute<decltype(attributeHookValue)>(findPattern(CLIENT_DLL, "\xE8????\xDA\x4D\xFC") + 1);
+   
+    boneSetupInitPose = relativeToAbsolute<decltype(boneSetupInitPose)>(findPattern(CLIENT_DLL, "\xE8????\xD9\x47\x1C") + 1);
+    boneSetupAccumulatePose = relativeToAbsolute<decltype(boneSetupAccumulatePose)>(findPattern(CLIENT_DLL, "\xE8????\x8B\x07\x33\xFF") + 1);
+    boneSetupCalcAutoplaySequences = relativeToAbsolute<decltype(boneSetupCalcAutoplaySequences)>(findPattern(CLIENT_DLL, "\xE8????\x8B\x03\x83\xB8?????\x74\x1E") + 1);
+    boneSetupCalcBoneAdj = relativeToAbsolute<decltype(boneSetupCalcBoneAdj)>(findPattern(CLIENT_DLL, "\xE8????\xFF\x75\x18\xD9\x45\x14\x8B\x07") + 1);
+
     calcAbsoluteVelocity = relativeToAbsolute<decltype(calcAbsoluteVelocity)>(findPattern(CLIENT_DLL, "\xE8????\xD9\xE8\x8D\x45\xEC") + 1);
     calcIsAttackCriticalHelper = reinterpret_cast<decltype(calcIsAttackCriticalHelper)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\x83\xEC\x18\x56\x57\x6A\x00\x68????\x68????\x6A\x00\x8B\xF9\xE8????\x50\xE8????\x8B\xF0\x83\xC4\x14\x89\x75\xEC"));
     calcIsAttackCriticalHelperMelee = reinterpret_cast<decltype(calcIsAttackCriticalHelperMelee)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\xA1????\x83\xEC\x08\x83\x78\x30\x00\x57"));
@@ -101,6 +107,13 @@ Memory::Memory() noexcept
     getItemDefinition = relativeToAbsolute<decltype(getItemDefinition)>(findPattern(CLIENT_DLL, "\xE8????\x0F\xB6\x40\x15") + 1);
     getNextThinkTick = reinterpret_cast<decltype(getNextThinkTick)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\x8B\x45\x08\x56\x8B\xF1\x85\xC0\x75\x13"));
     generatePerspectiveFrustum = relativeToAbsolute<decltype(generatePerspectiveFrustum)>(findPattern(ENGINE_DLL, "\xE8????\x8B\x45\x08\x83\xC4\x24\xF3\x0F\x10\x05????") + 1);
+    
+    IKContextConstruct = relativeToAbsolute<decltype(IKContextConstruct)>(findPattern(CLIENT_DLL, "\xE8????\x89\x83????\xEB\x38") + 1);
+    IKContextDeconstruct = relativeToAbsolute<decltype(IKContextDeconstruct)>(findPattern(CLIENT_DLL, "\xE8????\x68????\xFF\x75\xE4") + 1);
+    IKContextInit = relativeToAbsolute<decltype(IKContextInit)>(findPattern(CLIENT_DLL, "\xE8????\xFF\x73\x0C\x8D\x8D????") + 1);
+    IKContextUpdateTargets = relativeToAbsolute<decltype(IKContextUpdateTargets)>(findPattern(CLIENT_DLL, "\xE8????\x8B\x07\xD9\x45\x14") + 1);
+    IKContextSolveDependencies = relativeToAbsolute<decltype(IKContextSolveDependencies)>(findPattern(CLIENT_DLL, "\xE8????\x8B\x07\x8D\x4D\xD0\x51") + 1);
+
     passServerEntityFilter = reinterpret_cast<decltype(passServerEntityFilter)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\x56\x8B\x75?\x85\xF6\x75?\xB0?"));
     physicsRunThink = reinterpret_cast<decltype(physicsRunThink)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\x53\x8B\xD9\x56\x57\x8B\x83????\xC1"));
     randomSeed = reinterpret_cast<decltype(randomSeed)>(GetProcAddress(GetModuleHandleA(VSTDLIB_DLL), "RandomSeed"));
@@ -112,6 +125,7 @@ Memory::Memory() noexcept
     setNextThink = reinterpret_cast<decltype(setNextThink)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\xF3\x0F\x10\x45?\x0F\x2E\x05????\x53"));
     shouldCollide = reinterpret_cast<decltype(shouldCollide)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\x8B\x55?\x56\x8B\x75?\x3B\xF2"));
     simulatePlayerSimulatedEntities = relativeToAbsolute<decltype(simulatePlayerSimulatedEntities)>(findPattern(CLIENT_DLL, "\xE8????\x8B\x06\x8B\xCE\x5E\x5B") + 1);
+    seqdesc = relativeToAbsolute<decltype(seqdesc)>(findPattern(CLIENT_DLL, "\xE8????\x39\x78\x10") + 1);
     standardFilterRules = reinterpret_cast<decltype(standardFilterRules)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\x8B\x4D?\x56\x8B\x01\xFF\x50?\x8B\xF0\x85\xF6\x75?\xB0?\x5E\x5D\xC3"));
 
     predictionRandomSeed = *reinterpret_cast<int**>(findPattern(CLIENT_DLL, "\xC7\x05????????\x5D\xC3\x8B\x40\x34") + 2);

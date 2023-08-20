@@ -62,7 +62,10 @@
     <ClCompile Include="MinHook\trampoline.c" />
     <ClCompile Include="Netvars.cpp" />
     <ClCompile Include="SDK\AttributeManager.cpp" />
+    <ClCompile Include="SDK\BoneSetup.cpp" />
+    <ClCompile Include="SDK\CBoneSetup.cpp" />
     <ClCompile Include="SDK\EngineTrace.cpp" />
+    <ClCompile Include="SDK\IKContext.cpp" />
     <ClCompile Include="SDK\KeyValues.cpp" />
     <ClCompile Include="SDK\Math.cpp" />
     <ClCompile Include="SDK\MD5.cpp" />
@@ -137,12 +140,14 @@
     <ClInclude Include="SDK\AttributeManager.h" />
     <ClInclude Include="SDK\Attribute.h" />
     <ClInclude Include="SDK\BitBuffer.h" />
+    <ClInclude Include="SDK\CBoneSetup.h" />
     <ClInclude Include="SDK\Client.h" />
     <ClInclude Include="SDK\ClientMode.h" />
     <ClInclude Include="SDK\ClientState.h" />
     <ClInclude Include="SDK\CommandContext.h" />
     <ClInclude Include="SDK\Conditions.h" />
     <ClInclude Include="SDK\ConVar.h" />
+    <ClInclude Include="SDK\CStudioHdr.h" />
     <ClInclude Include="SDK\DebugOverlay.h" />
     <ClInclude Include="SDK\EngineTrace.h" />
     <ClInclude Include="SDK\Entity.h" />
@@ -192,6 +197,7 @@
     <ClInclude Include="SDK\Platform.h" />
     <ClInclude Include="SDK\PlayerResource.h" />
     <ClInclude Include="SDK\Prediction.h" />
+    <ClInclude Include="SDK\Quaternion.h" />
     <ClInclude Include="SDK\Recv.h" />
     <ClInclude Include="SDK\RenderView.h" />
     <ClInclude Include="SDK\Server.h" />
