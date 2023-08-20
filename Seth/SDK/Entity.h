@@ -141,7 +141,7 @@ public:
     VIRTUAL_METHOD(Entity*, getBaseEntity, 7, (), (this))
 
     VIRTUAL_METHOD(const Vector&, getAbsOrigin, 9, (), (this))
-    VIRTUAL_METHOD(Vector&, getAbsAngle, 10, (), (this))
+    VIRTUAL_METHOD(const Vector&, getAbsAngle, 10, (), (this))
     VIRTUAL_METHOD(void, updateVisibility, 91, (), (this))
     VIRTUAL_METHOD(void*, onNewModel, 94, (), (this))
     VIRTUAL_METHOD(int, getMaxHealth, 107, (), (this))
@@ -240,7 +240,7 @@ public:
 
     CStudioHdr* getModelPtr() noexcept
     {
-        return *reinterpret_cast<CStudioHdr**>(reinterpret_cast<uintptr_t>(this) + 0x889);
+        return *reinterpret_cast<CStudioHdr**>(reinterpret_cast<uintptr_t>(this) + 0x890);
     }
 
     void getAbsVelocity(Vector& vel) noexcept
@@ -279,7 +279,7 @@ public:
 
     TFPlayerAnimState* getAnimState() noexcept
     {
-        return *reinterpret_cast<TFPlayerAnimState**>(this + 0x1D00);
+        return *reinterpret_cast<TFPlayerAnimState**>(this + 0x1D88);
     }
 
     float* getPoseParameter() noexcept
@@ -337,8 +337,8 @@ public:
 
     IKContext*& IK() noexcept
     {
-        return *reinterpret_cast<IKContext**>(reinterpret_cast<uintptr_t>(this) + 0x574);
-    }   
+        return *reinterpret_cast<IKContext**>(reinterpret_cast<uintptr_t>(this) + 0x578);
+    }
 
     UtlVector<matrix3x4>& getBoneCache() noexcept
     {
