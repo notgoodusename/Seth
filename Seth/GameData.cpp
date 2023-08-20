@@ -50,14 +50,6 @@ static auto playerByHandleWritable(int handle) noexcept
     return it != playerData.end() ? &(*it) : nullptr;
 }
 
-constexpr auto playerVisibilityUpdateDelay = 0.1f;
-static float nextPlayerVisibilityUpdateTime = 0.0f;
-
-static bool shouldUpdatePlayerVisibility() noexcept
-{
-    return nextPlayerVisibilityUpdateTime <= memory->globalVars->realtime;
-}
-
 static void updateNetLatency() noexcept
 {
     if (const auto networkChannel = interfaces->engine->getNetworkChannel())
@@ -115,10 +107,8 @@ void GameData::update() noexcept
                 playerData.emplace_back(entity);
             }
         }
-        else
-        {
-            switch (entity->getClassId())
-            {
+        else {
+            switch (entity->getClassId()) {
                 case ClassId::ObjectSentrygun:
                 case ClassId::ObjectDispenser:
                 case ClassId::ObjectTeleporter:
@@ -172,9 +162,6 @@ void GameData::update() noexcept
 
     std::erase_if(playerData, [](const auto& player) { return interfaces->entityList->getEntityFromHandle(player.handle) == nullptr; });
     std::erase_if(worldData, [](const auto& world) { return world.name == ""; });
-
-    if (shouldUpdatePlayerVisibility())
-        nextPlayerVisibilityUpdateTime = memory->globalVars->realtime + playerVisibilityUpdateDelay;
 }
 
 struct PlayerAvatar {
