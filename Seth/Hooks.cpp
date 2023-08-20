@@ -388,7 +388,7 @@ static float __fastcall frameAdvanceHook(void* thisPointer, void*, float interva
     static auto original = hooks->frameAdvance.getOriginal<float>(interval);
 
     const auto entity = reinterpret_cast<Entity*>(thisPointer);
-    if (!entity || !localPlayer || !entity->getModelPtr())
+    if (!entity || !localPlayer || !entity->getModelPtr() || !entity->isPlayer())
         return original(thisPointer, interval);
 
     const auto it = std::find_if(simTimes.begin(), simTimes.end(),
