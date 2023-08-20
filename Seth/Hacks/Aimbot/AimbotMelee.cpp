@@ -62,6 +62,9 @@ void runKnife(Entity* activeWeapon, UserCmd* cmd) noexcept
 
     for (const auto& target : enemies)
     {
+        if (!target.isValid || target.priority == 0)
+            continue;
+
         auto entity{ interfaces->entityList->getEntityFromHandle(target.handle) };
         if ((entity->isCloaked() && cfg.ignoreCloaked) || (!entity->isEnemy(localPlayer.get()) && !cfg.friendlyFire))
             continue;
@@ -210,6 +213,9 @@ void AimbotMelee::run(Entity* activeWeapon, UserCmd* cmd) noexcept
     const auto& localPlayerEyePosition = localPlayer->getEyePosition();
     for (const auto& target : enemies)
     {
+        if (!target.isValid || target.priority == 0)
+            continue;
+
         auto entity{ interfaces->entityList->getEntityFromHandle(target.handle) };
         if (!entity || (entity->isCloaked() && cfg.ignoreCloaked) || (!entity->isEnemy(localPlayer.get()) && !cfg.friendlyFire))
             continue;

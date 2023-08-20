@@ -15,7 +15,6 @@
 
 #include "SDK/GlobalVars.h"
 #include "SDK/Engine.h"
-#include "SDK/Math.cpp"
 
 std::array<float, 3U> Helpers::rgbToHsv(float r, float g, float b) noexcept
 {

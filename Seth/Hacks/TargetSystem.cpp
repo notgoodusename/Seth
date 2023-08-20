@@ -38,7 +38,7 @@ void TargetSystem::updateFrame() noexcept
         }
     }
 
-    std::erase_if(playersTargets, [](const auto& player) { return interfaces->entityList->getEntityFromHandle(player.handle) == nullptr || !player.isValid; });
+    std::erase_if(playersTargets, [](const auto& player) { return interfaces->entityList->getEntityFromHandle(player.handle) == nullptr; });
 }
 
 void TargetSystem::updateTick(UserCmd* cmd) noexcept
@@ -49,6 +49,12 @@ void TargetSystem::updateTick(UserCmd* cmd) noexcept
 void TargetSystem::reset() noexcept
 {
     playersTargets.clear();
+}
+
+void TargetSystem::setPriority(int handle, int priority) noexcept
+{
+    if (auto target = playerTargetByHandle(handle))
+        target->priority = priority;
 }
 
 void LocalPlayerInfo::update() noexcept
@@ -136,6 +142,9 @@ const std::vector<PlayerTarget>& TargetSystem::playerTargets(int sortType) noexc
     default:
         return playersTargets;
     }
+
+    std::sort(playersTargets.begin(), playersTargets.end(),
+        [&](const PlayerTarget& a, const PlayerTarget& b) { return a.priority > b.priority; });
 
     return playersTargets;
 }

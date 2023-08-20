@@ -17,6 +17,8 @@ namespace TargetSystem
 
 	void reset() noexcept;
 
+	void setPriority(int handle, int priority) noexcept;
+
 	const LocalPlayerInfo& local() noexcept;
 	const std::vector<PlayerTarget>& playerTargets(int sortType = -1) noexcept;
 	const PlayerTarget* playerByHandle(int handle) noexcept;
@@ -61,6 +63,7 @@ struct PlayerTarget : Target
 	Vector origin{}, absAngle{};
 	Vector eyeAngle{};
 
+	int priority{ 1 };
 	float simulationTime{ -1.0f };
 	bool isValid{ false };
 

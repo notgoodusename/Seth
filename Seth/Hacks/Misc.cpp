@@ -16,6 +16,7 @@
 
 #include "Misc.h"
 #include "EnginePrediction.h"
+#include "TargetSystem.h"
 
 #include "../SDK/Client.h"
 #include "../SDK/ClientMode.h"
@@ -425,12 +426,13 @@ void Misc::drawPlayerList() noexcept
     ImGui::SetNextWindowSize(ImVec2(300.0f, 300.0f), ImGuiCond_Once);
 
     if (ImGui::Begin("Player List", nullptr, windowFlags)) {
-        if (ImGui::beginTable("", 6, ImGuiTableFlags_Borders | ImGuiTableFlags_Hideable | ImGuiTableFlags_ScrollY | ImGuiTableFlags_Resizable)) {
+        if (ImGui::beginTable("", 7, ImGuiTableFlags_Borders | ImGuiTableFlags_Hideable | ImGuiTableFlags_ScrollY | ImGuiTableFlags_Resizable)) {
             ImGui::TableSetupColumn("Index", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide);
             ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 120.0f);
             ImGui::TableSetupColumn("Steam ID", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoResize);
             ImGui::TableSetupColumn("Class", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoResize);
             ImGui::TableSetupColumn("Health", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoResize);
+            ImGui::TableSetupColumn("Priority", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoResize);
             ImGui::TableSetupColumn("Extra", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide);
             ImGui::TableSetupScrollFreeze(0, 1);
             ImGui::TableSetColumnEnabled(2, config->misc.playerList.steamID);
@@ -457,8 +459,7 @@ void Misc::drawPlayerList() noexcept
                 if (ImGui::TableNextColumn())
                     ImGui::Text("%d", player.userId);
 
-                if (ImGui::TableNextColumn())
-                {
+                if (ImGui::TableNextColumn()) {
                     ImGui::Image(player.getAvatarTexture(), { ImGui::GetTextLineHeight(), ImGui::GetTextLineHeight() });
                     ImGui::SameLine();
                     ImGui::textEllipsisInTableCell(player.name.c_str());
@@ -467,11 +468,9 @@ void Misc::drawPlayerList() noexcept
                 if (ImGui::TableNextColumn() && ImGui::smallButtonFullWidth("Copy", player.steamID == 0))
                     ImGui::SetClipboardText(std::to_string(player.steamID).c_str());
 
-                if (ImGui::TableNextColumn())
-                {
+                if (ImGui::TableNextColumn()) {
                     std::string className = "unknown";
-                    switch (player.classID)
-                    {
+                    switch (player.classID) {
                     case TFClass::SCOUT:
                         className = "Scout";
                         break;
@@ -511,35 +510,50 @@ void Misc::drawPlayerList() noexcept
                 }
 
                 if (ImGui::TableNextColumn()) {
+                    const auto targetPlayer = TargetSystem::playerByHandle(player.handle);
+                    if (!targetPlayer)
+                        ImGui::Text("unknown");
+                    else {
+                        switch (targetPlayer->priority) {
+                        case 0:
+                            ImGui::Text("Na");
+                            break;
+                        case 1:
+                            ImGui::Text("Base");
+                            break;
+                        case 2:
+                            ImGui::Text("Low");
+                            break;
+                        case 3:
+                            ImGui::Text("High");
+                            break;
+                        default:
+                            ImGui::Text("unknown");
+                            break;
+                        }
+                    }
+                }
+
+                if (ImGui::TableNextColumn()) {
                     if (ImGui::smallButtonFullWidth("...", false))
                         ImGui::OpenPopup("##options");
 
                     if (ImGui::BeginPopup("##options", ImGuiWindowFlags_AlwaysUseWindowPadding)) {
-                        if (GameData::local().exists && player.team == GameData::local().team 
-                            && player.steamID != 0)
-                        {
+                        if (GameData::local().exists) {
                             if (ImGui::Button("Set to high priority"))
-                            {
-
-                            }
+                                TargetSystem::setPriority(player.handle, 3);
 
                             if (ImGui::Button("Set to low priority"))
-                            {
-
-                            }
+                                TargetSystem::setPriority(player.handle, 2);
 
                             if (ImGui::Button("Set to no priority"))
-                            {
-
-                            }
+                                TargetSystem::setPriority(player.handle, 0);
 
                             if (ImGui::Button("Reset priority"))
-                            {
+                                TargetSystem::setPriority(player.handle, 1);
 
-                            }
-
-                            if (ImGui::Button("Kick"))
-                            {
+                            if (player.steamID != 0 && player.team == GameData::local().team 
+                                && ImGui::Button("Kick")) {
                                 const std::string cmd = "callvote kick " + std::to_string(player.userId);
                                 interfaces->engine->clientCmdUnrestricted(cmd.c_str());
                             }

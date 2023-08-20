@@ -57,6 +57,9 @@ void TriggerbotMelee::run(Entity* activeWeapon, UserCmd* cmd, float& lastTime, f
 
     for (const auto& target : enemies)
     {
+        if (!target.isValid || target.priority == 0)
+            continue;
+
         auto entity{ interfaces->entityList->getEntityFromHandle(target.handle) };
         if (!entity || (entity->isCloaked() && cfg.ignoreCloaked) || (!entity->isEnemy(localPlayer.get()) && !cfg.friendlyFire))
             continue;
