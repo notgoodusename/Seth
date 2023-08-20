@@ -2,7 +2,9 @@
 
 #include <cstdint>
 
+#include "matrix3x4.h"
 #include "Pad.h"
+#include "Quaternion.h"
 #include "Vector.h"
 #include "VirtualMethod.h"
 
@@ -88,9 +90,25 @@ constexpr auto BONE_USED_BY_HITBOX = 0x100;
 struct StudioBone {
     int nameIndex;
     int	parent;
-    PAD(152)
+
+    int boneController[6];
+    Vector pos;
+    Quaternion quat;
+    Vector rot;
+
+    Vector posScale;
+    Vector rotScale;
+
+    matrix3x4 poseToBone;
+    Quaternion alignment;
     int flags;
-    PAD(52)
+
+    int procType;
+    int procIndex;
+    int physicsBone;
+    int surfacePropIndex;
+    int contents;
+    PAD(32)
 
     const char* getName() const noexcept
     {
