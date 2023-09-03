@@ -695,6 +695,117 @@ void Misc::fixMovement(UserCmd* cmd, float yaw) noexcept
     cmd->sidemove = std::sin(Helpers::deg2rad(yawDelta)) * forwardmove + std::sin(Helpers::deg2rad(yawDelta + 90.0f)) * sidemove;
 }
 
+static int buttons = 0;
+
+void Misc::runFreeCam(UserCmd* cmd, Vector viewAngles) noexcept
+{
+    static Vector currentViewAngles = Vector{ };
+    static Vector realViewAngles = Vector{ };
+    static bool wasCrouching = false;
+    static bool wasHoldingAttack = false;
+    static bool wasHoldingUse = false;
+    static bool hasSetAngles = false;
+
+    buttons = cmd->buttons;
+    if (!config->visuals.freeCam || !config->visuals.freeCamKey.isActive())
+    {
+        if (hasSetAngles)
+        {
+            interfaces->engine->setViewAngles(realViewAngles);
+            cmd->viewangles = currentViewAngles;
+            if (wasCrouching)
+                cmd->buttons |= UserCmd::IN_DUCK;
+            if (wasHoldingAttack)
+                cmd->buttons |= UserCmd::IN_ATTACK;
+            if (wasHoldingUse)
+                cmd->buttons |= UserCmd::IN_USE;
+            wasCrouching = false;
+            wasHoldingAttack = false;
+            wasHoldingUse = false;
+            hasSetAngles = false;
+        }
+        currentViewAngles = Vector{};
+        return;
+    }
+
+    if (!localPlayer || !localPlayer->isAlive())
+        return;
+
+    if (currentViewAngles.null())
+    {
+        currentViewAngles = cmd->viewangles;
+        realViewAngles = viewAngles;
+        wasCrouching = cmd->buttons & UserCmd::IN_DUCK;
+    }
+
+    cmd->forwardmove = 0;
+    cmd->sidemove = 0;
+    cmd->buttons = 0;
+    if (wasCrouching)
+        cmd->buttons |= UserCmd::IN_DUCK;
+    if (wasHoldingAttack)
+        cmd->buttons |= UserCmd::IN_ATTACK;
+    if (wasHoldingUse)
+        cmd->buttons |= UserCmd::IN_USE;
+    cmd->viewangles = currentViewAngles;
+    hasSetAngles = true;
+}
+
+void Misc::freeCam(ViewSetup* setup) noexcept
+{
+    static Vector newOrigin = Vector{ };
+
+    if (!config->visuals.freeCam || !config->visuals.freeCamKey.isActive())
+    {
+        newOrigin = Vector{ };
+        return;
+    }
+
+    if (!localPlayer || !localPlayer->isAlive())
+        return;
+
+    float freeCamSpeed = fabsf(static_cast<float>(config->visuals.freeCamSpeed));
+
+    if (newOrigin.null())
+        newOrigin = setup->origin;
+
+    Vector forward{ }, right{ }, up{ };
+
+    Vector::fromAngleAll(setup->angles, &forward, &right, &up);
+
+    const bool backBtn = buttons & UserCmd::IN_BACK;
+    const bool forwardBtn = buttons & UserCmd::IN_FORWARD;
+    const bool rightBtn = buttons & UserCmd::IN_MOVERIGHT;
+    const bool leftBtn = buttons & UserCmd::IN_MOVELEFT;
+    const bool shiftBtn = buttons & UserCmd::IN_SPEED;
+    const bool duckBtn = buttons & UserCmd::IN_DUCK;
+    const bool jumpBtn = buttons & UserCmd::IN_JUMP;
+
+    if (duckBtn)
+        freeCamSpeed *= 0.45f;
+
+    if (shiftBtn)
+        freeCamSpeed *= 1.65f;
+
+    if (forwardBtn)
+        newOrigin += forward * freeCamSpeed;
+
+    if (rightBtn)
+        newOrigin += right * freeCamSpeed;
+
+    if (leftBtn)
+        newOrigin -= right * freeCamSpeed;
+
+    if (backBtn)
+        newOrigin -= forward * freeCamSpeed;
+
+    if (jumpBtn)
+        newOrigin += up * freeCamSpeed;
+
+    setup->origin = newOrigin;
+}
+
+
 void Misc::updateInput() noexcept
 {
     config->misc.edgeJumpKey.handleToggle();

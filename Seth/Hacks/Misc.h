@@ -21,6 +21,9 @@ namespace Misc
     void fixMovement(UserCmd* cmd, float yaw) noexcept;
     void drawOffscreenEnemies(ImDrawList* drawList) noexcept;
 
+    void runFreeCam(UserCmd* cmd, Vector viewAngles) noexcept;
+    void freeCam(ViewSetup* setup) noexcept;
+
     void showKeybinds() noexcept;
 
     void spectatorList() noexcept;

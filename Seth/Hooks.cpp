@@ -171,6 +171,8 @@ static bool __fastcall createMove(void* thisPointer, void*, float inputSampleTim
     auto currentViewAngles{ cmd->viewangles };
     const auto currentCmd{ *cmd };
 
+    Misc::runFreeCam(cmd, currentViewAngles);
+
     memory->globalVars->serverTime(cmd);
     Misc::antiAfkKick(cmd);
     Misc::fastStop(cmd);
@@ -267,6 +269,7 @@ static void __stdcall overrideView(ViewSetup* setup) noexcept
 
     hooks->clientMode.callOriginal<void, 16>(setup);
     Visuals::thirdperson();
+    Misc::freeCam(setup);
 }
 
 static void __fastcall calcViewModelViewHook(void* thisPointer, void*, Entity* owner, Vector* eyePosition, Vector* eyeAngles) noexcept
