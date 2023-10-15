@@ -131,6 +131,7 @@ public:
 
     struct HitscanTriggerbot {
         bool enabled{ false };
+        bool magnet{ false };
         bool friendlyFire{ false };
         bool targetBacktrack{ true };
         bool scopedOnly{ true };

@@ -213,8 +213,10 @@ static bool __fastcall createMove(void* thisPointer, void*, float inputSampleTim
     return false;
 }
 
-static void __stdcall frameStageNotify(FrameStage stage) noexcept
+static void __fastcall frameStageNotify(void* thisPointer, void*, FrameStage stage) noexcept
 {
+    static auto original = hooks->client.getOriginal<void, 35>(stage);
+
     static auto animationInit = (Animations::init(), false);
     static auto backtrackInit = (Backtrack::init(), false);
     static auto movementRebuildInit = (MovementRebuild::init(), false);
@@ -231,8 +233,8 @@ static void __stdcall frameStageNotify(FrameStage stage) noexcept
     if (stage == FrameStage::RENDER_START) {
         Misc::unlockHiddenCvars();
     }
-
-    hooks->client.callOriginal<void, 35>(stage);
+    
+    original(thisPointer, stage); //render start crash
 }
 
 static bool __fastcall dispatchUserMessage(void* thisPointer, void*, int messageType, bufferRead* data) noexcept

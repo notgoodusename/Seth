@@ -253,6 +253,7 @@ static void from_json(const json& j, Config::Aimbot::Melee& m)
 static void from_json(const json& j, Config::HitscanTriggerbot& t)
 {
     read(j, "Enabled", t.enabled);
+    read(j, "Magnet", t.magnet);
     read(j, "Friendly fire", t.friendlyFire);
     read(j, "Target backtrack", t.targetBacktrack);
     read(j, "Scoped only", t.scopedOnly);
@@ -729,6 +730,7 @@ static void to_json(json& j, const Config::Aimbot::Melee& o, const Config::Aimbo
 static void to_json(json& j, const Config::HitscanTriggerbot& o, const Config::HitscanTriggerbot& dummy = {})
 {
     WRITE("Enabled", enabled);
+    WRITE("Magnet", magnet);
     WRITE("Friendly fire", friendlyFire);
     WRITE("Target backtrack", targetBacktrack);
     WRITE("Scoped only", scopedOnly);

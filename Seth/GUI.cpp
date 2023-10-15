@@ -290,6 +290,7 @@ void GUI::renderTriggerbotWindow() noexcept
         case 0:
         {
             ImGui::Checkbox("Enabled", &config->hitscanTriggerbot.enabled);
+            ImGui::Checkbox("Magnet", &config->hitscanTriggerbot.magnet);
             ImGui::Checkbox("Friendly fire", &config->hitscanTriggerbot.friendlyFire);
             ImGui::Checkbox("Target backtrack", &config->hitscanTriggerbot.targetBacktrack);
             ImGui::Checkbox("Scoped only", &config->hitscanTriggerbot.scopedOnly);
