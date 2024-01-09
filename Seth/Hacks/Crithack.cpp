@@ -11,6 +11,7 @@
 #include "../Interfaces.h"
 
 //A mix of these 2 sources
+// STILL WIP (forever)
 //https://github.com/nullworks/cathook/blob/master/src/crits.cpp
 //https://www.unknowncheats.me/forum/team-fortress-2-a/430169-perfect-crithack-engine-manipulation.html
 

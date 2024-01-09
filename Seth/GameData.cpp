@@ -77,18 +77,19 @@ void GameData::update() noexcept
         playerData.clear();
         return;
     }
+    
+    ViewSetup viewSetup = {}; 
+    if (!interfaces->client->getPlayerView(viewSetup))
+        return;
 
-    if (ViewSetup viewSetup = {}; interfaces->client->getPlayerView(viewSetup))
-    {
-        Matrix4x4 worldToView = {}, viewToProjection = {}, worldToProjection = {}, worldToPixels = {};
-        interfaces->renderView->getMatricesForView(viewSetup, &worldToView, &viewToProjection, &worldToProjection, &worldToPixels);
-        viewMatrix = worldToProjection;
+    Matrix4x4 worldToView = {}, viewToProjection = {}, worldToProjection = {}, worldToPixels = {};
+    interfaces->renderView->getMatricesForView(viewSetup, &worldToView, &viewToProjection, &worldToProjection, &worldToPixels);
+    viewMatrix = worldToProjection;
 
-        Vector forward, right, up;
-        Vector::fromAngleAll(viewSetup.angles, &forward, &right, &up);
-        float fovY = Helpers::calcFovY(viewSetup.fov, viewSetup.aspectRatio);
-        memory->generatePerspectiveFrustum(viewSetup.origin, forward, right, up, viewSetup.zNear, viewSetup.zFar, viewSetup.fov, fovY, frustum);
-    }
+    Vector forward, right, up;
+    Vector::fromAngleAll(viewSetup.angles, &forward, &right, &up);
+    float fovY = Helpers::calcFovY(viewSetup.fov, viewSetup.aspectRatio);
+    memory->generatePerspectiveFrustum(viewSetup.origin, forward, right, up, viewSetup.zNear, viewSetup.zFar, viewSetup.fov, fovY, frustum);
 
     const auto highestEntityIndex = interfaces->entityList->getHighestEntityIndex();
     for (int i = 1; i <= highestEntityIndex; ++i) {
@@ -319,7 +320,7 @@ void PlayerData::update(Entity* entity) noexcept
 
     static_cast<BaseData&>(*this) = { entity };
     origin = entity->getAbsOrigin();
-    inViewFrustum = alive ? !memory->cullBox(obbMins + origin, obbMaxs + origin, frustum) : false;// we need to recalculate the frustum fucking valve
+    inViewFrustum = alive ? !memory->cullBox(obbMins + origin, obbMaxs + origin, frustum) : false;// we need to sign another func that could be virtual fucking valve
     lastContactTime = alive ? memory->globalVars->realtime : 0.0f;
 
     if (!inViewFrustum)
