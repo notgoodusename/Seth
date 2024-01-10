@@ -558,8 +558,7 @@ public:
     bool isCritBoosted() noexcept
     {
         int condition = this->condition(), conditionEx = this->conditionEx();
-
-        return (condition & TFCond_Kritzkrieged ||
+        if (condition & TFCond_Kritzkrieged ||
             conditionEx & TFCondEx_CritCanteen ||
             conditionEx & TFCondEx_CritOnFirstBlood ||
             conditionEx & TFCondEx_CritOnWin ||
@@ -567,8 +566,16 @@ public:
             conditionEx & TFCondEx_CritDemoCharge ||
             conditionEx & TFCondEx_CritOnFlagCapture ||
             conditionEx & TFCondEx_HalloweenCritCandy ||
-            conditionEx & TFCondEx_PyroCrits ||
-            hasCritTempRune());
+            hasCritTempRune())
+            return true;
+
+
+        if (const auto weapon = getActiveWeapon()) {
+            if (conditionEx & TFCondEx_PyroCrits && weapon->slot() == WeaponSlots::SLOT_PRIMARY)
+                return true;
+        }
+
+        return false;
     }
 
     CONDITION(isCharging, condition(), TFCond_Charging)
