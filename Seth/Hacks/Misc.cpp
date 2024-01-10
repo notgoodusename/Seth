@@ -209,18 +209,27 @@ void Misc::spectatorList() noexcept
 
 void Misc::bunnyHop(UserCmd* cmd) noexcept
 {
-    if (!localPlayer)
+    if (!config->misc.bunnyHop)
         return;
-    //TODO: Fix double jump on scout
-    static auto wasLastTimeOnGround{ localPlayer->isOnGround() };
 
-    if (config->misc.bunnyHop && !localPlayer->isOnGround() 
-        && localPlayer->moveType() != MoveType::NOCLIP
-        && !localPlayer->isInBumperKart() && !localPlayer->isAGhost() && !localPlayer->isSwimming() && localPlayer->isAlive()
-        && !wasLastTimeOnGround)
-        cmd->buttons &= ~UserCmd::IN_JUMP;
+    if (!localPlayer || !localPlayer->isAlive())
+        return;
 
-    wasLastTimeOnGround = localPlayer->isOnGround();
+    if (localPlayer->moveType() == MoveType::NOCLIP || localPlayer->moveType() == MoveType::OBSERVER
+        || localPlayer->isInBumperKart() || localPlayer->isAGhost() || localPlayer->isSwimming())
+        return;
+
+    const bool isOnGround = localPlayer->isOnGround();
+    static bool jumpState = false;
+
+    if (cmd->buttons & UserCmd::IN_JUMP) {
+        if (!jumpState && !isOnGround)
+            cmd->buttons &= ~UserCmd::IN_JUMP;
+        else if (jumpState)
+            jumpState = false;
+    }
+    else if (!jumpState)
+        jumpState = true;
 }
 
 void Misc::autoStrafe(UserCmd* cmd, Vector& currentViewAngles) noexcept
@@ -231,11 +240,9 @@ void Misc::autoStrafe(UserCmd* cmd, Vector& currentViewAngles) noexcept
     if (!localPlayer || !localPlayer->isAlive())
         return;
 
-    const float speed = localPlayer->velocity().length2D();
-    if (speed < 5.0f)
-        return;
-
     static float angle = 0.f;
+
+    const float speed = localPlayer->velocity().length2D();
 
     const bool back = cmd->buttons & UserCmd::IN_BACK;
     const bool forward = cmd->buttons & UserCmd::IN_FORWARD;
@@ -267,11 +274,34 @@ void Misc::autoStrafe(UserCmd* cmd, Vector& currentViewAngles) noexcept
         angle = 0.f;
     }
 
-    //If we are on ground, noclip or in a ladder return
-    if (localPlayer->isOnGround() || localPlayer->moveType() == MoveType::NOCLIP)
+    if (localPlayer->isInBumperKart() || localPlayer->isAGhost() || localPlayer->isSwimming()
+        || localPlayer->moveType() == MoveType::NOCLIP || localPlayer->moveType() == MoveType::OBSERVER)
         return;
 
-    if (localPlayer->isInBumperKart() || localPlayer->isAGhost() || localPlayer->isSwimming())
+    const bool isOnGround = localPlayer->isOnGround();
+    static bool jumpState = false;
+    static bool recentltyJumped = false;
+
+    if (cmd->buttons & UserCmd::IN_JUMP) {
+        if (!jumpState && !isOnGround)
+            cmd->buttons &= ~UserCmd::IN_JUMP;
+        else if (jumpState)
+        {
+            jumpState = false;
+            recentltyJumped = true;
+            return;
+        }
+    }
+    else if (!jumpState)
+        jumpState = true;
+
+    if (isOnGround)
+    {
+        recentltyJumped = false;
+        return;
+    }
+
+    if (speed < 5.0f && !recentltyJumped)
         return;
 
     currentViewAngles.y += angle;
