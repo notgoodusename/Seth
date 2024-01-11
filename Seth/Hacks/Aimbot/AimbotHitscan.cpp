@@ -106,16 +106,16 @@ void AimbotHitscan::run(Entity* activeWeapon, UserCmd* cmd) noexcept
                 if (!cfg.targetBacktrack && cycle == 1)
                     continue;
 
-                const auto records = &target.backtrackRecords;
-                if (!records || records->empty() || records->size() <= 3U)
+                const auto& records = target.backtrackRecords;
+                if (records.empty() || records.size() <= 3U)
                     continue;
 
                 int bestTick = -1;
                 if (cycle == 0)
                 {
-                    for (size_t i = 3; i < records->size(); i++)
+                    for (size_t i = 3; i < records.size(); i++)
                     {
-                        if (Backtrack::valid(records->at(i).simulationTime))
+                        if (Backtrack::valid(records[i].simulationTime))
                         {
                             bestTick = static_cast<int>(i);
                             break;
@@ -125,11 +125,11 @@ void AimbotHitscan::run(Entity* activeWeapon, UserCmd* cmd) noexcept
                 else
                 {
                     auto bestBacktrackFov = 255.0f;
-                    for (int i = static_cast<int>(records->size() - 1U); i >= 3; i--)
+                    for (int i = static_cast<int>(records.size() - 1U); i >= 3; i--)
                     {
-                        if (Backtrack::valid(records->at(i).simulationTime))
+                        if (Backtrack::valid(records[i].simulationTime))
                         {
-                            const Vector angle{ Math::calculateRelativeAngle(localPlayerEyePosition, records->at(i).matrix[0].origin() , cmd->viewangles) };
+                            const Vector angle{ Math::calculateRelativeAngle(localPlayerEyePosition, records[i].matrix[0].origin() , cmd->viewangles)};
                             const float fov{ angle.length2D() };
 
                             if (fov < bestBacktrackFov)
@@ -144,12 +144,12 @@ void AimbotHitscan::run(Entity* activeWeapon, UserCmd* cmd) noexcept
                 if (bestTick <= -1)
                     continue;
 
-                memcpy(entity->getBoneCache().memory, records->at(bestTick).matrix, std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
-                memory->setAbsOrigin(entity, records->at(bestTick).origin);
-                entity->eyeAngles() = records->at(bestTick).eyeAngle;
-                memory->setCollisionBounds(entity->getCollideable(), records->at(bestTick).mins, records->at(bestTick).maxs);
+                memcpy(entity->getBoneCache().memory, records[bestTick].matrix, std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
+                memory->setAbsOrigin(entity, records[bestTick].origin);
+                entity->eyeAngles() = records[bestTick].eyeAngle;
+                memory->setCollisionBounds(entity->getCollideable(), records[bestTick].mins, records[bestTick].maxs);
 
-                bestSimulationTime = records->at(bestTick).simulationTime;
+                bestSimulationTime = records[bestTick].simulationTime;
             }
             else
             {

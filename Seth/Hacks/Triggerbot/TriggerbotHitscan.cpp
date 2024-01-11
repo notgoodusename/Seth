@@ -100,19 +100,19 @@ void TriggerbotHitscan::run(Entity* activeWeapon, UserCmd* cmd, float& lastTime,
 
         if ((config->backtrack.enabled || config->backtrack.fakeLatency) && cfg.targetBacktrack)
         {
-            auto records = &target.backtrackRecords;
-            if (!records || records->empty() || records->size() <= 3U)
+            const auto& records = target.backtrackRecords;
+            if (records.empty() || records.size() <= 3U)
                 continue;
 
             int bestTick = -1;
             auto bestFov{ 255.f };
 
-            for (int i = static_cast<int>(records->size() - 1U); i >= 0; i--)
+            for (int i = static_cast<int>(records.size() - 1U); i >= 0; i--)
             {
-                if (!Backtrack::valid(records->at(i).simulationTime))
+                if (!Backtrack::valid(records[i].simulationTime))
                     continue;
 
-                for (auto& position : records->at(i).positions)
+                for (auto& position : records[i].positions)
                 {
                     const auto angle = Math::calculateRelativeAngle(startPos, position, cmd->viewangles);
                     const auto fov = std::hypotf(angle.x, angle.y);
@@ -129,12 +129,12 @@ void TriggerbotHitscan::run(Entity* activeWeapon, UserCmd* cmd, float& lastTime,
                 continue;
             }
 
-            memcpy(entity->getBoneCache().memory, records->at(bestTick).matrix, std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
-            memory->setAbsOrigin(entity, records->at(bestTick).origin);
-            entity->eyeAngles() = records->at(bestTick).eyeAngle;
-            memory->setCollisionBounds(entity->getCollideable(), records->at(bestTick).mins, records->at(bestTick).maxs);
+            memcpy(entity->getBoneCache().memory, records[bestTick].matrix, std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
+            memory->setAbsOrigin(entity, records[bestTick].origin);
+            entity->eyeAngles() = records[bestTick].eyeAngle;
+            memory->setCollisionBounds(entity->getCollideable(), records[bestTick].mins, records[bestTick].maxs);
 
-            bestSimulationTime = records->at(bestTick).simulationTime;
+            bestSimulationTime = records[bestTick].simulationTime;
         }
         else
         {

@@ -78,25 +78,25 @@ void runKnife(Entity* activeWeapon, UserCmd* cmd) noexcept
 
         if ((config->backtrack.enabled || config->backtrack.fakeLatency) && cfg.targetBacktrack)
         {
-            auto records = &target.backtrackRecords;
-            if (!records || records->empty() || records->size() <= 3U)
+            const auto& records = target.backtrackRecords;
+            if (records.empty() || records.size() <= 3U)
                 continue;
 
-            for (int i = static_cast<int>(records->size() - 1U); i >= 3; i--)
+            for (int i = static_cast<int>(records.size() - 1U); i >= 3; i--)
             {
-                if (Backtrack::valid(records->at(i).simulationTime))
+                if (Backtrack::valid(records[i].simulationTime))
                 {
-                    memcpy(entity->getBoneCache().memory, records->at(i).matrix, std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
-                    memory->setAbsOrigin(entity, records->at(i).origin);
-                    entity->eyeAngles() = records->at(i).eyeAngle;
-                    memory->setCollisionBounds(entity->getCollideable(), records->at(i).mins, records->at(i).maxs);
+                    memcpy(entity->getBoneCache().memory, records[i].matrix, std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
+                    memory->setAbsOrigin(entity, records[i].origin);
+                    entity->eyeAngles() = records[i].eyeAngle;
+                    memory->setCollisionBounds(entity->getCollideable(), records[i].mins, records[i].maxs);
 
-                    bestTarget = getMeleeTarget(cmd, entity, entity->getBoneCache().memory, activeWeapon, bestFov, localPlayerEyePosition, cfg.autoBackstab, records->at(i).eyeAngle);
+                    bestTarget = getMeleeTarget(cmd, entity, entity->getBoneCache().memory, activeWeapon, bestFov, localPlayerEyePosition, cfg.autoBackstab, records[i].eyeAngle);
                     applyMatrix(entity, backupBoneCache, backupOrigin, backupEyeAngle, backupPrescaledMins, backupPrescaledMaxs);
 
                     if (bestTarget.notNull())
                     {
-                        bestSimulationTime = records->at(i).simulationTime;
+                        bestSimulationTime = records[i].simulationTime;
                         break;
                     }
                 }
@@ -156,7 +156,7 @@ public:
 } meleeRecord;
 
 //TODO: Need optimizing
-//Remove all distant players if not in reach, using an if check
+//Remove all distant players if not in reach
 
 void AimbotMelee::run(Entity* activeWeapon, UserCmd* cmd) noexcept
 {
@@ -231,16 +231,16 @@ void AimbotMelee::run(Entity* activeWeapon, UserCmd* cmd) noexcept
 
         if ((config->backtrack.enabled || config->backtrack.fakeLatency) && cfg.targetBacktrack)
         {
-            const auto records = &target.backtrackRecords;
-            if (!records || records->empty() || records->size() <= 3U)
+            const auto& records = target.backtrackRecords;
+            if (records.empty() || records.size() <= 3U)
                 continue;
 
             auto bestBacktrackDistance = FLT_MAX;
             int bestTick = -1;
-            for (size_t i = 0; i < records->size(); i++)
+            for (size_t i = 0; i < records.size(); i++)
             {
                 //We gotta make sure if we fire now it will be correct when registering 0.2 seconds later and can register right now
-                if (Backtrack::valid(records->at(i).simulationTime - 0.2121f) && Backtrack::valid(records->at(i).simulationTime))
+                if (Backtrack::valid(records[i].simulationTime - 0.2121f) && Backtrack::valid(records[i].simulationTime))
                 {
                     const auto distance{ localPlayerOrigin.distTo(entity->getAbsOrigin()) };
 
@@ -255,12 +255,12 @@ void AimbotMelee::run(Entity* activeWeapon, UserCmd* cmd) noexcept
             if (bestTick <= -1)
                 continue;
 
-            memcpy(entity->getBoneCache().memory, records->at(bestTick).matrix, std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
-            memory->setAbsOrigin(entity, records->at(bestTick).origin);
-            entity->eyeAngles() = records->at(bestTick).eyeAngle;
-            memory->setCollisionBounds(entity->getCollideable(), records->at(bestTick).mins, records->at(bestTick).maxs);
+            memcpy(entity->getBoneCache().memory, records[bestTick].matrix, std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
+            memory->setAbsOrigin(entity, records[bestTick].origin);
+            entity->eyeAngles() = records[bestTick].eyeAngle;
+            memory->setCollisionBounds(entity->getCollideable(), records[bestTick].mins, records[bestTick].maxs);
 
-            currentSimulationTime = records->at(bestTick).simulationTime;
+            currentSimulationTime = records[bestTick].simulationTime;
         }
         else
         {

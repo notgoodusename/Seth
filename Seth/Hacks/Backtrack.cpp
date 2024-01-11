@@ -61,7 +61,7 @@ void Backtrack::run(UserCmd* cmd) noexcept
 
     const auto enemies = TargetSystem::playerTargets();
 
-    for (const auto target : enemies) 
+    for (const auto& target : enemies) 
     {
         if (target.backtrackRecords.empty() || !target.isValid || target.priority == 0)
             continue;
@@ -73,9 +73,9 @@ void Backtrack::run(UserCmd* cmd) noexcept
 
         for (int j = static_cast<int>(target.backtrackRecords.size() - 1); j >= 0; j--)
         {
-            if (Backtrack::valid(target.backtrackRecords.at(j).simulationTime))
+            if (Backtrack::valid(target.backtrackRecords[j].simulationTime))
             {
-                for (auto& position : target.backtrackRecords.at(j).positions) {
+                for (auto& position : target.backtrackRecords[j].positions) {
                     auto angle = Math::calculateRelativeAngle(localPlayerEyePosition, position, cmd->viewangles);
                     auto fov = std::hypotf(angle.x, angle.y);
                     if (fov < bestFov) {
