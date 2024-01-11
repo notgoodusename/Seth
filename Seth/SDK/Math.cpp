@@ -53,7 +53,7 @@ bool Math::doesMeleeHit(Entity* activeWeapon, int index, const Vector angles) no
     Vector vecSwingEnd = vecSwingStart + vecForward * swingRange;
 
     Trace trace;
-    interfaces->engineTrace->traceRay({ vecSwingStart, vecSwingEnd, vecSwingMins, vecSwingMaxs }, MASK_SHOT, TraceFilterSkipOne{ localPlayer.get() }, trace);
+    interfaces->engineTrace->traceRay({ vecSwingStart, vecSwingEnd, vecSwingMins, vecSwingMaxs }, MASK_SHOT, TraceFilterHitscan{ localPlayer.get() }, trace);
     return trace.entity && trace.entity->index() == index;
 }
 

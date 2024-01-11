@@ -496,7 +496,7 @@ bool doesProjectileHit(AimbotProjectile::ProjectileWeaponInfo projectileInfo, Ve
     {
         Trace trace;
         //This trace should use hullSize, but whatever
-        interfaces->engineTrace->traceRay({ source, destination }, MASK_SHOT | CONTENTS_HITBOX, TraceFilterSkipOne{ localPlayer.get() }, trace);
+        interfaces->engineTrace->traceRay({ source, destination }, MASK_SHOT | CONTENTS_HITBOX, TraceFilterHitscan{ localPlayer.get() }, trace);
 
         float time = source.distTo(trace.endpos) / projectileInfo.speed;
 

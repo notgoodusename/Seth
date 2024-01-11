@@ -2,7 +2,8 @@
 
 #include "Server.h"
 
-enum class ClassId {
+enum class ClassId
+{
     _TFWeaponBuilder = 0,
     AI_BaseNPC = 0,
     BossAlpha = 0,

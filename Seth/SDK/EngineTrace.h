@@ -4,8 +4,8 @@
 
 #include "../Interfaces.h"
 
-#include "Cvar.h"
 #include "ConVar.h"
+#include "Cvar.h"
 #include "Vector.h"
 #include "VirtualMethod.h"
 
@@ -141,6 +141,14 @@ struct Ray {
 
 class Entity;
 
+enum TraceType
+{
+    TRACE_EVERYTHING = 0,
+    TRACE_WORLD_ONLY,
+    TRACE_ENTITIES_ONLY,
+    TRACE_EVERYTHING_FILTER_PROPS,
+};
+
 class BaseTraceFilter 
 {
 public:
@@ -148,27 +156,82 @@ public:
     virtual int getTraceType() const = 0;
 };
 
-class TraceFilterSkipOne : public BaseTraceFilter
-{
-public:
-    TraceFilterSkipOne() {}
-    TraceFilterSkipOne(const Entity* entity) : skip{ entity } { }
-	virtual bool shouldHitEntity(Entity* entity, int) { return entity != skip; }
-	virtual int getTraceType() const { return 0; }
-
-	const void* skip;
-};
-
 class TraceFilter : public BaseTraceFilter
 {
 public:
-    virtual int getTraceType() const { return 0; }
+    virtual int getTraceType() const noexcept
+    { 
+        return TRACE_EVERYTHING; 
+    }
 };
+
+class TraceFilterEntitiesOnly : public BaseTraceFilter
+{
+public:
+    virtual int getTraceType() const noexcept
+    {
+        return TRACE_ENTITIES_ONLY;
+    }
+};
+
+class TraceFilterWorldOnly : public BaseTraceFilter
+{
+public:
+    virtual bool shouldHitEntity(Entity* serverEntity, int contentsMask) noexcept
+    {
+        return false;
+    }
+
+    virtual int	getTraceType() const noexcept
+    {
+        return TRACE_WORLD_ONLY;
+    }
+};
+
+
+class TraceFilterWorldAndPropsOnly : public BaseTraceFilter
+{
+public:
+    virtual bool shouldHitEntity(Entity* serverEntity, int contentsMask) noexcept
+    {
+        return false;
+    }
+
+    virtual int	getTraceType() const noexcept
+    {
+        return TRACE_EVERYTHING;
+    }
+};
+
+class TraceFilterHitAll : public BaseTraceFilter
+{
+public:
+    virtual bool shouldHitEntity(Entity* serverEntity, int contentsMask) noexcept
+    {
+        return true;
+    }
+};
+
+class TraceFilterHitscan : public BaseTraceFilter
+{
+public:
+    TraceFilterHitscan(Entity* entity) : passEntity{ entity } { }
+    virtual bool shouldHitEntity(Entity* serverEntity, int contentsMask) noexcept;
+
+    virtual int	getTraceType() const noexcept
+    {
+        return TRACE_EVERYTHING;
+    }
+
+    void* passEntity = nullptr;
+};
+
+typedef bool (*ShouldHitFunction)(Entity* handleEntity, int contentsMask);
 
 class TraceFilterSimple : public TraceFilter
 {
 public:
-    TraceFilterSimple(Entity* entity, int collisionGroup, int shouldHit = NULL) : passEntity{ entity }, collisionGroup{ collisionGroup }, extraShouldHitCheckFunction{ shouldHit } { }
+    TraceFilterSimple(Entity* entity, int collisionGroup, ShouldHitFunction shouldHit = NULL) : passEntity{ entity }, collisionGroup{ collisionGroup }, extraShouldHitCheckFunction{ shouldHit } { }
     virtual bool shouldHitEntity(Entity* handleEntity, int contentsMask);
     virtual void setPassEntity(Entity* passEntity) { this->passEntity = passEntity; }
     virtual void setCollisionGroup(int collisionGroup) { this->collisionGroup = collisionGroup; }
@@ -178,23 +241,23 @@ public:
 private:
     Entity* passEntity;
 	int collisionGroup;
-	int extraShouldHitCheckFunction;
-};
-
-class TraceFilterIgnoreTeammates : public TraceFilterSimple 
-{
-public:
-	TraceFilterIgnoreTeammates(Entity* entity, int collisionGroup, int ignoreTeam) : TraceFilterSimple(entity, collisionGroup), ignoreTeam(ignoreTeam) { }
-    virtual bool shouldHitEntity(Entity* entity, int contentsMask);
-
-	int ignoreTeam;
+    ShouldHitFunction extraShouldHitCheckFunction;
 };
 
 class TraceFilterIgnorePlayers : public TraceFilterSimple
 {
 public:
-	TraceFilterIgnorePlayers(Entity* entity, int collisionGroup) : TraceFilterSimple(entity, collisionGroup) { }
+    TraceFilterIgnorePlayers(Entity* entity, int collisionGroup) : TraceFilterSimple(entity, collisionGroup) { }
     virtual bool shouldHitEntity(Entity* entity, int contentsMask);
+};
+
+class TraceFilterIgnoreTeammates : public TraceFilterSimple
+{
+public:
+    TraceFilterIgnoreTeammates(Entity* entity, int collisionGroup, int ignoreTeam) : TraceFilterSimple(entity, collisionGroup), ignoreTeam(ignoreTeam) { }
+    virtual bool shouldHitEntity(Entity* entity, int contentsMask);
+
+    int ignoreTeam;
 };
 
 namespace HitGroup {

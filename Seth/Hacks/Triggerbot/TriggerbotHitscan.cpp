@@ -32,7 +32,7 @@ bool getTriggerbotHitscanTarget(UserCmd* cmd, Entity* activeWeapon, Entity* enti
         if (Math::hitboxIntersection(matrix, j, set, startPos, endPos))
         {
             Trace trace;
-            interfaces->engineTrace->traceRay({ startPos, endPos }, MASK_SHOT | CONTENTS_HITBOX, TraceFilterSkipOne{ localPlayer.get() }, trace);
+            interfaces->engineTrace->traceRay({ startPos, endPos }, MASK_SHOT | CONTENTS_HITBOX, TraceFilterHitscan{ localPlayer.get() }, trace);
             if (!trace.entity)
                 continue;
 
