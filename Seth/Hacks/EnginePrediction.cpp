@@ -60,7 +60,7 @@ void EnginePrediction::run(UserCmd* cmd) noexcept
     const auto oldInPrediction = interfaces->prediction->inPrediction;
     const auto oldSeed = *memory->predictionRandomSeed;
 
-    *memory->predictionRandomSeed = MD5_PseudoRandom(cmd->commandNumber) & MASK_SIGNED;;
+    *memory->predictionRandomSeed = MD5_PseudoRandom(cmd->commandNumber) & MASK_SIGNED;
 
     memory->globalVars->currenttime = memory->globalVars->serverTime();
     memory->globalVars->frametime = interfaces->prediction->enginePaused ? 0 : memory->globalVars->intervalPerTick;
