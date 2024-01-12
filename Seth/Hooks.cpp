@@ -569,12 +569,8 @@ static DWORD WINAPI unload(HMODULE moduleHandle) noexcept
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
 
-    //IDK why, dont ask me why, but release crashes because of engineprediction on unhook
-    //Debug doesnt tho, so this check is needed to unhook on release, also unhooking on release will lag your game
-    //prob some exception being skipped lol
-#ifdef _DEBUG
     _CRT_INIT(moduleHandle, DLL_PROCESS_DETACH, nullptr);
-#endif
+    
     FreeLibraryAndExitThread(moduleHandle, 0);
 }
 

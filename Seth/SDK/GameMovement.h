@@ -11,7 +11,7 @@ public:
 	bool firstRunOfFunctions : 1;
 	bool gameCodeMovedPlayer : 1;
 
-	int playerHandle;
+	unsigned int playerHandle;
 
 	int impulseCommand;
 	Vector vecViewAngles;
@@ -19,6 +19,7 @@ public:
 	int buttons;
 	int oldButtons;
 	float forwardMove;
+	float oldForwardMove;
 	float sideMove;
 	float upMove;
 
