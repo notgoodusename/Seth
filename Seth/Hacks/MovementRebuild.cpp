@@ -41,6 +41,7 @@ void MovementRebuild::init() noexcept
 	cvars.stopSpeed = interfaces->cvar->findVar("sv_stopspeed");
 	cvars.maxVelocity = interfaces->cvar->findVar("sv_maxvelocity");
 	cvars.optimizedMovement = interfaces->cvar->findVar("sv_optimizedmovement");
+	cvars.parachuteMaxSpeedZ = interfaces->cvar->findVar("tf_parachute_maxspeed_z");
 }
 
 void MovementRebuild::setEntity(Entity* player) noexcept
@@ -472,9 +473,15 @@ void MovementRebuild::stayOnGround() noexcept
 void MovementRebuild::fullWalkMove() noexcept
 {
 	if (!checkWater())
-		startGravity();
+	{
+		if (mv.player->isParachuting() && mv.velocity[2] < 0)
+			mv.velocity[2] = max(mv.velocity[2], cvars.parachuteMaxSpeedZ->getFloat());
 
-	if (mv.waterLevel >= 2)
+		startGravity();
+	}
+
+	if (mv.waterLevel >= 2 
+		|| mv.player->isAGhost() || mv.player->isSwimmingNoEffects())
 	{
 		// Perform regular water movement
 		waterMove();
@@ -606,7 +613,7 @@ bool MovementRebuild::checkWater() noexcept
 
 void MovementRebuild::startGravity() noexcept
 {
-	const float gravity = (mv.player->conditionEx2() & TFCondEx2_Parachute) ? 0.224f : 1.0f;
+	const float gravity = 1.0f;// (mv.player->conditionEx2() & TFCondEx2_Parachute) ? 0.224f : 1.0f;
 
 	// Add gravity so they'll be in the correct position during movement
 	// yes, this 0.5 looks wrong, but it's not.  
@@ -624,7 +631,7 @@ void MovementRebuild::startGravity() noexcept
 
 void MovementRebuild::finishGravity() noexcept
 {
-	const float gravity = (mv.player->conditionEx2() & TFCondEx2_Parachute) ? 0.224f : 1.0f;
+	const float gravity = 1.0f;//(mv.player->conditionEx2() & TFCondEx2_Parachute) ? 0.224f : 1.0f;
 
 	// Get the correct velocity for the end of the dt 
 	mv.velocity[2] -= (gravity * cvars.gravity->getFloat() * 0.5f * memory->globalVars->intervalPerTick);

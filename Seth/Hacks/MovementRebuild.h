@@ -46,6 +46,7 @@ namespace MovementRebuild
 		ConVar* stopSpeed;
 		ConVar* maxVelocity;
 		ConVar* optimizedMovement;
+		ConVar* parachuteMaxSpeedZ;
 	};
 
 	void waterMove() noexcept;

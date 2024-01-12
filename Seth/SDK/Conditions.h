@@ -94,6 +94,7 @@ enum TFConds
 	TFCondEx3_KnockoutRune = (1 << 7),
 	TFCondEx3_ImbalanceRune = (1 << 8),
 	TFCondEx3_CritboostedTempRune = (1 << 9),
+	TFCondEx3_SwimmingNoEffects = (1 << 11),
 	TFCondEx3_KingRune = (1 << 13),
 	TFCondEx3_PlagueRune = (1 << 14),
 	TFCondEx3_SupernovaRune = (1 << 15),
