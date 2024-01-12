@@ -625,6 +625,7 @@ public:
     NETVAR(sequence, "CBaseAnimating", "m_nSequence", int)
     NETVAR(modelScale, "CBaseAnimating", "m_flModelScale", float)
 
+    NETVAR(angleRotation, "CBaseEntity", "m_angRotation", Vector)
     NETVAR(modelIndex, "CBaseEntity", "m_nModelIndex", unsigned)
     NETVAR(origin, "CBaseEntity", "m_vecOrigin", Vector)
     NETVAR(simulationTime, "CBaseEntity", "m_flSimulationTime", float)
@@ -690,6 +691,8 @@ public:
     NETVAR(chargeTime, "CTFPipebombLauncher", "m_flChargeBeginTime", float)
 
     NETVAR(itemDefinitionIndex, "CEconEntity", "m_iItemDefinitionIndex", int)
+   
+    NETVAR(conveyorSpeed, "CFuncConveyor", "m_flConveyorSpeed", float)
 };
 
 class Collideable {

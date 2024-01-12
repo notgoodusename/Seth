@@ -25,6 +25,7 @@ namespace MovementRebuild
 		Entity* player;
 		Entity* groundEntity;
 		Vector velocity;
+		Vector baseVelocity;
 		Vector position;
 		Vector obbMins;
 		Vector obbMaxs;

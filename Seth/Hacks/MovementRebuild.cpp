@@ -972,9 +972,36 @@ int MovementRebuild::testPlayerPosition(const Vector& pos, int collisionGroup, T
 
 void MovementRebuild::setGroundEntity(Trace* pm) noexcept
 {
+	Entity* oldGround = mv.groundEntity;
 	Entity* newGround = pm ? pm->entity : NULL;
 
 	mv.groundEntity = newGround;
+
+	if (newGround != oldGround)
+	{
+		if (oldGround)
+		{
+			if (oldGround->getClassId() == ClassId::FuncConveyor)
+			{
+				Vector right{ };
+				Vector::fromAngleAll(oldGround->angleRotation(), nullptr, &right, nullptr);
+				right *= oldGround->conveyorSpeed();
+				mv.baseVelocity -= right;
+				mv.baseVelocity.z = right.z;
+			}
+		}
+		else if (newGround)
+		{
+			if (newGround->getClassId() == ClassId::FuncConveyor)
+			{
+				Vector right{ };
+				Vector::fromAngleAll(newGround->angleRotation(), nullptr, &right, nullptr);
+				right *= newGround->conveyorSpeed();
+				mv.baseVelocity += right;
+				mv.baseVelocity.z = right.z;
+			}
+		}
+	}
 
 	// If we are on something...
 
