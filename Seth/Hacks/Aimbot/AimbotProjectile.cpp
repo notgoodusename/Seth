@@ -4,6 +4,7 @@
 #include "../MovementRebuild.h"
 #include "../TargetSystem.h"
 
+#include "../../SDK/AttributeManager.h"
 #include "../../SDK/Entity.h"
 #include "../../SDK/UserCmd.h"
 #include "../../SDK/Math.h"
@@ -271,18 +272,20 @@ AimbotProjectile::ProjectileWeaponInfo getProjectileWeaponInfo(Entity* weapon) n
 {
     float beginCharge = 0.0f;
     float charge = 0.0f;
+    float chargeRate = 0.0f;
     float speed = 0.0f;
     float gravity = 0.0f;
     float maxTime = 0.0f;
+
     Vector offset = getWeaponOffsetPosition(weapon);
+
     switch (weapon->itemDefinitionIndex())
     {
-        case Soldier_m_TheDirectHit:
-            speed = 1980.0f;
-            break;
         case Soldier_m_RocketLauncher:
+        case Soldier_m_TheDirectHit:
         case Soldier_m_RocketLauncherR:
         case Soldier_m_TheBlackBox:
+        case Soldier_m_TheLibertyLauncher:
         case Soldier_m_TheCowMangler5000:
         case Soldier_m_TheOriginal:
         case Soldier_m_FestiveRocketLauncher:
@@ -309,10 +312,7 @@ AimbotProjectile::ProjectileWeaponInfo getProjectileWeaponInfo(Entity* weapon) n
         case Soldier_m_CoffinNail:
         case Soldier_m_HighRollers:
         case Soldier_m_Warhawk:
-            speed = 1100.0f;
-            break;
-        case Soldier_m_TheLibertyLauncher:
-            speed = 1540.0f;
+            speed = AttributeManager::attributeHookFloat(1100.0f, "mult_projectile_speed", weapon, 0);
             break;
         case Soldier_s_TheRighteousBison:
         case Engi_m_ThePomson6000:
@@ -360,8 +360,8 @@ AimbotProjectile::ProjectileWeaponInfo getProjectileWeaponInfo(Entity* weapon) n
         case Pyro_s_FestiveFlareGun:
         case Pyro_s_TheScorchShot:
         case Pyro_s_TheManmelter:
-            speed = 2000.0f;
-            gravity = 0.3f;
+            speed = AttributeManager::attributeHookFloat(2000.0f, "mult_projectile_speed", weapon, 0);
+            gravity = AttributeManager::attributeHookFloat(0.3f, "mult_projectile_speed", weapon, 0);
             break;
         case Medic_m_SyringeGun:
         case Medic_m_SyringeGunR:
@@ -388,6 +388,8 @@ AimbotProjectile::ProjectileWeaponInfo getProjectileWeaponInfo(Entity* weapon) n
             break;
         case Demoman_m_GrenadeLauncher:
         case Demoman_m_GrenadeLauncherR:
+        case Demoman_m_TheLochnLoad:
+        case Demoman_m_TheLooseCannon:
         case Demoman_m_FestiveGrenadeLauncher:
         case Demoman_m_TheIronBomber:
         case Demoman_m_Autumn:
@@ -398,31 +400,23 @@ AimbotProjectile::ProjectileWeaponInfo getProjectileWeaponInfo(Entity* weapon) n
         case Demoman_m_TopShelf:
         case Demoman_m_Warhawk:
         case Demoman_m_ButcherBird:
-            speed = 1200.0f;
-            gravity = 0.5f;
-            break;
-        case Demoman_m_TheLochnLoad:
-            speed = 1575.0f;
-            gravity = 0.5f;
-            break;
-        case Demoman_m_TheLooseCannon:
-            speed = 1440.0f;
+            speed = AttributeManager::attributeHookFloat(1200.0f, "mult_projectile_speed", weapon, 0);
+            //https://github.com/lua9520/source-engine-2018-hl2_src/blob/3bf9df6b2785fa6d951086978a3e66f49427166a/game/shared/tf/tf_weapon_grenadelauncher.cpp#L469-L470
+            if (localPlayer->hasPrecisionRune())
+                speed = 3000.0f;
             gravity = 0.5f;
             break;
         case Demoman_s_StickybombLauncher:
         case Demoman_s_StickybombLauncherR:
         case Demoman_s_FestiveStickybombLauncher:
         case Demoman_s_TheScottishResistance:
-            beginCharge = weapon->chargeTime();
-            charge = (beginCharge == 0.0f) ? 0.f : memory->globalVars->serverTime() - beginCharge;
-            speed = Helpers::remapValClamped(charge, 0.0f, 4.f, 900.f, 2400.f);
-            gravity = Helpers::remapValClamped(charge, 0.0f, 4.f, 0.5f, 0.0f);
-            break;
         case Demoman_s_TheQuickiebombLauncher:
             beginCharge = weapon->chargeTime();
             charge = (beginCharge == 0.0f) ? 0.f : memory->globalVars->serverTime() - beginCharge;
-            speed = Helpers::remapValClamped(charge, 0.0f, 1.2f, 900.f, 2400.f);
-            gravity = Helpers::remapValClamped(charge, 0.0f, 1.2f, 0.5f, 0.0f);
+            
+            chargeRate = AttributeManager::attributeHookFloat(4.0f, "stickybomb_charge_rate", weapon, 0);
+            speed = Helpers::remapValClamped(charge, 0.0f, chargeRate, 900.f, 2400.f);
+            gravity = Helpers::remapValClamped(charge, 0.0f, chargeRate, 0.5f, 0.0f);
             break;
         case Scout_t_TheSandman:
         case Scout_t_TheWrapAssassin:
@@ -437,6 +431,7 @@ AimbotProjectile::ProjectileWeaponInfo getProjectileWeaponInfo(Entity* weapon) n
         default:
             break;
     }
+
     return AimbotProjectile::ProjectileWeaponInfo{ speed, gravity, maxTime, offset };
 }
 
