@@ -47,8 +47,9 @@ void MovementRebuild::init() noexcept
 void MovementRebuild::setEntity(Entity* player) noexcept
 {
 	mv.player = player;
-	mv.groundEntity = player->getGroundEntity();
+	mv.groundEntity = player->calculateGroundEntity();
 	mv.velocity = player->velocity();
+	mv.baseVelocity = Vector{ };
 	mv.position = player->origin();
 	mv.eyeAngles = player->eyeAngles();
 	mv.surfaceFriction = 1.0f;
@@ -166,7 +167,7 @@ void MovementRebuild::waterMove() noexcept
 		}
 	}
 
-	//VectorAdd(mv->m_vecVelocity, player->GetBaseVelocity(), mv->m_vecVelocity);
+	//mv.velocity += mv.baseVelocity;
 
 	// Now move
 	// assume it is a stair or a slope, so press down from stepheight above
@@ -186,7 +187,7 @@ void MovementRebuild::waterMove() noexcept
 		{
 			// walked up the step, so just keep result and exit
 			mv.position = pm.endpos;
-			//VectorSubtract(mv->m_vecVelocity, player->GetBaseVelocity(), mv->m_vecVelocity);
+			//mv.velocity -= mv.baseVelocity;
 			return;
 		}
 
@@ -198,14 +199,14 @@ void MovementRebuild::waterMove() noexcept
 		if (!mv.groundEntity)
 		{
 			tryPlayerMove();
-			//VectorSubtract(mv->m_vecVelocity, player->GetBaseVelocity(), mv->m_vecVelocity);
+			//mv.velocity -= mv.baseVelocity;
 			return;
 		}
 
 		stepMove(dest, pm);
 	}
-
-	//VectorSubtract(mv->m_vecVelocity, player->GetBaseVelocity(), mv->m_vecVelocity);
+	
+	//mv.velocity -= mv.baseVelocity;
 }
 
 void MovementRebuild::friction() noexcept
@@ -310,12 +311,12 @@ void MovementRebuild::airMove() noexcept
 	airAccelerate(wishdir, wishspeed, cvars.airAccelerate->getFloat());
 
 	// Add in any base velocity to the current velocity.
-	//VectorAdd(mv.m_velocity, player->GetBaseVelocity(), mv.m_velocity);
+	//mv.velocity += mv.baseVelocity;
 
 	tryPlayerMove();
 
 	// Now pull the base velocity back out.   Base velocity is set if you are on a moving object, like a conveyor (or maybe another monster?)
-	//VectorSubtract(mv.m_velocity, player->GetBaseVelocity(), mv.m_velocity);
+	//mv.velocity -= mv.baseVelocity;
 }
 
 void MovementRebuild::accelerate(Vector& wishdir, float wishspeed, float accel) noexcept
@@ -392,7 +393,7 @@ void MovementRebuild::walkMove() noexcept
 	mv.velocity[2] = 0.0f;
 
 	// Add in any base velocity to the current velocity.
-	//VectorAdd(mv.m_velocity, player->GetBaseVelocity(), mv.m_velocity);
+	//mv.velocity += mv.baseVelocity;
 
 	spd = mv.velocity.length();
 
@@ -400,7 +401,7 @@ void MovementRebuild::walkMove() noexcept
 	{
 		mv.velocity = Vector{ 0.0f, 0.0f, 0.0f };
 		// Now pull the base velocity back out.   Base velocity is set if you are on a moving object, like a conveyor (or maybe another monster?)
-		//VectorSubtract(mv.m_velocity, player->GetBaseVelocity(), mv.m_velocity);
+		//mv.velocity -= mv.baseVelocity;
 		return;
 	}
 
@@ -416,8 +417,7 @@ void MovementRebuild::walkMove() noexcept
 	{
 		mv.position = pm.endpos;
 		// Now pull the base velocity back out.   Base velocity is set if you are on a moving object, like a conveyor (or maybe another monster?)
-		//VectorSubtract(mv.m_velocity, player->GetBaseVelocity(), mv.m_velocity);
-
+		//mv.velocity -= mv.baseVelocity;
 		stayOnGround();
 		return;
 	}
@@ -426,14 +426,14 @@ void MovementRebuild::walkMove() noexcept
 	if (oldground == NULL && mv.waterLevel == 0)
 	{
 		// Now pull the base velocity back out.   Base velocity is set if you are on a moving object, like a conveyor (or maybe another monster?)
-		//VectorSubtract(mv.m_velocity, player->GetBaseVelocity(), mv.m_velocity);
+		//mv.velocity -= mv.baseVelocity;
 		return;
 	}
 
 	stepMove(dest, pm);
 
 	// Now pull the base velocity back out.   Base velocity is set if you are on a moving object, like a conveyor (or maybe another monster?)
-	//VectorSubtract(mv.m_velocity, player->GetBaseVelocity(), mv.m_velocity);
+	//mv.velocity -= mv.baseVelocity;
 
 	stayOnGround();
 }
@@ -618,14 +618,10 @@ void MovementRebuild::startGravity() noexcept
 	// Add gravity so they'll be in the correct position during movement
 	// yes, this 0.5 looks wrong, but it's not.  
 	mv.velocity[2] -= (gravity * cvars.gravity->getFloat() * 0.5f * memory->globalVars->intervalPerTick);
-	//mv.velocity[2] += player->GetBaseVelocity()[2] * memory->globalVars->intervalPerTick;
+	mv.velocity[2] += mv.baseVelocity[2] * memory->globalVars->intervalPerTick;
 
-	/*
-	Vector temp = player->GetBaseVelocity();
-	temp[2] = 0;
-	player->SetBaseVelocity(temp);
-	*/
-
+	mv.baseVelocity[2] = 0.0f;
+	
 	checkVelocity();
 }
 
@@ -990,7 +986,7 @@ void MovementRebuild::setGroundEntity(Trace* pm) noexcept
 				mv.baseVelocity.z = right.z;
 			}
 		}
-		else if (newGround)
+		if (newGround)
 		{
 			if (newGround->getClassId() == ClassId::FuncConveyor)
 			{
