@@ -52,7 +52,7 @@ void runKnife(Entity* activeWeapon, UserCmd* cmd) noexcept
 {
     const auto& cfg = config->aimbot.melee;
 
-    const auto enemies = TargetSystem::playerTargets(cfg.sortMethod);
+    const auto& enemies = TargetSystem::playerTargets(cfg.sortMethod);
 
     float bestSimulationTime{ -1.0f };
     auto bestFov = cfg.fov;
@@ -205,7 +205,7 @@ void AimbotMelee::run(Entity* activeWeapon, UserCmd* cmd) noexcept
     if (activeWeapon->isKnife())
         return runKnife(activeWeapon, cmd);
 
-    const auto enemies = TargetSystem::playerTargets(cfg.sortMethod);
+    const auto& enemies = TargetSystem::playerTargets(cfg.sortMethod);
 
     auto bestFov = cfg.fov;
     Vector bestTarget{ };

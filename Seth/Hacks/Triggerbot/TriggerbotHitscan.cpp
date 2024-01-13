@@ -68,7 +68,7 @@ void TriggerbotHitscan::run(Entity* activeWeapon, UserCmd* cmd, float& lastTime,
     hitbox[Hitboxes::Pelvis] = (cfg.hitboxes & 1 << 2) == 1 << 2; //Pelvis
 
     //Yeah, this shit is hacky but it works well so who cares
-    const auto enemies = TargetSystem::playerTargets(SortType::Fov);
+    const auto& enemies = TargetSystem::playerTargets(SortType::Fov);
 
     bool gotTarget = false;
     float bestSimulationTime = -1.0f;

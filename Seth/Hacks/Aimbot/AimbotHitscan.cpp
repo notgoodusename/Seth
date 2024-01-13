@@ -74,7 +74,7 @@ void AimbotHitscan::run(Entity* activeWeapon, UserCmd* cmd) noexcept
 
     hitbox[Hitboxes::Pelvis] = (cfg.hitboxes & 1 << 2) == 1 << 2; //Pelvis
 
-    const auto enemies = TargetSystem::playerTargets(cfg.sortMethod);
+    const auto& enemies = TargetSystem::playerTargets(cfg.sortMethod);
 
     auto bestFov = cfg.fov;
     auto bestSimulationTime = -1.0f;

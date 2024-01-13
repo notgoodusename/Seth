@@ -41,7 +41,7 @@ void TriggerbotMelee::run(Entity* activeWeapon, UserCmd* cmd, float& lastTime, f
     if (now - lastTime < cfg.shotDelay / 1000.0f)
         return;
 
-    const auto enemies = TargetSystem::playerTargets(SortType::Fov);
+    const auto& enemies = TargetSystem::playerTargets(SortType::Fov);
 
     bool gotTarget = false;
     float bestSimulationTime = -1.0f;

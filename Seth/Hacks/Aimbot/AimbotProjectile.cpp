@@ -521,7 +521,7 @@ void AimbotProjectile::run(Entity* activeWeapon, UserCmd* cmd) noexcept
     if (!canAttack(cmd, activeWeapon))
         return;
 
-    const auto enemies = TargetSystem::playerTargets(cfg.sortMethod);
+    const auto& enemies = TargetSystem::playerTargets(cfg.sortMethod);
 
     auto bestFov = cfg.fov;
 
