@@ -323,7 +323,9 @@ static void __fastcall estimateAbsVelocityHook(void* thisPointer, void*, Vector&
     static auto original = hooks->estimateAbsVelocity.getOriginal<void>(&vel);
 
     const auto entity = reinterpret_cast<Entity*>(thisPointer);
-    if (localPlayer && entity->isPlayer() && entity != localPlayer.get())
+    if (localPlayer 
+        && entity != localPlayer.get() 
+        && entity->isPlayer())
     {
         entity->getAbsVelocity(vel);
         return;

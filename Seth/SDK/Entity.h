@@ -164,6 +164,8 @@ public:
     VIRTUAL_METHOD(int, getDamageType, 340, (), (this))
     VIRTUAL_METHOD(WeaponId, weaponId, 381, (), (this))
 
+    Entity* calculateGroundEntity() noexcept;
+
     bool isPlayer() noexcept
     {
         return getClassId() == ClassId::TFPlayer;
@@ -247,15 +249,37 @@ public:
     {
         EFlags() |= (1 << 12);
         memory->calcAbsoluteVelocity(this);
+        
         vel.x = *reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + 0x15C);
         vel.y = *reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + 0x160);
         vel.z = *reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + 0x164);
+        
+        const auto groundEnt = calculateGroundEntity();
+        if (groundEnt)
+        {
+            if (groundEnt->getClassId() == ClassId::FuncConveyor)
+            {
+                Vector right{ };
+                Vector::fromAngleAll(groundEnt->angleRotation(), nullptr, &right, nullptr);
+                right *= groundEnt->conveyorSpeed();
+                vel -= right;
+            }
+        }
     }
 
     Vector getAbsVelocity() noexcept
     {
         Vector out;
         getAbsVelocity(out);
+        return out;
+    }
+
+    Vector absVelocity() noexcept
+    {
+        Vector out;
+        out.x = *reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + 0x15C);
+        out.y = *reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + 0x160);
+        out.z = *reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + 0x164);
         return out;
     }
 
