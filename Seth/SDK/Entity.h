@@ -425,8 +425,6 @@ public:
     {
         if (weaponId() == WeaponId::SWORD)
             return 72.0f; // swords are typically 72
-        if (itemDefinitionIndex() == Soldier_t_TheDisciplinaryAction)
-            return 91.2f; //Wtf is this range fr, its basiccally 90% extra of range
         return 48.0f;
     }
 

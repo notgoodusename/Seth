@@ -1,3 +1,4 @@
+#include "AttributeManager.h"
 #include "Entity.h"
 #include "Math.h"
 #include "ModelInfo.h"
@@ -35,8 +36,8 @@ bool Math::canBackstab(Entity* entity, Vector angles, Vector entityAngles) noexc
 
 bool Math::doesMeleeHit(Entity* activeWeapon, int index, const Vector angles) noexcept
 {
-    static Vector vecSwingMins(-18, -18, -18);
-    static Vector vecSwingMaxs(18, 18, 18);
+    static Vector vecSwingMinsBase{ -18.0f, -18.0f, -18.0f };
+    static Vector vecSwingMaxsBase{ 18.0f, 18.0f, 18.0f };
 
     if (!localPlayer)
         return false;
@@ -45,15 +46,26 @@ bool Math::doesMeleeHit(Entity* activeWeapon, int index, const Vector angles) no
     if (swingRange <= 0.0f)
         return false;
 
-    if (localPlayer->modelScale() > 1.0f)
-        swingRange *= localPlayer->modelScale();
+    float boundsScale = AttributeManager::attributeHookFloat(1.0f, "melee_bounds_multiplier", activeWeapon);
+    Vector vecSwingMins = vecSwingMinsBase * boundsScale;
+    Vector vecSwingMaxs = vecSwingMaxsBase * boundsScale;
+
+    float modelScale = localPlayer->modelScale();
+    if (modelScale > 1.0f)
+    {
+        swingRange *= modelScale;
+        vecSwingMins *= modelScale;
+        vecSwingMaxs *= modelScale;
+    }
+
+    swingRange = AttributeManager::attributeHookFloat(swingRange, "melee_range_multiplier", activeWeapon);
 
     Vector vecForward = Vector::fromAngle(angles);
     Vector vecSwingStart = localPlayer->getEyePosition();
     Vector vecSwingEnd = vecSwingStart + vecForward * swingRange;
 
     Trace trace;
-    interfaces->engineTrace->traceRay({ vecSwingStart, vecSwingEnd, vecSwingMins, vecSwingMaxs }, MASK_SHOT, TraceFilterHitscan{ localPlayer.get() }, trace);
+    interfaces->engineTrace->traceRay({ vecSwingStart, vecSwingEnd, vecSwingMins, vecSwingMaxs }, MASK_SOLID, TraceFilterSimple{ localPlayer.get(), 0 }, trace);
     return trace.entity && trace.entity->index() == index;
 }
 
