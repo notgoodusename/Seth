@@ -571,7 +571,7 @@ void AimbotProjectile::run(Entity* activeWeapon, UserCmd* cmd) noexcept
             if (time > currentTime)
                 continue;
 
-            //We calculate the trajectorie of the projectile and if it doesnt hit we just continue
+            //We calculate the trajectory of the projectile and if it doesnt hit we just continue
             if (!doesProjectileHit(projectileWeaponInfo, localPlayerEyePosition - projectileWeaponInfo.offset, position))
                 continue;
 

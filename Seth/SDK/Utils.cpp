@@ -97,7 +97,8 @@ bool isAttacking(UserCmd* cmd, Entity* activeWeapon) noexcept
 		break;
 	}
 
-	if (activeWeapon->weaponId() == WeaponId::COMPOUND_BOW || activeWeapon->weaponId() == WeaponId::PIPEBOMBLAUNCHER)
+	if (activeWeapon->weaponId() == WeaponId::COMPOUND_BOW || activeWeapon->weaponId() == WeaponId::PIPEBOMBLAUNCHER 
+		|| activeWeapon->weaponId() == WeaponId::CANNON)
 	{
 		if (!(cmd->buttons & UserCmd::IN_ATTACK) && activeWeapon->chargeTime() > 0.0f)
 			return true;
