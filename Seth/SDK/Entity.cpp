@@ -105,43 +105,6 @@ Entity* Entity::calculateGroundEntity() noexcept
 	Vector playerMaxs = obbMaxs() * modelScale();
 	Vector position = getAbsOrigin();
 
-	int waterLevel = 0;
-	{
-		Vector	point;
-		int		cont;
-
-		// Pick a spot just above the players feet.
-		point[0] = position[0] + (playerMins[0] + playerMaxs[0]) * 0.5f;
-		point[1] = position[1] + (playerMins[1] + playerMaxs[1]) * 0.5f;
-		point[2] = position[2] + playerMins[2] + 1;
-
-		// Grab point contents.
-		cont = interfaces->engineTrace->getPointContents(point, NULL);
-
-		// Are we under water? (not solid and not empty?)
-		if (cont & MASK_WATER)
-		{
-			// We are at least at level one
-			waterLevel = 1;
-
-			// Now check a point that is at the player hull midpoint.
-			point[2] = position[2] + (playerMins[2] + playerMaxs[2]) * 0.5f;
-			cont = interfaces->engineTrace->getPointContents(point, NULL);
-			// If that point is also under water...
-			if (cont & MASK_WATER)
-			{
-				// Set a higher water level.
-				waterLevel = 2;
-
-				// Now check the eye position.  (view_ofs is relative to the origin)
-				point[2] = position[2] + viewOffset()[2];
-				cont = interfaces->engineTrace->getPointContents(point, NULL);
-				if (cont & MASK_WATER)
-					waterLevel = 3;
-			}
-		}
-	}
-
 	Vector point = position;
 	point.z -= 2.0f;
 
