@@ -38,6 +38,7 @@ float Backtrack::getLatency() noexcept
     return latencyRampup * std::clamp(static_cast<float>(config->backtrack.fakeLatencyAmount), 0.f, cvars.maxUnlag->getFloat() * 1000.0f);
 }
 
+//TODO: Account backtrack for melee
 void Backtrack::run(UserCmd* cmd) noexcept
 {
     if (!config->backtrack.enabled)

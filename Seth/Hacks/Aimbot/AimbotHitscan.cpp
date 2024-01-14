@@ -79,7 +79,8 @@ void AimbotHitscan::run(Entity* activeWeapon, UserCmd* cmd) noexcept
     auto bestFov = cfg.fov;
     auto bestSimulationTime = -1.0f;
     Vector bestTarget{ };
-    const auto localPlayerEyePosition = localPlayer->getEyePosition();
+
+    const auto& localPlayerEyePosition = localPlayer->getEyePosition();
 
     for (const auto& target : enemies)
     {
