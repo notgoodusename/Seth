@@ -46,14 +46,8 @@ void TriggerbotMelee::run(Entity* activeWeapon, UserCmd* cmd, float& lastTime, f
     bool gotTarget = false;
     float bestSimulationTime = -1.0f;
 
-    float range = activeWeapon->getSwingRange();;
-    if (localPlayer->modelScale() > 1.0f)
-        range *= localPlayer->modelScale();
-
     const auto& localPlayerOrigin = localPlayer->getAbsOrigin();
     const auto& localPlayerEyePosition = localPlayer->getEyePosition();
-    const auto startPos = localPlayerEyePosition;
-    const auto endPos = startPos + Vector::fromAngle(cmd->viewangles) * range;
 
     for (const auto& target : enemies)
     {
@@ -87,7 +81,7 @@ void TriggerbotMelee::run(Entity* activeWeapon, UserCmd* cmd, float& lastTime, f
 
                 for (auto& position : records[i].positions)
                 {
-                    const auto angle = Math::calculateRelativeAngle(startPos, position, cmd->viewangles);
+                    const auto angle = Math::calculateRelativeAngle(localPlayerEyePosition, position, cmd->viewangles);
                     const auto fov = std::hypotf(angle.x, angle.y);
                     if (fov < bestFov) {
                         bestFov = fov;
