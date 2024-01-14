@@ -50,7 +50,7 @@ void Backtrack::run(UserCmd* cmd) noexcept
     if (!activeWeapon)
         return;
 
-    if (!isAttacking(cmd, activeWeapon))
+    if (!canAttack(cmd, activeWeapon) || !isAttacking(cmd, activeWeapon))
         return;
 
     auto localPlayerEyePosition = localPlayer->getEyePosition();
@@ -59,7 +59,7 @@ void Backtrack::run(UserCmd* cmd) noexcept
     int bestTargetIndex{ };
     int bestRecord{ };
 
-    const auto enemies = TargetSystem::playerTargets();
+    const auto& enemies = TargetSystem::playerTargets();
 
     for (const auto& target : enemies) 
     {

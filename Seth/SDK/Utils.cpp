@@ -36,6 +36,18 @@ bool canAttack(UserCmd* cmd, Entity* activeWeapon) noexcept
 		|| localPlayer->isCloaked() || localPlayer->isInBumperKart() || localPlayer->isAGhost())
 		return false;
 
+	switch (activeWeapon->weaponId())
+	{
+		case WeaponId::PDA:
+		case WeaponId::PDA_ENGINEER_BUILD:
+		case WeaponId::PDA_ENGINEER_DESTROY:
+		case WeaponId::PDA_SPY:
+		case WeaponId::MEDIGUN:
+			return false;
+		default:
+			break;
+	}
+
 	switch (activeWeapon->itemDefinitionIndex())
 	{
 	case Soldier_m_TheBeggarsBazooka:
@@ -79,6 +91,18 @@ bool isAttacking(UserCmd* cmd, Entity* activeWeapon) noexcept
 	if (!localPlayer || !localPlayer->isAlive() || localPlayer->isTaunting() || localPlayer->isBonked() || localPlayer->isFeignDeathReady()
 		|| localPlayer->isCloaked() || localPlayer->isInBumperKart() || localPlayer->isAGhost())
 		return false;
+
+	switch (activeWeapon->weaponId())
+	{
+		case WeaponId::PDA:
+		case WeaponId::PDA_ENGINEER_BUILD:
+		case WeaponId::PDA_ENGINEER_DESTROY:
+		case WeaponId::PDA_SPY:
+		case WeaponId::MEDIGUN:
+			return false;
+		default:
+			break;
+	}
 
 	switch (activeWeapon->itemDefinitionIndex())
 	{
