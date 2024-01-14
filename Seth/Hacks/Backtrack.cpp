@@ -38,7 +38,6 @@ float Backtrack::getLatency() noexcept
     return latencyRampup * std::clamp(static_cast<float>(config->backtrack.fakeLatencyAmount), 0.f, cvars.maxUnlag->getFloat() * 1000.0f);
 }
 
-//TODO: Account backtrack for melee
 void Backtrack::run(UserCmd* cmd) noexcept
 {
     if (!config->backtrack.enabled)
@@ -51,11 +50,11 @@ void Backtrack::run(UserCmd* cmd) noexcept
     if (!activeWeapon)
         return;
 
-    if (!canAttack(cmd, activeWeapon) || !isAttacking(cmd, activeWeapon))
-        return;
-    
     const auto weaponType = activeWeapon->getWeaponType();
     if (weaponType != WeaponType::HITSCAN && weaponType != WeaponType::MELEE)
+        return;
+
+    if (!isAttacking(cmd, activeWeapon))
         return;
 
     const auto& localPlayerEyePosition = localPlayer->getEyePosition();

@@ -140,6 +140,8 @@ bool isAttacking(UserCmd* cmd, Entity* activeWeapon) noexcept
 				return false;
 			break;
 		case WeaponType::MELEE:
+			if (!activeWeapon->isKnife())
+				return fabsf(activeWeapon->smackTime() - memory->globalVars->serverTime()) < memory->globalVars->intervalPerTick * 2.0f;
 			if (activeWeapon->nextPrimaryAttack() > memory->globalVars->serverTime() && activeWeapon->nextSecondaryAttack() > memory->globalVars->serverTime())
 				return false;
 			break;

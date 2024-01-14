@@ -704,6 +704,7 @@ public:
     NETVAR(nextAttack, "CBaseCombatCharacter", "m_flNextAttack", float)
 
     NETVAR(lastFireTime, "CTFWeaponBase", "m_flLastFireTime", float)
+    NETVAR_OFFSET(smackTime, "CTFWeaponBase", "m_nInspectStage", 0x1C, float)
 
     NETVAR(clip, "CBaseCombatWeapon", "m_iClip1", int)
     NETVAR(nextSecondaryAttack, "CBaseCombatWeapon","m_flNextSecondaryAttack", float)

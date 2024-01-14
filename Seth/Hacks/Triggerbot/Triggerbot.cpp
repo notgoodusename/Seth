@@ -27,7 +27,7 @@ void Triggerbot::run(UserCmd* cmd) noexcept
     if (weaponType != WeaponType::HITSCAN && weaponType != WeaponType::MELEE)
         return;
 
-    if (activeWeapon->nextPrimaryAttack() > memory->globalVars->serverTime())
+    if (!canAttack(cmd, activeWeapon))
         return;
 
     static auto lastTime = 0.0f;
