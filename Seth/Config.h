@@ -103,7 +103,7 @@ public:
             bool autoShoot{ false };
             int sortMethod{ 0 };
             float fov{ 255.0f };
-            float maxTime{ 5.0f };
+            float maxTime{ 1.0f };
         } projectile;
         struct Melee {
             constexpr auto operator!=(const Melee& m) const noexcept
