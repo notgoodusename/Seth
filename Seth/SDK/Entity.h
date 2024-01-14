@@ -665,12 +665,6 @@ public:
     CONDITION(hasBulletResist, conditionEx(), TFCondEx_BulletCharge)
     CONDITION(hasFireResist, conditionEx(), TFCondEx_FireCharge)
 
-    NETVAR(clientSideAnimation, "CBaseAnimating", "m_bClientSideAnimation", bool)
-    NETVAR(hitboxSet, "CBaseAnimating", "m_nHitboxSet", int)
-    NETVAR(cycle, "CBaseAnimating", "m_flCycle", float)
-    NETVAR(sequence, "CBaseAnimating", "m_nSequence", int)
-    NETVAR(modelScale, "CBaseAnimating", "m_flModelScale", float)
-
     NETVAR(angleRotation, "CBaseEntity", "m_angRotation", Vector)
     NETVAR(modelIndex, "CBaseEntity", "m_nModelIndex", unsigned)
     NETVAR(origin, "CBaseEntity", "m_vecOrigin", Vector)
@@ -682,29 +676,11 @@ public:
     NETVAR(obbMins, "CBaseEntity", "m_vecMins", Vector)
     NETVAR(obbMaxs, "CBaseEntity", "m_vecMaxs", Vector)
 
-    NETVAR(condition, "CTFPlayer", "m_nPlayerCond", int)
-    NETVAR(conditionEx, "CTFPlayer", "m_nPlayerCondEx", int)
-    NETVAR(conditionEx2, "CTFPlayer", "m_nPlayerCondEx2", int)
-    NETVAR(conditionEx3, "CTFPlayer", "m_nPlayerCondEx3", int)
-    NETVAR(getPlayerClass, "CTFPlayer", "m_iClass", TFClass)
-    NETVAR(waterLevel, "CTFPlayer", "m_nWaterLevel", unsigned char)
-    NETVAR(forceTauntCam, "CTFPlayer", "m_nForceTauntCam", int)
-    NETVAR(isFeignDeathReady, "CTFPlayer", "m_bFeignDeathReady", bool)
-    NETVAR(eyeAngles, "CTFPlayer", "m_angEyeAngles[0]", Vector)
-
-    NETVAR(objectType, "CBaseObject", "m_iObjectType", int)
-    NETVAR(objectMode, "CBaseObject", "m_iObjectMode", int)
-    NETVAR(mapPlaced, "CBaseObject", "m_bWasMapPlaced", bool)
-    NETVAR(isMini, "CBaseObject", "m_bMiniBuilding", bool)
-    NETVAR(objectBuilder, "CBaseObject", "m_hBuilder", int)
-    NETVAR(objectHealth, "CBaseObject", "m_iHealth", int)
-    NETVAR(objectMaxHealth, "CBaseObject", "m_iMaxHealth", int)
-    NETVAR(objectCarried, "CBaseObject", "m_bCarried", bool)
-
-    NETVAR(weapons, "CBaseCombatCharacter", "m_hMyWeapons", int[64])
-
-    NETVAR(owner, "CBaseViewModel", "m_hOwner", int)
-    NETVAR(weapon, "CBaseViewModel", "m_hWeapon", int)
+    NETVAR(clientSideAnimation, "CBaseAnimating", "m_bClientSideAnimation", bool)
+    NETVAR(hitboxSet, "CBaseAnimating", "m_nHitboxSet", int)
+    NETVAR(cycle, "CBaseAnimating", "m_flCycle", float)
+    NETVAR(sequence, "CBaseAnimating", "m_nSequence", int)
+    NETVAR(modelScale, "CBaseAnimating", "m_flModelScale", float)
 
     NETVAR(viewModel, "CBasePlayer", "m_hViewModel[0]", int)
     NETVAR(fov, "CBasePlayer", "m_iFOV", int)
@@ -724,17 +700,40 @@ public:
     NETVAR(groundEntity, "CBasePlayer", "m_hGroundEntity", int)
     NETVAR(health, "CBasePlayer", "m_iHealth", int)
     NETVAR(maxSpeed, "CBasePlayer", "m_flMaxspeed", float)
+    NETVAR(clip, "CBaseCombatWeapon", "m_iClip1", int)
 
+    NETVAR(nextSecondaryAttack, "CBaseCombatWeapon","m_flNextSecondaryAttack", float)
+    NETVAR(nextPrimaryAttack, "CBaseCombatWeapon", "m_flNextPrimaryAttack", float)
+    NETVAR(state, "CBaseCombatWeapon", "m_iState ", int)
+
+    NETVAR(weapons, "CBaseCombatCharacter", "m_hMyWeapons", int[64])
     NETVAR(activeWeapon, "CBaseCombatCharacter", "m_hActiveWeapon", int)
     NETVAR(nextAttack, "CBaseCombatCharacter", "m_flNextAttack", float)
+
+    NETVAR(owner, "CBaseViewModel", "m_hOwner", int)
+    NETVAR(weapon, "CBaseViewModel", "m_hWeapon", int)
+
+    NETVAR(objectType, "CBaseObject", "m_iObjectType", int)
+    NETVAR(objectMode, "CBaseObject", "m_iObjectMode", int)
+    NETVAR(mapPlaced, "CBaseObject", "m_bWasMapPlaced", bool)
+    NETVAR(isMini, "CBaseObject", "m_bMiniBuilding", bool)
+    NETVAR(objectBuilder, "CBaseObject", "m_hBuilder", int)
+    NETVAR(objectHealth, "CBaseObject", "m_iHealth", int)
+    NETVAR(objectMaxHealth, "CBaseObject", "m_iMaxHealth", int)
+    NETVAR(objectCarried, "CBaseObject", "m_bCarried", bool)
 
     NETVAR(lastFireTime, "CTFWeaponBase", "m_flLastFireTime", float)
     NETVAR_OFFSET(smackTime, "CTFWeaponBase", "m_nInspectStage", 0x1C, float)
 
-    NETVAR(clip, "CBaseCombatWeapon", "m_iClip1", int)
-    NETVAR(nextSecondaryAttack, "CBaseCombatWeapon","m_flNextSecondaryAttack", float)
-    NETVAR(nextPrimaryAttack, "CBaseCombatWeapon", "m_flNextPrimaryAttack", float)
-    NETVAR(state, "CBaseCombatWeapon", "m_iState ", int)
+    NETVAR(condition, "CTFPlayer", "m_nPlayerCond", int)
+    NETVAR(conditionEx, "CTFPlayer", "m_nPlayerCondEx", int)
+    NETVAR(conditionEx2, "CTFPlayer", "m_nPlayerCondEx2", int)
+    NETVAR(conditionEx3, "CTFPlayer", "m_nPlayerCondEx3", int)
+    NETVAR(getPlayerClass, "CTFPlayer", "m_iClass", TFClass)
+    NETVAR(waterLevel, "CTFPlayer", "m_nWaterLevel", unsigned char)
+    NETVAR(forceTauntCam, "CTFPlayer", "m_nForceTauntCam", int)
+    NETVAR(isFeignDeathReady, "CTFPlayer", "m_bFeignDeathReady", bool)
+    NETVAR(eyeAngles, "CTFPlayer", "m_angEyeAngles[0]", Vector)
 
     NETVAR(chargeTime, "CTFPipebombLauncher", "m_flChargeBeginTime", float)
 
