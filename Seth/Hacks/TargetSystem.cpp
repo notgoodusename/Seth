@@ -86,7 +86,7 @@ void PlayerTarget::update(Entity* entity) noexcept
 
     simulationTime = entity->simulationTime();
 
-    isValid = entity->setupBones(matrix.data(), entity->getBoneCache().size, 0x7FF00, memory->globalVars->currenttime);
+    isValid = entity->setupBones(matrix.data(), entity->getBoneCache().size, 0x7FF00, memory->globalVars->currentTime);
     if (!isValid)
         return;
 
@@ -114,7 +114,10 @@ void PlayerTarget::update(Entity* entity) noexcept
     record.mins = mins;
     record.maxs = maxs;
     std::copy(matrix.begin(), matrix.end(), record.matrix);
-    record.positions.push_back(record.matrix[6].origin());
+    record.headPositions.push_back(record.matrix[6].origin());
+    for (auto bone : { 2, 0 }) { //basically spine_1 and pelvis
+        record.bodyPositions.push_back(record.matrix[bone].origin());
+    }
 
     backtrackRecords.push_front(record);
 

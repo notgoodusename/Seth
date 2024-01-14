@@ -61,9 +61,9 @@ static void updateNetLatency() noexcept
 void GameData::update() noexcept
 {
     static int lastFrame;
-    if (lastFrame == memory->globalVars->framecount)
+    if (lastFrame == memory->globalVars->frameCount)
         return;
-    lastFrame = memory->globalVars->framecount;
+    lastFrame = memory->globalVars->frameCount;
 
     Lock lock;
 
@@ -321,7 +321,7 @@ void PlayerData::update(Entity* entity) noexcept
     static_cast<BaseData&>(*this) = { entity };
     origin = entity->getAbsOrigin();
     inViewFrustum = alive ? !memory->cullBox(obbMins + origin, obbMaxs + origin, frustum) : false;// we need to sign another func that could be virtual fucking valve
-    lastContactTime = alive ? memory->globalVars->realtime : 0.0f;
+    lastContactTime = alive ? memory->globalVars->realTime : 0.0f;
 
     if (!inViewFrustum)
         return;
@@ -406,7 +406,7 @@ ImTextureID PlayerData::getAvatarTexture() const noexcept
 float PlayerData::fadingAlpha() const noexcept
 {
     constexpr float fadeTime = 1.50f;
-    return std::clamp(1.0f - (memory->globalVars->realtime - lastContactTime - 0.25f) / fadeTime, 0.0f, 1.0f);
+    return std::clamp(1.0f - (memory->globalVars->realTime - lastContactTime - 0.25f) / fadeTime, 0.0f, 1.0f);
 }
 
 BuildingsData::BuildingsData(Entity* building) noexcept : BaseData{ building }

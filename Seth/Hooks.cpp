@@ -372,10 +372,10 @@ static float __fastcall calculateChargeCapHook(void* thisPointer, void*) noexcep
 {
     static auto original = hooks->calculateChargeCap.getOriginal<float>();
 
-    const float backupFrametime = memory->globalVars->frametime;
-    memory->globalVars->frametime = FLT_MAX;
+    const float backupFrameTime = memory->globalVars->frameTime;
+    memory->globalVars->frameTime = FLT_MAX;
     float finalValue = original(thisPointer);
-    memory->globalVars->frametime = backupFrametime;
+    memory->globalVars->frameTime = backupFrameTime;
     return finalValue;
 }
 

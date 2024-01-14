@@ -54,16 +54,16 @@ void EnginePrediction::run(UserCmd* cmd) noexcept
 
     localPlayer->setCurrentCommand(cmd);
 
-    const auto oldCurrenttime = memory->globalVars->currenttime;
-    const auto oldFrametime = memory->globalVars->frametime;
+    const auto oldCurrentTime = memory->globalVars->currentTime;
+    const auto oldFrameTime = memory->globalVars->frameTime;
     const auto oldIsFirstTimePredicted = interfaces->prediction->isFirstTimePredicted;
     const auto oldInPrediction = interfaces->prediction->inPrediction;
     const auto oldSeed = *memory->predictionRandomSeed;
 
     *memory->predictionRandomSeed = MD5_PseudoRandom(cmd->commandNumber) & MASK_SIGNED;
 
-    memory->globalVars->currenttime = memory->globalVars->serverTime();
-    memory->globalVars->frametime = interfaces->prediction->enginePaused ? 0 : memory->globalVars->intervalPerTick;
+    memory->globalVars->currentTime = memory->globalVars->serverTime();
+    memory->globalVars->frameTime = interfaces->prediction->enginePaused ? 0 : memory->globalVars->intervalPerTick;
     interfaces->prediction->isFirstTimePredicted = false;
     interfaces->prediction->inPrediction = true;
 
@@ -88,8 +88,8 @@ void EnginePrediction::run(UserCmd* cmd) noexcept
     localPlayer->setCurrentCommand(nullptr);
     *memory->predictionRandomSeed = oldSeed;
 
-    memory->globalVars->currenttime = oldCurrenttime;
-    memory->globalVars->frametime = oldFrametime;
+    memory->globalVars->currentTime = oldCurrentTime;
+    memory->globalVars->frameTime = oldFrameTime;
 
     interfaces->prediction->isFirstTimePredicted = oldIsFirstTimePredicted;
     interfaces->prediction->inPrediction = oldInPrediction;

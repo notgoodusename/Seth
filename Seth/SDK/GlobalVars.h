@@ -7,11 +7,11 @@
 struct UserCmd;
 
 struct GlobalVars {
-    const float realtime;
-    int framecount;
+    const float realTime;
+    int frameCount;
     const float absoluteFrameTime;
-    float currenttime;
-    float frametime;
+    float currentTime;
+    float frameTime;
     const int maxClients;
     const int tickCount;
     const float intervalPerTick;

@@ -45,7 +45,9 @@ struct PlayerTarget : Target
 	void update(Entity* entity) noexcept;
 
 	struct Record {
-		std::vector<Vector> positions;
+		std::vector<Vector> headPositions; //Use this for headshoting
+		std::vector<Vector> bodyPositions; //Use this for body
+
 		Vector origin;
 		Vector absAngle;
 		Vector eyeAngle;

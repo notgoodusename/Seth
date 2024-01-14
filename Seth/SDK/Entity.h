@@ -455,6 +455,30 @@ public:
             return Vector{ };
     }
 
+    bool canFireCriticalShot(bool headShot) noexcept
+    {
+        bool result = false;
+        
+        if (const auto& owner = interfaces->entityList->getEntityFromHandle(ownerEntity()))
+        {
+            const int backupFov = owner->fov();
+            const float backupFovTime = owner->fovTime();
+            owner->fov() = owner->defaultFov() - 1;
+            owner->fovTime() = memory->globalVars->currentTime;
+
+            result = VirtualMethod::call<bool, 425>(this, headShot, nullptr);
+
+            owner->fov() = backupFov;
+            owner->fovTime() = backupFovTime;
+        }
+        return result;
+    }
+
+    bool canWeaponHeadshot() noexcept
+    {
+        return (getDamageType() & (1 << 25)) && canFireCriticalShot(true);
+    }
+
     bool setupBones(matrix3x4* out, int maxBones, int boneMask, float currentTime) noexcept
     {
         Vector absOrigin = getAbsOrigin();
@@ -685,6 +709,7 @@ public:
     NETVAR(viewModel, "CBasePlayer", "m_hViewModel[0]", int)
     NETVAR(fov, "CBasePlayer", "m_iFOV", int)
     NETVAR(fovStart, "CBasePlayer", "m_iFOVStart", int)
+    NETVAR(fovTime, "CBasePlayer", "m_flFOVTime", float)
     NETVAR(defaultFov, "CBasePlayer", "m_iDefaultFOV", int)
     NETVAR(observerTarget, "CBasePlayer", "m_hObserverTarget", int)
     NETVAR(getObserverMode, "CBasePlayer", "m_iObserverMode", ObsMode)

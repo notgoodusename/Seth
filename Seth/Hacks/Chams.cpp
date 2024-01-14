@@ -255,7 +255,7 @@ void Chams::applyChams(const std::array<Config::Chams::Material, 7>& chams, int 
         else
             interfaces->renderView->setColorModulation(r, g, b);
 
-        const auto pulse = cham.color[3] * (cham.blinking ? std::sin(memory->globalVars->currenttime * 5) * 0.5f + 0.5f : 1.0f);
+        const auto pulse = cham.color[3] * (cham.blinking ? std::sin(memory->globalVars->currentTime * 5) * 0.5f + 0.5f : 1.0f);
 
         interfaces->renderView->setBlend(pulse);
 
@@ -285,7 +285,7 @@ void Chams::applyChams(const std::array<Config::Chams::Material, 7>& chams, int 
             b = cham.color[2];
         }
 
-        const auto pulse = cham.color[3] * (cham.blinking ? std::sin(memory->globalVars->currenttime * 5) * 0.5f + 0.5f : 1.0f);
+        const auto pulse = cham.color[3] * (cham.blinking ? std::sin(memory->globalVars->currentTime * 5) * 0.5f + 0.5f : 1.0f);
 
         if (material == glow)
             material->findVar("$envmaptint")->setVectorValue(r, g, b);

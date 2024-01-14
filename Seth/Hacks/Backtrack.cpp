@@ -57,6 +57,8 @@ void Backtrack::run(UserCmd* cmd) noexcept
     if (!isAttacking(cmd, activeWeapon))
         return;
 
+    const bool canHeadshot = activeWeapon->canWeaponHeadshot();
+
     const auto& localPlayerEyePosition = localPlayer->getEyePosition();
 
     auto bestFov{ 255.f };
@@ -79,7 +81,8 @@ void Backtrack::run(UserCmd* cmd) noexcept
         {
             if (Backtrack::valid(target.backtrackRecords[j].simulationTime))
             {
-                for (auto& position : target.backtrackRecords[j].positions) {
+                for (auto& position : 
+                    canHeadshot ? target.backtrackRecords[j].headPositions : target.backtrackRecords[j].bodyPositions) {
                     auto angle = Math::calculateRelativeAngle(localPlayerEyePosition, position, cmd->viewangles);
                     auto fov = std::hypotf(angle.x, angle.y);
                     if (fov < bestFov) {
@@ -106,7 +109,7 @@ void Backtrack::updateLatency(NetworkChannel* network) noexcept
 {
     for (auto& sequence : sequences)
     {
-        if (memory->globalVars->realtime - sequence.currentTime >= (getLatency() / 1000.0f))
+        if (memory->globalVars->realTime - sequence.currentTime >= (getLatency() / 1000.0f))
         {
             network->inReliableState = sequence.inReliableState;
             network->inSequenceNr = sequence.inSequenceNr;
@@ -145,7 +148,7 @@ void Backtrack::update() noexcept
         IncomingSequence sequence{ };
         sequence.inReliableState = network->inReliableState;
         sequence.inSequenceNr = network->inSequenceNr;
-        sequence.currentTime = memory->globalVars->realtime;
+        sequence.currentTime = memory->globalVars->realTime;
         sequences.push_front(sequence);
     }
 

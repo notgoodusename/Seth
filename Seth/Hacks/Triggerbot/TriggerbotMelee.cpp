@@ -36,7 +36,7 @@ void TriggerbotMelee::run(Entity* activeWeapon, UserCmd* cmd, float& lastTime, f
     if (!cfg.enabled)
         return;
 
-    const auto now = memory->globalVars->realtime;
+    const auto now = memory->globalVars->realTime;
 
     if (now - lastTime < cfg.shotDelay / 1000.0f)
         return;
@@ -79,7 +79,7 @@ void TriggerbotMelee::run(Entity* activeWeapon, UserCmd* cmd, float& lastTime, f
                 if (!Backtrack::valid(records[i].simulationTime))
                     continue;
 
-                for (auto& position : records[i].positions)
+                for (const auto& position : records[i].bodyPositions)
                 {
                     const auto angle = Math::calculateRelativeAngle(localPlayerEyePosition, position, cmd->viewangles);
                     const auto fov = std::hypotf(angle.x, angle.y);
