@@ -128,11 +128,6 @@ struct PlayerData : BaseData {
     };
 };
 
-struct NPCData : BaseData {
-    NPCData(Entity* npc) noexcept;
-
-    std::string name;
-};
 
 struct BuildingsData : BaseData {
     BuildingsData(Entity* building) noexcept;
@@ -144,6 +139,12 @@ struct BuildingsData : BaseData {
     std::string owner;
     int health;
     int maxHealth;
+};
+
+struct NPCData : BaseData {
+    NPCData(Entity* npc) noexcept;
+
+    std::string name;
 };
 
 struct WorldData : BaseData {
