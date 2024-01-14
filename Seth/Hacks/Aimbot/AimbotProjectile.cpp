@@ -580,7 +580,16 @@ void AimbotProjectile::run(Entity* activeWeapon, UserCmd* cmd) noexcept
             cmd->viewangles = angle;
 
             if (cfg.autoShoot)
+            {
                 cmd->buttons |= UserCmd::IN_ATTACK;
+                if (activeWeapon->weaponId() == WeaponId::COMPOUND_BOW 
+                    || activeWeapon->weaponId() == WeaponId::PIPEBOMBLAUNCHER
+                    || activeWeapon->weaponId() == WeaponId::CANNON)
+                {
+                    if (activeWeapon->chargeTime() > 0.0f)
+                        cmd->buttons &= ~UserCmd::IN_ATTACK;
+                }
+            }
 
             if (!cfg.silent)
                 interfaces->engine->setViewAngles(cmd->viewangles);
