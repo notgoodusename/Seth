@@ -52,8 +52,12 @@ void Backtrack::run(UserCmd* cmd) noexcept
 
     if (!canAttack(cmd, activeWeapon) || !isAttacking(cmd, activeWeapon))
         return;
+    
+    const auto weaponType = activeWeapon->getWeaponType();
+    if (weaponType != WeaponType::HITSCAN && weaponType != WeaponType::MELEE)
+        return;
 
-    auto localPlayerEyePosition = localPlayer->getEyePosition();
+    const auto& localPlayerEyePosition = localPlayer->getEyePosition();
 
     auto bestFov{ 255.f };
     int bestTargetIndex{ };
