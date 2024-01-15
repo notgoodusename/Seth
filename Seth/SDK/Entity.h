@@ -359,6 +359,21 @@ public:
         return clientClass ? clientClass->classId : ClassId(0);
     }
 
+    Entity* moveChild() noexcept
+    {
+        return interfaces->entityList->getEntity(*reinterpret_cast<int*>(reinterpret_cast<uintptr_t>(this) + 0x1B0) & 0xFFF);
+    }
+
+    Entity* nextMovePeer() noexcept
+    {
+        return interfaces->entityList->getEntity(*reinterpret_cast<int*>(reinterpret_cast<uintptr_t>(this) + 0x1B4) & 0xFFF);
+    }
+
+    Entity* moveParent() noexcept
+    {
+        return interfaces->entityList->getEntity(*reinterpret_cast<int*>(reinterpret_cast<uintptr_t>(this) + 0x1B8) & 0xFFF);
+    }
+
     IKContext*& IK() noexcept
     {
         return *reinterpret_cast<IKContext**>(reinterpret_cast<uintptr_t>(this) + 0x578);

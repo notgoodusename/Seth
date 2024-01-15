@@ -21,31 +21,66 @@ struct GlowEntity
     std::array<float, 4> color;
 };
 
-static std::vector<GlowEntity> customGlowEntities;
-static std::unordered_map<int, bool> drawnGlowEntities;
+bool renderingGlow = false;
 
-static Material* normal;
+std::vector<GlowEntity> customGlowEntities;
+std::unordered_map<int, bool> drawnGlowEntities;
 
+Material* glowColor = nullptr;
 
-static Texture* fullFrame;
-static Texture* quarterSize;
-static Texture* renderBuffer1;
+Material* blurX = nullptr;
+Material* blurY = nullptr;
+Material* haloAddToScreen = nullptr;
 
-static constexpr auto dispatchGlowMaterial(int id) noexcept
-{
-    switch (id) {
-    default:
-    case 0: return normal;
-    }
-}
+Texture* fullFrame;
+Texture* quarterSize;
+Texture* renderBuffer1;
+Texture* renderBuffer2;
 
 static void initializeGlowMaterials() noexcept
 {
+    if(!glowColor)
     {
-        normal = interfaces->materialSystem->findMaterial("dev/glow_color", "Other textures");
-        normal->incrementReferenceCount();
+        glowColor = interfaces->materialSystem->findMaterial("dev/glow_color", "Other textures");
+        glowColor->incrementReferenceCount();
     }
 
+    if(!blurX)
+    {
+        static KeyValues* blurXKeyValue = nullptr;
+        if (!blurXKeyValue)
+        {
+            blurXKeyValue = new KeyValues("BlurFilterX");
+            blurXKeyValue->setString("$basetexture", "glow_buffer_1");
+            blurXKeyValue->setString("$wireframe", "0");
+        }
+        blurX = interfaces->materialSystem->createMaterial("BlurX", blurXKeyValue);
+    }
+
+    if (!blurY)
+    {
+        static KeyValues* blurYKeyValue = nullptr;
+        if (!blurYKeyValue)
+        {
+            blurYKeyValue = new KeyValues("BlurFilterY");
+            blurYKeyValue->setString("$basetexture", "glow_buffer_2");
+            blurYKeyValue->setString("$wireframe", "0");
+        }
+        blurY = interfaces->materialSystem->createMaterial("BlurY", blurYKeyValue);
+    }
+
+    if (!haloAddToScreen)
+    {
+        static KeyValues* haloAddToScreenKeyValue = nullptr;;
+        if (!haloAddToScreenKeyValue)
+        {
+            haloAddToScreenKeyValue = new KeyValues("UnlitGeneric");
+            haloAddToScreenKeyValue->setString("$basetexture", "glow_buffer_1");
+            haloAddToScreenKeyValue->setString("$wireframe", "0");
+            haloAddToScreenKeyValue->setString("$additive", "1");
+        }
+        haloAddToScreen = interfaces->materialSystem->createMaterial("HaloAddToScreen", haloAddToScreenKeyValue);
+    }
 
     fullFrame = interfaces->materialSystem->findTexture("_rt_FullFrameFB", "RenderTargets");
     fullFrame->incrementReferenceCount();
@@ -56,18 +91,35 @@ static void initializeGlowMaterials() noexcept
         "glow_buffer_1", fullFrame->getActualWidth(), fullFrame->getActualHeight(),
         8, 2, 0, 4 | 8 | 8192, 0x00000001);
     renderBuffer1->incrementReferenceCount();
+
+    renderBuffer2 = interfaces->materialSystem->createNamedRenderTargetTextureEx(
+        "glow_buffer_2", fullFrame->getActualWidth(), fullFrame->getActualHeight(),
+        8, 2, 0, 4 | 8 | 8192, 0x00000001);
+    renderBuffer2->incrementReferenceCount();
 }
 
-static void drawModel(Entity* entity, int flags = 0x00000001, bool isDrawingModels = true) noexcept
+static void drawModel(Entity* entity, bool isDrawingModels = true) noexcept
 {
-    entity->drawModel(flags);
+    if (!isDrawingModels)
+        renderingGlow = true;
+
+    entity->drawModel(0x00000001 | 0x00000080);
+
     if (isDrawingModels)
         drawnGlowEntities[entity->handle()] = true;
+
+    if (!isDrawingModels)
+        renderingGlow = false;
 }
 
-bool hasDrawn(int handle) noexcept
+bool Glow::hasDrawn(int handle) noexcept
 {
     return drawnGlowEntities.find(handle) != drawnGlowEntities.end();
+}
+
+bool Glow::isRenderingGlow() noexcept
+{
+    return renderingGlow;
 }
 
 void Glow::render() noexcept
@@ -93,21 +145,21 @@ void Glow::render() noexcept
     if (!renderContext)
         return;
 
-    ShaderStencilState StencilStateDisable = {};
-    StencilStateDisable.enabled = false;
-
     std::array<float, 3> originalColor;
     interfaces->renderView->getColorModulation(originalColor.data());
     const float originalBlend = interfaces->renderView->getBlend();
 
-    ShaderStencilState StencilState = {};
-    StencilState.enabled = true;
-    StencilState.referenceValue = 1;
-    StencilState.compareFunc = STENCILCOMPARISONFUNCTION_ALWAYS;
-    StencilState.passOp = STENCILOPERATION_REPLACE;
-    StencilState.failOp = STENCILOPERATION_KEEP;
-    StencilState.ZfailOp = STENCILOPERATION_REPLACE;
-    StencilState.setStencilState(renderContext);
+    ShaderStencilState stencilState = { };
+    stencilState.enabled = true;
+    stencilState.referenceValue = 1;
+    stencilState.compareFunc = STENCILCOMPARISONFUNCTION_ALWAYS;
+    stencilState.passOp = STENCILOPERATION_REPLACE;
+    stencilState.failOp = STENCILOPERATION_KEEP;
+    stencilState.ZfailOp = STENCILOPERATION_REPLACE;
+    stencilState.referenceValue = 1;
+    stencilState.writeMask = 0xFF;
+    stencilState.testMask = 0x0;
+    stencilState.setStencilState(renderContext);
 
     interfaces->renderView->setBlend(1.0f);
     interfaces->renderView->setColorModulation(1.0f, 1.0f, 1.0f);
@@ -116,29 +168,98 @@ void Glow::render() noexcept
     for (int i = 1; i <= highestEntityIndex; ++i) {
         auto applyGlow = [](const Config::GlowItem& glow, Entity* entity, int health = 0, int maxHealth = 0) noexcept
         {
-            if (glow.enabled) {
-                GlowEntity glowEntity;
-                glowEntity.entity = entity;
-                glowEntity.color[3] = glow.color[3];
-                if (glow.healthBased && health) {
-                    Helpers::healthColor(std::clamp(static_cast<float>(health) / static_cast<float>(maxHealth), 0.0f, 1.0f), glowEntity.color[0], glowEntity.color[1], glowEntity.color[2]);
-                }
-                else if (glow.rainbow) {
-                    const auto [r, g, b] { rainbowColor(glow.rainbowSpeed) };
-                    glowEntity.color[0] = r;
-                    glowEntity.color[1] = g;
-                    glowEntity.color[2] = b;
-                }
-                else {
-                    glowEntity.color[0] = glow.color[0];
-                    glowEntity.color[1] = glow.color[1];
-                    glowEntity.color[2] = glow.color[2];
-                }
-                if (!hasDrawn(entity->handle()))
-                    drawModel(entity);
+            if (!glow.enabled)
+                return;
 
-                customGlowEntities.push_back(glowEntity);
+            GlowEntity glowEntity;
+            glowEntity.entity = entity;
+            glowEntity.color[3] = glow.color[3];
+            if (glow.healthBased && health) {
+                Helpers::healthColor(std::clamp(static_cast<float>(health) / static_cast<float>(maxHealth), 0.0f, 1.0f), glowEntity.color[0], glowEntity.color[1], glowEntity.color[2]);
             }
+            else if (glow.rainbow) {
+                const auto [r, g, b] { rainbowColor(glow.rainbowSpeed) };
+                glowEntity.color[0] = r;
+                glowEntity.color[1] = g;
+                glowEntity.color[2] = b;
+            }
+            else {
+                glowEntity.color[0] = glow.color[0];
+                glowEntity.color[1] = glow.color[1];
+                glowEntity.color[2] = glow.color[2];
+            }
+
+            if (!hasDrawn(entity->handle()))
+                drawModel(entity);
+
+            customGlowEntities.push_back(glowEntity);
+
+            if (!entity->isPlayer())
+                return;
+
+            auto attachment = entity->moveChild();
+            for (int i = 0; i < 32; i++)
+            {
+                if (!attachment || attachment->isDormant())
+                    continue;
+
+                if (attachment->getClassId() == ClassId::TFWearable)
+                {
+                    GlowEntity glowAttachement;
+                    glowAttachement.entity = attachment;
+                    glowAttachement.color[3] = glow.color[3];
+
+                    if (glow.healthBased && health) {
+                        Helpers::healthColor(std::clamp(static_cast<float>(health) / static_cast<float>(maxHealth), 0.0f, 1.0f), glowAttachement.color[0], glowAttachement.color[1], glowAttachement.color[2]);
+                    }
+                    else if (glow.rainbow) {
+                        const auto [r, g, b] { rainbowColor(glow.rainbowSpeed) };
+                        glowAttachement.color[0] = r;
+                        glowAttachement.color[1] = g;
+                        glowAttachement.color[2] = b;
+                    }
+                    else {
+                        glowAttachement.color[0] = glow.color[0];
+                        glowAttachement.color[1] = glow.color[1];
+                        glowAttachement.color[2] = glow.color[2];
+                    }
+
+                    customGlowEntities.push_back(glowAttachement);
+
+                    if (!hasDrawn(attachment->handle()))
+                        drawModel(attachment);
+                }
+
+                attachment = attachment->nextMovePeer();
+            }
+
+            const auto& activeWeapon = entity->getActiveWeapon();
+            if (!activeWeapon || activeWeapon->isDormant())
+                return;
+
+            GlowEntity glowWeapon;
+            glowWeapon.entity = activeWeapon;
+            glowWeapon.color[3] = glow.color[3];
+
+            if (glow.healthBased && health) {
+                Helpers::healthColor(std::clamp(static_cast<float>(health) / static_cast<float>(maxHealth), 0.0f, 1.0f), glowWeapon.color[0], glowWeapon.color[1], glowWeapon.color[2]);
+            }
+            else if (glow.rainbow) {
+                const auto [r, g, b] { rainbowColor(glow.rainbowSpeed) };
+                glowWeapon.color[0] = r;
+                glowWeapon.color[1] = g;
+                glowWeapon.color[2] = b;
+            }
+            else {
+                glowWeapon.color[0] = glow.color[0];
+                glowWeapon.color[1] = glow.color[1];
+                glowWeapon.color[2] = glow.color[2];
+            }
+
+            customGlowEntities.push_back(glowWeapon);
+
+            if (!hasDrawn(activeWeapon->handle()))
+                drawModel(activeWeapon);
         };
 
         const auto entity = interfaces->entityList->getEntity(i);
@@ -181,21 +302,15 @@ void Glow::render() noexcept
         }
     }
 
-    const int w =static_cast<int>(ImGui::GetIO().DisplaySize.x);
+    const int w = static_cast<int>(ImGui::GetIO().DisplaySize.x);
     const int h = static_cast<int>(ImGui::GetIO().DisplaySize.y);
 
-    StencilState = {};
-    StencilState.enabled = true;
-    StencilState.writeMask = 0x0;
-    StencilState.testMask = 0xFF;
-    StencilState.referenceValue = 0;
-    StencilState.compareFunc = STENCILCOMPARISONFUNCTION_EQUAL;
-    StencilState.passOp = STENCILOPERATION_KEEP;
-    StencilState.failOp = STENCILOPERATION_KEEP;
-    StencilState.ZfailOp = STENCILOPERATION_KEEP;
-    StencilState.setStencilState(renderContext);
+    renderContext->setStencilEnable(false);
 
-    interfaces->modelRender->forcedMaterialOverride(normal);
+    if (customGlowEntities.empty())
+        return;
+
+    interfaces->modelRender->forcedMaterialOverride(glowColor);
 
     renderContext->pushRenderTargetAndViewport();
     {
@@ -206,18 +321,49 @@ void Glow::render() noexcept
 
         for (const auto& glowEntity : customGlowEntities)
         {
+            if (!glowEntity.entity)
+                continue;
+
             interfaces->renderView->setBlend(glowEntity.color[3]);
             interfaces->renderView->setColorModulation(glowEntity.color[0], glowEntity.color[1], glowEntity.color[2]);
-            drawModel(glowEntity.entity, 0x00000001 | 0x00000080, false);
+            
+            drawModel(glowEntity.entity, false);
         }
     }
     renderContext->popRenderTargetAndViewport();
 
-    StencilStateDisable.setStencilState(renderContext);
+    renderContext->pushRenderTargetAndViewport(); {
+        renderContext->viewport(0, 0, w, h);
 
+        renderContext->setRenderTarget(renderBuffer2);
+        renderContext->drawScreenSpaceRectangle(blurX, 0, 0, w, h, 0.0f, 0.0f, static_cast<float>(w - 1), static_cast<float>(h - 1), w, h);
+
+        renderContext->setRenderTarget(renderBuffer1);
+        renderContext->drawScreenSpaceRectangle(blurY, 0, 0, w, h, 0.0f, 0.0f, static_cast<float>(w - 1), static_cast<float>(h - 1), w, h);
+    }
+    renderContext->popRenderTargetAndViewport();
+
+    stencilState = { };
+    stencilState.enabled = true;
+    stencilState.writeMask = 0x0;
+    stencilState.testMask = 0xFF;
+    stencilState.referenceValue = 0;
+    stencilState.compareFunc = STENCILCOMPARISONFUNCTION_EQUAL;
+    stencilState.passOp = STENCILOPERATION_KEEP;
+    stencilState.failOp = STENCILOPERATION_KEEP;
+    stencilState.ZfailOp = STENCILOPERATION_KEEP;
+    stencilState.referenceValue =01;
+    stencilState.writeMask = 0x0;
+    stencilState.testMask = 0xFF;
+    stencilState.setStencilState(renderContext);
+
+    renderContext->drawScreenSpaceRectangle(haloAddToScreen, 0, 0, w, h, 0.0f, 0.0f, static_cast<float>(w - 1), static_cast<float>(h - 1), w, h);
+
+    renderContext->setStencilEnable(false);
+    
+    interfaces->renderView->setColorModulation(1.0f, 1.0f, 1.0f);
+    interfaces->renderView->setBlend(1.0f);
     interfaces->modelRender->forcedMaterialOverride(nullptr);
-    interfaces->renderView->setColorModulation(originalColor.data());
-    interfaces->renderView->setBlend(originalBlend);
 }
 
 void Glow::updateInput() noexcept
