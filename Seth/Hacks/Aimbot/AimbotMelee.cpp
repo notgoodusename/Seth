@@ -9,44 +9,49 @@
 #include "../../SDK/ModelInfo.h"
 #include "../../SDK/Vector.h"
 
-Vector getMeleeTarget(UserCmd* cmd, Entity* entity, matrix3x4 matrix[MAXSTUDIOBONES], Entity* activeWeapon, 
-    float& bestFov, Vector localPlayerEyePosition, bool mustBackstab = false, Vector eyeAngle = {}, Vector worldSpaceCenter = { }) noexcept
+Vector getKnifeTarget(UserCmd* cmd, Entity* entity, Entity* activeWeapon,
+    float& bestFov, Vector localPlayerEyePosition, Vector eyeAngle, Vector worldSpaceCenter) noexcept
 {
-    const Model* model = entity->getModel();
-    if (!model)
+    const Vector angle{ Math::calculateRelativeAngle(localPlayerEyePosition, worldSpaceCenter, cmd->viewangles) };
+    const float fov{ angle.length2D() };
+    if (fov > bestFov)
         return Vector{ 0.0f, 0.0f, 0.0f };
 
-    StudioHdr* hdr = interfaces->modelInfo->getStudioModel(model);
-    if (!hdr)
+    Vector possibleAngle = cmd->viewangles + angle;
+    possibleAngle.normalize();
+
+    if (!Math::canBackstab(possibleAngle, eyeAngle, worldSpaceCenter) 
+        || !Math::doesMeleeHit(activeWeapon, entity->index(), possibleAngle))
         return Vector{ 0.0f, 0.0f, 0.0f };
 
-    StudioHitboxSet* set = hdr->getHitboxSet(0);
-    if (!set)
-        return Vector{ 0.0f, 0.0f, 0.0f };
-
-    StudioBbox* hitbox = set->getHitbox(mustBackstab ? Hitboxes::Spine1 : Hitboxes::Pelvis);
-    if (!hitbox)
-        return Vector{ 0.0f, 0.0f, 0.0f };
-
-    for (const auto& bonePosition : Aimbot::multiPoint(entity, matrix, hitbox, localPlayerEyePosition, 0, true))
-    {
-        const Vector angle{ Math::calculateRelativeAngle(localPlayerEyePosition, bonePosition, cmd->viewangles) };
-        const float fov{ angle.length2D() };
-        if (fov > bestFov)
-            continue;
-
-        if (mustBackstab 
-            && !Math::canBackstab(cmd->viewangles + angle, eyeAngle, worldSpaceCenter))
-            continue;
-
-        if (!Math::doesMeleeHit(activeWeapon, entity->index(), cmd->viewangles + angle))
-            continue;
-
-        if (fov < bestFov) {
-            bestFov = fov;
-            return bonePosition;
-        }
+    if (fov < bestFov) {
+        bestFov = fov;
+        return worldSpaceCenter;
     }
+
+    return Vector{ 0.0f , 0.0f, 0.0f };
+}
+
+
+Vector getMeleeTarget(UserCmd* cmd, Entity* entity, Vector worldSpaceCenter, Entity* activeWeapon,
+    float& bestFov, Vector localPlayerEyePosition) noexcept
+{
+    const Vector angle{ Math::calculateRelativeAngle(localPlayerEyePosition, worldSpaceCenter, cmd->viewangles) };
+    const float fov{ angle.length2D() };
+    if (fov > bestFov)
+        return Vector{ 0.0f, 0.0f, 0.0f };
+
+    Vector possibleAngle = cmd->viewangles + angle;
+    possibleAngle.normalize();
+
+    if (!Math::doesMeleeHit(activeWeapon, entity->index(), possibleAngle))
+        return Vector{ 0.0f, 0.0f, 0.0f };
+
+    if (fov < bestFov) {
+        bestFov = fov;
+        return worldSpaceCenter;
+    }
+
     return Vector{ 0.0f, 0.0f, 0.0f };
 }
 
@@ -85,21 +90,21 @@ void runKnife(Entity* activeWeapon, UserCmd* cmd) noexcept
 
             for (int i = static_cast<int>(records.size() - 1U); i >= 3; i--)
             {
-                if (Backtrack::valid(records[i].simulationTime))
+                if (!Backtrack::valid(records[i].simulationTime))
+                    continue;
+
+                memcpy(entity->getBoneCache().memory, records[i].matrix, std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
+                memory->setAbsOrigin(entity, records[i].origin);
+                memory->setAbsAngle(entity, records[i].absAngle);
+                memory->setCollisionBounds(entity->getCollideable(), records[i].mins, records[i].maxs);
+
+                bestTarget = getKnifeTarget(cmd, entity, activeWeapon, bestFov, localPlayerEyePosition, records[i].eyeAngle, records[i].worldSpaceCenter);
+                applyMatrix(entity, backupBoneCache, backupOrigin, backupAbsAngle, backupPrescaledMins, backupPrescaledMaxs);
+
+                if (bestTarget.notNull())
                 {
-                    memcpy(entity->getBoneCache().memory, records[i].matrix, std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
-                    memory->setAbsOrigin(entity, records[i].origin);
-                    memory->setAbsAngle(entity, records[i].absAngle);
-                    memory->setCollisionBounds(entity->getCollideable(), records[i].mins, records[i].maxs);
-
-                    bestTarget = getMeleeTarget(cmd, entity, entity->getBoneCache().memory, activeWeapon, bestFov, localPlayerEyePosition, cfg.autoBackstab, records[i].eyeAngle, records[i].worldSpaceCenter);
-                    applyMatrix(entity, backupBoneCache, backupOrigin, backupAbsAngle, backupPrescaledMins, backupPrescaledMaxs);
-
-                    if (bestTarget.notNull())
-                    {
-                        bestSimulationTime = records[i].simulationTime;
-                        break;
-                    }
+                    bestSimulationTime = records[i].simulationTime;
+                    break;
                 }
             }
         }
@@ -110,7 +115,7 @@ void runKnife(Entity* activeWeapon, UserCmd* cmd) noexcept
             memory->setAbsAngle(entity, target.absAngle);
             memory->setCollisionBounds(entity->getCollideable(), target.mins, target.maxs);
 
-            bestTarget = getMeleeTarget(cmd, entity, entity->getBoneCache().memory, activeWeapon, bestFov, localPlayerEyePosition, cfg.autoBackstab, target.eyeAngle, target.worldSpaceCenter);
+            bestTarget = getKnifeTarget(cmd, entity, activeWeapon, bestFov, localPlayerEyePosition, target.eyeAngle, target.worldSpaceCenter);
 
             applyMatrix(entity, backupBoneCache, backupOrigin, backupAbsAngle, backupPrescaledMins, backupPrescaledMaxs);
 
@@ -209,6 +214,7 @@ void AimbotMelee::run(Entity* activeWeapon, UserCmd* cmd) noexcept
 
     auto bestFov = cfg.fov;
     Vector bestTarget{ };
+    Vector worldSpaceCenter{ };
     const auto& localPlayerOrigin = localPlayer->getAbsOrigin();
     const auto& localPlayerEyePosition = localPlayer->getEyePosition();
     for (const auto& target : enemies)
@@ -259,6 +265,7 @@ void AimbotMelee::run(Entity* activeWeapon, UserCmd* cmd) noexcept
             memory->setAbsAngle(entity, records[bestTick].absAngle);
             memory->setCollisionBounds(entity->getCollideable(), records[bestTick].mins, records[bestTick].maxs);
 
+            worldSpaceCenter = records[bestTick].worldSpaceCenter;
             currentSimulationTime = records[bestTick].simulationTime;
         }
         else
@@ -268,6 +275,7 @@ void AimbotMelee::run(Entity* activeWeapon, UserCmd* cmd) noexcept
             memory->setAbsAngle(entity, target.absAngle);
             memory->setCollisionBounds(entity->getCollideable(), target.mins, target.maxs);
 
+            worldSpaceCenter = target.worldSpaceCenter;
             currentSimulationTime = target.simulationTime;
         }
 
@@ -277,7 +285,7 @@ void AimbotMelee::run(Entity* activeWeapon, UserCmd* cmd) noexcept
         meleeRecord.origin = entity->getAbsOrigin();
         meleeRecord.absAngle = entity->getAbsAngle();
 
-        bestTarget = getMeleeTarget(cmd, entity, entity->getBoneCache().memory, activeWeapon, bestFov, localPlayerEyePosition);
+        bestTarget = getMeleeTarget(cmd, entity, worldSpaceCenter, activeWeapon, bestFov, localPlayerEyePosition);
         applyMatrix(entity, backupBoneCache, backupOrigin, backupAbsAngle, backupPrescaledMins, backupPrescaledMaxs);
         if (bestTarget.notNull())
         {
