@@ -21,13 +21,13 @@ int getMaxUserCmdProcessTicks() noexcept
     return 22;
 }
 
-void applyMatrix(Entity* entity, matrix3x4* boneCacheData, Vector origin, Vector eyeAngle, Vector mins, Vector maxs) noexcept
+void applyMatrix(Entity* entity, matrix3x4* boneCacheData, Vector absOrigin, Vector absAngle, Vector mins, Vector maxs) noexcept
 {
     entity->invalidateBoneCache();
     memcpy(entity->getBoneCache().memory, boneCacheData, std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
-    memory->setAbsOrigin(entity, origin);
-    entity->eyeAngles() = eyeAngle;
-    memory->setCollisionBounds(entity->getCollideable(), mins, maxs);
+	memory->setAbsOrigin(entity, absOrigin);
+	memory->setAbsAngle(entity, absAngle);
+	memory->setCollisionBounds(entity->getCollideable(), mins, maxs);
 }
 
 bool canAttack(UserCmd* cmd, Entity* activeWeapon) noexcept

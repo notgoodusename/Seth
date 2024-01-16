@@ -10,7 +10,7 @@
 #include "../../SDK/Math.h"
 #include "../../SDK/ModelInfo.h"
 
-bool getTriggerbotMeleeTarget(UserCmd* cmd, Entity* activeWeapon, Entity* entity, bool mustBackstab) noexcept
+bool getTriggerbotMeleeTarget(UserCmd* cmd, Entity* activeWeapon, Entity* entity, bool mustBackstab, Vector entityWorldSpaceCenter) noexcept
 {
     const Model* model = entity->getModel();
     if (!model)
@@ -25,7 +25,8 @@ bool getTriggerbotMeleeTarget(UserCmd* cmd, Entity* activeWeapon, Entity* entity
         return false;
     
     if (mustBackstab)
-        return Math::canBackstab(entity, cmd->viewangles, entity->eyeAngles()) && Math::doesMeleeHit(activeWeapon, entity->index(), cmd->viewangles);
+        return Math::canBackstab(cmd->viewangles, entity->eyeAngles(), entityWorldSpaceCenter)
+        && Math::doesMeleeHit(activeWeapon, entity->index(), cmd->viewangles);
 
     return Math::doesMeleeHit(activeWeapon, entity->index(), cmd->viewangles);
 }
@@ -63,7 +64,8 @@ void TriggerbotMelee::run(Entity* activeWeapon, UserCmd* cmd, float& lastTime, f
         Vector backupPrescaledMaxs = entity->getCollideable()->obbMaxsPreScaled();
         Vector backupOrigin = entity->getAbsOrigin();
         Vector backupAbsAngle = entity->getAbsAngle();
-        Vector backupEyeAngle = entity->eyeAngles();
+
+        Vector worldSpaceCenter = entity->getWorldSpaceCenter();
 
         if ((config->backtrack.enabled || config->backtrack.fakeLatency) && cfg.targetBacktrack)
         {
@@ -92,29 +94,31 @@ void TriggerbotMelee::run(Entity* activeWeapon, UserCmd* cmd, float& lastTime, f
 
             if (bestTick <= -1)
             {
-                applyMatrix(entity, backupBoneCache, backupOrigin, backupEyeAngle, backupPrescaledMins, backupPrescaledMaxs);
+                applyMatrix(entity, backupBoneCache, backupOrigin, backupAbsAngle, backupPrescaledMins, backupPrescaledMaxs);
                 continue;
             }
 
             memcpy(entity->getBoneCache().memory, records[bestTick].matrix, std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
             memory->setAbsOrigin(entity, records[bestTick].origin);
-            entity->eyeAngles() = records[bestTick].eyeAngle;
+            memory->setAbsAngle(entity, records[bestTick].absAngle);
             memory->setCollisionBounds(entity->getCollideable(), records[bestTick].mins, records[bestTick].maxs);
 
+            worldSpaceCenter = records[bestTick].worldSpaceCenter;
             bestSimulationTime = records[bestTick].simulationTime;
         }
         else
         {
             memcpy(entity->getBoneCache().memory, target.matrix.data(), std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
             memory->setAbsOrigin(entity, target.origin);
-            entity->eyeAngles() = target.eyeAngle;
+            memory->setAbsAngle(entity, target.absAngle);
             memory->setCollisionBounds(entity->getCollideable(), target.mins, target.maxs);
 
+            worldSpaceCenter = target.worldSpaceCenter;
             bestSimulationTime = target.simulationTime;
         }
 
-        gotTarget = getTriggerbotMeleeTarget(cmd, activeWeapon, entity, activeWeapon->isKnife() && cfg.autoBackstab);
-        applyMatrix(entity, backupBoneCache, backupOrigin, backupEyeAngle, backupPrescaledMins, backupPrescaledMaxs);
+        gotTarget = getTriggerbotMeleeTarget(cmd, activeWeapon, entity, activeWeapon->isKnife() && cfg.autoBackstab, worldSpaceCenter);
+        applyMatrix(entity, backupBoneCache, backupOrigin, backupAbsAngle, backupPrescaledMins, backupPrescaledMaxs);
         if (gotTarget)
             break;
     }

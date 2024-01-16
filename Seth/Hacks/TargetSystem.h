@@ -48,11 +48,11 @@ struct PlayerTarget : Target
 		std::vector<Vector> headPositions; //Use this for headshoting
 		std::vector<Vector> bodyPositions; //Use this for body
 
-		Vector origin;
-		Vector absAngle;
-		Vector eyeAngle;
-		Vector mins;
-		Vector maxs;
+		Vector origin{ }, absAngle{ };
+		Vector mins{ }, maxs{ };
+		Vector eyeAngle{ };
+		Vector worldSpaceCenter{ };
+
 		float simulationTime;
 		matrix3x4 matrix[MAXSTUDIOBONES];
 	};
@@ -61,9 +61,10 @@ struct PlayerTarget : Target
 
 	std::array<matrix3x4, MAXSTUDIOBONES> matrix;
 
-	Vector mins{}, maxs{};
-	Vector origin{}, absAngle{};
-	Vector eyeAngle{};
+	Vector mins{ }, maxs{ };
+	Vector origin{ }, absAngle{ };
+	Vector eyeAngle{ };
+	Vector worldSpaceCenter{ };
 
 	int priority{ 1 };
 	float simulationTime{ -1.0f };

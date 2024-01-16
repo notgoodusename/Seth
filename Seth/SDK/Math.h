@@ -9,7 +9,7 @@ class Entity;
 
 namespace Math
 {
-	bool canBackstab(Entity* entity, Vector angles, Vector entityAngles) noexcept;
+	bool canBackstab(Vector angles, Vector entityAngles, Vector entityWorldSpaceCenter) noexcept;
     bool doesMeleeHit(Entity* activeWeapon, int index, const Vector angles) noexcept;
 
 	Vector getCenterOfHitbox(const matrix3x4 matrix[MAXSTUDIOBONES], StudioBbox* hitbox) noexcept;

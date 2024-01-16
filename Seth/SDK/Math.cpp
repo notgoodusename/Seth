@@ -7,10 +7,10 @@
 
 #include "../Helpers.h"
 
-bool Math::canBackstab(Entity* entity, Vector angles, Vector entityAngles) noexcept
+bool Math::canBackstab(Vector angles, Vector entityAngles, Vector entityWorldSpaceCenter) noexcept
 {
     Vector vecToTarget;
-    vecToTarget = entity->getWorldSpaceCenter() - localPlayer->getWorldSpaceCenter();
+    vecToTarget = entityWorldSpaceCenter - localPlayer->getWorldSpaceCenter();
     vecToTarget.z = 0.0f;
     vecToTarget.normalizeInPlace();
 

@@ -96,8 +96,9 @@ void PlayerTarget::update(Entity* entity) noexcept
     fovFromLocal = angle.length2D();
 
     origin = entity->origin();
-    eyeAngle = entity->eyeAngles();
     absAngle = entity->getAbsAngle();
+    eyeAngle = entity->eyeAngles();
+    worldSpaceCenter = entity->getWorldSpaceCenter();
 
     mins = entity->getCollideable()->obbMinsPreScaled();
     maxs = entity->getCollideable()->obbMaxsPreScaled();
@@ -110,6 +111,7 @@ void PlayerTarget::update(Entity* entity) noexcept
     record.origin = origin;
     record.absAngle = absAngle;
     record.eyeAngle = eyeAngle;
+    record.worldSpaceCenter = worldSpaceCenter;
     record.simulationTime = simulationTime;
     record.mins = mins;
     record.maxs = maxs;
