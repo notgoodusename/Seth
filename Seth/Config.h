@@ -230,7 +230,11 @@ public:
         int fov{ 0 };
         ColorToggle bulletImpacts{ 0.0f, 0.0f, 1.f, 0.5f };
         float bulletImpactsTime{ 4.f };
-        BulletTracers bulletTracers;
+        struct BulletTracers
+        {
+            bool enabled { false };
+            int type { 0 };
+        } bulletTracers;
         struct Viewmodel
         {
             bool enabled { false };

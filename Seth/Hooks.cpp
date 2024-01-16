@@ -389,6 +389,44 @@ static void __cdecl interpolateServerEntitiesHook() noexcept
     original();
 }
 
+struct FireBulletsInfo
+{
+    int shots;
+    Vector source;
+    Vector directionShooting;
+    Vector spread;
+    float distance;
+    int ammoType;
+    int tracerFrequency;
+    float damage;
+    int playerDamage;
+    int flags;
+    float damageForceScale;
+    Entity* attacker;
+    Entity* additionalIgnoreEntity;
+    bool primaryAttack;
+    bool useServerRandomSeed;
+};
+
+static void __fastcall fireBulletHook(void* thisPointer, void*, Entity* weapon, const FireBulletsInfo& info, bool doEffects, int damageType, int customDamageType) noexcept
+{
+    static auto original = hooks->fireBullet.getOriginal<void>(weapon, info, doEffects, damageType, customDamageType);
+    /*
+    const auto entity = reinterpret_cast<Entity*>(thisPointer);
+    if (config->visuals.bulletTracers.enabled 
+        && localPlayer && entity == localPlayer.get())
+    {
+        //Remove crit type so tracers some tracers don't break.
+        if (damageType & (1 << 20))
+            damageType &= ~(1 << 20);
+
+        //Draws tracer on each shot
+        //info.tracerFrequency = 1;
+    }*/
+
+    return original(thisPointer, weapon, info, doEffects, damageType, customDamageType);
+}
+
 std::vector<std::pair<int, float>> simTimes;
 
 static float __fastcall frameAdvanceHook(void* thisPointer, void*, float interval) noexcept
@@ -419,6 +457,37 @@ static float __fastcall frameAdvanceHook(void* thisPointer, void*, float interva
             return original(thisPointer, newInterval);
     }
     return 0.0f;
+}
+
+static const char* __fastcall getTraceTypeHook(void* thisPointer, void*) noexcept
+{
+    static auto original = hooks->getTraceType.getOriginal<const char*>();
+    if (!thisPointer || !localPlayer)
+        return original(thisPointer);
+
+    switch (config->visuals.bulletTracers.type)
+    {
+        case 1:
+            return (localPlayer->teamNumber() == Team::RED ? "dxhr_sniper_rail_red" : "dxhr_sniper_rail_blue");
+        case 2:
+            return (localPlayer->isCritBoosted() ? 
+                (localPlayer->teamNumber() == Team::RED ? "bullet_tracer_raygun_red_crit" : "bullet_tracer_raygun_blue_crit") :
+                (localPlayer->teamNumber() == Team::RED ? "bullet_tracer_raygun_red" : "bullet_tracer_raygun_blue"));
+        case 3:
+            return localPlayer->teamNumber() == Team::RED ? "dxhr_lightningball_hit_zap_red" : "dxhr_lightningball_hit_zap_blue";
+        case 4:
+            return "merasmus_zap";
+        case 5:
+            return "merasmus_zap_beam02";
+        case 6:
+            return localPlayer->isCritBoosted() ? 
+                (localPlayer->teamNumber() == Team::RED ? "bullet_bignasty_tracer01_red_crit" : "bullet_bignasty_tracer01_blue_crit") : 
+                (localPlayer->teamNumber() == Team::RED ? "bullet_bignasty_tracer01_blue" : "bullet_bignasty_tracer01_red");
+        default: 
+            break;
+    }
+
+    return original(thisPointer);
 }
 
 static void __fastcall updateTFAnimStateHook(void* thisPointer, void*, float eyeYaw, float eyePitch) noexcept
@@ -525,7 +594,9 @@ void Hooks::install() noexcept
     doEnginePostProcessing.detour(memory->doEnginePostProcessing, doEnginePostProcessingHook);
     estimateAbsVelocity.detour(memory->estimateAbsVelocity, estimateAbsVelocityHook);
     enableWorldFog.detour(memory->enableWorldFog, enableWorldFogHook);
+    //fireBullet.detour(memory->fireBullet, fireBulletHook);
     frameAdvance.detour(memory->frameAdvance, frameAdvanceHook);
+    //getTraceType.detour(memory->getTraceType, getTraceTypeHook);
     interpolateServerEntities.detour(memory->interpolateServerEntities, interpolateServerEntitiesHook);
     isAllowedToWithdrawFromCritBucket.detour(memory->isAllowedToWithdrawFromCritBucket, isAllowedToWithdrawFromCritBucketHook);
     newMatchFoundDashboardStateOnUpdate.detour(memory->newMatchFoundDashboardStateOnUpdate, newMatchFoundDashboardStateOnUpdateHook);

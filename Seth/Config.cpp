@@ -187,9 +187,10 @@ static void from_json(const json& j, OffscreenEnemies& o)
     read(j, "Disable on cloaked", o.disableOnCloaked);
 }
 
-static void from_json(const json& j, BulletTracers& o)
+static void from_json(const json& j, Config::Visuals::BulletTracers& o)
 {
-    from_json(j, static_cast<ColorToggle&>(o));
+    read(j, "Enabled", o.enabled);
+    read(j, "Type", o.type);
 }
 
 static void from_json(const json& j, ImVec2& v)
@@ -657,9 +658,10 @@ static void to_json(json& j, const OffscreenEnemies& o, const OffscreenEnemies& 
     WRITE("Disable on cloaked", disableOnCloaked);
 }
 
-static void to_json(json& j, const BulletTracers& o, const BulletTracers& dummy = {})
+static void to_json(json& j, const Config::Visuals::BulletTracers& o, const Config::Visuals::BulletTracers& dummy = {})
 {
-    to_json(j, static_cast<const ColorToggle&>(o), dummy);
+    WRITE("Enabled", enabled);
+    WRITE("Type", type);
 }
 
 static void to_json(json& j, const World& o, const World& dummy = {})

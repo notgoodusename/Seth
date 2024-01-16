@@ -27,7 +27,7 @@ Vector getMeleeTarget(UserCmd* cmd, Entity* entity, matrix3x4 matrix[MAXSTUDIOBO
     if (!hitbox)
         return Vector{ 0.0f, 0.0f, 0.0f };
 
-    for (auto& bonePosition : Aimbot::multiPoint(entity, matrix, hitbox, localPlayerEyePosition, 0, true))
+    for (const auto& bonePosition : Aimbot::multiPoint(entity, matrix, hitbox, localPlayerEyePosition, 0, true))
     {
         const Vector angle{ Math::calculateRelativeAngle(localPlayerEyePosition, bonePosition, cmd->viewangles) };
         const float fov{ angle.length2D() };

@@ -30,7 +30,9 @@ public:
     MinHook doEnginePostProcessing;
     MinHook estimateAbsVelocity;
     MinHook enableWorldFog;
+    MinHook fireBullet;
     MinHook frameAdvance;
+    MinHook getTraceType;
     MinHook isAllowedToWithdrawFromCritBucket;
     MinHook interpolateServerEntities;
     MinHook newMatchFoundDashboardStateOnUpdate;
