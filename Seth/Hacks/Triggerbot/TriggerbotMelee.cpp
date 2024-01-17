@@ -52,7 +52,7 @@ void TriggerbotMelee::run(Entity* activeWeapon, UserCmd* cmd, float& lastTime, f
 
     for (const auto& target : enemies)
     {
-        if (!target.isValid || target.priority == 0)
+        if (target.playerData.empty() || !target.isAlive || target.priority == 0)
             continue;
 
         auto entity{ interfaces->entityList->getEntityFromHandle(target.handle) };
@@ -65,59 +65,49 @@ void TriggerbotMelee::run(Entity* activeWeapon, UserCmd* cmd, float& lastTime, f
         Vector backupOrigin = entity->getAbsOrigin();
         Vector backupAbsAngle = entity->getAbsAngle();
 
-        Vector worldSpaceCenter = entity->getWorldSpaceCenter();
-
+        const auto& records = target.playerData;
+        int bestTick = -1;
         if ((config->backtrack.enabled || config->backtrack.fakeLatency) && cfg.targetBacktrack)
         {
-            const auto& records = target.backtrackRecords;
-            if (records.empty() || records.size() <= 3U)
-                continue;
-
-            int bestTick = -1;
-            auto bestFov{ 255.f };
+            auto bestBacktrackFov{ 255.f };
 
             for (int i = static_cast<int>(records.size() - 1U); i >= 0; i--)
             {
-                if (!Backtrack::valid(records[i].simulationTime))
+                const auto& targetTick = records[i];
+                if (!Backtrack::valid(targetTick.simulationTime))
                     continue;
 
-                for (const auto& position : records[i].bodyPositions)
+                for (const auto& position : targetTick.bodyPositions)
                 {
                     const auto angle = Math::calculateRelativeAngle(localPlayerEyePosition, position, cmd->viewangles);
                     const auto fov = std::hypotf(angle.x, angle.y);
-                    if (fov < bestFov) {
-                        bestFov = fov;
+                    if (fov < bestBacktrackFov) {
+                        bestBacktrackFov = fov;
                         bestTick = i;
                     }
                 }
             }
-
-            if (bestTick <= -1)
-            {
-                applyMatrix(entity, backupBoneCache, backupOrigin, backupAbsAngle, backupPrescaledMins, backupPrescaledMaxs);
-                continue;
-            }
-
-            memcpy(entity->getBoneCache().memory, records[bestTick].matrix, std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
-            memory->setAbsOrigin(entity, records[bestTick].origin);
-            memory->setAbsAngle(entity, records[bestTick].absAngle);
-            memory->setCollisionBounds(entity->getCollideable(), records[bestTick].mins, records[bestTick].maxs);
-
-            worldSpaceCenter = records[bestTick].worldSpaceCenter;
-            bestSimulationTime = records[bestTick].simulationTime;
         }
         else
         {
-            memcpy(entity->getBoneCache().memory, target.matrix.data(), std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
-            memory->setAbsOrigin(entity, target.origin);
-            memory->setAbsAngle(entity, target.absAngle);
-            memory->setCollisionBounds(entity->getCollideable(), target.mins, target.maxs);
-
-            worldSpaceCenter = target.worldSpaceCenter;
-            bestSimulationTime = target.simulationTime;
+            bestTick = records.size() - 1U;
         }
 
-        gotTarget = getTriggerbotMeleeTarget(cmd, activeWeapon, entity, activeWeapon->isKnife() && cfg.autoBackstab, worldSpaceCenter);
+        if (bestTick <= -1)
+            continue;
+
+        const auto& targetTick = target.playerData[bestTick];
+        if (!Backtrack::valid(targetTick.simulationTime))
+            continue;
+
+        entity->replaceMatrix(targetTick.matrix.data());
+        memory->setAbsOrigin(entity, targetTick.origin);
+        memory->setAbsAngle(entity, targetTick.absAngle);
+        memory->setCollisionBounds(entity->getCollideable(), targetTick.mins, targetTick.maxs);
+
+        bestSimulationTime = targetTick.simulationTime;
+
+        gotTarget = getTriggerbotMeleeTarget(cmd, activeWeapon, entity, activeWeapon->isKnife() && cfg.autoBackstab, targetTick.worldSpaceCenter);
         applyMatrix(entity, backupBoneCache, backupOrigin, backupAbsAngle, backupPrescaledMins, backupPrescaledMaxs);
         if (gotTarget)
             break;

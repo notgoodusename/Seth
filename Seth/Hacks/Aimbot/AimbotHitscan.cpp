@@ -84,7 +84,7 @@ void AimbotHitscan::run(Entity* activeWeapon, UserCmd* cmd) noexcept
 
     for (const auto& target : enemies)
     {
-        if (!target.isValid || target.priority == 0)
+        if (target.playerData.empty() || !target.isAlive || target.priority == 0)
             continue;
 
         auto entity{ interfaces->entityList->getEntityFromHandle(target.handle) };
@@ -96,80 +96,50 @@ void AimbotHitscan::run(Entity* activeWeapon, UserCmd* cmd) noexcept
         Vector backupPrescaledMaxs = entity->getCollideable()->obbMaxsPreScaled();
         Vector backupOrigin = entity->getAbsOrigin();
         Vector backupAbsAngle = entity->getAbsAngle();
-        Vector backupEyeAngle = entity->eyeAngles();
 
-        for (int cycle = 0; cycle < 2; cycle++)
+        const auto& records = target.playerData;
+
+        int bestTick = -1;
+        if ((config->backtrack.enabled || config->backtrack.fakeLatency) && cfg.targetBacktrack)
         {
-            float currentSimulationTime = -1.0f;
-
-            if (config->backtrack.enabled || config->backtrack.fakeLatency)
+            auto bestBacktrackFov = cfg.fov;
+            for (int i = static_cast<int>(records.size() - 1U); i >= 0; i--)
             {
-                if (!cfg.targetBacktrack && cycle == 1)
+                const auto& targetTick = records[i];
+                if (!Backtrack::valid(targetTick.simulationTime))
                     continue;
 
-                const auto& records = target.backtrackRecords;
-                if (records.empty() || records.size() <= 3U)
-                    continue;
+                const Vector angle{ Math::calculateRelativeAngle(localPlayerEyePosition, targetTick.matrix[0].origin() , cmd->viewangles) };
+                const float fov{ angle.length2D() };
 
-                int bestTick = -1;
-                if (cycle == 0)
+                if (fov < bestBacktrackFov)
                 {
-                    for (size_t i = 3; i < records.size(); i++)
-                    {
-                        if (Backtrack::valid(records[i].simulationTime))
-                        {
-                            bestTick = static_cast<int>(i);
-                            break;
-                        }
-                    }
+                    bestTick = i;
+                    bestBacktrackFov = fov;
                 }
-                else
-                {
-                    auto bestBacktrackFov = 255.0f;
-                    for (int i = static_cast<int>(records.size() - 1U); i >= 3; i--)
-                    {
-                        if (Backtrack::valid(records[i].simulationTime))
-                        {
-                            const Vector angle{ Math::calculateRelativeAngle(localPlayerEyePosition, records[i].matrix[0].origin() , cmd->viewangles)};
-                            const float fov{ angle.length2D() };
-
-                            if (fov < bestBacktrackFov)
-                            {
-                                bestTick = i;
-                                bestBacktrackFov = fov;
-                            }
-                        }
-                    }
-                }
-
-                if (bestTick <= -1)
-                    continue;
-
-                memcpy(entity->getBoneCache().memory, records[bestTick].matrix, std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
-                memory->setAbsOrigin(entity, records[bestTick].origin);
-                entity->eyeAngles() = records[bestTick].eyeAngle;
-                memory->setCollisionBounds(entity->getCollideable(), records[bestTick].mins, records[bestTick].maxs);
-
-                bestSimulationTime = records[bestTick].simulationTime;
             }
-            else
-            {
-                if (cycle == 1)
-                    continue;
-
-                memcpy(entity->getBoneCache().memory, target.matrix.data(), std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
-                memory->setAbsOrigin(entity, target.origin);
-                entity->eyeAngles() = target.eyeAngle;
-                memory->setCollisionBounds(entity->getCollideable(), target.mins, target.maxs);
-
-                bestSimulationTime = target.simulationTime;
-            }
-
-            bestTarget = getHitscanTarget(cmd, entity, entity->getBoneCache().memory, hitbox, bestFov, localPlayerEyePosition);
-            applyMatrix(entity, backupBoneCache, backupOrigin, backupEyeAngle, backupPrescaledMins, backupPrescaledMaxs);
-            if (bestTarget.notNull())
-                break;
         }
+        else
+        {
+            bestTick = records.size() - 1U;
+        }
+
+        if (bestTick <= -1)
+            continue;
+
+        const auto& targetTick = records[bestTick];
+        if (!Backtrack::valid(targetTick.simulationTime))
+            continue;
+
+        entity->replaceMatrix(targetTick.matrix.data());
+        memory->setAbsOrigin(entity, targetTick.origin);
+        memory->setAbsAngle(entity, targetTick.absAngle);
+        memory->setCollisionBounds(entity->getCollideable(), targetTick.mins, targetTick.maxs);
+
+        bestSimulationTime = targetTick.simulationTime;
+
+        bestTarget = getHitscanTarget(cmd, entity, entity->getBoneCache().memory, hitbox, bestFov, localPlayerEyePosition);
+        applyMatrix(entity, backupBoneCache, backupOrigin, backupAbsAngle, backupPrescaledMins, backupPrescaledMaxs);
         if (bestTarget.notNull())
             break;
     }

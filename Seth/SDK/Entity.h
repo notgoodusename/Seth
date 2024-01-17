@@ -494,6 +494,13 @@ public:
         return (getDamageType() & (1 << 25)) && canFireCriticalShot(true);
     }
 
+    void replaceMatrix(const matrix3x4* newMatrix) noexcept
+    {
+        memcpy(getBoneCache().memory, 
+            newMatrix, 
+            std::clamp(getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
+    }
+
     bool setupBones(matrix3x4* out, int maxBones, int boneMask, float currentTime) noexcept
     {
         Vector absOrigin = getAbsOrigin();

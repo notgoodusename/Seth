@@ -98,7 +98,7 @@ void TriggerbotHitscan::run(Entity* activeWeapon, UserCmd* cmd, float& lastTime,
 
     for (const auto& target : enemies)
     {
-        if (!target.isValid || target.priority == 0)
+        if (target.playerData.empty() || !target.isAlive || target.priority == 0)
             continue;
 
         auto entity{ interfaces->entityList->getEntityFromHandle(target.handle) };
@@ -112,23 +112,22 @@ void TriggerbotHitscan::run(Entity* activeWeapon, UserCmd* cmd, float& lastTime,
         Vector backupAbsAngle = entity->getAbsAngle();
         Vector backupEyeAngle = entity->eyeAngles();
 
+        const auto& records = target.playerData;
+
+        int bestTick = -1;
         if ((config->backtrack.enabled || config->backtrack.fakeLatency) && cfg.targetBacktrack)
         {
-            const auto& records = target.backtrackRecords;
-            if (records.empty() || records.size() <= 3U)
-                continue;
-
-            int bestTick = -1;
             auto bestFov{ 255.f };
 
             for (int i = static_cast<int>(records.size() - 1U); i >= 0; i--)
             {
-                if (!Backtrack::valid(records[i].simulationTime))
+                const auto& targetTick = records[i];
+                if (!Backtrack::valid(targetTick.simulationTime))
                     continue;
 
                 //if head is set to be scanned do it, else just do body
                 for (const auto& position :
-                    scanBacktrackPositions == 1 ? records[i].headPositions : records[i].bodyPositions)
+                    scanBacktrackPositions == 1 ? targetTick.headPositions : targetTick.bodyPositions)
                 {
                     const auto angle = Math::calculateRelativeAngle(startPos, position, cmd->viewangles);
                     const auto fov = std::hypotf(angle.x, angle.y);
@@ -142,7 +141,7 @@ void TriggerbotHitscan::run(Entity* activeWeapon, UserCmd* cmd, float& lastTime,
                 //Basically if both options are on backtrack both head and body
                 if (scanBacktrackPositions == 3)
                 {
-                    for (const auto& position : records[i].headPositions)
+                    for (const auto& position : targetTick.headPositions)
                     {
                         const auto angle = Math::calculateRelativeAngle(startPos, position, cmd->viewangles);
                         const auto fov = std::hypotf(angle.x, angle.y);
@@ -153,29 +152,25 @@ void TriggerbotHitscan::run(Entity* activeWeapon, UserCmd* cmd, float& lastTime,
                     }
                 }
             }
-
-            if (bestTick <= -1)
-            {
-                applyMatrix(entity, backupBoneCache, backupOrigin, backupEyeAngle, backupPrescaledMins, backupPrescaledMaxs);
-                continue;
-            }
-
-            memcpy(entity->getBoneCache().memory, records[bestTick].matrix, std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
-            memory->setAbsOrigin(entity, records[bestTick].origin);
-            entity->eyeAngles() = records[bestTick].eyeAngle;
-            memory->setCollisionBounds(entity->getCollideable(), records[bestTick].mins, records[bestTick].maxs);
-
-            bestSimulationTime = records[bestTick].simulationTime;
         }
         else
         {
-            memcpy(entity->getBoneCache().memory, target.matrix.data(), std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
-            memory->setAbsOrigin(entity, target.origin);
-            entity->eyeAngles() = target.eyeAngle;
-            memory->setCollisionBounds(entity->getCollideable(), target.mins, target.maxs);
-
-            bestSimulationTime = target.simulationTime;
+            bestTick = records.size() - 1U;
         }
+
+        if (bestTick <= -1)
+            continue;
+
+        const auto& targetTick = target.playerData[bestTick];
+        if (!Backtrack::valid(targetTick.simulationTime))
+            continue;
+
+        entity->replaceMatrix(targetTick.matrix.data());
+        memory->setAbsOrigin(entity, targetTick.origin);
+        memory->setAbsAngle(entity, targetTick.absAngle);
+        memory->setCollisionBounds(entity->getCollideable(), targetTick.mins, targetTick.maxs);
+
+        bestSimulationTime = targetTick.simulationTime;
 
         gotTarget = getTriggerbotHitscanTarget(cmd, activeWeapon, entity, entity->getBoneCache().memory, hitbox, startPos, endPos, bestHitbox);
         if (gotTarget)

@@ -62,47 +62,51 @@ void Backtrack::run(UserCmd* cmd) noexcept
     const auto& localPlayerEyePosition = localPlayer->getEyePosition();
 
     auto bestFov{ 255.f };
-    int bestTargetIndex{ };
-    int bestRecord{ };
+    int bestTargetIndex = -1;
+    int bestTick = -1;
 
     const auto& enemies = TargetSystem::playerTargets();
 
     for (const auto& target : enemies) 
     {
-        if (target.backtrackRecords.empty() || !target.isValid || target.priority == 0)
+        if (target.playerData.empty() || !target.isAlive || target.priority == 0)
             continue;
 
         const auto entity{ interfaces->entityList->getEntityFromHandle(target.handle) };
-        if (!entity || entity->isDormant() || !entity->isAlive()
+        if (!entity || entity->isDormant()
             || !entity->isEnemy(localPlayer.get()))
             continue;
 
-        for (int j = static_cast<int>(target.backtrackRecords.size() - 1); j >= 0; j--)
+        const auto& records = target.playerData;
+     
+        for (int i = static_cast<int>(records.size() - 1U); i >= 0; i--)
         {
-            if (Backtrack::valid(target.backtrackRecords[j].simulationTime))
-            {
-                for (auto& position : 
-                    canHeadshot ? target.backtrackRecords[j].headPositions : target.backtrackRecords[j].bodyPositions) {
-                    auto angle = Math::calculateRelativeAngle(localPlayerEyePosition, position, cmd->viewangles);
-                    auto fov = std::hypotf(angle.x, angle.y);
-                    if (fov < bestFov) {
-                        bestFov = fov;
-                        bestRecord = j;
-                        bestTargetIndex = target.handle;
-                    }
+            const auto& targetTick = records[i];
+            if (!Backtrack::valid(targetTick.simulationTime))
+                continue;
+
+            for (auto& position :
+                canHeadshot ? targetTick.headPositions : targetTick.bodyPositions) {
+                auto angle = Math::calculateRelativeAngle(localPlayerEyePosition, position, cmd->viewangles);
+                auto fov = std::hypotf(angle.x, angle.y);
+                if (fov < bestFov) {
+                    bestFov = fov;
+                    bestTick = i;
+                    bestTargetIndex = target.handle;
                 }
             }
         }
     }
 
-    const auto player = TargetSystem::playerByHandle(bestTargetIndex);
-    if (!player || !player->isValid)
+    if (bestTick <= -1 || bestTargetIndex <= -1)
         return;
 
-    if (bestRecord) {
-        const auto& record = player->backtrackRecords[bestRecord];
-        cmd->tickCount = timeToTicks(record.simulationTime + getLerp());
-    }
+    const auto& player = TargetSystem::playerByHandle(bestTargetIndex);
+    if (!player || player->playerData.empty() || !player->isAlive || player->priority == 0)
+        return;
+
+    const auto& record = player->playerData[bestTick];
+    cmd->tickCount = timeToTicks(record.simulationTime + getLerp());
 }
 
 void Backtrack::updateLatency(NetworkChannel* network) noexcept
@@ -164,7 +168,8 @@ bool Backtrack::valid(float simtime) noexcept
 
     const auto deadTime = static_cast<int>(memory->globalVars->serverTime() - cvars.maxUnlag->getFloat());
     if (simtime < deadTime)
-        return false;
+    {
+    }
 
     const auto delta = std::clamp(network->getLatency(0) + network->getLatency(1) + getLerp(), 0.f, cvars.maxUnlag->getFloat())
         - (memory->globalVars->serverTime() - simtime);

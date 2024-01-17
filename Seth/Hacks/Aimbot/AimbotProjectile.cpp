@@ -533,7 +533,7 @@ void AimbotProjectile::run(Entity* activeWeapon, UserCmd* cmd) noexcept
     const int maxTicks = timeToTicks(projectileWeaponInfo.maxTime == 0.f ? cfg.maxTime : projectileWeaponInfo.maxTime);
     for (const auto& target : enemies)
     {
-        if (!target.isValid || target.priority == 0)
+        if (target.playerData.empty() || !target.isAlive || target.priority == 0)
             continue;
 
         auto entity{ interfaces->entityList->getEntityFromHandle(target.handle) };

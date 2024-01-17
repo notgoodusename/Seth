@@ -24,7 +24,8 @@ namespace TargetSystem
 	const PlayerTarget* playerByHandle(int handle) noexcept;
 };
 
-struct LocalPlayerInfo {
+struct LocalPlayerInfo 
+{
 	void update() noexcept;
 
 	int handle;
@@ -36,6 +37,8 @@ struct Target
 	Target(Entity* entity) noexcept;
 
 	int handle;
+	int priority{ 1 };
+	float simulationTime{ -1.0f };
 };
 
 struct PlayerTarget : Target
@@ -44,7 +47,8 @@ struct PlayerTarget : Target
 
 	void update(Entity* entity) noexcept;
 
-	struct Record {
+	struct Record 
+	{
 		std::vector<Vector> headPositions; //Use this for headshoting
 		std::vector<Vector> bodyPositions; //Use this for body
 
@@ -53,25 +57,17 @@ struct PlayerTarget : Target
 		Vector eyeAngle{ };
 		Vector worldSpaceCenter{ };
 
-		float simulationTime;
-		matrix3x4 matrix[MAXSTUDIOBONES];
+		float simulationTime{ };
+
+		std::array<matrix3x4, MAXSTUDIOBONES> matrix;
+		
+		float distanceToLocal{ 0.0f };
+		float fovFromLocal{ 0.0f };
 	};
 
-	std::deque<Record> backtrackRecords;
+	bool isAlive{ true };
 
-	std::array<matrix3x4, MAXSTUDIOBONES> matrix;
-
-	Vector mins{ }, maxs{ };
-	Vector origin{ }, absAngle{ };
-	Vector eyeAngle{ };
-	Vector worldSpaceCenter{ };
-
-	int priority{ 1 };
-	float simulationTime{ -1.0f };
-	bool isValid{ false };
-
-	float distanceToLocal{ 0.0f };
-	float fovFromLocal{ 0.0f };
+	std::deque<Record> playerData;
 };
 
 enum SortType
