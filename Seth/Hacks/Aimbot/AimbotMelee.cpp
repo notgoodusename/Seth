@@ -110,9 +110,17 @@ void runKnife(Entity* activeWeapon, UserCmd* cmd) noexcept
         }
         else
         {
-            const auto& targetTick = records[records.size() - 1U];
-            if (!Backtrack::valid(targetTick.simulationTime))
-                continue;
+            int bestTick = -1;
+            for (int i = 0; i < static_cast<int>(records.size()); i++)
+            {
+                const auto& targetTick = records[i];
+                if (!Backtrack::valid(targetTick.simulationTime))
+                    continue;
+
+                bestTick = i;
+            }
+
+            const auto& targetTick = records[bestTick];
 
             entity->replaceMatrix(targetTick.matrix.data());
             memory->setAbsOrigin(entity, targetTick.origin);
@@ -258,15 +266,20 @@ void AimbotMelee::run(Entity* activeWeapon, UserCmd* cmd) noexcept
         }
         else
         {
-            bestTick = records.size() - 1U;
+            for (int i = 0; i < static_cast<int>(records.size()); i++)
+            {
+                const auto& targetTick = records[i];
+                if (!Backtrack::valid(targetTick.simulationTime))
+                    continue;
+
+                bestTick = i;
+            }
         }
 
         if (bestTick <= -1)
             continue;
 
         const auto& targetTick = records[bestTick];
-        if (!Backtrack::valid(targetTick.simulationTime))
-            continue;
 
         entity->replaceMatrix(targetTick.matrix.data());
         memory->setAbsOrigin(entity, targetTick.origin);

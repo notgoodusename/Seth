@@ -155,15 +155,20 @@ void TriggerbotHitscan::run(Entity* activeWeapon, UserCmd* cmd, float& lastTime,
         }
         else
         {
-            bestTick = records.size() - 1U;
+            for (int i = 0; i < static_cast<int>(records.size()); i++)
+            {
+                const auto& targetTick = records[i];
+                if (!Backtrack::valid(targetTick.simulationTime))
+                    continue;
+
+                bestTick = i;
+            }
         }
 
         if (bestTick <= -1)
             continue;
 
         const auto& targetTick = target.playerData[bestTick];
-        if (!Backtrack::valid(targetTick.simulationTime))
-            continue;
 
         entity->replaceMatrix(targetTick.matrix.data());
         memory->setAbsOrigin(entity, targetTick.origin);

@@ -121,15 +121,22 @@ void AimbotHitscan::run(Entity* activeWeapon, UserCmd* cmd) noexcept
         }
         else
         {
-            bestTick = records.size() - 1U;
+            //yes we have backtrack disabled, but we want to get atleast a good tick before shooting, no?
+            //dont tell the player abt it
+            for (int i = 0; i < static_cast<int>(records.size()); i++)
+            {
+                const auto& targetTick = records[i];
+                if (!Backtrack::valid(targetTick.simulationTime))
+                    continue;
+
+                bestTick = i;
+            }
         }
 
         if (bestTick <= -1)
             continue;
 
         const auto& targetTick = records[bestTick];
-        if (!Backtrack::valid(targetTick.simulationTime))
-            continue;
 
         entity->replaceMatrix(targetTick.matrix.data());
         memory->setAbsOrigin(entity, targetTick.origin);
