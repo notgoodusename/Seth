@@ -108,12 +108,14 @@ void PlayerTarget::update(Entity* entity) noexcept
         newRecord.mins = entity->getCollideable()->obbMinsPreScaled();
         newRecord.maxs = entity->getCollideable()->obbMaxsPreScaled();
 
-        newRecord.headPositions.push_back(newRecord.matrix[6].origin());
-        for (auto bone : { 2, 0 }) 
-        { 
-            //basically spine_1 and pelvis
-            newRecord.bodyPositions.push_back(newRecord.matrix[bone].origin());
-        }
+        if(const Vector headPos = Math::getCenterOfHitbox(entity, newRecord.matrix.data(), Hitboxes::Head); headPos.notNull())
+            newRecord.headPositions.push_back(headPos);
+        
+        if (const Vector spinePos = Math::getCenterOfHitbox(entity, newRecord.matrix.data(), Hitboxes::Spine1); spinePos.notNull())
+            newRecord.bodyPositions.push_back(spinePos);
+
+        if (const Vector pelvisPos = Math::getCenterOfHitbox(entity, newRecord.matrix.data(), Hitboxes::Pelvis); pelvisPos.notNull())
+            newRecord.bodyPositions.push_back(pelvisPos);
 
         playerData.push_back(newRecord);
     }

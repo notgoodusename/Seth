@@ -31,7 +31,7 @@ bool Math::canBackstab(Vector angles, Vector entityAngles, Vector entityWorldSpa
     float posVsOwnerViewDot = vecToTarget.dotProduct(vecOwnerForward);
     float viewAnglesDot = vecTargetForward.dotProduct(vecOwnerForward);
 
-    return (posVsTargetViewDot > 0.f && posVsOwnerViewDot > 0.5 && viewAnglesDot > -0.3f);
+    return (posVsTargetViewDot > 0.f && posVsOwnerViewDot > 0.5f && viewAnglesDot > -0.3f);
 }
 
 bool Math::doesMeleeHit(Entity* activeWeapon, int index, const Vector angles) noexcept
@@ -85,6 +85,45 @@ Vector Math::getCenterOfHitbox(const matrix3x4 matrix[MAXSTUDIOBONES], StudioBbo
         };
         VectorTransform(&in1.x, in2, &out.x);
     };
+
+    Vector min, max;
+    VectorTransformWrapper(hitbox->bbMin, matrix[hitbox->bone], min);
+    VectorTransformWrapper(hitbox->bbMax, matrix[hitbox->bone], max);
+    return (min + max) * 0.5f;
+}
+
+Vector Math::getCenterOfHitbox(Entity* entity, const matrix3x4 matrix[MAXSTUDIOBONES], int hitboxNumber) noexcept
+{
+    auto VectorTransformWrapper = [](const Vector& in1, const matrix3x4 in2, Vector& out)
+    {
+        auto VectorTransform = [](const float* in1, const matrix3x4 in2, float* out)
+        {
+            auto dotProducts = [](const float* v1, const float* v2)
+            {
+                return v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2];
+            };
+            out[0] = dotProducts(in1, in2[0]) + in2[0][3];
+            out[1] = dotProducts(in1, in2[1]) + in2[1][3];
+            out[2] = dotProducts(in1, in2[2]) + in2[2][3];
+        };
+        VectorTransform(&in1.x, in2, &out.x);
+    };
+
+    const Model* model = entity->getModel();
+    if (!model)
+        return Vector{ 0.0f, 0.0f, 0.0f };
+
+    StudioHdr* hdr = interfaces->modelInfo->getStudioModel(model);
+    if (!hdr)
+        return Vector{ 0.0f, 0.0f, 0.0f };
+
+    StudioHitboxSet* set = hdr->getHitboxSet(0);
+    if (!set)
+        return Vector{ 0.0f, 0.0f, 0.0f };
+
+    StudioBbox* hitbox = set->getHitbox(hitboxNumber);
+    if (!hitbox)
+        return Vector{ 0.0f, 0.0f, 0.0f };
 
     Vector min, max;
     VectorTransformWrapper(hitbox->bbMin, matrix[hitbox->bone], min);
