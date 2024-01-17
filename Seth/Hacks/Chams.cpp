@@ -213,6 +213,7 @@ void Chams::renderPlayer(Entity* player) noexcept
                     {
                         const auto& targetTick = records[i];
                         if (player->simulationTime() > targetTick.simulationTime
+                            && Backtrack::valid(targetTick.simulationTime)
                             && targetTick.origin != player->origin())
                         {
                             if (!appliedChams)
