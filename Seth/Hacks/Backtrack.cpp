@@ -168,12 +168,11 @@ bool Backtrack::valid(float simtime) noexcept
 
     const auto deadTime = static_cast<int>(memory->globalVars->serverTime() - cvars.maxUnlag->getFloat());
     if (simtime < deadTime)
-    {
-    }
+        return false;
 
     const auto delta = std::clamp(network->getLatency(0) + network->getLatency(1) + getLerp(), 0.f, cvars.maxUnlag->getFloat())
         - (memory->globalVars->serverTime() - simtime);
-    return std::abs(delta) <= 0.2f;
+    return std::fabs(delta) <= 0.2f;
 }
 
 void Backtrack::init() noexcept
