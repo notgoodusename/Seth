@@ -329,14 +329,7 @@ public:
         reinterpret_cast<void(__thiscall*)(void*, float, float)>(memory->updateTFAnimState)(animState, angle.y, angle.x);
     }
 
-    void getPlayerName(char(&out)[128]) noexcept;
-    [[nodiscard]] std::string getPlayerName() noexcept
-    {
-        char name[128];
-        getPlayerName(name);
-        name[127] = '\0';
-        return name;
-    }
+    std::string getPlayerName() noexcept;
 
     auto getUserId() noexcept
     {

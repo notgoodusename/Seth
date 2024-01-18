@@ -21,8 +21,8 @@ std::array<float, 3U> Helpers::rgbToHsv(float r, float g, float b) noexcept
     r = std::clamp(r, 0.0f, 1.0f);
     g = std::clamp(g, 0.0f, 1.0f);
     b = std::clamp(b, 0.0f, 1.0f);
-    const auto max = std::max({ r, g, b });
-    const auto min = std::min({ r, g, b });
+    const auto max = max(max(r, g), b);
+    const auto min = min(min(r, g), b);
     const auto delta = max - min;
 
     float hue = 0.0f, sat = 0.0f;
@@ -379,6 +379,14 @@ ImWchar* Helpers::getFontGlyphRanges() noexcept
         builder.BuildRanges(&ranges);
     }
     return ranges.Data;
+}
+
+std::wstring Helpers::utf8ToWide(const std::string& str) noexcept
+{
+    auto count = MultiByteToWideChar(CP_UTF8, 0, str.data(), str.length(), NULL, 0);
+    std::wstring wstr(count, 0);
+    MultiByteToWideChar(CP_UTF8, 0, str.data(), str.length(), &wstr[0], count);
+    return wstr;
 }
 
 std::wstring Helpers::toWideString(const std::string& str) noexcept

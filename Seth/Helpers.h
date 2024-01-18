@@ -4,6 +4,7 @@
 #include <numbers>
 #include <string>
 #include <vector>
+#include <Windows.h>
 
 #include "imgui/imgui.h"
 
@@ -71,6 +72,7 @@ namespace Helpers
         return start;
     }
 
+    std::wstring utf8ToWide(const std::string& str) noexcept;
     std::wstring toWideString(const std::string& str) noexcept;
     std::wstring toUpper(std::wstring str) noexcept;
 
