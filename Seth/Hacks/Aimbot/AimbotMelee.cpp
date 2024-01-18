@@ -96,9 +96,12 @@ void runKnife(Entity* activeWeapon, UserCmd* cmd) noexcept
                 entity->replaceMatrix(targetTick.matrix.data());
                 memory->setAbsOrigin(entity, targetTick.origin);
                 memory->setAbsAngle(entity, targetTick.absAngle);
-                memory->setCollisionBounds(entity->getCollideable(), targetTick.mins, targetTick.maxs);
+                memory->setCollisionBounds(entity->getCollideable(), targetTick.minsPrescaled, targetTick.maxsPrescaled);
 
-                bestTarget = getKnifeTarget(cmd, entity, activeWeapon, bestFov, localPlayerEyePosition, targetTick.eyeAngle, targetTick.worldSpaceCenter);
+                Vector worldSpaceCenter = targetTick.origin;
+                worldSpaceCenter.z += (targetTick.mins.z + targetTick.maxs.z) * 0.5f;
+
+                bestTarget = getKnifeTarget(cmd, entity, activeWeapon, bestFov, localPlayerEyePosition, targetTick.eyeAngle, worldSpaceCenter);
                 applyMatrix(entity, backupBoneCache, backupOrigin, backupAbsAngle, backupPrescaledMins, backupPrescaledMaxs);
 
                 if (bestTarget.notNull())
@@ -128,9 +131,12 @@ void runKnife(Entity* activeWeapon, UserCmd* cmd) noexcept
             entity->replaceMatrix(targetTick.matrix.data());
             memory->setAbsOrigin(entity, targetTick.origin);
             memory->setAbsAngle(entity, targetTick.absAngle);
-            memory->setCollisionBounds(entity->getCollideable(), targetTick.mins, targetTick.maxs);
+            memory->setCollisionBounds(entity->getCollideable(), targetTick.minsPrescaled, targetTick.maxsPrescaled);
 
-            bestTarget = getKnifeTarget(cmd, entity, activeWeapon, bestFov, localPlayerEyePosition, targetTick.eyeAngle, targetTick.worldSpaceCenter);
+            Vector worldSpaceCenter = targetTick.origin;
+            worldSpaceCenter.z += (targetTick.mins.z + targetTick.maxs.z) * 0.5f;
+
+            bestTarget = getKnifeTarget(cmd, entity, activeWeapon, bestFov, localPlayerEyePosition, targetTick.eyeAngle, worldSpaceCenter);
             applyMatrix(entity, backupBoneCache, backupOrigin, backupAbsAngle, backupPrescaledMins, backupPrescaledMaxs);
 
             if (bestTarget.notNull())
@@ -287,7 +293,7 @@ void AimbotMelee::run(Entity* activeWeapon, UserCmd* cmd) noexcept
         entity->replaceMatrix(targetTick.matrix.data());
         memory->setAbsOrigin(entity, targetTick.origin);
         memory->setAbsAngle(entity, targetTick.absAngle);
-        memory->setCollisionBounds(entity->getCollideable(), targetTick.mins, targetTick.maxs);
+        memory->setCollisionBounds(entity->getCollideable(), targetTick.minsPrescaled, targetTick.maxsPrescaled);
 
         meleeRecord.matrix = entity->getBoneCache().memory;
         meleeRecord.mins = entity->getCollideable()->obbMinsPreScaled();
@@ -295,7 +301,10 @@ void AimbotMelee::run(Entity* activeWeapon, UserCmd* cmd) noexcept
         meleeRecord.origin = entity->getAbsOrigin();
         meleeRecord.absAngle = entity->getAbsAngle();
 
-        bestTarget = getMeleeTarget(cmd, entity, targetTick.worldSpaceCenter, activeWeapon, bestFov, localPlayerEyePosition);
+        Vector worldSpaceCenter = targetTick.origin;
+        worldSpaceCenter.z += (targetTick.mins.z + targetTick.maxs.z) * 0.5f;
+
+        bestTarget = getMeleeTarget(cmd, entity, worldSpaceCenter, activeWeapon, bestFov, localPlayerEyePosition);
         applyMatrix(entity, backupBoneCache, backupOrigin, backupAbsAngle, backupPrescaledMins, backupPrescaledMaxs);
         if (bestTarget.notNull())
         {

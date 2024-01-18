@@ -103,10 +103,11 @@ void PlayerTarget::update(Entity* entity) noexcept
         newRecord.origin = entity->origin();
         newRecord.absAngle = entity->getAbsAngle();
         newRecord.eyeAngle = entity->eyeAngles();
-        newRecord.worldSpaceCenter = entity->getWorldSpaceCenter();
 
-        newRecord.mins = entity->getCollideable()->obbMinsPreScaled();
-        newRecord.maxs = entity->getCollideable()->obbMaxsPreScaled();
+        newRecord.mins = entity->getCollideable()->obbMins();
+        newRecord.maxs = entity->getCollideable()->obbMaxs();
+        newRecord.minsPrescaled = entity->getCollideable()->obbMinsPreScaled();
+        newRecord.maxsPrescaled = entity->getCollideable()->obbMaxsPreScaled();
 
         if(const Vector headPos = Math::getCenterOfHitbox(entity, newRecord.matrix.data(), Hitboxes::Head); headPos.notNull())
             newRecord.headPositions.push_back(headPos);

@@ -57,8 +57,8 @@ struct PlayerTarget : Target
 
 		Vector origin{ }, absAngle{ };
 		Vector mins{ }, maxs{ };
+		Vector minsPrescaled{ }, maxsPrescaled{ };
 		Vector eyeAngle{ };
-		Vector worldSpaceCenter{ };
 
 		float simulationTime{ };
 

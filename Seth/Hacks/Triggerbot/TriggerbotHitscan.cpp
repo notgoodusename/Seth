@@ -172,7 +172,7 @@ void TriggerbotHitscan::run(Entity* activeWeapon, UserCmd* cmd, float& lastTime,
         entity->replaceMatrix(targetTick.matrix.data());
         memory->setAbsOrigin(entity, targetTick.origin);
         memory->setAbsAngle(entity, targetTick.absAngle);
-        memory->setCollisionBounds(entity->getCollideable(), targetTick.mins, targetTick.maxs);
+        memory->setCollisionBounds(entity->getCollideable(), targetTick.minsPrescaled, targetTick.maxsPrescaled);
 
         bestSimulationTime = targetTick.simulationTime;
 
