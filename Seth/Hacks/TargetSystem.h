@@ -39,6 +39,9 @@ struct Target
 	int handle;
 	int priority{ 1 };
 	float simulationTime{ -1.0f };
+	
+	float distanceToLocal{ 0.0f };
+	float fovFromLocal{ 0.0f };
 };
 
 struct PlayerTarget : Target
@@ -61,8 +64,6 @@ struct PlayerTarget : Target
 
 		std::array<matrix3x4, MAXSTUDIOBONES> matrix;
 		
-		float distanceToLocal{ 0.0f };
-		float fovFromLocal{ 0.0f };
 	};
 
 	bool isAlive{ true };

@@ -97,8 +97,8 @@ void PlayerTarget::update(Entity* entity) noexcept
 
         newRecord.simulationTime = simulationTime;
     
-        newRecord.distanceToLocal = entity->getAbsOrigin().distTo(localPlayerInfo.origin);
-        newRecord.fovFromLocal = angle.length2D();
+        distanceToLocal = entity->getAbsOrigin().distTo(localPlayerInfo.origin);
+        fovFromLocal = angle.length2D();
 
         newRecord.origin = entity->origin();
         newRecord.absAngle = entity->getAbsAngle();
@@ -135,11 +135,11 @@ const std::vector<PlayerTarget>& TargetSystem::playerTargets(int sortType) noexc
     {
     case 0:
         std::sort(playersTargets.begin(), playersTargets.end(),
-            [&](const PlayerTarget& a, const PlayerTarget& b) { return a.playerData.back().distanceToLocal < b.playerData.back().distanceToLocal; });
+            [&](const PlayerTarget& a, const PlayerTarget& b) { return a.distanceToLocal < b.distanceToLocal; });
         break;
     case 1:
         std::sort(playersTargets.begin(), playersTargets.end(),
-            [&](const PlayerTarget& a, const PlayerTarget& b) { return a.playerData.back().fovFromLocal < b.playerData.back().fovFromLocal; });
+            [&](const PlayerTarget& a, const PlayerTarget& b) { return a.fovFromLocal < b.fovFromLocal; });
         break;
     default:
         return playersTargets;
