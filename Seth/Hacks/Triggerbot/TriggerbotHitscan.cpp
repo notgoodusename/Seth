@@ -118,8 +118,7 @@ void TriggerbotHitscan::run(Entity* activeWeapon, UserCmd* cmd, float& lastTime,
         if ((config->backtrack.enabled || config->backtrack.fakeLatency) && cfg.targetBacktrack)
         {
             auto bestFov{ 255.f };
-
-            for (int i = static_cast<int>(records.size() - 1U); i >= 0; i--)
+            for (int i = 0; i < static_cast<int>(records.size()); i++)
             {
                 const auto& targetTick = records[i];
                 if (!Backtrack::valid(targetTick.simulationTime))
@@ -155,7 +154,7 @@ void TriggerbotHitscan::run(Entity* activeWeapon, UserCmd* cmd, float& lastTime,
         }
         else
         {
-            for (int i = 0; i < static_cast<int>(records.size()); i++)
+            for (int i = static_cast<int>(records.size() - 1U); i >= 0; i--)
             {
                 const auto& targetTick = records[i];
                 if (!Backtrack::valid(targetTick.simulationTime))

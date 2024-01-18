@@ -86,7 +86,7 @@ void runKnife(Entity* activeWeapon, UserCmd* cmd) noexcept
         
         if ((config->backtrack.enabled || config->backtrack.fakeLatency) && cfg.targetBacktrack)
         {
-            for (int i = static_cast<int>(records.size() - 1U); i >= 0; i--)
+            for (int i = 0; i < static_cast<int>(records.size()); i++)
             {
                 if (!Backtrack::valid(records[i].simulationTime))
                     continue;
@@ -111,7 +111,7 @@ void runKnife(Entity* activeWeapon, UserCmd* cmd) noexcept
         else
         {
             int bestTick = -1;
-            for (int i = 0; i < static_cast<int>(records.size()); i++)
+            for (int i = static_cast<int>(records.size() - 1U); i >= 0; i--)
             {
                 const auto& targetTick = records[i];
                 if (!Backtrack::valid(targetTick.simulationTime))
@@ -119,6 +119,9 @@ void runKnife(Entity* activeWeapon, UserCmd* cmd) noexcept
 
                 bestTick = i;
             }
+
+            if (bestTick <= -1)
+                continue;
 
             const auto& targetTick = records[bestTick];
 

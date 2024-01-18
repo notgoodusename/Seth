@@ -79,7 +79,7 @@ void Backtrack::run(UserCmd* cmd) noexcept
 
         const auto& records = target.playerData;
      
-        for (int i = static_cast<int>(records.size() - 1U); i >= 0; i--)
+        for (int i = 0; i < static_cast<int>(records.size()); i++)
         {
             const auto& targetTick = records[i];
             if (!Backtrack::valid(targetTick.simulationTime))
