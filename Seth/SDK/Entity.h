@@ -436,6 +436,14 @@ public:
         return 48.0f;
     }
 
+    Vector getWorldSpaceCenter() noexcept
+    {
+        Vector mins = obbMins(), maxs = obbMaxs();
+        Vector worldSpaceCenter = getAbsOrigin();
+        worldSpaceCenter.z += (mins.z + maxs.z) / 2.0f;
+        return worldSpaceCenter;
+    }
+
     Entity* getGroundEntity() noexcept
     {
         return interfaces->entityList->getEntityFromHandle(groundEntity());
