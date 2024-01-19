@@ -13,7 +13,6 @@
 #include "../SDK/Utils.h"
 
 static std::deque<Backtrack::IncomingSequence> sequences;
-float latencyRampup = 0.0f;
 
 struct Cvars {
     ConVar* updateRate;
@@ -35,12 +34,12 @@ float Backtrack::getLerp() noexcept
 
 float Backtrack::getLatency() noexcept
 {
-    return latencyRampup * std::clamp(static_cast<float>(config->backtrack.fakeLatencyAmount), 0.f, cvars.maxUnlag->getFloat() * 1000.0f);
+    return std::clamp(static_cast<float>(config->backtrack.fakeLatencyAmount), 0.f, cvars.maxUnlag->getFloat() * 1000.0f);
 }
 
 void Backtrack::run(UserCmd* cmd) noexcept
 {
-    if (!config->backtrack.enabled)
+    if (!config->backtrack.enabled && !config->backtrack.fakeLatency)
         return;
 
     if (!localPlayer || !localPlayer->isAlive())
@@ -111,7 +110,7 @@ void Backtrack::run(UserCmd* cmd) noexcept
 
 void Backtrack::updateLatency(NetworkChannel* network) noexcept
 {
-    for (auto& sequence : sequences)
+    for (const auto& sequence : sequences)
     {
         if (memory->globalVars->realTime - sequence.currentTime >= (getLatency() / 1000.0f))
         {
@@ -122,33 +121,14 @@ void Backtrack::updateLatency(NetworkChannel* network) noexcept
     }
 }
 
-static int lastIncomingSequenceNumber = 0;
-
-void Backtrack::update() noexcept
+void Backtrack::updateSequences() noexcept
 {
-    if (!localPlayer)
-    {
-        latencyRampup = 0.0f;
-        lastIncomingSequenceNumber = 0;
-        sequences.clear();
-        return;
-    }
-
     const auto network = interfaces->engine->getNetworkChannel();
     if (!network)
-    {
-        latencyRampup = 0.0f;
-        lastIncomingSequenceNumber = 0;
-        sequences.clear();
         return;
-    }
 
-    latencyRampup = config->backtrack.fakeLatency ? min(1.0f, latencyRampup += memory->globalVars->intervalPerTick) : 0.0f;
-
-    if (network->inSequenceNr > lastIncomingSequenceNumber)
+    if (sequences.empty() || network->inSequenceNr > sequences.front().inSequenceNr)
     {
-        lastIncomingSequenceNumber = network->inSequenceNr;
-
         IncomingSequence sequence{ };
         sequence.inReliableState = network->inReliableState;
         sequence.inSequenceNr = network->inSequenceNr;
@@ -170,9 +150,13 @@ bool Backtrack::valid(float simtime) noexcept
     if (simtime < deadTime)
         return false;
 
-    const auto delta = std::clamp(network->getLatency(0) + network->getLatency(1) + getLerp(), 0.f, cvars.maxUnlag->getFloat())
+    const auto delta = std::clamp(
+            network->getLatency(0) + network->getLatency(1) + getLerp(),
+        0.f, 
+        cvars.maxUnlag->getFloat())
         - (memory->globalVars->serverTime() - simtime);
-    return std::fabs(delta) <= 0.2f;
+    //yea this is bad to do, but whatever
+    return std::fabs(delta) < (0.2f - (memory->globalVars->intervalPerTick * 2.0f));
 }
 
 void Backtrack::init() noexcept
@@ -188,8 +172,6 @@ void Backtrack::init() noexcept
 
 void Backtrack::reset() noexcept
 {
-    latencyRampup = 0.0f;
-    lastIncomingSequenceNumber = 0;
     sequences.clear();
 }
 

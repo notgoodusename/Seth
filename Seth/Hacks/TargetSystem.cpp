@@ -42,11 +42,6 @@ void TargetSystem::updateFrame() noexcept
         return interfaces->entityList->getEntityFromHandle(player.handle) == nullptr; });
 }
 
-void TargetSystem::updateTick(UserCmd* cmd) noexcept
-{
-
-}
-
 void TargetSystem::reset() noexcept
 {
     playersTargets.clear();
@@ -112,7 +107,7 @@ void PlayerTarget::update(Entity* entity) noexcept
         if(const Vector headPos = Math::getCenterOfHitbox(entity, newRecord.matrix.data(), Hitboxes::Head); headPos.notNull())
             newRecord.headPositions.push_back(headPos);
         
-        if (const Vector spinePos = Math::getCenterOfHitbox(entity, newRecord.matrix.data(), Hitboxes::Spine1); spinePos.notNull())
+        if (const Vector spinePos = Math::getCenterOfHitbox(entity, newRecord.matrix.data(), Hitboxes::Spine3); spinePos.notNull())
             newRecord.bodyPositions.push_back(spinePos);
 
         if (const Vector pelvisPos = Math::getCenterOfHitbox(entity, newRecord.matrix.data(), Hitboxes::Pelvis); pelvisPos.notNull())

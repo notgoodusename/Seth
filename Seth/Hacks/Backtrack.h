@@ -18,7 +18,7 @@ namespace Backtrack
     void run(UserCmd*) noexcept;
 
     void updateLatency(NetworkChannel*) noexcept;
-    void update() noexcept;
+    void updateSequences() noexcept;
 
     float getLerp() noexcept;
     float getLatency() noexcept;

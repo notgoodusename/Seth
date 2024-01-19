@@ -159,7 +159,7 @@ static bool __fastcall createMove(void* thisPointer, void*, float inputSampleTim
 {
     auto result = hooks->clientMode.callOriginal<bool, 21>(inputSampleTime, cmd);
 
-    Backtrack::update();
+    Backtrack::updateSequences();
 
     if (!cmd || !cmd->commandNumber)
         return result;
@@ -181,8 +181,6 @@ static bool __fastcall createMove(void* thisPointer, void*, float inputSampleTim
 
     EnginePrediction::update();
     EnginePrediction::run(cmd);
-
-    TargetSystem::updateTick(cmd);
 
     Backtrack::run(cmd);
     Aimbot::run(cmd);

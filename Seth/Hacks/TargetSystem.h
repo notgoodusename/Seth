@@ -13,7 +13,6 @@ struct PlayerTarget;
 namespace TargetSystem
 {
 	void updateFrame() noexcept;
-	void updateTick(UserCmd* cmd) noexcept;
 
 	void reset() noexcept;
 
