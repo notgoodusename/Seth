@@ -4,6 +4,7 @@
 #include "TargetSystem.h"
 
 #include "../SDK/ConVar.h"
+#include "../SDK/ClientState.h"
 #include "../SDK/Entity.h"
 #include "../SDK/FrameStage.h"
 #include "../SDK/LocalPlayer.h"
@@ -143,20 +144,21 @@ void Backtrack::updateSequences() noexcept
 bool Backtrack::valid(float simtime) noexcept
 {
     const auto network = interfaces->engine->getNetworkChannel();
-    if (!network)
+    if (!network || !memory->clientState)
         return false;
 
-    const auto deadTime = static_cast<int>(memory->globalVars->serverTime() - cvars.maxUnlag->getFloat());
-    if (simtime < deadTime)
+    const float arrivalTime = ticksToTime(memory->clientState->clockDrift.serverTick + 1 + timeToTicks(network->getLatency(0)));
+
+    const auto deadTime = static_cast<int>(arrivalTime - cvars.maxUnlag->getFloat());
+    if (simtime < deadTime) 
         return false;
 
     const auto delta = std::clamp(
-            network->getLatency(0) + network->getLatency(1) + getLerp(),
-        0.f, 
+        network->getLatency(0) + network->getLatency(1) + getLerp(),
+        0.f,
         cvars.maxUnlag->getFloat())
-        - (memory->globalVars->serverTime() - simtime);
-    //yea this is bad to do, but whatever
-    return std::fabs(delta) < (0.2f - (memory->globalVars->intervalPerTick * 2.0f));
+        - (arrivalTime - simtime);
+    return std::fabs(delta) <= 0.2f;
 }
 
 void Backtrack::init() noexcept
