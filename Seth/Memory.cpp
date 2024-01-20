@@ -133,6 +133,7 @@ Memory::Memory() noexcept
     addToCritBucket = findPattern(CLIENT_DLL, "\x55\x8B\xEC\xA1????\xF3\x0F\x10\x81????\xF3\x0F\x10\x48?\x0F\x2F\xC8\x76\x1D\xF3\x0F\x58\x45?\x0F\x2F\xC8\xF3\x0F\x11\x81????\x77\x03\x0F\x28\xC1\xF3\x0F\x11\x81????\x5D\xC2\x04\x00");
     calculateChargeCap = relativeToAbsolute<decltype(calculateChargeCap)>(findPattern(CLIENT_DLL, "\xE8????\xF3\x0F\x10\x1D????\xD9\x55\x08") + 1);
     calcViewModelView = findPattern(CLIENT_DLL, "\x55\x8B\xEC\x83\xEC\x70\x8B\x55\x0C\x53\x8B\x5D\x08\x89\x4D\xFC\x8B\x02\x89\x45\xE8\x8B\x42\x04\x89\x45\xEC\x8B\x42\x08\x89\x45\xF0\x56\x57");
+    checkForSequenceChange = relativeToAbsolute<decltype(checkForSequenceChange)>(findPattern(CLIENT_DLL, "\xE8????\x8B\x87????\x83\xEC\x0C") + 1);
     clLoadWhitelist = relativeToAbsolute<decltype(clLoadWhitelist)>(findPattern(ENGINE_DLL, "\xE8????\x83\xC4\x08\x8B\xF0\x56") + 1);
     customTextureOnItemProxyOnBindInternal = findPattern(CLIENT_DLL, "\x55\x8B\xEC\x57\x8B\xF9\x8B\x4F\x04\x85\xC9\x0F\x84????");
     doEnginePostProcessing = relativeToAbsolute<decltype(doEnginePostProcessing)>(findPattern(CLIENT_DLL, "\xE8????\x8B\x75\xF4\x83\xC4\x18") + 1);

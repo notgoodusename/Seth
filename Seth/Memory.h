@@ -100,6 +100,7 @@ public:
     std::uintptr_t addToCritBucket;
     std::uintptr_t calculateChargeCap;
     std::uintptr_t calcViewModelView;
+    std::uintptr_t checkForSequenceChange;
     std::uintptr_t clLoadWhitelist;
     std::uintptr_t customTextureOnItemProxyOnBindInternal;
     std::uintptr_t doEnginePostProcessing;

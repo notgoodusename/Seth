@@ -308,6 +308,12 @@ static void __fastcall calcViewModelViewHook(void* thisPointer, void*, Entity* o
     original(thisPointer, owner, eyePositionCopy, eyeAnglesCopy);
 }
 
+static void __fastcall checkForSequenceChangeHook(void* thisPointer, void*, CStudioHdr* hdr, int currentSequence, bool forceSequence, bool interpolate) noexcept
+{
+    static auto original = hooks->checkForSequenceChange.getOriginal<void>(hdr, currentSequence, forceSequence, interpolate);
+    original(thisPointer, hdr, currentSequence, forceSequence, false);
+}
+
 static void* __cdecl clLoadWhitelistHook(void* whitelist, const char* name) noexcept
 {
     static auto original = reinterpret_cast<void*(__cdecl*)(void*, const char*)>(hooks->enableWorldFog.getDetour());
@@ -587,6 +593,7 @@ void Hooks::install() noexcept
     addToCritBucket.detour(memory->addToCritBucket, addToCritBucketHook);
     calculateChargeCap.detour(memory->calculateChargeCap, calculateChargeCapHook);
     calcViewModelView.detour(memory->calcViewModelView, calcViewModelViewHook);
+    checkForSequenceChange.detour(memory->checkForSequenceChange, checkForSequenceChangeHook);
     clLoadWhitelist.detour(memory->clLoadWhitelist, clLoadWhitelistHook);
     customTextureOnItemProxyOnBindInternal.detour(memory->customTextureOnItemProxyOnBindInternal, customTextureOnItemProxyOnBindInternalHook);
     doEnginePostProcessing.detour(memory->doEnginePostProcessing, doEnginePostProcessingHook);
@@ -601,7 +608,6 @@ void Hooks::install() noexcept
     sendDatagram.detour(memory->sendDatagram, sendDatagramHook);
     tfPlayerInventoryGetMaxItemCount.detour(memory->tfPlayerInventoryGetMaxItemCount, tfPlayerInventoryGetMaxItemCountHook);
     updateTFAnimState.detour(memory->updateTFAnimState, updateTFAnimStateHook);
-
 
     client.init(interfaces->client);
     client.hookAt(7, levelShutDown);

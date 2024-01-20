@@ -25,6 +25,7 @@ public:
     MinHook addToCritBucket;
     MinHook calculateChargeCap;
     MinHook calcViewModelView;
+    MinHook checkForSequenceChange;
     MinHook clLoadWhitelist;
     MinHook customTextureOnItemProxyOnBindInternal;
     MinHook doEnginePostProcessing;
