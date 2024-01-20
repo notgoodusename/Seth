@@ -1027,8 +1027,8 @@ void Config::save(size_t id) const noexcept
         to_json(j["Aimbot Key"], aimbotKey, KeyBind::NONE);
         j["Draw aimbot fov"] = aimbotFov;
 
-        j["Hitscan Triggerbot"] = hitscanTriggerbot;
-        j["Melee Triggerbot"] = meleeTriggerbot;
+        j["Hitscan triggerbot"] = hitscanTriggerbot;
+        j["Melee triggerbot"] = meleeTriggerbot;
         to_json(j["Triggerbot Key"], triggerbotKey, KeyBind::NONE);
 
         j["Anti aim"] = antiAim;
