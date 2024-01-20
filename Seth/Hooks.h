@@ -28,16 +28,16 @@ public:
     MinHook clLoadWhitelist;
     MinHook customTextureOnItemProxyOnBindInternal;
     MinHook doEnginePostProcessing;
-    MinHook estimateAbsVelocity;
     MinHook enableWorldFog;
+    MinHook estimateAbsVelocity;
     MinHook fireBullet;
     MinHook frameAdvance;
     MinHook getTraceType;
-    MinHook isAllowedToWithdrawFromCritBucket;
     MinHook interpolateServerEntities;
+    MinHook isAllowedToWithdrawFromCritBucket;
     MinHook newMatchFoundDashboardStateOnUpdate;
-    MinHook tfPlayerInventoryGetMaxItemCount;
     MinHook sendDatagram;
+    MinHook tfPlayerInventoryGetMaxItemCount;
     MinHook updateClientSideAnimation;
     MinHook updateTFAnimState;
 

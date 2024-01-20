@@ -135,26 +135,6 @@ static HRESULT __stdcall reset(IDirect3DDevice9* device, D3DPRESENT_PARAMETERS* 
     return hooks->originalReset(device, params);
 }
 
-static int __fastcall sendDatagramHook(NetworkChannel* network, void* edx, bufferWrite* datagram) noexcept
-{
-    static auto original = hooks->sendDatagram.getOriginal<int>(datagram);
-    if (!localPlayer || !config->backtrack.fakeLatency || !interfaces->engine->isInGame() || !interfaces->engine->isConnected()
-        || !network || datagram)
-        return original(network, datagram);
-
-    const int inState = network->inReliableState;
-    const int inSequenceNr = network->inSequenceNr;
-
-    Backtrack::updateLatency(network);
-
-    int result = original(network, datagram);
-
-    network->inReliableState = inState;
-    network->inSequenceNr = inSequenceNr;
-
-    return result;
-}
-
 static bool __fastcall createMove(void* thisPointer, void*, float inputSampleTime, UserCmd* cmd) noexcept
 {
     auto result = hooks->clientMode.callOriginal<bool, 21>(inputSampleTime, cmd);
@@ -272,18 +252,6 @@ static void __stdcall overrideView(ViewSetup* setup) noexcept
     Misc::freeCam(setup);
 }
 
-static void __fastcall calcViewModelViewHook(void* thisPointer, void*, Entity* owner, Vector* eyePosition, Vector* eyeAngles) noexcept
-{
-    static auto original = hooks->calcViewModelView.getOriginal<void>(owner, eyePosition, eyeAngles);
-
-    auto eyePositionCopy = eyePosition;
-    auto eyeAnglesCopy = eyeAngles;
-
-    Misc::viewModelChanger(*eyePositionCopy, *eyeAnglesCopy);
-
-    original(thisPointer, owner, eyePositionCopy, eyeAnglesCopy);
-}
-
 static unsigned int vguiFocusOverlayPanel;
 
 static void __fastcall paintTraverse(void* thisPointer, void*, unsigned int vguiPanel, bool forceRepaint, bool allowForce) noexcept
@@ -308,12 +276,70 @@ static void __stdcall lockCursor() noexcept
     return hooks->surface.callOriginal<void, 62>();
 }
 
+static void __fastcall addToCritBucketHook(void* thisPointer, void*, const float amount) noexcept
+{
+    static auto original = hooks->addToCritBucket.getOriginal<void>(amount);
+    if (Crithack::protectData())
+        return;
+
+    original(thisPointer, amount);
+}
+
+static float __fastcall calculateChargeCapHook(void* thisPointer, void*) noexcept
+{
+    static auto original = hooks->calculateChargeCap.getOriginal<float>();
+
+    const float backupFrameTime = memory->globalVars->frameTime;
+    memory->globalVars->frameTime = FLT_MAX;
+    float finalValue = original(thisPointer);
+    memory->globalVars->frameTime = backupFrameTime;
+    return finalValue;
+}
+
+static void __fastcall calcViewModelViewHook(void* thisPointer, void*, Entity* owner, Vector* eyePosition, Vector* eyeAngles) noexcept
+{
+    static auto original = hooks->calcViewModelView.getOriginal<void>(owner, eyePosition, eyeAngles);
+
+    auto eyePositionCopy = eyePosition;
+    auto eyeAnglesCopy = eyeAngles;
+
+    Misc::viewModelChanger(*eyePositionCopy, *eyeAnglesCopy);
+
+    original(thisPointer, owner, eyePositionCopy, eyeAnglesCopy);
+}
+
 static void* __cdecl clLoadWhitelistHook(void* whitelist, const char* name) noexcept
 {
     static auto original = reinterpret_cast<void*(__cdecl*)(void*, const char*)>(hooks->enableWorldFog.getDetour());
     if(config->misc.svPureBypass)
         return NULL;
     return original(whitelist, name);
+}
+
+static void __fastcall customTextureOnItemProxyOnBindInternalHook(void* thisPointer, void*, void* scriptItem) noexcept
+{
+    static auto original = hooks->customTextureOnItemProxyOnBindInternal.getOriginal<void>(scriptItem);
+    if (config->visuals.disableCustomDecals)
+        return;
+
+    original(thisPointer, scriptItem);
+}
+
+static void __cdecl doEnginePostProcessingHook(int x, int y, int w, int h, bool flashlightIsOn, bool postVGui) noexcept
+{
+    static auto original = reinterpret_cast<void(__cdecl*)(int, int, int, int, bool, bool)>(hooks->doEnginePostProcessing.getDetour());
+    if (config->visuals.disablePostProcessing)
+        return;
+
+    original(x, y, w, h, flashlightIsOn, postVGui);
+}
+
+static void __cdecl enableWorldFogHook() noexcept
+{
+    static auto original = reinterpret_cast<void(__cdecl*)()>(hooks->enableWorldFog.getDetour());
+    if (config->visuals.noFog)
+        return;
+    return original();
 }
 
 static void __fastcall estimateAbsVelocityHook(void* thisPointer, void*, Vector& vel) noexcept
@@ -330,61 +356,6 @@ static void __fastcall estimateAbsVelocityHook(void* thisPointer, void*, Vector&
     }
 
     original(thisPointer, &vel);
-}
-
-static void __cdecl enableWorldFogHook() noexcept
-{
-    static auto original = reinterpret_cast<void(__cdecl*)()>(hooks->enableWorldFog.getDetour());
-    if (config->visuals.noFog)
-        return;
-    return original();
-}
-
-static int __fastcall tfPlayerInventoryGetMaxItemCountHook(void* thisPointer) noexcept
-{
-    static auto original = hooks->tfPlayerInventoryGetMaxItemCount.getOriginal<int>();
-    if (config->misc.backpackExpander)
-        return 3000;
-    return original(thisPointer);
-}
-
-static void __fastcall addToCritBucketHook(void* thisPointer, void*, const float amount) noexcept
-{
-    static auto original = hooks->addToCritBucket.getOriginal<void>(amount);
-    if (Crithack::protectData())
-        return;
-
-    original(thisPointer, amount);
-}
-
-static bool __fastcall isAllowedToWithdrawFromCritBucketHook(void* thisPointer, void*, float damage) noexcept
-{
-    static auto original = hooks->isAllowedToWithdrawFromCritBucket.getOriginal<bool>(damage);
-    if (Crithack::protectData())
-        return true;
-
-    return original(thisPointer, damage);
-}
-
-static float __fastcall calculateChargeCapHook(void* thisPointer, void*) noexcept
-{
-    static auto original = hooks->calculateChargeCap.getOriginal<float>();
-
-    const float backupFrameTime = memory->globalVars->frameTime;
-    memory->globalVars->frameTime = FLT_MAX;
-    float finalValue = original(thisPointer);
-    memory->globalVars->frameTime = backupFrameTime;
-    return finalValue;
-}
-
-static void __cdecl interpolateServerEntitiesHook() noexcept
-{
-    static auto original = reinterpret_cast<void(__cdecl*)()>(hooks->interpolateServerEntities.getDetour());
-    
-    static auto extrapolate = interfaces->cvar->findVar("cl_extrapolate");
-    if(extrapolate->getInt() != 0)
-        extrapolate->setValue(0);
-    original();
 }
 
 struct FireBulletsInfo
@@ -488,6 +459,65 @@ static const char* __fastcall getTraceTypeHook(void* thisPointer, void*) noexcep
     return original(thisPointer);
 }
 
+static void __cdecl interpolateServerEntitiesHook() noexcept
+{
+    static auto original = reinterpret_cast<void(__cdecl*)()>(hooks->interpolateServerEntities.getDetour());
+    
+    static auto extrapolate = interfaces->cvar->findVar("cl_extrapolate");
+    if(extrapolate->getInt() != 0)
+        extrapolate->setValue(0);
+    original();
+}
+
+static bool __fastcall isAllowedToWithdrawFromCritBucketHook(void* thisPointer, void*, float damage) noexcept
+{
+    static auto original = hooks->isAllowedToWithdrawFromCritBucket.getOriginal<bool>(damage);
+    if (Crithack::protectData())
+        return true;
+
+    return original(thisPointer, damage);
+}
+
+static void __fastcall newMatchFoundDashboardStateOnUpdateHook(void* thisPointer, void*) noexcept
+{
+    static auto original = hooks->newMatchFoundDashboardStateOnUpdate.getOriginal<void>();
+
+    auto autoJoinTime = reinterpret_cast<double*>(reinterpret_cast<uintptr_t>(thisPointer) + 424);
+
+    if (config->misc.autoAccept)
+        *autoJoinTime = -10.0;
+
+    original(thisPointer);
+}
+
+static int __fastcall sendDatagramHook(NetworkChannel* network, void* edx, bufferWrite* datagram) noexcept
+{
+    static auto original = hooks->sendDatagram.getOriginal<int>(datagram);
+    if (!localPlayer || !config->backtrack.fakeLatency || !interfaces->engine->isInGame() || !interfaces->engine->isConnected()
+        || !network || datagram)
+        return original(network, datagram);
+
+    const int inState = network->inReliableState;
+    const int inSequenceNr = network->inSequenceNr;
+
+    Backtrack::updateLatency(network);
+
+    int result = original(network, datagram);
+
+    network->inReliableState = inState;
+    network->inSequenceNr = inSequenceNr;
+
+    return result;
+}
+
+static int __fastcall tfPlayerInventoryGetMaxItemCountHook(void* thisPointer) noexcept
+{
+    static auto original = hooks->tfPlayerInventoryGetMaxItemCount.getOriginal<int>();
+    if (config->misc.backpackExpander)
+        return 3000;
+    return original(thisPointer);
+}
+
 static void __fastcall updateTFAnimStateHook(void* thisPointer, void*, float eyeYaw, float eyePitch) noexcept
 {
     static auto original = hooks->updateTFAnimState.getOriginal<void>(eyeYaw, eyePitch);
@@ -504,36 +534,6 @@ static void __fastcall updateTFAnimStateHook(void* thisPointer, void*, float eye
         return original(thisPointer, Animations::getLocalViewangles().y, Animations::getLocalViewangles().x);
 
     return original(thisPointer, eyeYaw, eyePitch);
-}
-
-static void __fastcall customTextureOnItemProxyOnBindInternalHook(void* thisPointer, void*, void* scriptItem) noexcept
-{
-    static auto original = hooks->customTextureOnItemProxyOnBindInternal.getOriginal<void>(scriptItem);
-    if (config->visuals.disableCustomDecals)
-        return;
-
-    original(thisPointer, scriptItem);
-}
-
-static void __fastcall newMatchFoundDashboardStateOnUpdateHook(void* thisPointer, void*) noexcept
-{
-    static auto original = hooks->newMatchFoundDashboardStateOnUpdate.getOriginal<void>();
-
-    auto autoJoinTime = reinterpret_cast<double*>(reinterpret_cast<uintptr_t>(thisPointer) + 424);
-
-    if (config->misc.autoAccept)
-        *autoJoinTime = -10.0;
-
-    original(thisPointer);
-}
-
-static void __cdecl doEnginePostProcessingHook(int x, int y, int w, int h, bool flashlightIsOn, bool postVGui) noexcept
-{
-    static auto original = reinterpret_cast<void(__cdecl*)(int, int, int, int, bool, bool)>(hooks->doEnginePostProcessing.getDetour());
-    if (config->visuals.disablePostProcessing)
-        return;
-
-    original(x, y, w, h, flashlightIsOn, postVGui);
 }
 
 void resetAll(int resetType) noexcept
@@ -590,17 +590,18 @@ void Hooks::install() noexcept
     clLoadWhitelist.detour(memory->clLoadWhitelist, clLoadWhitelistHook);
     customTextureOnItemProxyOnBindInternal.detour(memory->customTextureOnItemProxyOnBindInternal, customTextureOnItemProxyOnBindInternalHook);
     doEnginePostProcessing.detour(memory->doEnginePostProcessing, doEnginePostProcessingHook);
-    estimateAbsVelocity.detour(memory->estimateAbsVelocity, estimateAbsVelocityHook);
     enableWorldFog.detour(memory->enableWorldFog, enableWorldFogHook);
+    estimateAbsVelocity.detour(memory->estimateAbsVelocity, estimateAbsVelocityHook);
     //fireBullet.detour(memory->fireBullet, fireBulletHook);
     frameAdvance.detour(memory->frameAdvance, frameAdvanceHook);
     //getTraceType.detour(memory->getTraceType, getTraceTypeHook);
     interpolateServerEntities.detour(memory->interpolateServerEntities, interpolateServerEntitiesHook);
     isAllowedToWithdrawFromCritBucket.detour(memory->isAllowedToWithdrawFromCritBucket, isAllowedToWithdrawFromCritBucketHook);
     newMatchFoundDashboardStateOnUpdate.detour(memory->newMatchFoundDashboardStateOnUpdate, newMatchFoundDashboardStateOnUpdateHook);
+    sendDatagram.detour(memory->sendDatagram, sendDatagramHook);
     tfPlayerInventoryGetMaxItemCount.detour(memory->tfPlayerInventoryGetMaxItemCount, tfPlayerInventoryGetMaxItemCountHook);
     updateTFAnimState.detour(memory->updateTFAnimState, updateTFAnimStateHook);
-    sendDatagram.detour(memory->sendDatagram, sendDatagramHook);
+
 
     client.init(interfaces->client);
     client.hookAt(7, levelShutDown);
