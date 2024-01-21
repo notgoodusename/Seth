@@ -82,20 +82,6 @@ void TriggerbotHitscan::run(Entity* activeWeapon, UserCmd* cmd, float& lastTime,
     const auto startPos = localPlayerEyePosition;
     const auto endPos = startPos + Vector::fromAngle(cmd->viewangles) * range;
 
-
-    //TODO: Improve Readability
-    int scanBacktrackPositions = 0;
-
-    //head
-    if ((cfg.hitboxes & 1 << 0) == 1 << 0) {
-        scanBacktrackPositions += 1;
-    }
-
-    //body
-    if ((cfg.hitboxes & 1 << 1) == 1 << 1 || (cfg.hitboxes & 1 << 2) == 1 << 2) {
-        scanBacktrackPositions += 2;
-    }
-
     for (const auto& target : enemies)
     {
         if (target.playerData.empty() || !target.isAlive || target.priority == 0)
@@ -124,21 +110,22 @@ void TriggerbotHitscan::run(Entity* activeWeapon, UserCmd* cmd, float& lastTime,
                 if (!Backtrack::valid(targetTick.simulationTime))
                     continue;
 
-                //if head is set to be scanned do it, else just do body
-                for (const auto& position :
-                    scanBacktrackPositions == 1 ? targetTick.headPositions : targetTick.bodyPositions)
+                //if head is enabled do head
+                if ((cfg.hitboxes & 1 << 0) == 1 << 0)
                 {
-                    const auto angle = Math::calculateRelativeAngle(startPos, position, cmd->viewangles);
-                    const auto fov = std::hypotf(angle.x, angle.y);
-                    if (fov < bestFov) {
-                        bestFov = fov;
-                        bestTick = i;
+                    for (const auto& position : targetTick.headPositions)
+                    {
+                        const auto angle = Math::calculateRelativeAngle(startPos, position, cmd->viewangles);
+                        const auto fov = std::hypotf(angle.x, angle.y);
+                        if (fov < bestFov) {
+                            bestFov = fov;
+                            bestTick = i;
+                        }
                     }
                 }
-
-                //and if head is enabled and body too, scan head because in the previous case we only scanned for body
-                //Basically if both options are on backtrack both head and body
-                if (scanBacktrackPositions == 3)
+                
+                //and if body is also enabled do it too
+                if ((cfg.hitboxes & 1 << 1) == 1 << 1 || (cfg.hitboxes & 1 << 2) == 1 << 2)
                 {
                     for (const auto& position : targetTick.headPositions)
                     {
