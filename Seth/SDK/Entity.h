@@ -285,6 +285,7 @@ public:
 
     float getMaxSpeed() noexcept
     {
+        //TODO: Account for different speed boosts such as demoknight, mannpower, etc
         float speed = maxSpeed();
         if (flags() & (1 << 1))
             speed /= 3.0f;
