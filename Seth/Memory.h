@@ -68,13 +68,13 @@ public:
     void(__thiscall* boneSetupCalcBoneAdj)(void*, Vector*, Quaternion*, const float*);
     
     void(__thiscall* calcAbsoluteVelocity)(void*);
-    bool(__thiscall* calcIsAttackCriticalHelper)(void*);
-    bool(__thiscall* calcIsAttackCriticalHelperMelee)(void*);
     bool(_cdecl* cullBox)(const Vector&, const Vector&, const Frustum&);
+    int(__thiscall* getAmmoCount)(void*, int);
     EconItemDefinition*( __thiscall* getItemDefinition)(void*, int);
     int(__thiscall* getNextThinkTick)(void*, const char*);
+    void*(_cdecl* getWeaponData)(int);
     void(_cdecl* generatePerspectiveFrustum)(const Vector&, const Vector&, const Vector&, const Vector&, float zNear, float zFar, float fovX, float fovY, Frustum&);
-    
+
     void(__thiscall* IKContextConstruct)(void*);
     void(__thiscall* IKContextDeconstruct)(void*);
     void(__thiscall* IKContextInit)(void*, const CStudioHdr*, const Vector&, const Vector&, float, int, int);
@@ -98,8 +98,10 @@ public:
     int* predictionRandomSeed;
 
     std::uintptr_t addToCritBucket;
+    std::uintptr_t calcIsAttackCritical;
     std::uintptr_t calculateChargeCap;
     std::uintptr_t calcViewModelView;
+    std::uintptr_t canFireRandomCriticalShot;
     std::uintptr_t checkForSequenceChange;
     std::uintptr_t clLoadWhitelist;
     std::uintptr_t customTextureOnItemProxyOnBindInternal;
@@ -113,6 +115,9 @@ public:
     std::uintptr_t isAllowedToWithdrawFromCritBucket;
     std::uintptr_t newMatchFoundDashboardStateOnUpdate;
     std::uintptr_t tfPlayerInventoryGetMaxItemCount;
+    std::uintptr_t randomSeedReturnAddress1;
+    std::uintptr_t randomSeedReturnAddress2;
+    std::uintptr_t randomSeedReturnAddress3;
     std::uintptr_t sendDatagram;
     std::uintptr_t updateClientSideAnimation;
     std::uintptr_t updateTFAnimState;

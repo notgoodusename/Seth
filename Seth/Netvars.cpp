@@ -7,7 +7,7 @@
 #include <utility>
 #include <vector>
 
-#include "Hacks/Misc.h"
+#include "Hacks/Crithack.h"
 
 #include "Interfaces.h"
 #include "Netvars.h"
@@ -23,6 +23,24 @@
 
 static std::unordered_map<std::uint32_t, std::pair<recvProxy, recvProxy*>> proxies;
 static std::vector<std::pair<std::uint32_t, std::uint32_t>> offsets;
+
+static void __cdecl healthHook(recvProxyData& data, void* entityPointer, void* output) noexcept
+{
+    if (entityPointer == nullptr || output == nullptr)
+        return;
+
+    const auto newHealth = data.value._int;
+    const auto entity = static_cast<Entity*>(entityPointer);
+
+    if (entity) 
+        Crithack::updateHealth(entity->handle(), newHealth);
+
+    *static_cast<int*>(output) = newHealth;
+
+    constexpr auto hash{ fnv::hash("CBasePlayer->m_iHealth") };
+    proxies[hash].first(data, entityPointer, output);
+}
+
 
 static void walkTable(const char* networkName, RecvTable* recvTable, const std::size_t offset = 0) noexcept
 {
@@ -44,6 +62,8 @@ static void walkTable(const char* networkName, RecvTable* recvTable, const std::
 
         constexpr auto getHook{ [](std::uint32_t hash) noexcept -> recvProxy {
              switch (hash) {
+             case fnv::hash("CBasePlayer->m_iHealth"):
+                 return healthHook;
              default:
                  return nullptr;
              }

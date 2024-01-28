@@ -170,6 +170,7 @@
     <ClInclude Include="Memory.h" />
     <ClInclude Include="SDK\FileSystem.h" />
     <ClInclude Include="SDK\FrameStage.h" />
+    <ClInclude Include="SDK\GameEvent.h" />
     <ClInclude Include="SDK\GameMovement.h" />
     <ClInclude Include="SDK\GameRules.h" />
     <ClInclude Include="SDK\GlobalVars.h" />
@@ -213,6 +214,7 @@
     <ClInclude Include="SDK\Utils.h" />
     <ClInclude Include="SDK\ViewSetup.h" />
     <ClInclude Include="SDK\VirtualMethod.h" />
+    <ClInclude Include="SDK\WeaponData.h" />
     <ClInclude Include="SDK\WeaponId.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="CustomTexture.h" />

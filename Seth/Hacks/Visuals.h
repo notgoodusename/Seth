@@ -3,7 +3,6 @@
 #include <array>
 
 enum class FrameStage;
-class GameEvent;
 struct ImDrawList;
 class ViewSetup;
 struct UserCmd;

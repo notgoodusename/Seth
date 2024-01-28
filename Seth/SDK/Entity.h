@@ -28,6 +28,7 @@
 #include "Vector.h"
 #include "VirtualMethod.h"
 #include "WeaponId.h"
+#include "WeaponData.h"
 
 enum class MoveType {
     NONE = 0,
@@ -463,6 +464,21 @@ public:
             return Vector{ };
     }
 
+    int getAmmoCount(int ammoIndex) noexcept
+    {
+        return memory->getAmmoCount(this, ammoIndex);
+    }
+
+    TFWeaponInfo* getWeaponInfo() noexcept
+    {
+        return reinterpret_cast<TFWeaponInfo*>(memory->getWeaponData(static_cast<int>(weaponId())));
+    }
+
+    WeaponData* getWeaponData(int weaponMode = 0) noexcept
+    {
+        return &getWeaponInfo()->weaponData[weaponMode];
+    }
+
     bool canFireCriticalShot(bool headShot) noexcept
     {
         bool result = false;
@@ -486,6 +502,8 @@ public:
     {
         return (getDamageType() & (1 << 25)) && canFireCriticalShot(true);
     }
+
+    bool canWeaponRandomCrit() noexcept;
 
     void replaceMatrix(const matrix3x4* newMatrix) noexcept
     {
@@ -639,6 +657,36 @@ public:
         return false;
     }
 
+    bool isRapidFireCrits() noexcept
+    {
+        switch (weaponId())
+        {
+            case WeaponId::MINIGUN:
+            case WeaponId::SYRINGEGUN_MEDIC:
+            case WeaponId::FLAMETHROWER:
+            case WeaponId::PISTOL:
+            case WeaponId::PISTOL_SCOUT:
+            case WeaponId::SMG:
+            case WeaponId::FLAREGUN:
+                return true;
+            default:
+                break;
+        }
+
+        switch (itemDefinitionIndex())
+        {
+            case Scout_m_TheShortstop:
+            case Scout_s_ScoutsPistol:
+            case Scout_s_PistolR:
+            case Scout_s_PrettyBoysPocketPistol:
+                return true;
+            default:
+                break;
+        }
+
+        return false;
+    }
+
     CONDITION(isCharging, condition(), TFCond_Charging)
     CONDITION(isScoped, condition(), TFCond_Zoomed)
     CONDITION(isUbered, condition(), TFCond_Ubercharged)
@@ -680,6 +728,18 @@ public:
     CONDITION(hasBulletResist, conditionEx(), TFCondEx_BulletCharge)
     CONDITION(hasFireResist, conditionEx(), TFCondEx_FireCharge)
 
+    OFFSET(critTokenBucket, 0xA54, float)
+    OFFSET(critChecks, 0xA58, int)
+    OFFSET(critSeedRequests, 0xA5C, int)
+    OFFSET(weaponMode, 0xB24, int)
+    OFFSET(critShot, 0xB36, bool)
+    OFFSET(critTime, 0xB50, float)
+    OFFSET(lastCritCheckTime, 0xB54, float)
+    OFFSET(lastCritCheckFrame, 0xB58, int)
+    OFFSET(currentSeed, 0xB5C, int)
+    OFFSET(lastRapidFireCritCheckTime, 0xB60, float)
+    OFFSET(minigunState, 0xC48, int)
+
     NETVAR(angleRotation, "CBaseEntity", "m_angRotation", Vector)
     NETVAR(modelIndex, "CBaseEntity", "m_nModelIndex", unsigned)
     NETVAR(origin, "CBaseEntity", "m_vecOrigin", Vector)
@@ -720,6 +780,7 @@ public:
     NETVAR(nextSecondaryAttack, "CBaseCombatWeapon","m_flNextSecondaryAttack", float)
     NETVAR(nextPrimaryAttack, "CBaseCombatWeapon", "m_flNextPrimaryAttack", float)
     NETVAR(state, "CBaseCombatWeapon", "m_iState ", int)
+    NETVAR(primaryAmmoType, "CBaseCombatWeapon", "m_iPrimaryAmmoType", int);
 
     NETVAR(weapons, "CBaseCombatCharacter", "m_hMyWeapons", int[64])
     NETVAR(activeWeapon, "CBaseCombatCharacter", "m_hActiveWeapon", int)
@@ -739,6 +800,7 @@ public:
 
     NETVAR(lastFireTime, "CTFWeaponBase", "m_flLastFireTime", float)
     NETVAR_OFFSET(smackTime, "CTFWeaponBase", "m_nInspectStage", 0x1C, float)
+    NETVAR(observedCritChance, "CTFWeaponBase", "m_flObservedCritChance", float)
 
     NETVAR(condition, "CTFPlayer", "m_nPlayerCond", int)
     NETVAR(conditionEx, "CTFPlayer", "m_nPlayerCondEx", int)

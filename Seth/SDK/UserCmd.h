@@ -49,7 +49,6 @@ struct UserCmd {
     short mousedx;
     short mousedy;
     bool hasbeenpredicted;
-    PAD(24)
 };
 
 struct VerifiedUserCmd

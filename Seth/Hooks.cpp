@@ -45,6 +45,7 @@
 #include "SDK/Entity.h"
 #include "SDK/EntityList.h"
 #include "SDK/FrameStage.h"
+#include "SDK/GameEvent.h"
 #include "SDK/GlobalVars.h"
 #include "SDK/Input.h"
 #include "SDK/InputSystem.h"
@@ -105,9 +106,10 @@ static HRESULT __stdcall present(IDirect3DDevice9* device, const RECT* src, cons
         Triggerbot::updateInput();
         Misc::updateInput();
         Chams::updateInput();
+        Crithack::updateInput();
 
         Misc::drawPlayerList();
-        Crithack::draw();
+        Crithack::draw(ImGui::GetBackgroundDrawList());
 
         gui->handleToggle();
 
@@ -170,7 +172,7 @@ static bool __fastcall createMove(void* thisPointer, void*, float inputSampleTim
 
     Fakelag::run(sendPacket);
 
-    //Crithack::run(cmd);
+    Crithack::run(cmd);
 
     cmd->viewangles.normalize();
 
@@ -206,7 +208,10 @@ static void __fastcall frameStageNotify(void* thisPointer, void*, FrameStage sta
     }
 
     if (stage == FrameStage::NET_UPDATE_END)
+    {
         TargetSystem::updateFrame();
+        Crithack::updatePlayers();
+    }
 
     if (stage == FrameStage::RENDER_START) {
         Misc::unlockHiddenCvars();
@@ -276,6 +281,27 @@ static void __stdcall lockCursor() noexcept
     return hooks->surface.callOriginal<void, 62>();
 }
 
+static bool __fastcall fireEventClientSide(void* thisPointer, void*, GameEvent* event) noexcept
+{
+    switch (fnv::hashRuntime(event->getName())) {
+        case fnv::hash("player_hurt"):
+            Crithack::handleEvent(event);
+            break;
+    }
+
+    return hooks->eventManager.callOriginal<bool, 8>(event);
+}
+
+static UserCmd* __stdcall getUserCmd(int sequenceNumber) noexcept
+{
+    const auto commands = *reinterpret_cast<UserCmd**>(reinterpret_cast<uintptr_t>(memory->input) + 0xFC);
+    if (commands)
+        if (UserCmd* cmd = &commands[sequenceNumber % 90])
+            return cmd;
+
+    return nullptr;
+}
+
 static void __fastcall addToCritBucketHook(void* thisPointer, void*, const float amount) noexcept
 {
     static auto original = hooks->addToCritBucket.getOriginal<void>(amount);
@@ -283,6 +309,23 @@ static void __fastcall addToCritBucketHook(void* thisPointer, void*, const float
         return;
 
     original(thisPointer, amount);
+}
+
+static void __fastcall calcIsAttackCriticalHook(void* thisPointer, void*) noexcept
+{
+    static auto original = hooks->calcIsAttackCritical.getOriginal<void>();
+
+    const auto entity = reinterpret_cast<Entity*>(thisPointer);
+    if (!entity || !localPlayer || entity != localPlayer->getActiveWeapon())
+        return original(thisPointer);
+
+    if (!Crithack::isAttackCriticalHandler())
+        return;
+
+    const auto previousWeaponMode = entity->weaponMode();
+    entity->weaponMode() = 0;
+    original(thisPointer);
+    entity->weaponMode() = previousWeaponMode;
 }
 
 static float __fastcall calculateChargeCapHook(void* thisPointer, void*) noexcept
@@ -306,6 +349,17 @@ static void __fastcall calcViewModelViewHook(void* thisPointer, void*, Entity* o
     Misc::viewModelChanger(*eyePositionCopy, *eyeAnglesCopy);
 
     original(thisPointer, owner, eyePositionCopy, eyeAnglesCopy);
+}
+
+static bool __fastcall canFireRandomCriticalShotHook(void* thisPointer, void*, float critChance) noexcept
+{
+    static auto original = hooks->canFireRandomCriticalShot.getOriginal<bool>(critChance);
+
+    const auto entity = reinterpret_cast<Entity*>(thisPointer);
+    if (entity && localPlayer && entity == localPlayer->getActiveWeapon())
+        Crithack::handleCanFireRandomCriticalShot(critChance, entity);
+
+    return original(thisPointer, critChance);
 }
 
 static void __fastcall checkForSequenceChangeHook(void* thisPointer, void*, CStudioHdr* hdr, int currentSequence, bool forceSequence, bool interpolate) noexcept
@@ -478,8 +532,8 @@ static void __cdecl interpolateServerEntitiesHook() noexcept
 static bool __fastcall isAllowedToWithdrawFromCritBucketHook(void* thisPointer, void*, float damage) noexcept
 {
     static auto original = hooks->isAllowedToWithdrawFromCritBucket.getOriginal<bool>(damage);
-    if (Crithack::protectData())
-        return true;
+
+    Crithack::setCorrectDamage(damage);
 
     return original(thisPointer, damage);
 }
@@ -494,6 +548,30 @@ static void __fastcall newMatchFoundDashboardStateOnUpdateHook(void* thisPointer
         *autoJoinTime = -10.0;
 
     original(thisPointer);
+}
+
+static void __cdecl randomSeedHook(int seed) noexcept
+{
+    static auto original = reinterpret_cast<void(__cdecl*)(int)>(hooks->randomSeed.getDetour());
+
+    if (Crithack::protectData())
+        return original(seed);
+
+    if (reinterpret_cast<DWORD>(_ReturnAddress()) == memory->randomSeedReturnAddress1 ||
+        reinterpret_cast<DWORD>(_ReturnAddress()) == memory->randomSeedReturnAddress2 ||
+        reinterpret_cast<DWORD>(_ReturnAddress()) == memory->randomSeedReturnAddress3)
+    {
+        if (localPlayer)
+        {
+            const auto activeWeapon = localPlayer->getActiveWeapon();
+            if (activeWeapon)
+            {
+                activeWeapon->currentSeed() = seed;
+            }
+        }
+    }
+
+    original(seed);
 }
 
 static int __fastcall sendDatagramHook(NetworkChannel* network, void* edx, bufferWrite* datagram) noexcept
@@ -591,8 +669,10 @@ void Hooks::install() noexcept
     MH_Initialize();
 
     addToCritBucket.detour(memory->addToCritBucket, addToCritBucketHook);
+    calcIsAttackCritical.detour(memory->calcIsAttackCritical, calcIsAttackCriticalHook);
     calculateChargeCap.detour(memory->calculateChargeCap, calculateChargeCapHook);
     calcViewModelView.detour(memory->calcViewModelView, calcViewModelViewHook);
+    canFireRandomCriticalShot.detour(memory->canFireRandomCriticalShot, canFireRandomCriticalShotHook);
     checkForSequenceChange.detour(memory->checkForSequenceChange, checkForSequenceChangeHook);
     clLoadWhitelist.detour(memory->clLoadWhitelist, clLoadWhitelistHook);
     customTextureOnItemProxyOnBindInternal.detour(memory->customTextureOnItemProxyOnBindInternal, customTextureOnItemProxyOnBindInternalHook);
@@ -605,6 +685,7 @@ void Hooks::install() noexcept
     interpolateServerEntities.detour(memory->interpolateServerEntities, interpolateServerEntitiesHook);
     isAllowedToWithdrawFromCritBucket.detour(memory->isAllowedToWithdrawFromCritBucket, isAllowedToWithdrawFromCritBucketHook);
     newMatchFoundDashboardStateOnUpdate.detour(memory->newMatchFoundDashboardStateOnUpdate, newMatchFoundDashboardStateOnUpdateHook);
+    randomSeed.detour(reinterpret_cast<uintptr_t>(memory->randomSeed), randomSeedHook);
     sendDatagram.detour(memory->sendDatagram, sendDatagramHook);
     tfPlayerInventoryGetMaxItemCount.detour(memory->tfPlayerInventoryGetMaxItemCount, tfPlayerInventoryGetMaxItemCountHook);
     updateTFAnimState.detour(memory->updateTFAnimState, updateTFAnimStateHook);
@@ -618,6 +699,12 @@ void Hooks::install() noexcept
     clientMode.hookAt(16, overrideView);
     clientMode.hookAt(21, createMove);
     clientMode.hookAt(39, doPostScreenEffects);
+
+    eventManager.init(interfaces->gameEventManager);
+    eventManager.hookAt(8, fireEventClientSide);
+
+    input.init(memory->input);
+    input.hookAt(8, getUserCmd);
 
     modelRender.init(interfaces->modelRender);
     modelRender.hookAt(19, drawModelExecute);

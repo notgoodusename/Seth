@@ -37,3 +37,9 @@ namespace Netvars
     { \
 	    return (conditions & cond); \
     }
+
+#define OFFSET(funcname, offset, type) \
+[[nodiscard]] std::add_lvalue_reference_t<type> funcname() noexcept \
+{ \
+    return *reinterpret_cast<std::add_pointer_t<type>>(std::uintptr_t(this) + offset); \
+}

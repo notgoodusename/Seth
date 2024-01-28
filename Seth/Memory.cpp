@@ -101,11 +101,11 @@ Memory::Memory() noexcept
     boneSetupCalcBoneAdj = relativeToAbsolute<decltype(boneSetupCalcBoneAdj)>(findPattern(CLIENT_DLL, "\xE8????\xFF\x75\x18\xD9\x45\x14\x8B\x07") + 1);
 
     calcAbsoluteVelocity = relativeToAbsolute<decltype(calcAbsoluteVelocity)>(findPattern(CLIENT_DLL, "\xE8????\xD9\xE8\x8D\x45\xEC") + 1);
-    calcIsAttackCriticalHelper = reinterpret_cast<decltype(calcIsAttackCriticalHelper)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\x83\xEC\x18\x56\x57\x6A\x00\x68????\x68????\x6A\x00\x8B\xF9\xE8????\x50\xE8????\x8B\xF0\x83\xC4\x14\x89\x75\xEC"));
-    calcIsAttackCriticalHelperMelee = reinterpret_cast<decltype(calcIsAttackCriticalHelperMelee)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\xA1????\x83\xEC\x08\x83\x78\x30\x00\x57"));
     cullBox = relativeToAbsolute<decltype(cullBox)>(findPattern(ENGINE_DLL, "\xE8????\x33\xC9\x83\xC4\x10\x84\xC0") + 1);
+    getAmmoCount = reinterpret_cast<decltype(getAmmoCount)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\x56\x8B\x75\x08\x57\x8B\xF9\x83\xFE\xFF\x75\x08\x5F\x33\xC0\x5E\x5D\xC2\x04\x00"));
     getItemDefinition = relativeToAbsolute<decltype(getItemDefinition)>(findPattern(CLIENT_DLL, "\xE8????\x0F\xB6\x40\x15") + 1);
     getNextThinkTick = reinterpret_cast<decltype(getNextThinkTick)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\x8B\x45\x08\x56\x8B\xF1\x85\xC0\x75\x13"));
+    getWeaponData = reinterpret_cast<decltype(getWeaponData)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\x66\x8B??\x66\x3B\x05????\x73"));
     generatePerspectiveFrustum = relativeToAbsolute<decltype(generatePerspectiveFrustum)>(findPattern(ENGINE_DLL, "\xE8????\x8B\x45\x08\x83\xC4\x24\xF3\x0F\x10\x05????") + 1);
     
     IKContextConstruct = relativeToAbsolute<decltype(IKContextConstruct)>(findPattern(CLIENT_DLL, "\xE8????\x89\x83????\xEB\x38") + 1);
@@ -131,8 +131,10 @@ Memory::Memory() noexcept
     predictionRandomSeed = *reinterpret_cast<int**>(findPattern(CLIENT_DLL, "\xC7\x05????????\x5D\xC3\x8B\x40\x34") + 2);
 
     addToCritBucket = findPattern(CLIENT_DLL, "\x55\x8B\xEC\xA1????\xF3\x0F\x10\x81????\xF3\x0F\x10\x48?\x0F\x2F\xC8\x76\x1D\xF3\x0F\x58\x45?\x0F\x2F\xC8\xF3\x0F\x11\x81????\x77\x03\x0F\x28\xC1\xF3\x0F\x11\x81????\x5D\xC2\x04\x00");
+    calcIsAttackCritical = findPattern(CLIENT_DLL, "\x53\x57\x6A?\x68????\x68????\x6A?\x8B\xF9\xE8????\x50\xE8????\x8B\xD8\x83\xC4?\x85\xDB\x0F\x84");
     calculateChargeCap = relativeToAbsolute<decltype(calculateChargeCap)>(findPattern(CLIENT_DLL, "\xE8????\xF3\x0F\x10\x1D????\xD9\x55\x08") + 1);
     calcViewModelView = findPattern(CLIENT_DLL, "\x55\x8B\xEC\x83\xEC\x70\x8B\x55\x0C\x53\x8B\x5D\x08\x89\x4D\xFC\x8B\x02\x89\x45\xE8\x8B\x42\x04\x89\x45\xEC\x8B\x42\x08\x89\x45\xF0\x56\x57");
+    canFireRandomCriticalShot = findPattern(CLIENT_DLL, "\x55\x8B\xEC\xF3\x0F\x10\x4D?\xF3\x0F\x58\x0D");
     checkForSequenceChange = relativeToAbsolute<decltype(checkForSequenceChange)>(findPattern(CLIENT_DLL, "\xE8????\x8B\x87????\x83\xEC\x0C") + 1);
     clLoadWhitelist = relativeToAbsolute<decltype(clLoadWhitelist)>(findPattern(ENGINE_DLL, "\xE8????\x83\xC4\x08\x8B\xF0\x56") + 1);
     customTextureOnItemProxyOnBindInternal = findPattern(CLIENT_DLL, "\x55\x8B\xEC\x57\x8B\xF9\x8B\x4F\x04\x85\xC9\x0F\x84????");
@@ -146,6 +148,9 @@ Memory::Memory() noexcept
     isAllowedToWithdrawFromCritBucket = findPattern(CLIENT_DLL, "\x55\x8B\xEC\x56\x8B\xF1\x0F\xB7\x86????\xFF\x86????\x50\xE8????\x83\xC4\x04\x80\xB8?????\x74\x0A\xF3\x0F\x10\x15");
     newMatchFoundDashboardStateOnUpdate = findPattern(CLIENT_DLL, "\x55\x8B\xEC\x83\xEC\x0C\x56\x8B\xF1\xE8????\x8B\x86????");
     tfPlayerInventoryGetMaxItemCount = findPattern(CLIENT_DLL, "\x8B\x49\x68\x56");
+    randomSeedReturnAddress1 = findPattern(CLIENT_DLL, "\x83\xC4?\x0F\x57?\x80\x7D\xFF");
+    randomSeedReturnAddress2 = findPattern(CLIENT_DLL, "\x83\xC4?\x68????\x6A?\xFF\x15????\xF3\x0F???\x83\xC4?\x0F\x28");
+    randomSeedReturnAddress3 = findPattern(CLIENT_DLL, "\x83\xC4?\x68????\x6A?\xFF\x15????\xF3\x0F???\x83\xC4?\xF3\x0F");
     sendDatagram = findPattern(ENGINE_DLL, "\x55\x8B\xEC\xB8????\xE8????\xA1????\x53\x56\x8B\xD9");
     updateClientSideAnimation = findPattern(CLIENT_DLL, "\x56\x8B\xF1\x80\xBE?????\x74\x27");
     updateTFAnimState = findPattern(CLIENT_DLL, "\x55\x8B\xEC\x81\xEC????\x53\x57\x8B\xF9\x8B\x9F????");

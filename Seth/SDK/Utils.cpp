@@ -136,13 +136,14 @@ bool isAttacking(UserCmd* cmd, Entity* activeWeapon) noexcept
 				return false;
 			break;
 		case WeaponType::PROJECTILE:
-			if (activeWeapon->nextPrimaryAttack() > memory->globalVars->serverTime())
+			if (activeWeapon->nextPrimaryAttack() > memory->globalVars->serverTime() && localPlayer->nextAttack() > memory->globalVars->serverTime())
 				return false;
 			break;
 		case WeaponType::MELEE:
+			//TODO: fix melee smack time
 			if (!activeWeapon->isKnife())
-				return fabsf(activeWeapon->smackTime() - memory->globalVars->serverTime()) < memory->globalVars->intervalPerTick * 2.0f;
-			if (activeWeapon->nextPrimaryAttack() > memory->globalVars->serverTime() && activeWeapon->nextSecondaryAttack() > memory->globalVars->serverTime())
+				return fabsf(activeWeapon->smackTime() - memory->globalVars->serverTime()) <= memory->globalVars->intervalPerTick; //* 2.0f;
+			if (activeWeapon->nextPrimaryAttack() > memory->globalVars->serverTime() && localPlayer->nextAttack() > memory->globalVars->serverTime())
 				return false;
 			break;
 		default:

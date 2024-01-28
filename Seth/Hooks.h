@@ -23,8 +23,10 @@ public:
     void uninstall() noexcept;
 
     MinHook addToCritBucket;
+    MinHook calcIsAttackCritical;
     MinHook calculateChargeCap;
     MinHook calcViewModelView;
+    MinHook canFireRandomCriticalShot;
     MinHook checkForSequenceChange;
     MinHook clLoadWhitelist;
     MinHook customTextureOnItemProxyOnBindInternal;
@@ -37,6 +39,7 @@ public:
     MinHook interpolateServerEntities;
     MinHook isAllowedToWithdrawFromCritBucket;
     MinHook newMatchFoundDashboardStateOnUpdate;
+    MinHook randomSeed;
     MinHook sendDatagram;
     MinHook tfPlayerInventoryGetMaxItemCount;
     MinHook updateClientSideAnimation;
@@ -45,6 +48,8 @@ public:
     MinHook client;
     MinHook clientMode;
     MinHook engine;
+    MinHook eventManager;
+    MinHook input;
     MinHook modelRender;
     MinHook panel;
     MinHook prediction;

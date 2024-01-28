@@ -3,6 +3,7 @@
 #include "../Interfaces.h"
 #include "../StrayElements.h"
 
+#include "AttributeManager.h"
 #include "Entity.h"
 #include "GlobalVars.h"
 
@@ -156,4 +157,12 @@ Entity* Entity::calculateGroundEntity() noexcept
 	{
 		return pm.entity;
 	}
+}
+
+bool Entity::canWeaponRandomCrit() noexcept
+{
+	float critChange = AttributeManager::attributeHookFloat(1, "mult_crit_chance", this);
+	if (critChange == 0)
+		return false;
+	return true;
 }

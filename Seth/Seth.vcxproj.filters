@@ -658,5 +658,11 @@
     <ClInclude Include="SDK\CBoneSetup.h">
       <Filter>SDK</Filter>
     </ClInclude>
+    <ClInclude Include="SDK\GameEvent.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\WeaponData.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
