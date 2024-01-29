@@ -246,6 +246,7 @@ void Crithack::handleEvent(GameEvent* event) noexcept
 		if (!activeWeapon)
 			return;
 
+		//TODO: fix melee damage
 		if (activeWeapon->slot() == SLOT_MELEE)
 		{
 			meleeDamage += damage;
@@ -275,14 +276,21 @@ void Crithack::resync() noexcept
 		return;
 
 	const float playerResourceDamage = static_cast<float>(playerResource->getDamage(localPlayer->index()));
-/*	if (playerResourceDamage <= 0.0f)
+	
+	static float maxDamage = 0.0f;
+	maxDamage = max(playerResourceDamage, maxDamage);
+
+	rangedDamage = playerResourceDamage - critDamage - boostedDamage - meleeDamage;
+
+	//so if we have dealt damage in the past and playerdamage == 0 then yes we reset
+	if (playerResourceDamage <= 0.0f && maxDamage != 0.0f)
 	{
+		maxDamage = 0.0f;
+		rangedDamage = 0.0f;
 		critDamage = 0.0f;
 		boostedDamage = 0.0f;
 		meleeDamage = 0.0f;
-	}*/
-
-	rangedDamage = playerResourceDamage - critDamage - boostedDamage - meleeDamage;
+	}
 }
 
 int Crithack::getDamageTillUnban() noexcept
@@ -298,7 +306,7 @@ int Crithack::getDamageTillUnban() noexcept
 
 void Crithack::handleCanFireRandomCriticalShot(float critChance, Entity* activeWeapon) noexcept
 {
-	activeWeapon->observedCritChance() = 0.f;
+	activeWeapon->observedCritChance() = 0.0f;
 	correctCritChance = 0.0f;
 	critBan = false;
 
@@ -311,7 +319,8 @@ void Crithack::handleCanFireRandomCriticalShot(float critChance, Entity* activeW
 	activeWeapon->observedCritChance() = normalizedDamage / damage;
 
 	correctCritChance = critChance + 0.1f;
-	critBan = activeWeapon->observedCritChance() >= correctCritChance;
+	//if less than 0 it means that the crit damage is greater than the total damage, which means we are crit banned!!
+	critBan = activeWeapon->observedCritChance() >= correctCritChance || activeWeapon->observedCritChance() < 0.0f;
 }
 
 bool Crithack::isAttackCriticalHandler() noexcept
@@ -557,7 +566,7 @@ void Crithack::draw(ImDrawList* drawList) noexcept
 	if (!localPlayer)
 		return;
 
-	//Objective: not call fucking activeweapon
+	//TODO: not call fucking activeweapon
 	const auto activeWeapon = localPlayer->getActiveWeapon();
 	if (!activeWeapon || !activeWeapon->canWeaponRandomCrit())
 		return;
@@ -576,6 +585,22 @@ void Crithack::draw(ImDrawList* drawList) noexcept
 
 	auto& crits = critTicks[activeWeapon->index()];
 	auto& skips = skipTicks[activeWeapon->index()];
+
+	/*
+	renderText(pos, red, offset, drawList, "Ranged damage %.2f", rangedDamage);
+	renderText(pos, green, offset, drawList, "Crit damage %.2f", critDamage);
+	renderText(pos, blue, offset, drawList, "Boosted damage %.2f", boostedDamage);
+	renderText(pos, yellow, offset, drawList, "Melee damage %.2f", meleeDamage);
+	renderText(pos, blue, offset, drawList, "Crit banned %s", critBan ? "true" : "false");
+	renderText(pos, red, offset, drawList, "Can crit %s", canCrit ? "true" : "false");
+	renderText(pos, green, offset, drawList, "Correct crit chance %.4f", correctCritChance);
+	renderText(pos, blue, offset, drawList, "Cost %.2f", cost);
+	renderText(pos, yellow, offset, drawList, "Can force crit %s", canForceCrit(activeWeapon) ? "true" : "false");
+	renderText(pos, red, offset, drawList, "Crit seed request %i", activeWeapon->critSeedRequests());
+	renderText(pos, green, offset, drawList, "Crit checks %i", activeWeapon->critChecks());
+	renderText(pos, blue, offset, drawList, "Observed crit chance %.4f", activeWeapon->observedCritChance());
+	renderText(pos, yellow, offset, drawList, "Last command number %.4f", lastCommandNumberScanned);
+	*/
 
 	if (weaponCriticals->getInt() <= 0)
 	{
@@ -640,56 +665,9 @@ void Crithack::draw(ImDrawList* drawList) noexcept
 	if (potentialCrits < critsPossible && activeWeapon->slot() != SLOT_MELEE && cost > 0.0f)
 	{
 		const float fraction = std::clamp((activeWeapon->critTokenBucket() - (static_cast<float>(potentialCrits) * cost)) / cost, 0.0f, 1.0f);
-
+		 
 		renderBar(windowPos, ImVec2{ windowSize.x, 12.0f }, fraction, offset, drawList);
 	}
-
-	/*
-	std::string a = "Ranged damage " + std::to_string(rangedDamage);
-	ab(drawList, Color4(), a.c_str(), ImVec2{ critIndicatorX + 100 / 2, critIndicatorY }, textOffset);
-
-	a = "Correct damage " + std::to_string(correctDamage);
-	ab(drawList, Color4(), a.c_str(), ImVec2{ critIndicatorX + 100 / 2, critIndicatorY }, textOffset);
-
-	a = "Crit damage " + std::to_string(critDamage);
-	ab(drawList, Color4(), a.c_str(), ImVec2{ critIndicatorX + 100 / 2, critIndicatorY }, textOffset);
-
-	a = "Boosted damage " + std::to_string(boostedDamage);
-	ab(drawList, Color4(), a.c_str(), ImVec2{ critIndicatorX + 100 / 2, critIndicatorY }, textOffset);
-
-	a = "Melee damage " + std::to_string(meleeDamage);
-	ab(drawList, Color4(), a.c_str(), ImVec2{ critIndicatorX + 100 / 2, critIndicatorY }, textOffset);
-
-	a = "Crit banned " + std::to_string(critBan);
-	ab(drawList, Color4(), a.c_str(), ImVec2{ critIndicatorX + 100 / 2, critIndicatorY }, textOffset);
-
-	a = "Correct Crit chance " + std::to_string(correctCritChance);
-	ab(drawList, Color4(), a.c_str(), ImVec2{ critIndicatorX + 100 / 2, critIndicatorY }, textOffset);
-
-	a = "Cost " + std::to_string(cost);
-	ab(drawList, Color4(), a.c_str(), ImVec2{ critIndicatorX + 100 / 2, critIndicatorY }, textOffset);
-
-	a = "Can Crit " + std::to_string(canCrit);
-	ab(drawList, Color4(), a.c_str(), ImVec2{ critIndicatorX + 100 / 2, critIndicatorY }, textOffset);
-
-	a = "Can force crit " + std::to_string(canForceCrit(activeWeapon));
-	ab(drawList, Color4(), a.c_str(), ImVec2{ critIndicatorX + 100 / 2, critIndicatorY }, textOffset);
-
-	a = "Crit seed requests " + std::to_string(activeWeapon->critSeedRequests());
-	ab(drawList, Color4(), a.c_str(), ImVec2{ critIndicatorX + 100 / 2, critIndicatorY }, textOffset);
-	
-	a = "Potencial crits " + std::to_string(currentFound) + "/"+ std::to_string(critsPossible);
-	ab(drawList, Color4(), a.c_str(), ImVec2{ critIndicatorX + 100 / 2, critIndicatorY }, textOffset);
-
-	a = "Crit checks " + std::to_string(activeWeapon->critChecks());
-	ab(drawList, Color4(), a.c_str(), ImVec2{ critIndicatorX + 100 / 2, critIndicatorY }, textOffset);
-
-	a = "Observerd crit chance " + std::to_string(activeWeapon->observedCritChance());
-	ab(drawList, Color4(), a.c_str(), ImVec2{ critIndicatorX + 100 / 2, critIndicatorY }, textOffset);
-
-	a = "Last command number " + std::to_string(lastCommandNumberScanned);
-	ab(drawList, Color4(), a.c_str(), ImVec2{ critIndicatorX + 100 / 2, critIndicatorY }, textOffset);
-	*/
 }
 
 void Crithack::updatePlayers() noexcept
