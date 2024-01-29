@@ -129,20 +129,6 @@ struct World : Shared {
     using Shared::operator=;
 };
 
-struct PurchaseList {
-    bool enabled = false;
-    bool onlyDuringFreezeTime = false;
-    bool showPrices = false;
-    bool noTitleBar = false;
-    ImVec2 pos;
-
-    enum Mode {
-        Details = 0,
-        Summary
-    };
-    int mode = Details;
-};
-
 struct PreserveKillfeed {
     bool enabled = false;
     bool onlyHeadshots = false;
@@ -163,16 +149,6 @@ struct OffscreenEnemies : ColorToggle {
     OffscreenEnemies() : ColorToggle{ { 1.0f, 0.26f, 0.21f, 1.0f } } {}
     HealthBar healthBar;
     bool disableOnCloaked{ true };
-};
-
-struct AutoBuy {
-    bool enabled = false;
-
-    int primaryWeapon{ 0 };
-    int secondaryWeapon{ 0 };
-    int armor{ 0 };
-    int utility{ 0 };
-    int grenades{ 0 };
 };
 
 enum class Yaw {

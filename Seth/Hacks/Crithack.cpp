@@ -220,7 +220,7 @@ void Crithack::handleEvent(GameEvent* event) noexcept
 	{
 		const auto attacked = interfaces->engine->getPlayerForUserID(event->getInt("userid"));
 		const auto attacker = interfaces->engine->getPlayerForUserID(event->getInt("attacker"));
-		const auto crit = event->getBool("crit");
+		const auto crit = event->getBool("crit") || event->getBool("minicrit");
 		auto damage = static_cast<float>(event->getInt("damageamount"));
 		const auto health = event->getInt("health");
 		const auto weaponId = event->getInt("weaponid");
@@ -273,21 +273,21 @@ void Crithack::resync() noexcept
 	const auto playerResource = StrayElements::getPlayerResource();
 	if (!playerResource)
 		return;
-	
+
 	const float playerResourceDamage = static_cast<float>(playerResource->getDamage(localPlayer->index()));
-	if (playerResourceDamage <= 0.0f)
+/*	if (playerResourceDamage <= 0.0f)
 	{
 		critDamage = 0.0f;
 		boostedDamage = 0.0f;
 		meleeDamage = 0.0f;
-	}
+	}*/
 
 	rangedDamage = playerResourceDamage - critDamage - boostedDamage - meleeDamage;
 }
 
 int Crithack::getDamageTillUnban() noexcept
 {
-	if (correctCritChance <= 0.0f)
+	if (correctCritChance == 0.0f)
 		return 0;
 
 	//simple maths optimization!!
@@ -384,7 +384,7 @@ void Crithack::run(UserCmd* cmd) noexcept
 	if (localPlayer->isCritBoosted())
 		return;
 
-	bool shouldCrit = canForceCrit(activeWeapon) && config->misc.forceCritHack.isActive();
+	bool shouldCrit = canForceCrit(activeWeapon) && config->misc.forceCritKey.isActive();
 	if (activeWeapon->isRapidFireCrits() && (activeWeapon->lastRapidFireCritCheckTime() + 1.f > memory->globalVars->serverTime()))
 		return;
 	
@@ -419,7 +419,7 @@ void Crithack::run(UserCmd* cmd) noexcept
 
 		critIndex++;
 	}
-	else
+	else if(config->misc.critHack.skipRandomCrits)
 	{
 		if (skips.empty())
 			return;
@@ -505,14 +505,6 @@ void Crithack::draw(ImDrawList* drawList) noexcept
 	if (!config->misc.critHack.enabled)
 		return;
 
-	if (!localPlayer)
-		return;
-
-	//Objective: not call fucking activeweapon
-	const auto activeWeapon = localPlayer->getActiveWeapon();
-	if (!activeWeapon || !activeWeapon->canWeaponRandomCrit())
-		return;
-
 	//we using windows!!
 	//TextWrapped doesnt have centering and antialising, so the fix is?
 	//easy just use the window pos instead of some random ass pos
@@ -550,6 +542,26 @@ void Crithack::draw(ImDrawList* drawList) noexcept
 		windowSize = window->Size;
 	}
 
+	static const Color4 red{ 1.0f, 0.0f, 0.0f, 1.0f };
+	static const Color4 green{ 0.0f, 1.0f, 0.0f, 1.0f };
+	static const Color4 blue{ 0.0f, 0.75f, 1.0f, 1.0f };
+	static const Color4 yellow{ 1.0f, 1.0f, 0.0f, 1.0f };
+
+	float offset = 0.0f;
+	if (gui->isOpen())
+	{
+		renderText(pos, blue, offset, drawList, "Crit indicator");
+		return;
+	}
+
+	if (!localPlayer)
+		return;
+
+	//Objective: not call fucking activeweapon
+	const auto activeWeapon = localPlayer->getActiveWeapon();
+	if (!activeWeapon || !activeWeapon->canWeaponRandomCrit())
+		return;
+
 	static auto weaponCriticals = interfaces->cvar->findVar("tf_weapon_criticals");
 	static auto weaponCriticalsBucketCap = interfaces->cvar->findVar("tf_weapon_criticals_bucket_cap");
 
@@ -564,18 +576,6 @@ void Crithack::draw(ImDrawList* drawList) noexcept
 
 	auto& crits = critTicks[activeWeapon->index()];
 	auto& skips = skipTicks[activeWeapon->index()];
-
-	static const Color4 red{ 1.0f, 0.0f, 0.0f, 1.0f };
-	static const Color4 green{ 0.0f, 1.0f, 0.0f, 1.0f };
-	static const Color4 blue{ 0.0f, 0.75f, 1.0f, 1.0f };
-	static const Color4 yellow{ 1.0f, 1.0f, 0.0f, 1.0f };
-
-	float offset = 0.0f;
-	if (gui->isOpen())
-	{
-		renderText(pos, blue, offset, drawList, "Crit indicator");
-		return;
-	}
 
 	if (weaponCriticals->getInt() <= 0)
 	{
@@ -601,9 +601,10 @@ void Crithack::draw(ImDrawList* drawList) noexcept
 	if (activeWeapon->slot() != SLOT_MELEE && critBan)
 	{
 		renderText(pos, red, offset, drawList, "Crit banned");
-		renderText(pos, red, offset, drawList, "Deal %i damage", Crithack::getDamageTillUnban());
+		if(const int damage = Crithack::getDamageTillUnban(); damage > 0)
+			renderText(pos, red, offset, drawList, "Deal %i damage", Crithack::getDamageTillUnban());
 		return;
-	}
+	}	
 
 	if (crits.empty() || skips.empty())
 	{
@@ -618,15 +619,29 @@ void Crithack::draw(ImDrawList* drawList) noexcept
 		return;
 	}
 
+	if (activeWeapon->isRapidFireCrits() && activeWeapon->critChecks() < (activeWeapon->critSeedRequests() + 1) * 10)
+	{
+		renderText(pos, red, offset, drawList, "Crit throttled");
+		renderText(pos, red, offset, drawList, "Unbalance crit ratio");
+
+		const float checks = static_cast<float>(activeWeapon->critChecks());
+		const float required = (activeWeapon->critSeedRequests() + 1) * 10.f;
+		if (checks > 0.0f)
+		{
+			renderText(pos, red, offset, drawList, "%.0f/100", (checks / required) * 100.f);
+		}
+		return;
+	}
+
+	//maybe add safe damage?
 	renderText(pos, green, offset, drawList, "Can crit");
 	renderText(pos, green, offset, drawList, "%i/%i Potential crits", potentialCrits, critsPossible);
-	//maybe add safe damage?
+	
 	if (potentialCrits < critsPossible && activeWeapon->slot() != SLOT_MELEE && cost > 0.0f)
 	{
-		const float rest = activeWeapon->critTokenBucket() - (static_cast<float>(potentialCrits) * cost);
-		const float restratio = std::clamp(rest / cost, 0.0f, 1.0f);
+		const float fraction = std::clamp((activeWeapon->critTokenBucket() - (static_cast<float>(potentialCrits) * cost)) / cost, 0.0f, 1.0f);
 
-		renderBar(windowPos, ImVec2{ windowSize.x, 12.0f }, restratio, offset, drawList);
+		renderBar(windowPos, ImVec2{ windowSize.x, 12.0f }, fraction, offset, drawList);
 	}
 
 	/*
@@ -725,7 +740,7 @@ bool Crithack::protectData() noexcept
 
 void Crithack::updateInput() noexcept
 {
-	config->misc.forceCritHack.handleToggle();
+	config->misc.forceCritKey.handleToggle();
 }
 
 void Crithack::reset() noexcept

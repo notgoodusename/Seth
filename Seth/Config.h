@@ -263,10 +263,11 @@ public:
         struct Crithack
         {
             bool enabled{ false };
+            bool skipRandomCrits{ false };
             ImVec2 pos;
         } critHack;
 
-        KeyBind forceCritHack{ std::string("crithack") };
+        KeyBind forceCritKey{ std::string("crithack") };
         bool edgeJump{ false };
         KeyBind edgeJumpKey{ std::string("edgejump") };
         bool autoAccept{ false };

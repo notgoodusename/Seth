@@ -396,14 +396,11 @@ static void from_json(const json& j, Config::Visuals& v)
     read<value_t::object>(j, "Viewmodel", v.viewModel);
 }
 
-static void from_json(const json& j, PurchaseList& pl)
+static void from_json(const json& j, Config::Misc::Crithack& c)
 {
-    read(j, "Enabled", pl.enabled);
-    read(j, "Only During Freeze Time", pl.onlyDuringFreezeTime);
-    read(j, "Show Prices", pl.showPrices);
-    read(j, "No Title Bar", pl.noTitleBar);
-    read(j, "Mode", pl.mode);
-    read<value_t::object>(j, "Pos", pl.pos);
+    read(j, "Enabled", c.enabled);
+    read(j, "Skip random crits", c.skipRandomCrits);
+    read<value_t::object>(j, "Pos", c.pos);
 }
 
 static void from_json(const json& j, Config::Misc::SpectatorList& sl)
@@ -453,16 +450,6 @@ static void from_json(const json& j, KillfeedChanger& o)
     read(j, "Attackerblind", o.attackerblind);
 }
 
-static void from_json(const json& j, AutoBuy& o)
-{
-    read(j, "Enabled", o.enabled);
-    read(j, "Primary weapon", o.primaryWeapon);
-    read(j, "Secondary weapon", o.secondaryWeapon);
-    read(j, "Armor", o.armor);
-    read(j, "Utility", o.utility);
-    read(j, "Grenades", o.grenades);
-}
-
 static void from_json(const json& j, Config::Misc::Logger& o)
 {
     read(j, "Modes", o.modes);
@@ -490,6 +477,8 @@ static void from_json(const json& j, Config::Misc& m)
     read(j, "Anti AFK kick", m.antiAfkKick);
     read(j, "Auto strafe", m.autoStrafe);
     read(j, "Bunny hop", m.bunnyHop);
+    read<value_t::object>(j, "Crit hack", m.critHack);
+    read(j, "Force crit key", m.forceCritKey);
     read(j, "Edge Jump", m.edgeJump);
     read(j, "Edge Jump Key", m.edgeJumpKey);
     read(j, "Fast stop", m.fastStop);
@@ -855,6 +844,16 @@ static void to_json(json& j, const Config::Backtrack& o, const Config::Backtrack
     WRITE("Fake Latency Amount", fakeLatencyAmount);
 }
 
+static void to_json(json& j, const Config::Misc::Crithack& o, const Config::Misc::Crithack& dummy = {})
+{
+    WRITE("Enabled", enabled);
+    WRITE("Skip random crits", skipRandomCrits);
+
+    if (const auto window = ImGui::FindWindowByName("Crit indicator")) {
+        j["Pos"] = window->Pos;
+    }
+}
+
 static void to_json(json& j, const Config::Misc::SpectatorList& o, const Config::Misc::SpectatorList& dummy = {})
 {
     WRITE("Enabled", enabled);
@@ -914,16 +913,6 @@ static void to_json(json& j, const KillfeedChanger& o, const KillfeedChanger& du
     WRITE("Attackerblind", attackerblind);
 }
 
-static void to_json(json& j, const AutoBuy& o, const AutoBuy& dummy = {})
-{
-    WRITE("Enabled", enabled);
-    WRITE("Primary weapon", primaryWeapon);
-    WRITE("Secondary weapon", secondaryWeapon);
-    WRITE("Armor", armor);
-    WRITE("Utility", utility);
-    WRITE("Grenades", grenades);
-}
-
 static void to_json(json& j, const Config::Misc::Logger& o, const Config::Misc::Logger& dummy = {})
 {
     WRITE("Modes", modes);
@@ -953,7 +942,8 @@ static void to_json(json& j, const Config::Misc& o)
     WRITE("Anti AFK kick", antiAfkKick);
     WRITE("Auto strafe", autoStrafe);
     WRITE("Bunny hop", bunnyHop);
-
+    WRITE("Crit hack", critHack);
+    WRITE("Force crit key", forceCritKey);
     WRITE("Edge Jump", edgeJump);
     WRITE("Edge Jump Key", edgeJumpKey);
     WRITE("Fast stop", fastStop);

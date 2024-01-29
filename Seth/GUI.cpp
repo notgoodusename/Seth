@@ -926,9 +926,20 @@ void GUI::renderMiscWindow() noexcept
     ImGui::Checkbox("Bunny hop", &config->misc.bunnyHop);
     ImGui::Checkbox("Crit hack", &config->misc.critHack.enabled);
     ImGui::SameLine();
-    ImGui::PushID("Force crit Key");
-    ImGui::hotkey2("", config->misc.forceCritHack);
+
+    ImGui::PushID("Crit hack");
+    if (ImGui::Button("..."))
+        ImGui::OpenPopup("");
+
+    if (ImGui::BeginPopup("")) {
+        ImGui::PushID("Force crit Key");
+        ImGui::hotkey2("", config->misc.forceCritKey);
+        ImGui::PopID();
+        ImGui::Checkbox("Skip random crits", &config->misc.critHack.skipRandomCrits);
+        ImGui::EndPopup();
+    }
     ImGui::PopID();
+
     ImGui::Checkbox("Edge Jump", &config->misc.edgeJump);
     ImGui::SameLine();
     ImGui::PushID("Edge Jump Key");
