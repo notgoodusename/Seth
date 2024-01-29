@@ -162,8 +162,8 @@ Entity* Entity::calculateGroundEntity() noexcept
 bool Entity::canWeaponRandomCrit() noexcept
 {
 	float critChange = AttributeManager::attributeHookFloat(1, "mult_crit_chance", this);
-	if (critChange > 0)
-		return true;
+	if (critChange == 0)
+		return false;
 
 	switch (weaponId())
 	{
