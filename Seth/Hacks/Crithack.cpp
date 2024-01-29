@@ -319,7 +319,7 @@ void Crithack::handleCanFireRandomCriticalShot(float critChance, Entity* activeW
 	activeWeapon->observedCritChance() = normalizedDamage / damage;
 
 	correctCritChance = critChance + 0.1f;
-	//if less than 0 it means that the crit damage is greater than the total damage, which means we are crit banned!!
+	//if less than 0 it means that the crit damage is greater than the non crit damage, which means we are crit banned!!
 	critBan = activeWeapon->observedCritChance() >= correctCritChance || activeWeapon->observedCritChance() < 0.0f;
 }
 
