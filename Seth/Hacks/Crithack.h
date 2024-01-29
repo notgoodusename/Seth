@@ -19,6 +19,7 @@ namespace Crithack
 
 	void handleEvent(GameEvent* event) noexcept;
 	void resync() noexcept;
+	int getDamageTillUnban() noexcept;
 	void handleCanFireRandomCriticalShot(float critChance, Entity* entity) noexcept;
 	bool isAttackCriticalHandler() noexcept;
 	

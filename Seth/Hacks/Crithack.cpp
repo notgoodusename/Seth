@@ -10,9 +10,14 @@
 #include "../SDK/Prediction.h"
 
 #include "../Config.h"
-#include "../Interfaces.h"
+#include "../GUI.h"
 #include "../Hooks.h"
+#include "../Interfaces.h"
 #include "../StrayElements.h"
+#include "../imguiCustom.h"
+
+#include "../imgui/imgui.h"
+#include "../imgui/imgui_internal.h"
 
 #include <vector>
 
@@ -280,6 +285,17 @@ void Crithack::resync() noexcept
 	rangedDamage = playerResourceDamage - critDamage - boostedDamage - meleeDamage;
 }
 
+int Crithack::getDamageTillUnban() noexcept
+{
+	if (correctCritChance <= 0.0f)
+		return 0;
+
+	//simple maths optimization!!
+	const float requiredDamage = ((2.0f/3.0f) * critDamage * correctCritChance - rangedDamage * correctCritChance + critDamage / 3.0f) / correctCritChance;
+
+	return static_cast<int>(std::ceilf(requiredDamage));
+}
+
 void Crithack::handleCanFireRandomCriticalShot(float critChance, Entity* activeWeapon) noexcept
 {
 	activeWeapon->observedCritChance() = 0.f;
@@ -342,7 +358,7 @@ void Crithack::run(UserCmd* cmd) noexcept
 
 	resync();
 
-	if (!config->misc.critHack)
+	if (!config->misc.critHack.enabled)
 		return;
 
 	if (!localPlayer || !localPlayer->isAlive())
@@ -422,39 +438,122 @@ void Crithack::run(UserCmd* cmd) noexcept
 	}
 }
 
-static ImVec2 renderText(const char* text, const ImVec2& pos, const Color4& textCfg, ImDrawList* drawList, float& textOffset) noexcept
+static ImVec2 renderText(const ImVec2& pos, const Color4& textColor, float& textOffset, ImDrawList* drawList, const char* fmt, ...) noexcept
 {
-	const auto textSize = ImGui::CalcTextSize(text);
+	char buffer[1024];
+
+	va_list args;
+	va_start(args, fmt);
+	vsprintf_s(buffer, fmt, args);
+	va_end(args);
+
+	const auto textSize = ImGui::CalcTextSize(buffer);
 
 	const auto horizontalOffset = textSize.x / 2;
 	const auto verticalOffset = textSize.y + textOffset;
 
-	const auto color = Helpers::calculateColor(textCfg);
-	drawList->AddText({ pos.x - horizontalOffset + 1.0f, pos.y - verticalOffset + 1.0f }, color & IM_COL32_A_MASK, text);
-	drawList->AddText({ pos.x - horizontalOffset, pos.y - verticalOffset }, color, text);
+	const auto shadowColor = Helpers::calculateColor(Color4{ 0.02f, 0.07f, 0.17f, 1.0f }); //dark blue
+	const auto color = Helpers::calculateColor(textColor);
+	drawList->AddText({ pos.x - horizontalOffset + 1.0f, pos.y - verticalOffset + 1.0f }, shadowColor, buffer);
+	drawList->AddText({ pos.x - horizontalOffset, pos.y - verticalOffset }, color, buffer);
 
 	textOffset -= textSize.y;
 
 	return textSize;
 }
 
+static void renderBar(const ImVec2& pos, const ImVec2& barSize, const float& fraction, float& offset, ImDrawList* drawList)
+{
+	const float width = barSize.x;
+	const float height = barSize.y;
+	const float thickeness = 1.0f;
+	const float barSizing = 10.0f; //bigger = less bar
+
+	const Color4 backgroundColor{ 0.02f, 0.07f, 0.17f, 1.0f }; //dark blue
+	const Color4 startingColor{ 0.0f, 0.75f, 1.0f, 1.0f }; //blue
+	const Color4 endColor{ 1.0f, 1.0f, 1.0f, 1.0f }; //red
+	const Color4 lerpColor{ 
+		Helpers::lerp(fraction, startingColor.color[0], endColor.color[0]), 
+		Helpers::lerp(fraction, startingColor.color[1], endColor.color[1]),
+		Helpers::lerp(fraction, startingColor.color[2], endColor.color[2]),
+		Helpers::lerp(fraction, startingColor.color[3], endColor.color[3])};
+
+	const auto barColorStart = Helpers::calculateColor(startingColor);
+	const auto barColorEnd = Helpers::calculateColor(lerpColor);
+	const auto barBackgroundColor = Helpers::calculateColor(backgroundColor);
+
+	const float ratio = Helpers::lerp(fraction, ((2.0f * thickeness + 2.0f * barSizing)/width), 1.0f);
+
+	//Add a bit of offset cuz its too clusttered
+	offset -= 7.5f;
+
+	drawList->AddRectFilled(
+		ImVec2{ pos.x + barSizing, pos.y - offset },
+		ImVec2{ pos.x + width - barSizing, pos.y - offset + height },
+		barBackgroundColor);
+
+	drawList->AddRectFilledMultiColor(
+		ImVec2{ pos.x + thickeness + barSizing, pos.y - offset + thickeness },
+		ImVec2{ pos.x - thickeness - barSizing + width * ratio, pos.y - offset + height - thickeness },
+		barColorStart, barColorEnd, barColorEnd, barColorStart);
+
+	offset -= height;	
+}
+
 void Crithack::draw(ImDrawList* drawList) noexcept
 {
-	if (!config->misc.critHack)
+	if (!config->misc.critHack.enabled)
 		return;
 
 	if (!localPlayer)
 		return;
 
-	//Objective not call fucking activeweapon
+	//Objective: not call fucking activeweapon
 	const auto activeWeapon = localPlayer->getActiveWeapon();
 	if (!activeWeapon || !activeWeapon->canWeaponRandomCrit())
 		return;
 
+	//we using windows!!
+	//TextWrapped doesnt have centering and antialising, so the fix is?
+	//easy just use the window pos instead of some random ass pos
+
+	if (config->misc.critHack.pos != ImVec2{}) {
+		ImGui::SetNextWindowPos(config->misc.critHack.pos);
+		config->misc.critHack.pos = {};
+	}
+
+	ImGui::SetNextWindowSize({ 250.0f, 0.f }, ImGuiCond_Once);
+	ImGui::SetNextWindowSizeConstraints({ 250.0f, 0.f }, { 250.0f, FLT_MAX });
+
+	ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
+	if (!gui->isOpen())
+		windowFlags |= ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoBackground;
+
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowTitleAlign, { 0.5f, 0.5f });
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 10.5f);
+	ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 2.5f);
+	ImGui::Begin("Crit indicator", nullptr, windowFlags);
+	ImGui::PopStyleVar(3);
+
+	ImGui::End();
+
+	static ImVec2 windowSize{ 0.0f, 0.0f };
+	static ImVec2 windowPos{ 0.0f, 0.0f };
+	static ImVec2 pos{ 0.0f, 0.0f };
+	const auto window = ImGui::FindWindowByName("Crit indicator");
+	if (window)
+	{
+		windowPos = window->Pos;
+		pos.x = window->Pos.x + window->Size.x / 2.0f;
+		pos.y = window->Pos.y + window->Size.y / 2.0f;
+
+		windowSize = window->Size;
+	}
+
 	static auto weaponCriticals = interfaces->cvar->findVar("tf_weapon_criticals");
 	static auto weaponCriticalsBucketCap = interfaces->cvar->findVar("tf_weapon_criticals_bucket_cap");
 
-	const float cost = std::clamp(calculateCost(activeWeapon), 0.f, 1000.f);
+	const float cost = max(calculateCost(activeWeapon), 0.0f);
 	const int potentialCrits = getPotentialCrits(activeWeapon, cost);
 
 	int critsPossible = 0;
@@ -471,56 +570,64 @@ void Crithack::draw(ImDrawList* drawList) noexcept
 	static const Color4 blue{ 0.0f, 0.75f, 1.0f, 1.0f };
 	static const Color4 yellow{ 1.0f, 1.0f, 0.0f, 1.0f };
 
-	
-	const auto& displaySize = ImGui::GetIO().DisplaySize;
+	float offset = 0.0f;
+	if (gui->isOpen())
+	{
+		renderText(pos, blue, offset, drawList, "Crit indicator");
+		return;
+	}
 
-	//TODO: use windows
-	static const ImVec2 pos{ (displaySize.x / 2) , displaySize.y * 0.60f + 23 };
-
-	float textOffset = 0.0f;
 	if (weaponCriticals->getInt() <= 0)
 	{
-		renderText("Server doesnt allow crits", pos, red, drawList, textOffset);
+		renderText(pos, red, offset, drawList, "Server doesnt allow crits");
 		return;
 	}
 
 	if (localPlayer->isCritBoosted())
 	{
-		renderText("Crit boosted", pos, blue, drawList, textOffset);
+		renderText(pos, blue, offset, drawList, "Crit boosted");
 		return;
 	}
 
 	if (activeWeapon->critTime() > memory->globalVars->serverTime())
 	{
-		renderText("Streaming crits", pos, blue, drawList, textOffset);
+		float ratio = std::clamp(((activeWeapon->critTime() - memory->globalVars->serverTime()) / 2.f), 0.0f, 1.0f);
+		renderText(pos, blue, offset, drawList, "Streaming crits %.2fs", ratio);
+		renderBar(windowPos, ImVec2{ windowSize.x, 12.0f }, ratio, offset, drawList);
 		return;
 	}
 
 	//Add damage check
 	if (activeWeapon->slot() != SLOT_MELEE && critBan)
 	{
-		renderText("Crit banned", pos, red, drawList, textOffset);
+		renderText(pos, red, offset, drawList, "Crit banned");
+		renderText(pos, red, offset, drawList, "Deal %i damage", Crithack::getDamageTillUnban());
 		return;
 	}
 
 	if (crits.empty() || skips.empty())
 	{
-		renderText("Scanning for crits...", pos, yellow, drawList, textOffset);
+		renderText(pos, yellow, offset, drawList, "Scanning for crits...");
 		return;
 	}
 
 	if (cost > activeWeapon->critTokenBucket())
 	{
-		renderText("Cannot crit", pos, red, drawList, textOffset);
-		
-		const std::string text = "Cost: " + std::to_string(static_cast<int>(cost)) + " > Tokens: " + std::to_string(static_cast<int>(activeWeapon->critTokenBucket()));
-		renderText(text.c_str(), pos, red, drawList, textOffset);
+		renderText(pos, red, offset, drawList, "Cannot crit");
+		renderText(pos, red, offset, drawList, "Cost: %i > Tokens: %i", static_cast<int>(cost), static_cast<int>(activeWeapon->critTokenBucket()));
 		return;
 	}
 
-	renderText("Can crit", pos, green, drawList, textOffset);
-	const std::string text = std::to_string(potentialCrits) + "/" + std::to_string(critsPossible) + " Potential crits";
-	renderText(text.c_str(), pos, green, drawList, textOffset);
+	renderText(pos, green, offset, drawList, "Can crit");
+	renderText(pos, green, offset, drawList, "%i/%i Potential crits", potentialCrits, critsPossible);
+	//maybe add safe damage?
+	if (potentialCrits < critsPossible && activeWeapon->slot() != SLOT_MELEE && cost > 0.0f)
+	{
+		const float rest = activeWeapon->critTokenBucket() - (static_cast<float>(potentialCrits) * cost);
+		const float restratio = std::clamp(rest / cost, 0.0f, 1.0f);
+
+		renderBar(windowPos, ImVec2{ windowSize.x, 12.0f }, restratio, offset, drawList);
+	}
 
 	/*
 	std::string a = "Ranged damage " + std::to_string(rangedDamage);
@@ -595,7 +702,6 @@ void Crithack::updatePlayers() noexcept
 		}
 	}
 }
-
 
 void Crithack::updateHealth(int handle, int newHealth) noexcept
 {

@@ -50,7 +50,7 @@ const bool anyActiveKeybinds() noexcept
     const bool thirdperson = config->visuals.thirdperson && config->visuals.thirdpersonKey.canShowKeybind();
     const bool freecam = config->visuals.freeCam && config->visuals.freeCamKey.canShowKeybind();
 
-    const bool crithack = config->misc.critHack && config->misc.forceCritHack.canShowKeybind();
+    const bool crithack = config->misc.critHack.enabled && config->misc.forceCritHack.canShowKeybind();
     const bool edgejump = config->misc.edgeJump && config->misc.edgeJumpKey.canShowKeybind();
 
     return aimbot || antiAimManualForward || antiAimManualBackward || antiAimManualRight  || antiAimManualLeft 
@@ -109,7 +109,7 @@ void Misc::showKeybinds() noexcept
     if (config->visuals.freeCam)
         config->visuals.freeCamKey.showKeybind();
 
-    if (config->misc.critHack)
+    if (config->misc.critHack.enabled)
         config->misc.forceCritHack.showKeybind();
 
     if (config->misc.edgeJump)

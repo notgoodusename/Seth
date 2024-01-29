@@ -109,7 +109,7 @@ static HRESULT __stdcall present(IDirect3DDevice9* device, const RECT* src, cons
         Crithack::updateInput();
 
         Misc::drawPlayerList();
-        Crithack::draw(ImGui::GetBackgroundDrawList());
+        Crithack::draw(ImGui::GetForegroundDrawList());
 
         gui->handleToggle();
 

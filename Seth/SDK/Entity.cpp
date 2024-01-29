@@ -162,7 +162,68 @@ Entity* Entity::calculateGroundEntity() noexcept
 bool Entity::canWeaponRandomCrit() noexcept
 {
 	float critChange = AttributeManager::attributeHookFloat(1, "mult_crit_chance", this);
-	if (critChange == 0)
-		return false;
+	if (critChange > 0)
+		return true;
+
+	switch (weaponId())
+	{
+		case WeaponId::SNIPERRIFLE:
+		case WeaponId::SNIPERRIFLE_CLASSIC:
+		case WeaponId::KNIFE:
+		case WeaponId::MEDIGUN:
+		case WeaponId::PDA:
+		case WeaponId::PDA_ENGINEER_BUILD:
+		case WeaponId::PDA_ENGINEER_DESTROY:
+		case WeaponId::PDA_SPY:
+		case WeaponId::PDA_SPY_BUILD:
+		case WeaponId::JAR_GAS:
+		case WeaponId::JAR_MILK:
+		case WeaponId::COMPOUND_BOW:
+			return false;
+		default:
+			break;
+	}
+
+	//yes this is from ateris
+	switch (itemDefinitionIndex())
+	{
+		case Spy_m_FestiveAmbassador:
+		case Spy_m_TheAmbassador:
+		case Scout_s_MadMilk:
+		case Scout_s_MutatedMilk:
+		case Engi_p_PDA:
+		case Engi_p_ConstructionPDA:
+		case Engi_p_DestructionPDA:
+		case Engi_p_ConstructionPDAR:
+		case Heavy_s_Sandvich:
+		case Heavy_s_SecondBanana:
+		case Heavy_s_TheDalokohsBar:
+		case Heavy_s_FestiveSandvich:
+		case Heavy_s_Fishcake:
+		case Heavy_s_RoboSandvich:
+		case Engi_m_FestiveFrontierJustice:
+		case Engi_m_TheFrontierJustice:
+		case Soldier_m_RocketJumper:
+		case Soldier_t_TheHalfZatoichi:
+		case Demoman_s_StickyJumper:
+		case Demoman_t_TheEyelander:
+		case Demoman_t_TheClaidheamhMor:
+		case Demoman_t_ThePersianPersuader:
+		case Demoman_t_UllapoolCaber:
+		case Pyro_m_ThePhlogistinator:
+		case Pyro_m_DragonsFury:
+		case Pyro_s_ThermalThruster:
+		case Pyro_s_TheManmelter:
+		case Pyro_s_GasPasser:
+		case Pyro_t_TheAxtinguisher:
+		case Soldier_t_TheMarketGardener:
+		case Spy_m_TheDiamondback:
+		case Scout_s_TheFlyingGuillotine:
+		case Scout_s_TheFlyingGuillotineG:
+			return false;
+		default:
+			break;
+	}
+
 	return true;
 }

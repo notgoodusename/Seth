@@ -924,7 +924,7 @@ void GUI::renderMiscWindow() noexcept
     ImGui::Checkbox("Anti AFK kick", &config->misc.antiAfkKick);
     ImGui::Checkbox("Auto strafe", &config->misc.autoStrafe);
     ImGui::Checkbox("Bunny hop", &config->misc.bunnyHop);
-    ImGui::Checkbox("Crit hack", &config->misc.critHack);
+    ImGui::Checkbox("Crit hack", &config->misc.critHack.enabled);
     ImGui::SameLine();
     ImGui::PushID("Force crit Key");
     ImGui::hotkey2("", config->misc.forceCritHack);

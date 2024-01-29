@@ -259,7 +259,13 @@ public:
         bool antiAfkKick{ false };
         bool autoStrafe{ false };
         bool bunnyHop{ false };
-        bool critHack{ false };
+
+        struct Crithack
+        {
+            bool enabled{ false };
+            ImVec2 pos;
+        } critHack;
+
         KeyBind forceCritHack{ std::string("crithack") };
         bool edgeJump{ false };
         KeyBind edgeJumpKey{ std::string("edgejump") };
