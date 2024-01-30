@@ -171,7 +171,7 @@ void calculateIfCanCrit(int commandNumber, Entity* activeWeapon) noexcept
 	memcpy(backup, static_cast<void*>(activeWeapon + backupStart), backupSize);
 
 	activeWeapon->currentSeed()++;
-	activeWeapon->lastRapidFireCritCheckTime()++;
+	activeWeapon->lastRapidFireCritCheckTime() = 0.0f;
 
 	*memory->predictionRandomSeed = MD5_PseudoRandom(commandNumber) & 0x7FFFFFFF;
 
@@ -191,8 +191,8 @@ void calculateIfCanCrit(int commandNumber, Entity* activeWeapon) noexcept
 	
 	canCrit = activeWeapon->critShot();
 
-	activeWeapon->observedCritChance() = newObservedCritChance;
 	memcpy(static_cast<void*>(activeWeapon + backupStart), backup, backupSize);
+	activeWeapon->observedCritChance() = newObservedCritChance;
 	*memory->predictionRandomSeed = seedBackup;
 }
 
@@ -266,7 +266,7 @@ void Crithack::handleEvent(GameEvent* event) noexcept
 	}
 }
 
-void Crithack::resync() noexcept
+void Crithack::updateDamage() noexcept
 {
 	if (!localPlayer)
 		return;
@@ -323,9 +323,9 @@ void Crithack::handleCanFireRandomCriticalShot(float critChance, Entity* activeW
 	critBan = activeWeapon->observedCritChance() >= correctCritChance || activeWeapon->observedCritChance() < 0.0f;
 }
 
-bool Crithack::isAttackCriticalHandler() noexcept
+bool Crithack::isAttackCriticalHandler(Entity* entity) noexcept
 {
-	if (!interfaces->prediction->isFirstTimePredicted || !localPlayer)
+	if (!interfaces->prediction->isFirstTimePredicted)
 		return false;
 
 	static int lastTickcount { -1 };
@@ -334,20 +334,18 @@ bool Crithack::isAttackCriticalHandler() noexcept
 		return false;
 
 	lastTickcount = memory->globalVars->tickCount;
-
-	const auto activeWeapon = localPlayer->getActiveWeapon();
-	if (!activeWeapon)
-		return false;
 	
-	if (activeWeapon->weaponId() == WeaponId::FLAMETHROWER || activeWeapon->weaponId() == WeaponId::MINIGUN)
+	if (entity->weaponId() == WeaponId::FLAMETHROWER || entity->weaponId() == WeaponId::MINIGUN)
 	{
-		static auto ammoCount = localPlayer->getAmmoCount(activeWeapon->primaryAmmoType());
-		auto currentAmmoCount = localPlayer->getAmmoCount(activeWeapon->primaryAmmoType());
-		if (ammoCount != currentAmmoCount)
-		{
-			ammoCount = currentAmmoCount;
+		auto newAmmoCount = localPlayer->getAmmoCount(entity->primaryAmmoType());
+		static auto oldAmmoCount = newAmmoCount;
+		
+		const auto hasFiredBullet = oldAmmoCount != newAmmoCount;
+
+		oldAmmoCount = newAmmoCount;
+
+		if (!hasFiredBullet)
 			return false;
-		}
 	}
 
 	if (wishFireRandomSeed != 0)
@@ -365,7 +363,7 @@ void Crithack::run(UserCmd* cmd) noexcept
 	if (weaponCriticals->getInt() <= 0)
 		return;
 
-	resync();
+	updateDamage();
 
 	if (!config->misc.critHack.enabled)
 		return;
@@ -394,8 +392,6 @@ void Crithack::run(UserCmd* cmd) noexcept
 		return;
 
 	bool shouldCrit = canForceCrit(activeWeapon) && config->misc.forceCritKey.isActive();
-	if (activeWeapon->isRapidFireCrits() && (activeWeapon->lastRapidFireCritCheckTime() + 1.f > memory->globalVars->serverTime()))
-		return;
 	
 	auto& crits = critTicks[activeWeapon->index()];
 	auto& skips = skipTicks[activeWeapon->index()];
@@ -407,6 +403,10 @@ void Crithack::run(UserCmd* cmd) noexcept
 		calculateIfCanCrit(crits[critIndex], activeWeapon);
 		critIndex++;
 	}
+
+	if (activeWeapon->isRapidFireCrits() 
+		&& (activeWeapon->lastRapidFireCritCheckTime() + 1.f > memory->globalVars->serverTime()))
+		return;
 
 	const bool attacking = isAttacking(cmd, activeWeapon);
 
@@ -480,7 +480,7 @@ static void renderBar(const ImVec2& pos, const ImVec2& barSize, const float& fra
 
 	const Color4 backgroundColor{ 0.02f, 0.07f, 0.17f, 1.0f }; //dark blue
 	const Color4 startingColor{ 0.0f, 0.75f, 1.0f, 1.0f }; //blue
-	const Color4 endColor{ 1.0f, 1.0f, 1.0f, 1.0f }; //red
+	const Color4 endColor{ 1.0f, 1.0f, 1.0f, 1.0f }; //white
 	const Color4 lerpColor{ 
 		Helpers::lerp(fraction, startingColor.color[0], endColor.color[0]), 
 		Helpers::lerp(fraction, startingColor.color[1], endColor.color[1]),
@@ -600,6 +600,8 @@ void Crithack::draw(ImDrawList* drawList) noexcept
 	renderText(pos, green, offset, drawList, "Crit checks %i", activeWeapon->critChecks());
 	renderText(pos, blue, offset, drawList, "Observed crit chance %.4f", activeWeapon->observedCritChance());
 	renderText(pos, yellow, offset, drawList, "Last command number %.4f", lastCommandNumberScanned);
+	renderText(pos, yellow, offset, drawList, "Wait %.2fs", memory->globalVars->serverTime());
+	renderText(pos, yellow, offset, drawList, "Wait %.2fs", activeWeapon->lastRapidFireCritCheckTime());
 	*/
 
 	if (weaponCriticals->getInt() <= 0)
@@ -622,7 +624,6 @@ void Crithack::draw(ImDrawList* drawList) noexcept
 		return;
 	}
 
-	//Add damage check
 	if (activeWeapon->slot() != SLOT_MELEE && critBan)
 	{
 		renderText(pos, red, offset, drawList, "Crit banned");
@@ -637,6 +638,25 @@ void Crithack::draw(ImDrawList* drawList) noexcept
 		return;
 	}
 
+	if (activeWeapon->isRapidFireCrits() && activeWeapon->critChecks() < (activeWeapon->critSeedRequests() + 1) * 10)
+	{
+		renderText(pos, red, offset, drawList, "Crit throttled");
+		renderText(pos, red, offset, drawList, "Unbalanced crit ratio");
+
+		const float checks = static_cast<float>(activeWeapon->critChecks());
+		const float required = (activeWeapon->critSeedRequests() + 1) * 10.f;
+		if (checks > 0.0f)
+			renderText(pos, red, offset, drawList, "%.0f/100", (checks / required) * 100.f);
+
+		if (activeWeapon->lastRapidFireCritCheckTime() + 1.f > memory->globalVars->serverTime())
+		{
+			const float fraction = std::clamp(((activeWeapon->lastRapidFireCritCheckTime() + 1.f) - memory->globalVars->serverTime()), 0.0f, 1.0f);
+			renderText(pos, red, offset, drawList, "Wait %.2fs", fraction);
+			renderBar(windowPos, ImVec2{ windowSize.x, 12.0f }, fraction, offset, drawList);
+		}
+		return;
+	}
+
 	if (cost > activeWeapon->critTokenBucket())
 	{
 		renderText(pos, red, offset, drawList, "Cannot crit");
@@ -644,17 +664,12 @@ void Crithack::draw(ImDrawList* drawList) noexcept
 		return;
 	}
 
-	if (activeWeapon->isRapidFireCrits() && activeWeapon->critChecks() < (activeWeapon->critSeedRequests() + 1) * 10)
+	if (activeWeapon->lastRapidFireCritCheckTime() + 1.f > memory->globalVars->serverTime())
 	{
-		renderText(pos, red, offset, drawList, "Crit throttled");
-		renderText(pos, red, offset, drawList, "Unbalance crit ratio");
-
-		const float checks = static_cast<float>(activeWeapon->critChecks());
-		const float required = (activeWeapon->critSeedRequests() + 1) * 10.f;
-		if (checks > 0.0f)
-		{
-			renderText(pos, red, offset, drawList, "%.0f/100", (checks / required) * 100.f);
-		}
+		renderText(pos, red, offset, drawList, "Cannot crit");
+		const float fraction = std::clamp(((activeWeapon->lastRapidFireCritCheckTime() + 1.f) - memory->globalVars->serverTime()), 0.0f, 1.0f);
+		renderText(pos, red, offset, drawList, "Wait %.2fs", fraction);
+		renderBar(windowPos, ImVec2{ windowSize.x, 12.0f }, fraction, offset, drawList);
 		return;
 	}
 

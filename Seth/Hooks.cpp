@@ -319,7 +319,7 @@ static void __fastcall calcIsAttackCriticalHook(void* thisPointer, void*) noexce
     if (!entity || !localPlayer || entity != localPlayer->getActiveWeapon())
         return original(thisPointer);
 
-    if (!Crithack::isAttackCriticalHandler())
+    if (!Crithack::isAttackCriticalHandler(entity))
         return;
 
     const auto previousWeaponMode = entity->weaponMode();
