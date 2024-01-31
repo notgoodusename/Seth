@@ -283,7 +283,9 @@ static void __stdcall lockCursor() noexcept
 
 static bool __fastcall fireEventClientSide(void* thisPointer, void*, GameEvent* event) noexcept
 {
-    switch (fnv::hashRuntime(event->getName())) {
+    switch (fnv::hashRuntime(event->getName())) 
+    {
+        case fnv::hash("teamplay_round_start"):
         case fnv::hash("player_hurt"):
             Crithack::handleEvent(event);
             break;

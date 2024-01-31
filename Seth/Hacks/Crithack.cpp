@@ -214,10 +214,10 @@ float calculateCost(Entity* activeWeapon) noexcept
 	const int critChecks = activeWeapon->critChecks();
 
 	float mult = 1.f;
-	if (seedRequests > 0 && critChecks > 0)
-		mult = activeWeapon->slot() == 2 ? 0.5f : Helpers::remapValClamped(static_cast<float>(seedRequests) / static_cast<float>(critChecks), 0.1f, 1.f, 1.f, 3.f);
+	if (seedRequests > 0 && critChecks > 0 && activeWeapon->slot() != 2)
+		mult = Helpers::remapValClamped(static_cast<float>(seedRequests) / static_cast<float>(critChecks), 0.1f, 1.f, 1.f, 3.f);
 
-	cost = correctDamage * mult * (activeWeapon->slot() == SLOT_MELEE ? 0.5f : 3.f);
+	cost = correctDamage * mult * (activeWeapon->slot() == 2 ? 0.5f : 3.0f);
 	return cost;
 }
 
@@ -264,11 +264,32 @@ void Crithack::handleEvent(GameEvent* event) noexcept
 		if (damage > healthDelta && health == 0)
 			damage = static_cast<float>(healthDelta);
 
-		const auto activeWeapon = localPlayer->getActiveWeapon();
+		auto activeWeapon = localPlayer->getActiveWeapon();
 		if (!activeWeapon)
 			return;
 
-		//TODO: fix melee damage
+		if (static_cast<int>(activeWeapon->weaponId()) != weaponId)
+		{
+			activeWeapon = nullptr;
+			auto& weapons = localPlayer->weapons();
+
+			for (auto weaponHandle : weapons) {
+				if (weaponHandle == -1)
+					break;
+
+				auto weapon = reinterpret_cast<Entity*>(interfaces->entityList->getEntityFromHandle(weaponHandle));
+				if (!weapon || static_cast<int>(weapon->weaponId()) != weaponId)
+					continue;
+
+				activeWeapon = weapon;
+				break;
+			}
+		}
+
+		if (!activeWeapon)
+			return;
+
+		//TODO: fix damage desync!!, still to do? i have no clue
 		if (activeWeapon->slot() == SLOT_MELEE)
 		{
 			meleeDamage += damage;
@@ -284,7 +305,16 @@ void Crithack::handleEvent(GameEvent* event) noexcept
 	}
 	else if (eventName == fnv::hash("teamplay_round_start"))
 	{
-		reset();
+		correctDamage = 0.0f;
+		rangedDamage = 0.f;
+		critDamage = 0.f;
+		boostedDamage = 0.f;
+		meleeDamage = 0.f;
+
+		canCrit = false;
+		critBan = false;
+
+		playerHealthInfo.clear();
 	}
 }
 
@@ -596,7 +626,7 @@ void Crithack::draw(ImDrawList* drawList) noexcept
 		return;
 	}
 
-	if (!localPlayer || !canActiveWeaponRandomCrit)
+	if (!localPlayer)
 		return;
 
 	static auto weaponCriticals = interfaces->cvar->findVar("tf_weapon_criticals");
@@ -620,12 +650,11 @@ void Crithack::draw(ImDrawList* drawList) noexcept
 	renderText(pos, red, offset, drawList, "Can crit %s", canCrit ? "true" : "false");
 	renderText(pos, green, offset, drawList, "Correct crit chance %.4f", correctCritChance);
 	renderText(pos, blue, offset, drawList, "Cost %.2f", cost);
-	renderText(pos, yellow, offset, drawList, "Can force crit %s", canForceCrit(activeWeapon) ? "true" : "false");
-	renderText(pos, red, offset, drawList, "Crit seed request %i", activeWeapon->critSeedRequests());
-	renderText(pos, green, offset, drawList, "Crit checks %i", activeWeapon->critChecks());
-	renderText(pos, blue, offset, drawList, "Observed crit chance %.4f", activeWeapon->observedCritChance());
+	//renderText(pos, yellow, offset, drawList, "Can force crit %s", canForceCrit(activeWeapon) ? "true" : "false");
+	renderText(pos, red, offset, drawList, "Crit seed request %i", critSeedRequests);
+	renderText(pos, green, offset, drawList, "Crit checks %i", critChecks);
 	renderText(pos, yellow, offset, drawList, "Last command number %.4f", lastCommandNumberScanned);
-	renderText(pos, yellow, offset, drawList, "Wait %.2fs", memory->globalVars->serverTime());
+	renderText(pos, red, offset, drawList, "Wait %.2fs", memory->globalVars->serverTime());
 	renderText(pos, yellow, offset, drawList, "Wait %.2fs", activeWeapon->lastRapidFireCritCheckTime());
 	*/
 
@@ -638,6 +667,12 @@ void Crithack::draw(ImDrawList* drawList) noexcept
 	if (localPlayer->isCritBoosted())
 	{
 		renderText(pos, blue, offset, drawList, "Crit boosted");
+		return;
+	}
+
+	if (!canActiveWeaponRandomCrit)
+	{
+		renderText(pos, red, offset, drawList, "Weapon cannot crit");
 		return;
 	}
 
