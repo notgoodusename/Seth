@@ -318,8 +318,10 @@ void Misc::autoStrafe(UserCmd* cmd, Vector& currentViewAngles) noexcept
 
 void Misc::antiAfkKick(UserCmd* cmd) noexcept
 {
+    //StAC detects any value above/equal to (1 << 26)
+    //https://github.com/sapphonie/StAC-tf2/blob/51b3eb3862331e428c90234f491a951a6c638375/scripting/stac/stac_onplayerruncmd.sp#L1081
     if (config->misc.antiAfkKick && cmd->commandNumber % 2)
-        cmd->buttons |= 1 << 27;
+        cmd->buttons |= UserCmd::IN_ALT1;
 }
 
 void Misc::edgejump(UserCmd* cmd) noexcept
