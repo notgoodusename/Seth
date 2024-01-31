@@ -47,8 +47,23 @@ float meleeDamage = 0.f;
 //player data
 std::vector<Crithack::PlayerHealthInfo> playerHealthInfo;
 
-//filllerrrrrr
+//fill the critTicks/skipTicks
 int lastCommandNumberScanned{ 0 };
+
+//drawing info!!
+bool canActiveWeaponRandomCrit{ false };
+int activeWeaponIndex{ 0 };
+int activeWeaponSlot{ 0 };
+
+float cost{ 0.0f };
+int potentialCrits{ 0 };
+
+float critTime{ 0.0f };
+bool isRapidFireCrits{ false };
+int critChecks{ 0 };
+int critSeedRequests{ 0 };
+float critTokenBucket{ 0.0f };
+float lastRapidFireCritCheckTime{ 0.0f };
 
 static auto playerHealthInfoByHandle(int handle) noexcept
 {
@@ -56,11 +71,8 @@ static auto playerHealthInfoByHandle(int handle) noexcept
 	return it != playerHealthInfo.end() ? &(*it) : nullptr;
 }
 
-int decryptOrEncryptSeed(Entity* activeWeapon, const int seed) {
-
-	if (!activeWeapon)
-		return 0;
-
+int decryptOrEncryptSeed(Entity* activeWeapon, const int seed) 
+{
 	int extra = activeWeapon->index() << 8 | localPlayer->index();
 
 	if (activeWeapon->slot() == WeaponSlots::SLOT_MELEE)
@@ -78,7 +90,7 @@ bool isPureCritCommand(Entity* activeWeapon, int commandNumber, int range, bool 
 	return lower ? memory->randomInt(0, 9999) < range : memory->randomInt(0, 9999) > range;
 }	
 
-int getPotentialCrits(Entity* activeWeapon, float cost) noexcept
+int getPotentialCrits(Entity* activeWeapon) noexcept
 {
 	auto bucket = activeWeapon->critTokenBucket();
 	int crits = 0;
@@ -87,10 +99,10 @@ int getPotentialCrits(Entity* activeWeapon, float cost) noexcept
 			bucket -= cost;
 		else
 			break;
+	potentialCrits = crits;
 	return crits;
 }
 
-//https://github.com/nullworks/cathook/blob/master/src/crits.cpp#L500
 void updateCmds(UserCmd* cmd, Entity* activeWeapon, int cmdsToScan) noexcept
 {
 	//dont have this weapon in anywhere :/ - so its invalid
@@ -141,7 +153,7 @@ void updateCmds(UserCmd* cmd, Entity* activeWeapon, int cmdsToScan) noexcept
 
 bool canForceCrit(Entity* activeWeapon) noexcept
 {
-	if (activeWeapon->critTokenBucket() < Crithack::calculateCost(activeWeapon))
+	if (activeWeapon->critTokenBucket() < cost)
 		return false;
 
 	if (activeWeapon->isRapidFireCrits() && activeWeapon->critChecks() < (activeWeapon->critSeedRequests() + 1) * 10)
@@ -196,7 +208,7 @@ void calculateIfCanCrit(int commandNumber, Entity* activeWeapon) noexcept
 	*memory->predictionRandomSeed = seedBackup;
 }
 
-float Crithack::calculateCost(Entity* activeWeapon) noexcept
+float calculateCost(Entity* activeWeapon) noexcept
 {
 	const int seedRequests = activeWeapon->critSeedRequests();
 	const int critChecks = activeWeapon->critChecks();
@@ -205,9 +217,19 @@ float Crithack::calculateCost(Entity* activeWeapon) noexcept
 	if (seedRequests > 0 && critChecks > 0)
 		mult = activeWeapon->slot() == 2 ? 0.5f : Helpers::remapValClamped(static_cast<float>(seedRequests) / static_cast<float>(critChecks), 0.1f, 1.f, 1.f, 3.f);
 
-	const float cost = correctDamage * mult * (activeWeapon->slot() == SLOT_MELEE ? 0.5f : 3.f);
-
+	cost = correctDamage * mult * (activeWeapon->slot() == SLOT_MELEE ? 0.5f : 3.f);
 	return cost;
+}
+
+int getDamageTillUnban() noexcept
+{
+	if (correctCritChance == 0.0f)
+		return 0;
+
+	//simple maths optimization!!
+	const float requiredDamage = ((2.0f/3.0f) * critDamage * correctCritChance - rangedDamage * correctCritChance + critDamage / 3.0f) / correctCritChance;
+
+	return static_cast<int>(std::ceilf(requiredDamage));
 }
 
 void Crithack::handleEvent(GameEvent* event) noexcept
@@ -266,44 +288,6 @@ void Crithack::handleEvent(GameEvent* event) noexcept
 	}
 }
 
-void Crithack::updateDamage() noexcept
-{
-	if (!localPlayer)
-		return;
-
-	const auto playerResource = StrayElements::getPlayerResource();
-	if (!playerResource)
-		return;
-
-	const float playerResourceDamage = static_cast<float>(playerResource->getDamage(localPlayer->index()));
-	
-	static float maxDamage = 0.0f;
-	maxDamage = max(playerResourceDamage, maxDamage);
-
-	rangedDamage = playerResourceDamage - critDamage - boostedDamage - meleeDamage;
-
-	//so if we have dealt damage in the past and playerdamage == 0 then yes we reset
-	if (playerResourceDamage <= 0.0f && maxDamage != 0.0f)
-	{
-		maxDamage = 0.0f;
-		rangedDamage = 0.0f;
-		critDamage = 0.0f;
-		boostedDamage = 0.0f;
-		meleeDamage = 0.0f;
-	}
-}
-
-int Crithack::getDamageTillUnban() noexcept
-{
-	if (correctCritChance == 0.0f)
-		return 0;
-
-	//simple maths optimization!!
-	const float requiredDamage = ((2.0f/3.0f) * critDamage * correctCritChance - rangedDamage * correctCritChance + critDamage / 3.0f) / correctCritChance;
-
-	return static_cast<int>(std::ceilf(requiredDamage));
-}
-
 void Crithack::handleCanFireRandomCriticalShot(float critChance, Entity* activeWeapon) noexcept
 {
 	activeWeapon->observedCritChance() = 0.0f;
@@ -357,13 +341,63 @@ bool Crithack::isAttackCriticalHandler(Entity* entity) noexcept
 	return true;
 }
 
+void updateDamage() noexcept
+{
+	if (!localPlayer)
+		return;
+
+	const auto playerResource = StrayElements::getPlayerResource();
+	if (!playerResource)
+		return;
+
+	const float playerResourceDamage = static_cast<float>(playerResource->getDamage(localPlayer->index()));
+	
+	static float maxDamage = 0.0f;
+	maxDamage = max(playerResourceDamage, maxDamage);
+
+	rangedDamage = playerResourceDamage - critDamage - boostedDamage - meleeDamage;
+
+	//so if we have dealt damage in the past and playerdamage == 0 then yes we reset
+	if (playerResourceDamage <= 0.0f && maxDamage != 0.0f)
+	{
+		maxDamage = 0.0f;
+		rangedDamage = 0.0f;
+		critDamage = 0.0f;
+		boostedDamage = 0.0f;
+		meleeDamage = 0.0f;
+	}
+}
+
+void updateDrawInfo() noexcept
+{
+	if (!localPlayer)
+		return;
+
+	const auto activeWeapon = localPlayer->getActiveWeapon();
+	if (!activeWeapon)
+		return;
+
+	canActiveWeaponRandomCrit = activeWeapon->canWeaponRandomCrit();
+	activeWeaponIndex = activeWeapon->index();
+	activeWeaponSlot = activeWeapon->slot();
+	calculateCost(activeWeapon);
+	getPotentialCrits(activeWeapon);
+	critTime = activeWeapon->critTime();
+	isRapidFireCrits = activeWeapon->isRapidFireCrits();
+	critChecks = activeWeapon->critChecks();
+	critSeedRequests = activeWeapon->critSeedRequests();
+	critTokenBucket = activeWeapon->critTokenBucket();
+	lastRapidFireCritCheckTime = activeWeapon->lastRapidFireCritCheckTime();
+}
+
 void Crithack::run(UserCmd* cmd) noexcept
 {
+	updateDamage();
+	updateDrawInfo();
+
 	static auto weaponCriticals = interfaces->cvar->findVar("tf_weapon_criticals");
 	if (weaponCriticals->getInt() <= 0)
 		return;
-
-	updateDamage();
 
 	if (!config->misc.critHack.enabled)
 		return;
@@ -409,7 +443,6 @@ void Crithack::run(UserCmd* cmd) noexcept
 		return;
 
 	const bool attacking = isAttacking(cmd, activeWeapon);
-
 	if (!attacking && activeWeapon->slot() != SLOT_MELEE)
 		return;
 	
@@ -563,19 +596,11 @@ void Crithack::draw(ImDrawList* drawList) noexcept
 		return;
 	}
 
-	if (!localPlayer)
-		return;
-
-	//TODO: not call fucking activeweapon
-	const auto activeWeapon = localPlayer->getActiveWeapon();
-	if (!activeWeapon || !activeWeapon->canWeaponRandomCrit())
+	if (!localPlayer || !canActiveWeaponRandomCrit)
 		return;
 
 	static auto weaponCriticals = interfaces->cvar->findVar("tf_weapon_criticals");
 	static auto weaponCriticalsBucketCap = interfaces->cvar->findVar("tf_weapon_criticals_bucket_cap");
-
-	const float cost = max(calculateCost(activeWeapon), 0.0f);
-	const int potentialCrits = getPotentialCrits(activeWeapon, cost);
 
 	int critsPossible = 0;
 	if (cost > 0.0f)
@@ -583,8 +608,8 @@ void Crithack::draw(ImDrawList* drawList) noexcept
 
 	int currentFound = 0;
 
-	auto& crits = critTicks[activeWeapon->index()];
-	auto& skips = skipTicks[activeWeapon->index()];
+	auto& crits = critTicks[activeWeaponIndex];
+	auto& skips = skipTicks[activeWeaponIndex];
 
 	/*
 	renderText(pos, red, offset, drawList, "Ranged damage %.2f", rangedDamage);
@@ -616,19 +641,19 @@ void Crithack::draw(ImDrawList* drawList) noexcept
 		return;
 	}
 
-	if (activeWeapon->critTime() > memory->globalVars->serverTime())
+	if (critTime > memory->globalVars->serverTime())
 	{
-		float ratio = std::clamp(((activeWeapon->critTime() - memory->globalVars->serverTime()) / 2.f), 0.0f, 1.0f);
+		float ratio = std::clamp((critTime - memory->globalVars->serverTime()) / 2.f, 0.0f, 1.0f);
 		renderText(pos, blue, offset, drawList, "Streaming crits %.2fs", ratio);
 		renderBar(windowPos, ImVec2{ windowSize.x, 12.0f }, ratio, offset, drawList);
 		return;
 	}
 
-	if (activeWeapon->slot() != SLOT_MELEE && critBan)
+	if (activeWeaponSlot != SLOT_MELEE && critBan)
 	{
 		renderText(pos, red, offset, drawList, "Crit banned");
-		if(const int damage = Crithack::getDamageTillUnban(); damage > 0)
-			renderText(pos, red, offset, drawList, "Deal %i damage", Crithack::getDamageTillUnban());
+		if(const int damage = getDamageTillUnban(); damage > 0)
+			renderText(pos, red, offset, drawList, "Deal %i damage", damage);
 		return;
 	}	
 
@@ -638,36 +663,36 @@ void Crithack::draw(ImDrawList* drawList) noexcept
 		return;
 	}
 
-	if (activeWeapon->isRapidFireCrits() && activeWeapon->critChecks() < (activeWeapon->critSeedRequests() + 1) * 10)
+	if (isRapidFireCrits && critChecks < (critSeedRequests + 1) * 10)
 	{
 		renderText(pos, red, offset, drawList, "Crit throttled");
 		renderText(pos, red, offset, drawList, "Unbalanced crit ratio");
 
-		const float checks = static_cast<float>(activeWeapon->critChecks());
-		const float required = (activeWeapon->critSeedRequests() + 1) * 10.f;
+		const float checks = static_cast<float>(critChecks);
+		const float required = (critSeedRequests + 1) * 10.f;
 		if (checks > 0.0f)
 			renderText(pos, red, offset, drawList, "%.0f/100", (checks / required) * 100.f);
 
-		if (activeWeapon->lastRapidFireCritCheckTime() + 1.f > memory->globalVars->serverTime())
+		if (lastRapidFireCritCheckTime + 1.f > memory->globalVars->serverTime())
 		{
-			const float fraction = std::clamp(((activeWeapon->lastRapidFireCritCheckTime() + 1.f) - memory->globalVars->serverTime()), 0.0f, 1.0f);
+			const float fraction = std::clamp(((lastRapidFireCritCheckTime + 1.f) - memory->globalVars->serverTime()), 0.0f, 1.0f);
 			renderText(pos, red, offset, drawList, "Wait %.2fs", fraction);
 			renderBar(windowPos, ImVec2{ windowSize.x, 12.0f }, fraction, offset, drawList);
 		}
 		return;
 	}
 
-	if (cost > activeWeapon->critTokenBucket())
+	if (cost > critTokenBucket)
 	{
 		renderText(pos, red, offset, drawList, "Cannot crit");
-		renderText(pos, red, offset, drawList, "Cost: %i > Tokens: %i", static_cast<int>(cost), static_cast<int>(activeWeapon->critTokenBucket()));
+		renderText(pos, red, offset, drawList, "Cost: %i > Tokens: %i", static_cast<int>(cost), static_cast<int>(critTokenBucket));
 		return;
 	}
 
-	if (activeWeapon->lastRapidFireCritCheckTime() + 1.f > memory->globalVars->serverTime())
+	if (lastRapidFireCritCheckTime + 1.f > memory->globalVars->serverTime())
 	{
 		renderText(pos, red, offset, drawList, "Cannot crit");
-		const float fraction = std::clamp(((activeWeapon->lastRapidFireCritCheckTime() + 1.f) - memory->globalVars->serverTime()), 0.0f, 1.0f);
+		const float fraction = std::clamp(((lastRapidFireCritCheckTime + 1.f) - memory->globalVars->serverTime()), 0.0f, 1.0f);
 		renderText(pos, red, offset, drawList, "Wait %.2fs", fraction);
 		renderBar(windowPos, ImVec2{ windowSize.x, 12.0f }, fraction, offset, drawList);
 		return;
@@ -677,9 +702,9 @@ void Crithack::draw(ImDrawList* drawList) noexcept
 	renderText(pos, green, offset, drawList, "Can crit");
 	renderText(pos, green, offset, drawList, "%i/%i Potential crits", potentialCrits, critsPossible);
 	
-	if (potentialCrits < critsPossible && activeWeapon->slot() != SLOT_MELEE && cost > 0.0f)
+	if (potentialCrits < critsPossible && activeWeaponSlot != SLOT_MELEE && cost > 0.0f)
 	{
-		const float fraction = std::clamp((activeWeapon->critTokenBucket() - (static_cast<float>(potentialCrits) * cost)) / cost, 0.0f, 1.0f);
+		const float fraction = std::clamp((critTokenBucket - (static_cast<float>(potentialCrits) * cost)) / cost, 0.0f, 1.0f);
 		 
 		renderBar(windowPos, ImVec2{ windowSize.x, 12.0f }, fraction, offset, drawList);
 	}
@@ -758,4 +783,18 @@ void Crithack::reset() noexcept
 	playerHealthInfo.clear();
 
 	lastCommandNumberScanned = 0;
+
+	canActiveWeaponRandomCrit = false;
+	activeWeaponIndex = 0;
+	activeWeaponSlot = 0;
+
+	cost = 0.0f;
+	potentialCrits = 0;
+
+	critTime = 0.0f;
+	isRapidFireCrits = false;
+	critChecks = 0;
+	critSeedRequests = 0;
+	critTokenBucket = 0.0f;
+	lastRapidFireCritCheckTime = 0.0f;
 }

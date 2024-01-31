@@ -15,11 +15,7 @@ namespace Crithack
 	void updateInput() noexcept;
 	void reset() noexcept;
 
-	float calculateCost(Entity* activeWeapon) noexcept;
-
 	void handleEvent(GameEvent* event) noexcept;
-	void updateDamage() noexcept;
-	int getDamageTillUnban() noexcept;
 	void handleCanFireRandomCriticalShot(float critChance, Entity* entity) noexcept;
 	bool isAttackCriticalHandler(Entity* entity) noexcept;
 	
