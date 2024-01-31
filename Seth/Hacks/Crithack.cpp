@@ -115,8 +115,8 @@ void updateCmds(UserCmd* cmd, Entity* activeWeapon, int cmdsToScan) noexcept
 	std::erase_if(skips,
 		[&](const auto& commandNumber) { return commandNumber < cmd->commandNumber; });
 
-	static constexpr unsigned int critsMaxSize = 50U;
-	static constexpr unsigned int skipsMaxSize = 50U;
+	static constexpr unsigned int critsMaxSize = 25U;
+	static constexpr unsigned int skipsMaxSize = 25U;
 
 	if (crits.size() < critsMaxSize || skips.size() < skipsMaxSize)
 	{
@@ -508,12 +508,12 @@ static void renderBar(const ImVec2& pos, const ImVec2& barSize, const float& fra
 {
 	const float width = barSize.x;
 	const float height = barSize.y;
-	const float thickeness = 1.0f;
-	const float barSizing = 10.0f; //bigger = less bar
+	constexpr float thickeness = 1.0f;
+	constexpr float barSizing = 10.0f; //bigger = less bar
 
-	const Color4 backgroundColor{ 0.02f, 0.07f, 0.17f, 1.0f }; //dark blue
-	const Color4 startingColor{ 0.0f, 0.75f, 1.0f, 1.0f }; //blue
-	const Color4 endColor{ 1.0f, 1.0f, 1.0f, 1.0f }; //white
+	constexpr Color4 backgroundColor{ 0.02f, 0.07f, 0.17f, 1.0f }; //dark blue
+	constexpr Color4 startingColor{ 0.0f, 0.75f, 1.0f, 1.0f }; //blue
+	constexpr Color4 endColor{ 1.0f, 1.0f, 1.0f, 1.0f }; //white
 	const Color4 lerpColor{ 
 		Helpers::lerp(fraction, startingColor.color[0], endColor.color[0]), 
 		Helpers::lerp(fraction, startingColor.color[1], endColor.color[1]),
