@@ -106,19 +106,19 @@ bool isAttacking(UserCmd* cmd, Entity* activeWeapon) noexcept
 
 	switch (activeWeapon->itemDefinitionIndex())
 	{
-	case Soldier_m_TheBeggarsBazooka:
-		if (!(cmd->buttons & UserCmd::IN_ATTACK) && activeWeapon->clip() && activeWeapon->nextPrimaryAttack() <= memory->globalVars->serverTime())
-			return true;
-		return false;
-	case Sniper_m_TheMachina:
-	case Sniper_m_ShootingStar:
-	{
-		if (!localPlayer->isScoped())
+		case Soldier_m_TheBeggarsBazooka:
+			if (!(cmd->buttons & UserCmd::IN_ATTACK) && activeWeapon->clip() && activeWeapon->nextPrimaryAttack() <= memory->globalVars->serverTime())
+				return true;
 			return false;
-		break;
-	}
-	default:
-		break;
+		case Sniper_m_TheMachina:
+		case Sniper_m_ShootingStar:
+		{
+			if (!localPlayer->isScoped())
+				return false;
+			break;
+		}
+		default:
+			break;
 	}
 
 	if (activeWeapon->weaponId() == WeaponId::COMPOUND_BOW || activeWeapon->weaponId() == WeaponId::PIPEBOMBLAUNCHER 
@@ -131,23 +131,24 @@ bool isAttacking(UserCmd* cmd, Entity* activeWeapon) noexcept
 	{
 		switch (activeWeapon->getWeaponType())
 		{
-		case WeaponType::HITSCAN:
-			if (!activeWeapon->clip() || activeWeapon->nextPrimaryAttack() > memory->globalVars->serverTime() || activeWeapon->isInReload())
+			case WeaponType::HITSCAN:
+				if (!activeWeapon->clip() || activeWeapon->nextPrimaryAttack() > memory->globalVars->serverTime() || activeWeapon->isInReload())
+					return false;
+				break;
+			case WeaponType::PROJECTILE:
+				if (activeWeapon->nextPrimaryAttack() > memory->globalVars->serverTime() && localPlayer->nextAttack() > memory->globalVars->serverTime())
+					return false;
+				break;
+			case WeaponType::MELEE:
+				if (!activeWeapon->isKnife())
+					return fabsf(activeWeapon->smackTime() - memory->globalVars->serverTime()) < memory->globalVars->intervalPerTick
+						&& activeWeapon->smackTime() < memory->globalVars->serverTime();
+				
+				if (activeWeapon->nextPrimaryAttack() > memory->globalVars->serverTime() && localPlayer->nextAttack() > memory->globalVars->serverTime())
+					return false;
+				break;
+			default:
 				return false;
-			break;
-		case WeaponType::PROJECTILE:
-			if (activeWeapon->nextPrimaryAttack() > memory->globalVars->serverTime() && localPlayer->nextAttack() > memory->globalVars->serverTime())
-				return false;
-			break;
-		case WeaponType::MELEE:
-			//TODO: fix melee smack time
-			if (!activeWeapon->isKnife())
-				return fabsf(activeWeapon->smackTime() - memory->globalVars->serverTime()) <= memory->globalVars->intervalPerTick; //* 2.0f;
-			if (activeWeapon->nextPrimaryAttack() > memory->globalVars->serverTime() && localPlayer->nextAttack() > memory->globalVars->serverTime())
-				return false;
-			break;
-		default:
-			return false;
 		}
 		return cmd->buttons & UserCmd::IN_ATTACK;
 	}
