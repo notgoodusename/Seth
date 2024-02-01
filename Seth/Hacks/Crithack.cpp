@@ -289,7 +289,7 @@ void Crithack::handleEvent(GameEvent* event) noexcept
 		if (!activeWeapon)
 			return;
 
-		//TODO: fix damage desync!!, still to do? i have no clue
+		//TODO: fix damage desync!!
 		if (activeWeapon->slot() == SLOT_MELEE)
 		{
 			meleeDamage += damage;
@@ -478,7 +478,7 @@ void Crithack::run(UserCmd* cmd) noexcept
 	
 	if (shouldCrit)
 	{
-		if (crits.empty())
+		if (crits.size() <= 2U)
 			return;
 
 		critIndex = critIndex % crits.size();
@@ -493,7 +493,7 @@ void Crithack::run(UserCmd* cmd) noexcept
 	}
 	else if(config->misc.critHack.skipRandomCrits)
 	{
-		if (skips.empty())
+		if (skips.size() <= 2U)
 			return;
 
 		skipIndex = skipIndex % skips.size();
@@ -626,7 +626,7 @@ void Crithack::draw(ImDrawList* drawList) noexcept
 		return;
 	}
 
-	if (!localPlayer)
+	if (!localPlayer || !localPlayer->isAlive())
 		return;
 
 	static auto weaponCriticals = interfaces->cvar->findVar("tf_weapon_criticals");
@@ -650,12 +650,11 @@ void Crithack::draw(ImDrawList* drawList) noexcept
 	renderText(pos, red, offset, drawList, "Can crit %s", canCrit ? "true" : "false");
 	renderText(pos, green, offset, drawList, "Correct crit chance %.4f", correctCritChance);
 	renderText(pos, blue, offset, drawList, "Cost %.2f", cost);
-	//renderText(pos, yellow, offset, drawList, "Can force crit %s", canForceCrit(activeWeapon) ? "true" : "false");
 	renderText(pos, red, offset, drawList, "Crit seed request %i", critSeedRequests);
 	renderText(pos, green, offset, drawList, "Crit checks %i", critChecks);
-	renderText(pos, yellow, offset, drawList, "Last command number %.4f", lastCommandNumberScanned);
+	renderText(pos, yellow, offset, drawList, "Last command number %i", lastCommandNumberScanned);
 	renderText(pos, red, offset, drawList, "Wait %.2fs", memory->globalVars->serverTime());
-	renderText(pos, yellow, offset, drawList, "Wait %.2fs", activeWeapon->lastRapidFireCritCheckTime());
+	renderText(pos, yellow, offset, drawList, "Wait %.2fs", lastRapidFireCritCheckTime);
 	*/
 
 	if (weaponCriticals->getInt() <= 0)
@@ -692,9 +691,9 @@ void Crithack::draw(ImDrawList* drawList) noexcept
 		return;
 	}	
 
-	if (crits.empty() || skips.empty())
+	if (crits.size() <= 2 || skips.size() <= 2)
 	{
-		renderText(pos, yellow, offset, drawList, "Scanning for crits...");
+		renderText(pos, yellow, offset, drawList, "Scanning for crits... %i-%i", crits.size(), skips.size());
 		return;
 	}
 
