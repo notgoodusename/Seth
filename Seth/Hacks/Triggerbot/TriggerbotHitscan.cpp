@@ -56,6 +56,9 @@ void TriggerbotHitscan::run(Entity* activeWeapon, UserCmd* cmd, float& lastTime,
     if (now - lastTime < cfg.shotDelay / 1000.0f)
         return;
 
+    if (cfg.scopedOnly && activeWeapon->isSniper() && !localPlayer->isScoped())
+        return;
+
     std::array<bool, Hitboxes::LeftUpperArm> hitbox{ false };
 
     const auto canWeaponHeadshot = activeWeapon->canWeaponHeadshot();
