@@ -634,6 +634,8 @@ void resetAll(int resetType) noexcept
     StrayElements::clear();
     Visuals::reset(resetType);
 
+    resetUtil();
+
     simTimes.clear();
 }
 

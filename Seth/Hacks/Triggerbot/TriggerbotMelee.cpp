@@ -122,7 +122,11 @@ void TriggerbotMelee::run(Entity* activeWeapon, UserCmd* cmd, float& lastTime, f
         worldSpaceCenter.z += (targetTick.mins.z + targetTick.maxs.z) * 0.5f;
 
         gotTarget = getTriggerbotMeleeTarget(cmd, activeWeapon, entity, mustBackstab, worldSpaceCenter);
-        applyMatrix(entity, backupBoneCache, backupOrigin, backupAbsAngle, backupPrescaledMins, backupPrescaledMaxs);
+        
+        entity->replaceMatrix(backupBoneCache);
+        memory->setAbsOrigin(entity, backupOrigin);
+        memory->setAbsAngle(entity, backupAbsAngle);
+        memory->setCollisionBounds(entity->getCollideable(), backupPrescaledMins, backupPrescaledMaxs);
         if (gotTarget)
             break;
     }

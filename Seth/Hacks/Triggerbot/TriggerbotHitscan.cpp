@@ -183,7 +183,10 @@ void TriggerbotHitscan::run(Entity* activeWeapon, UserCmd* cmd, float& lastTime,
         if (gotTarget)
             matrix = entity->getBoneCache().memory;
  
-        applyMatrix(entity, backupBoneCache, backupOrigin, backupEyeAngle, backupPrescaledMins, backupPrescaledMaxs);
+        entity->replaceMatrix(backupBoneCache);
+        memory->setAbsOrigin(entity, backupOrigin);
+        memory->setAbsAngle(entity, backupAbsAngle);
+        memory->setCollisionBounds(entity->getCollideable(), backupPrescaledMins, backupPrescaledMaxs);
         if (gotTarget)
             break;
     }

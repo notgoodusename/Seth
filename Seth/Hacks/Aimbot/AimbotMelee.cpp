@@ -102,7 +102,11 @@ void runKnife(Entity* activeWeapon, UserCmd* cmd) noexcept
                 worldSpaceCenter.z += (targetTick.mins.z + targetTick.maxs.z) * 0.5f;
 
                 bestTarget = getKnifeTarget(cmd, entity, activeWeapon, bestFov, localPlayerEyePosition, targetTick.eyeAngle, worldSpaceCenter);
-                applyMatrix(entity, backupBoneCache, backupOrigin, backupAbsAngle, backupPrescaledMins, backupPrescaledMaxs);
+                
+                entity->replaceMatrix(backupBoneCache);
+                memory->setAbsOrigin(entity, backupOrigin);
+                memory->setAbsAngle(entity, backupAbsAngle);
+                memory->setCollisionBounds(entity->getCollideable(), backupPrescaledMins, backupPrescaledMaxs);
 
                 if (bestTarget.notNull())
                 {
@@ -137,7 +141,11 @@ void runKnife(Entity* activeWeapon, UserCmd* cmd) noexcept
             worldSpaceCenter.z += (targetTick.mins.z + targetTick.maxs.z) * 0.5f;
 
             bestTarget = getKnifeTarget(cmd, entity, activeWeapon, bestFov, localPlayerEyePosition, targetTick.eyeAngle, worldSpaceCenter);
-            applyMatrix(entity, backupBoneCache, backupOrigin, backupAbsAngle, backupPrescaledMins, backupPrescaledMaxs);
+            
+            entity->replaceMatrix(backupBoneCache);
+            memory->setAbsOrigin(entity, backupOrigin);
+            memory->setAbsAngle(entity, backupAbsAngle);
+            memory->setCollisionBounds(entity->getCollideable(), backupPrescaledMins, backupPrescaledMaxs);
 
             if (bestTarget.notNull())
             {
@@ -192,7 +200,6 @@ void AimbotMelee::run(Entity* activeWeapon, UserCmd* cmd) noexcept
 
     //Due to the delay of melee registering after shooting we gotta do this
     //And also recalculate melee
-    //If you miss its because of movement
     if (meleeRecord.commandNumber == cmd->commandNumber)
     {
         const auto entity{ interfaces->entityList->getEntityFromHandle(meleeRecord.index) };
@@ -207,7 +214,10 @@ void AimbotMelee::run(Entity* activeWeapon, UserCmd* cmd) noexcept
             Vector backupOrigin = entity->getAbsOrigin();
             Vector backupAbsAngle = entity->getAbsAngle();
 
-            applyMatrix(entity, meleeRecord.matrix, meleeRecord.origin, meleeRecord.absAngle, meleeRecord.mins, meleeRecord.maxs);
+            entity->replaceMatrix(meleeRecord.matrix);
+            memory->setAbsOrigin(entity, meleeRecord.origin);
+            memory->setAbsAngle(entity, meleeRecord.absAngle);
+            memory->setCollisionBounds(entity->getCollideable(), meleeRecord.mins, meleeRecord.maxs);
             if (Math::doesMeleeHit(activeWeapon, meleeRecord.index, cmd->viewangles + angle))
             {
                 cmd->viewangles += angle;
@@ -216,7 +226,10 @@ void AimbotMelee::run(Entity* activeWeapon, UserCmd* cmd) noexcept
                 if (!cfg.silent)
                     interfaces->engine->setViewAngles(cmd->viewangles);
             }
-            applyMatrix(entity, backupBoneCache, backupOrigin, backupAbsAngle, backupPrescaledMins, backupPrescaledMaxs);
+            entity->replaceMatrix(backupBoneCache);
+            memory->setAbsOrigin(entity, backupOrigin);
+            memory->setAbsAngle(entity, backupAbsAngle);
+            memory->setCollisionBounds(entity->getCollideable(), backupPrescaledMins, backupPrescaledMaxs);
         }
     }
 
@@ -305,7 +318,11 @@ void AimbotMelee::run(Entity* activeWeapon, UserCmd* cmd) noexcept
         worldSpaceCenter.z += (targetTick.mins.z + targetTick.maxs.z) * 0.5f;
 
         bestTarget = getMeleeTarget(cmd, entity, worldSpaceCenter, activeWeapon, bestFov, localPlayerEyePosition);
-        applyMatrix(entity, backupBoneCache, backupOrigin, backupAbsAngle, backupPrescaledMins, backupPrescaledMaxs);
+        
+        entity->replaceMatrix(backupBoneCache);
+        memory->setAbsOrigin(entity, backupOrigin);
+        memory->setAbsAngle(entity, backupAbsAngle);
+        memory->setCollisionBounds(entity->getCollideable(), backupPrescaledMins, backupPrescaledMaxs);
         if (bestTarget.notNull())
         {
             meleeRecord.target = bestTarget;

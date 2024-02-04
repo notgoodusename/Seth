@@ -162,7 +162,11 @@ void AimbotHitscan::run(Entity* activeWeapon, UserCmd* cmd) noexcept
         bestSimulationTime = targetTick.simulationTime;
 
         bestTarget = getHitscanTarget(cmd, entity, entity->getBoneCache().memory, hitbox, bestFov, localPlayerEyePosition);
-        applyMatrix(entity, backupBoneCache, backupOrigin, backupAbsAngle, backupPrescaledMins, backupPrescaledMaxs);
+        
+        entity->replaceMatrix(backupBoneCache);
+        memory->setAbsOrigin(entity, backupOrigin);
+        memory->setAbsAngle(entity, backupAbsAngle);
+        memory->setCollisionBounds(entity->getCollideable(), backupPrescaledMins, backupPrescaledMaxs);
         if (bestTarget.notNull())
             break;
     }

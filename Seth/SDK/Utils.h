@@ -17,12 +17,8 @@ static auto ticksToTime(int ticks) noexcept { return static_cast<float>(ticks * 
 
 std::tuple<float, float, float> rainbowColor(float speed) noexcept;
 
-int getMaxUserCmdProcessTicks() noexcept;
-
-#define maxUserCmdProcessTicks getMaxUserCmdProcessTicks()
-
-void applyMatrix(Entity* entity, matrix3x4* boneCacheData, Vector origin, Vector eyeAngle, Vector mins, Vector maxs) noexcept;
-
 bool canAttack(UserCmd* cmd, Entity* activeWeapon) noexcept;
 
 bool isAttacking(UserCmd* cmd, Entity* activeWeapon) noexcept;
+
+void resetUtil() noexcept;

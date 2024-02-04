@@ -16,20 +16,6 @@ std::tuple<float, float, float> rainbowColor(float speed) noexcept
                            std::sin(speed * memory->globalVars->realTime + 4 * pi / 3) * 0.5f + 0.5f);
 }
 
-int getMaxUserCmdProcessTicks() noexcept
-{
-    return 22;
-}
-
-void applyMatrix(Entity* entity, matrix3x4* boneCacheData, Vector absOrigin, Vector absAngle, Vector mins, Vector maxs) noexcept
-{
-    entity->invalidateBoneCache();
-	entity->replaceMatrix(boneCacheData);
-	memory->setAbsOrigin(entity, absOrigin);
-	memory->setAbsAngle(entity, absAngle);
-	memory->setCollisionBounds(entity->getCollideable(), mins, maxs);
-}
-
 bool canAttack(UserCmd* cmd, Entity* activeWeapon) noexcept
 {
 	if (!localPlayer || !localPlayer->isAlive() || localPlayer->isTaunting() || localPlayer->isBonked() || localPlayer->isFeignDeathReady()
@@ -85,6 +71,7 @@ bool canAttack(UserCmd* cmd, Entity* activeWeapon) noexcept
 }
 
 //TODO: Account for cleaver, jarate and sandman
+static bool charging = false;
 
 bool isAttacking(UserCmd* cmd, Entity* activeWeapon) noexcept
 {
@@ -126,8 +113,14 @@ bool isAttacking(UserCmd* cmd, Entity* activeWeapon) noexcept
 	if (activeWeapon->weaponId() == WeaponId::COMPOUND_BOW || activeWeapon->weaponId() == WeaponId::PIPEBOMBLAUNCHER 
 		|| activeWeapon->weaponId() == WeaponId::CANNON)
 	{
-		if (!(cmd->buttons & UserCmd::IN_ATTACK) && activeWeapon->chargeTime() > 0.0f)
+		if (activeWeapon->chargeTime() > 0.0f)
+			charging = true;
+
+		if (!(cmd->buttons & UserCmd::IN_ATTACK) && charging)
+		{
+			charging = false;
 			return true;
+		}
 	}
 	else
 	{
@@ -156,4 +149,9 @@ bool isAttacking(UserCmd* cmd, Entity* activeWeapon) noexcept
 	}
 
 	return false;
+}
+
+void resetUtil() noexcept
+{
+	charging = false;
 }
