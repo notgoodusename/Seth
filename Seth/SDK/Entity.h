@@ -508,7 +508,20 @@ public:
 
     bool canWeaponHeadshot() noexcept
     {
-        return (getDamageType() & (1 << 25)) && canFireCriticalShot(true);
+        if (isSniper() && localPlayer)
+        {
+            switch (weaponId())
+            {
+                case WeaponId::SNIPERRIFLE:
+                case WeaponId::SNIPERRIFLE_DECAP:
+                    return localPlayer->isScoped();
+                case WeaponId::SNIPERRIFLE_CLASSIC:
+                    return chargedDamage() >= 150.0f;
+                default:
+                    break;
+            }
+        }
+        return ((getDamageType() & (1 << 25)) && canFireCriticalShot(true));
     }
 
     bool canWeaponRandomCrit() noexcept;
@@ -821,6 +834,8 @@ public:
     NETVAR(eyeAngles, "CTFPlayer", "m_angEyeAngles[0]", Vector)
 
     NETVAR(chargeTime, "CTFPipebombLauncher", "m_flChargeBeginTime", float)
+
+    NETVAR(chargedDamage, "CTFSniperRifle", "m_flChargedDamage", float)
 
     NETVAR(itemDefinitionIndex, "CEconEntity", "m_iItemDefinitionIndex", int)
    

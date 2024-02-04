@@ -157,7 +157,7 @@ static void menuBarItem(const char* name, bool& enabled) noexcept
 
 void GUI::renderAimbotWindow() noexcept
 {
-    static const char* hitboxes[]{ "Head","Body","Pelvis" };
+    static const char* hitboxes[]{ "Head","Body","Auto" };
     static bool hitbox[ARRAYSIZE(hitboxes)] = { false, false, false };
     static std::string previewvalue = "";
     bool once = false;
@@ -195,19 +195,43 @@ void GUI::renderAimbotWindow() noexcept
             ImGui::Checkbox("Wait for charge", &config->aimbot.hitscan.waitForHeadshot);
 
             ImGui::Combo("Sort method", &config->aimbot.hitscan.sortMethod, "Distance\0Fov\0");
+            
+            if (config->aimbot.hitscan.hitboxes & 1 << 2)
+            {
+                config->aimbot.hitscan.hitboxes &= ~(1 << 0);
+                config->aimbot.hitscan.hitboxes &= ~(1 << 1);
+            }
+
             for (size_t i = 0; i < ARRAYSIZE(hitbox); i++)
             {
                 hitbox[i] = (config->aimbot.hitscan.hitboxes & 1 << i) == 1 << i;
             }
+
+
             if (ImGui::BeginCombo("Hitbox", previewvalue.c_str()))
             {
+                bool wasAutoActive = hitbox[2];
+                
                 previewvalue = "";
                 for (size_t i = 0; i < ARRAYSIZE(hitboxes); i++)
                 {
                     ImGui::Selectable(hitboxes[i], &hitbox[i], ImGuiSelectableFlags_::ImGuiSelectableFlags_DontClosePopups);
                 }
+
+                if ((hitbox[0] || hitbox[1]) && wasAutoActive)
+                {
+                    hitbox[2] = false;
+                }
+
+                if (hitbox[2])
+                {
+                    hitbox[0] = false;
+                    hitbox[1] = false;
+                }
+
                 ImGui::EndCombo();
             }
+
             for (size_t i = 0; i < ARRAYSIZE(hitboxes); i++)
             {
                 if (!once)
@@ -215,6 +239,7 @@ void GUI::renderAimbotWindow() noexcept
                     previewvalue = "";
                     once = true;
                 }
+
                 if (hitbox[i])
                 {
                     previewvalue += previewvalue.size() ? std::string(", ") + hitboxes[i] : hitboxes[i];
@@ -224,6 +249,11 @@ void GUI::renderAimbotWindow() noexcept
                 {
                     config->aimbot.hitscan.hitboxes &= ~(1 << i);
                 }
+            }
+
+            if ((config->aimbot.hitscan.hitboxes & 1 << 0) == 1 << 0 || (config->aimbot.hitscan.hitboxes & 1 << 1) == 1 << 1)
+            {
+                config->aimbot.hitscan.hitboxes &= ~(1 << 2);
             }
 
             ImGui::NextColumn();
@@ -271,7 +301,7 @@ void GUI::renderAimbotWindow() noexcept
 
 void GUI::renderTriggerbotWindow() noexcept
 {
-    static const char* hitboxes[]{ "Head","Chest","Stomach" };
+    static const char* hitboxes[]{ "Head","Body","Auto" };
     static bool hitbox[ARRAYSIZE(hitboxes)] = { false, false, false };
     static std::string previewvalue = "";
 
@@ -304,11 +334,25 @@ void GUI::renderTriggerbotWindow() noexcept
 
             if (ImGui::BeginCombo("Hitbox", previewvalue.c_str()))
             {
+                bool wasAutoActive = hitbox[2];
+
                 previewvalue = "";
                 for (size_t i = 0; i < ARRAYSIZE(hitboxes); i++)
                 {
                     ImGui::Selectable(hitboxes[i], &hitbox[i], ImGuiSelectableFlags_::ImGuiSelectableFlags_DontClosePopups);
                 }
+
+                if ((hitbox[0] || hitbox[1]) && wasAutoActive)
+                {
+                    hitbox[2] = false;
+                }
+
+                if (hitbox[2])
+                {
+                    hitbox[0] = false;
+                    hitbox[1] = false;
+                }
+
                 ImGui::EndCombo();
             }
             for (size_t i = 0; i < ARRAYSIZE(hitboxes); i++)
@@ -326,6 +370,13 @@ void GUI::renderTriggerbotWindow() noexcept
                     config->hitscanTriggerbot.hitboxes &= ~(1 << i);
                 }
             }
+
+            if (((config->hitscanTriggerbot.hitboxes & 1 << 0) == 1 << 0
+                || (config->hitscanTriggerbot.hitboxes & 1 << 1) == 1 << 1))
+            {
+                config->hitscanTriggerbot.hitboxes &= ~(1 << 2);
+            }
+
             ImGui::PushItemWidth(220.0f);
             ImGui::SliderInt("Shot delay", &config->hitscanTriggerbot.shotDelay, 0, 250, "%d ms");
             break;

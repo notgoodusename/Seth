@@ -65,14 +65,30 @@ void AimbotHitscan::run(Entity* activeWeapon, UserCmd* cmd) noexcept
 
     std::array<bool, Hitboxes::LeftUpperArm> hitbox{ false };
 
-    hitbox[Hitboxes::Head] = (cfg.hitboxes & 1 << 0) == 1 << 0; // Head
+    const auto canWeaponHeadshot = activeWeapon->canWeaponHeadshot();
+    if ((cfg.hitboxes & 1 << 2) == 1 << 2)
+    {
+        if (canWeaponHeadshot)
+        {
+            hitbox[Hitboxes::Head] = true;
+        }
+        else
+        {
+            hitbox[Hitboxes::Spine0] = true;
+            hitbox[Hitboxes::Spine1] = true;
+            hitbox[Hitboxes::Spine2] = true;
+            hitbox[Hitboxes::Spine3] = true;
+        }
+    }
+    else
+    {
+        hitbox[Hitboxes::Head] = (cfg.hitboxes & 1 << 0) == 1 << 0; // Head
 
-    hitbox[Hitboxes::Spine0] = (cfg.hitboxes & 1 << 1) == 1 << 1; //Body
-    hitbox[Hitboxes::Spine1] = (cfg.hitboxes & 1 << 1) == 1 << 1;
-    hitbox[Hitboxes::Spine2] = (cfg.hitboxes & 1 << 1) == 1 << 1;
-    hitbox[Hitboxes::Spine3] = (cfg.hitboxes & 1 << 1) == 1 << 1;
-
-    hitbox[Hitboxes::Pelvis] = (cfg.hitboxes & 1 << 2) == 1 << 2; //Pelvis
+        hitbox[Hitboxes::Spine0] = (cfg.hitboxes & 1 << 1) == 1 << 1; //Body
+        hitbox[Hitboxes::Spine1] = (cfg.hitboxes & 1 << 1) == 1 << 1;
+        hitbox[Hitboxes::Spine2] = (cfg.hitboxes & 1 << 1) == 1 << 1;
+        hitbox[Hitboxes::Spine3] = (cfg.hitboxes & 1 << 1) == 1 << 1;
+    }
 
     const auto& enemies = TargetSystem::playerTargets(cfg.sortMethod);
 
@@ -81,7 +97,6 @@ void AimbotHitscan::run(Entity* activeWeapon, UserCmd* cmd) noexcept
     Vector bestTarget{ };
 
     const auto& localPlayerEyePosition = localPlayer->getEyePosition();
-    const auto canWeaponHeadshot = activeWeapon->canWeaponHeadshot();
 
     for (const auto& target : enemies)
     {
