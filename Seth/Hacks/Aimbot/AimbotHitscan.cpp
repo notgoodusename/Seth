@@ -81,6 +81,7 @@ void AimbotHitscan::run(Entity* activeWeapon, UserCmd* cmd) noexcept
     Vector bestTarget{ };
 
     const auto& localPlayerEyePosition = localPlayer->getEyePosition();
+    const auto canWeaponHeadshot = activeWeapon->canWeaponHeadshot();
 
     for (const auto& target : enemies)
     {
@@ -160,6 +161,12 @@ void AimbotHitscan::run(Entity* activeWeapon, UserCmd* cmd) noexcept
 
         if (!cfg.autoShoot)
             angle /= cfg.smooth;
+
+        if (cfg.autoScope && activeWeapon->isSniper() && !localPlayer->isScoped())
+        {
+            cmd->buttons &= ~UserCmd::IN_ATTACK;
+            cmd->buttons |= UserCmd::IN_ATTACK2;
+        }
 
         if (cmd->buttons & UserCmd::IN_ATTACK)
             cmd->tickCount = timeToTicks(bestSimulationTime + Backtrack::getLerp());
