@@ -210,6 +210,14 @@ public:
         return weaponId() == WeaponId::KNIFE;
     }
 
+    bool isSniper() noexcept
+    {
+        const auto currentWeaponId = weaponId();
+        return currentWeaponId == WeaponId::SNIPERRIFLE
+            || currentWeaponId == WeaponId::SNIPERRIFLE_CLASSIC
+            || currentWeaponId == WeaponId::SNIPERRIFLE_DECAP;
+    }
+
     bool isVisible(const Vector& position = { }) noexcept
     {
         if (!localPlayer)

@@ -98,6 +98,8 @@ bool isAttacking(UserCmd* cmd, Entity* activeWeapon) noexcept
 		case WeaponId::PDA_ENGINEER_BUILD:
 		case WeaponId::PDA_ENGINEER_DESTROY:
 		case WeaponId::PDA_SPY:
+		case WeaponId::PDA_SPY_BUILD:
+		case WeaponId::BUILDER:
 		case WeaponId::MEDIGUN:
 			return false;
 		default:

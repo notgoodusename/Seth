@@ -168,6 +168,7 @@ bool Entity::canWeaponRandomCrit() noexcept
 	switch (weaponId())
 	{
 		case WeaponId::SNIPERRIFLE:
+		case WeaponId::SNIPERRIFLE_DECAP:
 		case WeaponId::SNIPERRIFLE_CLASSIC:
 		case WeaponId::KNIFE:
 		case WeaponId::MEDIGUN:
@@ -175,7 +176,11 @@ bool Entity::canWeaponRandomCrit() noexcept
 		case WeaponId::PDA_ENGINEER_BUILD:
 		case WeaponId::PDA_ENGINEER_DESTROY:
 		case WeaponId::PDA_SPY:
+		case WeaponId::BUILDER:
 		case WeaponId::PDA_SPY_BUILD:
+		case WeaponId::LUNCHBOX:
+		case WeaponId::JAR:
+		case WeaponId::BUFF_ITEM:
 		case WeaponId::JAR_GAS:
 		case WeaponId::JAR_MILK:
 		case WeaponId::COMPOUND_BOW:
