@@ -639,6 +639,7 @@ void Misc::drawOffscreenEnemies(ImDrawList* drawList) noexcept
     if (!config->misc.offscreenEnemies.enabled)
         return;
 
+    //TODO: Take pitch into account
     const auto yaw = Helpers::deg2rad(interfaces->engine->getViewAngles().y);
 
     GameData::Lock lock;
