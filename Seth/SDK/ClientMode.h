@@ -7,9 +7,9 @@
 class HudChat {
 public:
     template <typename... Args>
-    void printf(int filter, const char* fmt, Args... args) noexcept
+    void printf(const char* fmt, Args... args) noexcept
     {
-        (*reinterpret_cast<void(__cdecl***)(void*, int, const char*, ...)>(this))[26](this, filter, fmt, args...);
+        (*reinterpret_cast<void(__cdecl***)(void*, int, const char*, ...)>(this))[18](this, 0, fmt, args...);
     }
 };
 

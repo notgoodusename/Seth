@@ -7,6 +7,8 @@
 #include "../SDK/Vector.h"
 #include "../SDK/ViewSetup.h"
 
+class GameEvent;
+
 namespace Misc
 {
     void bunnyHop(UserCmd*) noexcept;
@@ -20,6 +22,7 @@ namespace Misc
     void drawPlayerList() noexcept;
     void fixMovement(UserCmd* cmd, float yaw) noexcept;
     void drawOffscreenEnemies(ImDrawList* drawList) noexcept;
+    void revealVotes(GameEvent* event) noexcept;
 
     void runFreeCam(UserCmd* cmd, Vector viewAngles) noexcept;
     void freeCam(ViewSetup* setup) noexcept;

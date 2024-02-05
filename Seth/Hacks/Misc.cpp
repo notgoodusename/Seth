@@ -23,6 +23,7 @@
 #include "../SDK/ConVar.h"
 #include "../SDK/Entity.h"
 #include "../SDK/FrameStage.h"
+#include "../SDK/GameEvent.h"
 #include "../SDK/GlobalVars.h"
 #include "../SDK/Input.h"
 #include "../SDK/LocalPlayer.h"
@@ -718,6 +719,32 @@ void Misc::drawOffscreenEnemies(ImDrawList* drawList) noexcept
                 shadeVertsHSVColorGradientKeepAlpha(drawList, vertStartIdx, vertEndIdx, pos - ImVec2{ 0.0f, radius }, pos + ImVec2{ 0.0f, radius }, IM_COL32(0, 255, 0, 255), IM_COL32(255, 0, 0, 255));
         }
     }
+}
+
+void Misc::revealVotes(GameEvent* event) noexcept
+{
+    if (!config->misc.revealVotes)
+        return;
+
+    if (!event)
+        return;
+
+    const auto entity = interfaces->entityList->getEntity(event->getInt("entityid"));
+    if (!entity || !entity->isPlayer())
+        return;
+
+    static std::string red({ '\x7', 'F', 'F', '0', '0', '0', '0' }); // \x7 RRGGBB
+    static std::string green({ '\x7', '0', '0', 'F', 'F', '0', '0' }); // \x7 RRGGBB
+    static std::string blue({ '\x7', '7', '2', 'B', 'C', 'D', '4' }); // \x7 RRGGBB
+
+    const auto votedYes = event->getInt("vote_option") == 0;
+    const auto isLocal = localPlayer && entity == localPlayer.get();
+
+    memory->clientMode->getHudChat()->printf(
+        "%s-Seth-%s %s\x01 voted %s%s\x01",
+        blue.c_str(), isLocal ? "\x01" : (votedYes ? green.c_str() : red.c_str()), isLocal ? "You" : entity->getPlayerName().c_str(),
+        votedYes ? green.c_str() : red.c_str(),
+        votedYes ? "Yes" : "No");
 }
 
 void Misc::fixMovement(UserCmd* cmd, float yaw) noexcept

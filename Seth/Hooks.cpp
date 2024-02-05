@@ -289,6 +289,9 @@ static bool __fastcall fireEventClientSide(void* thisPointer, void*, GameEvent* 
         case fnv::hash("player_hurt"):
             Crithack::handleEvent(event);
             break;
+        case fnv::hash("vote_cast"):
+            Misc::revealVotes(event);
+            break;
     }
 
     return hooks->eventManager.callOriginal<bool, 8>(event);
