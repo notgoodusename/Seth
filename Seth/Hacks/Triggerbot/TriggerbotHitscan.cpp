@@ -107,7 +107,8 @@ void TriggerbotHitscan::run(Entity* activeWeapon, UserCmd* cmd, float& lastTime,
             continue;
 
         auto entity{ interfaces->entityList->getEntityFromHandle(target.handle) };
-        if (!entity || (entity->isCloaked() && cfg.ignoreCloaked) || (!entity->isEnemy(localPlayer.get()) && !cfg.friendlyFire))
+        if (!entity || (entity->isCloaked() && cfg.ignoreCloaked) 
+            || (!entity->isEnemy(localPlayer.get()) && !cfg.friendlyFire))
             continue;
 
         matrix3x4* backupBoneCache = entity->getBoneCache().memory;
@@ -130,7 +131,7 @@ void TriggerbotHitscan::run(Entity* activeWeapon, UserCmd* cmd, float& lastTime,
                     continue;
 
                 //if head is enabled do head
-                if ((cfg.hitboxes & 1 << 0) == 1 << 0)
+                if ((cfg.hitboxes & 1 << 0) == 1 << 0 || ((cfg.hitboxes & 1 << 2) == 1 << 2 && canWeaponHeadshot))
                 {
                     for (const auto& position : targetTick.headPositions)
                     {
@@ -144,7 +145,7 @@ void TriggerbotHitscan::run(Entity* activeWeapon, UserCmd* cmd, float& lastTime,
                 }
                 
                 //and if body is also enabled do it too
-                if ((cfg.hitboxes & 1 << 1) == 1 << 1 || (cfg.hitboxes & 1 << 2) == 1 << 2)
+                if ((cfg.hitboxes & 1 << 1) == 1 << 1 || ((cfg.hitboxes & 1 << 2) == 1 << 2 && !canWeaponHeadshot))
                 {
                     for (const auto& position : targetTick.headPositions)
                     {
