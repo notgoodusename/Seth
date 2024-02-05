@@ -9,7 +9,8 @@
 #include "../../SDK/ModelInfo.h"
 #include "../../SDK/Vector.h"
 
-Vector getHitscanTarget(UserCmd* cmd, Entity* entity, matrix3x4 matrix[MAXSTUDIOBONES], std::array<bool, Hitboxes::LeftUpperArm> hitbox, float& bestFov, Vector localPlayerEyePosition) noexcept
+Vector getHitscanTarget(UserCmd* cmd, Entity* entity, const matrix3x4* matrix, 
+    std::array<bool, Hitboxes::LeftUpperArm> hitbox, float& bestFov, Vector localPlayerEyePosition, bool friendlyFire) noexcept
 {
     const Model* model = entity->getModel();
     if (!model)
@@ -39,7 +40,7 @@ Vector getHitscanTarget(UserCmd* cmd, Entity* entity, matrix3x4 matrix[MAXSTUDIO
             if (fov > bestFov)
                 continue;
 
-            if (!entity->isVisible(bonePosition))
+            if (!entity->isVisible(bonePosition, friendlyFire))
                 continue;
 
             if (fov < bestFov) {
@@ -161,7 +162,7 @@ void AimbotHitscan::run(Entity* activeWeapon, UserCmd* cmd) noexcept
 
         bestSimulationTime = targetTick.simulationTime;
 
-        bestTarget = getHitscanTarget(cmd, entity, entity->getBoneCache().memory, hitbox, bestFov, localPlayerEyePosition);
+        bestTarget = getHitscanTarget(cmd, entity, entity->getBoneCache().memory, hitbox, bestFov, localPlayerEyePosition, cfg.friendlyFire);
         
         entity->replaceMatrix(backupBoneCache);
         memory->setAbsOrigin(entity, backupOrigin);

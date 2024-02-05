@@ -69,46 +69,31 @@ bool Math::doesMeleeHit(Entity* activeWeapon, int index, const Vector angles) no
     return trace.entity && trace.entity->index() == index;
 }
 
-Vector Math::getCenterOfHitbox(const matrix3x4 matrix[MAXSTUDIOBONES], StudioBbox* hitbox) noexcept
+void Math::vectorTransform(const Vector& in1, const matrix3x4* in2, Vector& out) noexcept
 {
-    auto VectorTransformWrapper = [](const Vector& in1, const matrix3x4 in2, Vector& out)
+    auto VectorTransform = [](const float* in1, const matrix3x4* in2, float* out)
     {
-        auto VectorTransform = [](const float* in1, const matrix3x4 in2, float* out)
+        auto dotProducts = [](const float* v1, const float* v2)
         {
-            auto dotProducts = [](const float* v1, const float* v2)
-            {
-                return v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2];
-            };
-            out[0] = dotProducts(in1, in2[0]) + in2[0][3];
-            out[1] = dotProducts(in1, in2[1]) + in2[1][3];
-            out[2] = dotProducts(in1, in2[2]) + in2[2][3];
+            return v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2];
         };
-        VectorTransform(&in1.x, in2, &out.x);
+        out[0] = dotProducts(in1, in2->operator[](0)) + in2->operator[](0)[3];
+        out[1] = dotProducts(in1, in2->operator[](1)) + in2->operator[](1)[3];
+        out[2] = dotProducts(in1, in2->operator[](2)) + in2->operator[](2)[3];
     };
+    VectorTransform(&in1.x, in2, &out.x);
+}
 
+Vector Math::getCenterOfHitbox(const matrix3x4* matrix, StudioBbox* hitbox) noexcept
+{
     Vector min, max;
-    VectorTransformWrapper(hitbox->bbMin, matrix[hitbox->bone], min);
-    VectorTransformWrapper(hitbox->bbMax, matrix[hitbox->bone], max);
+    vectorTransform(hitbox->bbMin, &matrix[hitbox->bone], min);
+    vectorTransform(hitbox->bbMax, &matrix[hitbox->bone], max);
     return (min + max) * 0.5f;
 }
 
-Vector Math::getCenterOfHitbox(Entity* entity, const matrix3x4 matrix[MAXSTUDIOBONES], int hitboxNumber) noexcept
+Vector Math::getCenterOfHitbox(Entity* entity, const matrix3x4* matrix, int hitboxNumber) noexcept
 {
-    auto VectorTransformWrapper = [](const Vector& in1, const matrix3x4 in2, Vector& out)
-    {
-        auto VectorTransform = [](const float* in1, const matrix3x4 in2, float* out)
-        {
-            auto dotProducts = [](const float* v1, const float* v2)
-            {
-                return v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2];
-            };
-            out[0] = dotProducts(in1, in2[0]) + in2[0][3];
-            out[1] = dotProducts(in1, in2[1]) + in2[1][3];
-            out[2] = dotProducts(in1, in2[2]) + in2[2][3];
-        };
-        VectorTransform(&in1.x, in2, &out.x);
-    };
-
     const Model* model = entity->getModel();
     if (!model)
         return Vector{ 0.0f, 0.0f, 0.0f };
@@ -126,8 +111,8 @@ Vector Math::getCenterOfHitbox(Entity* entity, const matrix3x4 matrix[MAXSTUDIOB
         return Vector{ 0.0f, 0.0f, 0.0f };
 
     Vector min, max;
-    VectorTransformWrapper(hitbox->bbMin, matrix[hitbox->bone], min);
-    VectorTransformWrapper(hitbox->bbMax, matrix[hitbox->bone], max);
+    vectorTransform(hitbox->bbMin, &matrix[hitbox->bone], min);
+    vectorTransform(hitbox->bbMax, &matrix[hitbox->bone], max);
     return (min + max) * 0.5f;
 }
 
@@ -234,30 +219,15 @@ void vectorITransform(const Vector& in1, const matrix3x4& in2, Vector& out) noex
     out.z = (in1.x - in2[0][3]) * in2[0][2] + (in1.y - in2[1][3]) * in2[1][2] + (in1.z - in2[2][3]) * in2[2][2];
 }
 
-bool Math::hitboxIntersection(const matrix3x4 matrix[MAXSTUDIOBONES], int _hitbox, StudioHitboxSet* set, const Vector& start, const Vector& end) noexcept
+bool Math::hitboxIntersection(const matrix3x4* matrix, int hitboxNumber, StudioHitboxSet* set, const Vector& start, const Vector& end) noexcept
 {
-    auto VectorTransform_Wrapper = [](const Vector& in1, const matrix3x4 in2, Vector& out)
-    {
-        auto VectorTransform = [](const float* in1, const matrix3x4 in2, float* out)
-        {
-            auto DotProducts = [](const float* v1, const float* v2)
-            {
-                return v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2];
-            };
-            out[0] = DotProducts(in1, in2[0]) + in2[0][3];
-            out[1] = DotProducts(in1, in2[1]) + in2[1][3];
-            out[2] = DotProducts(in1, in2[2]) + in2[2][3];
-        };
-        VectorTransform(&in1.x, in2, &out.x);
-    };
-
-    StudioBbox* hitbox = set->getHitbox(_hitbox);
+    StudioBbox* hitbox = set->getHitbox(hitboxNumber);
     if (!hitbox)
         return false;
 
     Vector mins, maxs;
-    VectorTransform_Wrapper(vectorRotate(hitbox->bbMin, hitbox->angle), matrix[hitbox->bone], mins);
-    VectorTransform_Wrapper(vectorRotate(hitbox->bbMax, hitbox->angle), matrix[hitbox->bone], maxs);
+    vectorTransform(vectorRotate(hitbox->bbMin, hitbox->angle), &matrix[hitbox->bone], mins);
+    vectorTransform(vectorRotate(hitbox->bbMax, hitbox->angle), &matrix[hitbox->bone], maxs);
 
     vectorITransform(start, matrix[hitbox->bone], mins);
     vectorITransform(end, matrix[hitbox->bone], maxs);

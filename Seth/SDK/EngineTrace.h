@@ -226,6 +226,20 @@ public:
     void* passEntity = nullptr;
 };
 
+class TraceFilterHitscanIgnoreTeammates : public BaseTraceFilter
+{
+public:
+    TraceFilterHitscanIgnoreTeammates(Entity* entity) : passEntity{ entity } { }
+    virtual bool shouldHitEntity(Entity* serverEntity, int contentsMask) noexcept;
+
+    virtual int	getTraceType() const noexcept
+    {
+        return TRACE_EVERYTHING;
+    }
+
+    void* passEntity = nullptr;
+};
+
 typedef bool (*ShouldHitFunction)(Entity* handleEntity, int contentsMask);
 
 class TraceFilterSimple : public TraceFilter

@@ -218,13 +218,17 @@ public:
             || currentWeaponId == WeaponId::SNIPERRIFLE_DECAP;
     }
 
-    bool isVisible(const Vector& position = { }) noexcept
+    bool isVisible(const Vector& position = { }, bool friendlyFire = false) noexcept
     {
         if (!localPlayer)
             return false;
 
         Trace trace;
-        interfaces->engineTrace->traceRay({ localPlayer->getEyePosition(), position.notNull() ? position : getBonePosition(6) }, MASK_SHOT | CONTENTS_HITBOX, TraceFilterHitscan{ localPlayer.get() }, trace);
+        if(friendlyFire)
+            interfaces->engineTrace->traceRay({ localPlayer->getEyePosition(), position.notNull() ? position : getBonePosition(6) }, MASK_SHOT | CONTENTS_HITBOX, TraceFilterHitscan{ localPlayer.get() }, trace);
+        else
+            interfaces->engineTrace->traceRay({ localPlayer->getEyePosition(), position.notNull() ? position : getBonePosition(6) }, MASK_SHOT | CONTENTS_HITBOX, TraceFilterHitscanIgnoreTeammates{ localPlayer.get() }, trace);
+
         return trace.entity == this || trace.fraction > 0.97f;
     }
 
@@ -487,7 +491,7 @@ public:
         return &getWeaponInfo()->weaponData[weaponMode];
     }
 
-    bool canFireCriticalShot(bool headShot) noexcept
+    bool canFireCriticalShot(bool headshot) noexcept
     {
         bool result = false;
         
@@ -498,7 +502,7 @@ public:
             owner->fov() = owner->defaultFov() - 1;
             owner->fovTime() = memory->globalVars->currentTime;
 
-            result = VirtualMethod::call<bool, 425>(this, headShot, nullptr);
+            result = VirtualMethod::call<bool, 425>(this, headshot, nullptr);
 
             owner->fov() = backupFov;
             owner->fovTime() = backupFovTime;
@@ -508,20 +512,33 @@ public:
 
     bool canWeaponHeadshot() noexcept
     {
-        if (isSniper() && localPlayer)
+        if (const auto& owner = interfaces->entityList->getEntityFromHandle(ownerEntity()))
         {
-            switch (weaponId())
+            if (isSniper())
             {
-                case WeaponId::SNIPERRIFLE:
-                case WeaponId::SNIPERRIFLE_DECAP:
-                    return localPlayer->isScoped();
-                case WeaponId::SNIPERRIFLE_CLASSIC:
-                    return chargedDamage() >= 150.0f;
-                default:
-                    break;
+                switch (weaponId())
+                {
+                    case WeaponId::SNIPERRIFLE:
+                    case WeaponId::SNIPERRIFLE_DECAP:
+                        return owner->isScoped();
+                    case WeaponId::SNIPERRIFLE_CLASSIC:
+                        return chargedDamage() >= 150.0f;
+                    default:
+                        break;
+                }
             }
         }
-        return ((getDamageType() & (1 << 25)) && canFireCriticalShot(true));
+
+        switch (itemDefinitionIndex())
+        {
+            case Spy_m_FestiveAmbassador:
+            case Spy_m_TheAmbassador:
+                return true;
+            default:
+                break;
+        }
+
+        return false;
     }
 
     bool canWeaponRandomCrit() noexcept;

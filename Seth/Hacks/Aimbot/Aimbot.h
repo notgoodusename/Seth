@@ -15,5 +15,5 @@ namespace Aimbot
     void updateInput() noexcept;
     void reset() noexcept;
 
-    std::vector<Vector> multiPoint(Entity* entity, const matrix3x4 matrix[MAXSTUDIOBONES], StudioBbox* hitbox, Vector localEyePos, int _hitbox, bool doNotRunMultipoint = false) noexcept;
+    std::vector<Vector> multiPoint(Entity* entity, const matrix3x4* matrix, StudioBbox* hitbox, Vector localEyePos, int _hitbox, bool doNotRunMultipoint = false) noexcept;
 }

@@ -41,26 +41,11 @@ void Aimbot::run(UserCmd* cmd) noexcept
     }
 }
 
-std::vector<Vector> Aimbot::multiPoint(Entity* entity, const matrix3x4 matrix[MAXSTUDIOBONES], StudioBbox* hitbox, Vector localEyePos, int _hitbox, bool doNotRunMultipoint) noexcept
+std::vector<Vector> Aimbot::multiPoint(Entity* entity, const matrix3x4* matrix, StudioBbox* hitbox, Vector localEyePos, int _hitbox, bool doNotRunMultipoint) noexcept
 {
-    auto VectorTransformWrapper = [](const Vector& in1, const matrix3x4 in2, Vector& out)
-    {
-        auto VectorTransform = [](const float* in1, const matrix3x4 in2, float* out)
-        {
-            auto dotProducts = [](const float* v1, const float* v2)
-            {
-                return v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2];
-            };
-            out[0] = dotProducts(in1, in2[0]) + in2[0][3];
-            out[1] = dotProducts(in1, in2[1]) + in2[1][3];
-            out[2] = dotProducts(in1, in2[2]) + in2[2][3];
-        };
-        VectorTransform(&in1.x, in2, &out.x);
-    };
-
     Vector min, max, center;
-    VectorTransformWrapper(hitbox->bbMin, matrix[hitbox->bone], min);
-    VectorTransformWrapper(hitbox->bbMax, matrix[hitbox->bone], max);
+    Math::vectorTransform(hitbox->bbMin, &matrix[hitbox->bone], min);
+    Math::vectorTransform(hitbox->bbMax, &matrix[hitbox->bone], max);
     center = (min + max) * 0.5f;
 
     std::vector<Vector> vecArray;

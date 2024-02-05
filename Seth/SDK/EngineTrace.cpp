@@ -3,7 +3,7 @@
 #include "Entity.h"
 #include "LocalPlayer.h"
 
-bool TraceFilterHitscan::shouldHitEntity(Entity* serverEntity, int contentsMask) noexcept
+bool TraceFilterHitscanIgnoreTeammates::shouldHitEntity(Entity* serverEntity, int contentsMask) noexcept
 {
     switch (serverEntity->getClassId())
     {
@@ -33,6 +33,31 @@ bool TraceFilterHitscan::shouldHitEntity(Entity* serverEntity, int contentsMask)
             }
         }
         break;
+    default:
+        break;
+    }
+
+    return serverEntity != passEntity;
+}
+
+bool TraceFilterHitscan::shouldHitEntity(Entity* serverEntity, int contentsMask) noexcept
+{
+    switch (serverEntity->getClassId())
+    {
+    case ClassId::FuncAreaPortalWindow:
+    case ClassId::FuncRespawnRoomVisualizer:
+    case ClassId::SniperDot:
+    case ClassId::TFKnife:
+    case ClassId::TFGrenadePipebombProjectile:
+    case ClassId::TFProjectile_Arrow:
+    case ClassId::TFProjectile_SentryRocket:
+    case ClassId::TFProjectile_ThrowableRepel:
+    case ClassId::TFProjectile_Cleaver:
+    case ClassId::TFProjectile_Flare:
+    case ClassId::TFProjectile_Rocket:
+    case ClassId::TFProjectile_EnergyBall:
+    case ClassId::TFProjectile_EnergyRing:
+        return false;
     default:
         break;
     }

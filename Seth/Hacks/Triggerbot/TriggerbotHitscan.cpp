@@ -10,7 +10,9 @@
 #include "../../SDK/Math.h"
 #include "../../SDK/ModelInfo.h"
 
-bool getTriggerbotHitscanTarget(UserCmd* cmd, Entity* activeWeapon, Entity* entity, matrix3x4 matrix[MAXSTUDIOBONES], std::array<bool, Hitboxes::LeftUpperArm> hitbox, Vector startPos, Vector endPos, StudioBbox* bestHitbox) noexcept
+bool getTriggerbotHitscanTarget(UserCmd* cmd, Entity* activeWeapon, Entity* entity, const matrix3x4* matrix, 
+    std::array<bool, Hitboxes::LeftUpperArm> hitbox, 
+    Vector startPos, Vector endPos, StudioBbox* bestHitbox, bool friendlyFire) noexcept
 {
     const Model* model = entity->getModel();
     if (!model)
@@ -32,7 +34,11 @@ bool getTriggerbotHitscanTarget(UserCmd* cmd, Entity* activeWeapon, Entity* enti
         if (Math::hitboxIntersection(matrix, j, set, startPos, endPos))
         {
             Trace trace;
-            interfaces->engineTrace->traceRay({ startPos, endPos }, MASK_SHOT | CONTENTS_HITBOX, TraceFilterHitscan{ localPlayer.get() }, trace);
+            if(friendlyFire)
+                interfaces->engineTrace->traceRay({ startPos, endPos }, MASK_SHOT | CONTENTS_HITBOX, TraceFilterHitscan{ localPlayer.get() }, trace);
+            else
+                interfaces->engineTrace->traceRay({ startPos, endPos }, MASK_SHOT | CONTENTS_HITBOX, TraceFilterHitscanIgnoreTeammates{ localPlayer.get() }, trace);
+
             if (!trace.entity)
                 continue;
 
@@ -183,7 +189,7 @@ void TriggerbotHitscan::run(Entity* activeWeapon, UserCmd* cmd, float& lastTime,
 
         bestSimulationTime = targetTick.simulationTime;
 
-        gotTarget = getTriggerbotHitscanTarget(cmd, activeWeapon, entity, entity->getBoneCache().memory, hitbox, startPos, endPos, bestHitbox);
+        gotTarget = getTriggerbotHitscanTarget(cmd, activeWeapon, entity, targetTick.matrix.data(), hitbox, startPos, endPos, bestHitbox, cfg.friendlyFire);
         if (gotTarget)
             matrix = entity->getBoneCache().memory;
  
