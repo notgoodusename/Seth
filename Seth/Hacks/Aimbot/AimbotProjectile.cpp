@@ -435,7 +435,7 @@ AimbotProjectile::ProjectileWeaponInfo getProjectileWeaponInfo(Entity* weapon) n
     return AimbotProjectile::ProjectileWeaponInfo{ speed, gravity, maxTime, offset };
 }
 
-Vector getProjectileTarget(UserCmd* cmd, Entity* entity, Vector offset, float& bestFov, Vector localPlayerEyePosition) noexcept
+Vector getProjectileTarget(UserCmd* cmd, Entity* entity, Vector offset, float& bestFov, Vector localPlayerEyePosition, bool friendlyFire) noexcept
 {
     const auto origin = entity->origin() + offset;
 
@@ -444,7 +444,7 @@ Vector getProjectileTarget(UserCmd* cmd, Entity* entity, Vector offset, float& b
     if (fov > bestFov)
         return Vector{ 0.0f, 0.0f, 0.0f };
 
-    if (!entity->isVisible(origin))
+    if (!entity->isVisible(origin, friendlyFire))
         return Vector{ 0.0f, 0.0f, 0.0f };
 
     if (fov < bestFov) {
@@ -525,12 +525,12 @@ void AimbotProjectile::run(Entity* activeWeapon, UserCmd* cmd) noexcept
 
     auto bestFov = cfg.fov;
 
-    const int latencyTicks = static_cast<int>(round(network->getLatency(0) / memory->globalVars->intervalPerTick));
+    //Still wrong but atleast its better?
+    const float latencyTime = ticksToTime(timeToTicks(max(0, network->getLatency(0))));
 
     const auto projectileWeaponInfo = getProjectileWeaponInfo(activeWeapon);
-    const auto& localPlayerOrigin = localPlayer->getAbsOrigin();
     const auto& localPlayerEyePosition = localPlayer->getEyePosition();
-    const int maxTicks = timeToTicks(projectileWeaponInfo.maxTime == 0.f ? cfg.maxTime : projectileWeaponInfo.maxTime);
+    const int maxTicks = timeToTicks((projectileWeaponInfo.maxTime == 0.f ? cfg.maxTime : projectileWeaponInfo.maxTime) + latencyTime);
     for (const auto& target : enemies)
     {
         if (target.playerData.empty() || !target.isAlive || target.priority == 0)
@@ -545,18 +545,11 @@ void AimbotProjectile::run(Entity* activeWeapon, UserCmd* cmd) noexcept
             continue;
 
         const auto aimOffset = getProjectileWeaponAimOffset(activeWeapon, entity);
-        if (getProjectileTarget(cmd, entity, aimOffset, bestFov, localPlayerEyePosition).null())
+        if (getProjectileTarget(cmd, entity, aimOffset, bestFov, localPlayerEyePosition, cfg.friendlyFire).null())
             continue;
 
         MovementRebuild::setEntity(entity);
-
-        //We should first position the dude correctly
-        //So given the last origin we predict our ping first
-        for (int i = 1; i <= latencyTicks; i++)
-        {
-            MovementRebuild::runPlayerMove();
-        }
-
+        
         bool foundTarget = false;
         for (int step = 1; step <= maxTicks; step++)
         {
@@ -567,6 +560,8 @@ void AimbotProjectile::run(Entity* activeWeapon, UserCmd* cmd) noexcept
             float time = 0.0f;
             if (!calculateProjectileInfo(localPlayerEyePosition, position, projectileWeaponInfo, time, angle))
                 continue;
+
+            time += latencyTime;
 
             if (time > currentTime)
                 continue;
