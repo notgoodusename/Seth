@@ -50,6 +50,7 @@ namespace GameData
     const std::vector<WorldData>& world() noexcept;
 }
 
+enum class ObsMode;
 enum class Team;
 enum class TFClass;
 
@@ -63,6 +64,7 @@ struct LocalPlayerData {
     float nextWeaponAttack = 0.0f;
     int fov;
     int handle;
+    int observerTargetHandle;
     Vector origin;
     Team team;
 };
@@ -102,6 +104,8 @@ struct PlayerData : BaseData {
     int maxHealth;
     int userId;
     int handle;
+    int observerTargetHandle;
+    ObsMode observerMode;
     bool isCloaked;
     float simulationTime = 0.0f;
     Team team;

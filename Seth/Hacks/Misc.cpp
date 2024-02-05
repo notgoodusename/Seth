@@ -139,23 +139,32 @@ void Misc::spectatorList() noexcept
     ImGui::Begin("Spectator list", nullptr, windowFlags);
     ImGui::PopStyleVar();
 
-    if (interfaces->engine->isInGame() && localPlayer)
+    GameData::Lock lock;
+    if ((GameData::players().empty()))
     {
-        if (localPlayer->isAlive())
+        ImGui::End();
+        return;
+    }
+
+    const auto& local = GameData::local();
+
+    if (!local.exists)
+    {
+        ImGui::End();
+        return;
+    }
+
+    if (local.alive)
+    {
+        for (const auto& player : GameData::players())
         {
-            for (int i = 1; i <= interfaces->engine->getMaxClients(); ++i) {
-                const auto entity = interfaces->entityList->getEntity(i);
-                if (!entity || entity->isDormant() || entity->isAlive() || entity->getObserverTarget() != localPlayer.get())
-                    continue;
+            if (player.dormant || player.alive || player.observerTargetHandle == 0 || player.observerTargetHandle != local.handle)
+                continue;
 
-                PlayerInfo playerInfo;
+            auto obsMode{ "" };
 
-                if (!interfaces->engine->getPlayerInfo(i, playerInfo))
-                    continue;
-
-                auto obsMode{ "" };
-
-                switch (entity->getObserverMode()) {
+            switch (player.observerMode) 
+            {
                 case ObsMode::InEye:
                     obsMode = "1st";
                     break;
@@ -167,43 +176,39 @@ void Misc::spectatorList() noexcept
                     break;
                 default:
                     continue;
-                }
-
-                ImGui::TextWrapped("%s - %s", playerInfo.name, obsMode);
             }
-        }
-        else if (auto observer = localPlayer->getObserverTarget(); !localPlayer->isAlive() && observer && observer->isAlive())
-        {
-            for (int i = 1; i <= interfaces->engine->getMaxClients(); ++i) {
-                const auto entity = interfaces->entityList->getEntity(i);
-                if (!entity || entity->isDormant() || entity->isAlive() || entity == localPlayer.get() || entity->getObserverTarget() != observer)
-                    continue;
 
-                PlayerInfo playerInfo;
-
-                if (!interfaces->engine->getPlayerInfo(i, playerInfo))
-                    continue;
-
-                auto obsMode{ "" };
-
-                switch (entity->getObserverMode()) {
-                case ObsMode::InEye:
-                    obsMode = "1st";
-                    break;
-                case ObsMode::Chase:
-                    obsMode = "3rd";
-                    break;
-                case ObsMode::Roaming:
-                    obsMode = "Freecam";
-                    break;
-                default:
-                    continue;
-                }
-
-                ImGui::TextWrapped("%s - %s", playerInfo.name, obsMode);
-            }
+            ImGui::TextWrapped("%s - %s", player.name.c_str(), obsMode);
         }
     }
+    else if (local.observerTargetHandle)
+    {
+        for (const auto& player : GameData::players())
+        {
+            if (player.dormant || player.alive || player.observerTargetHandle == 0 || player.observerTargetHandle != local.observerTargetHandle)
+                continue;
+
+            auto obsMode{ "" };
+
+            switch (player.observerMode)
+            {
+            case ObsMode::InEye:
+                obsMode = "1st";
+                break;
+            case ObsMode::Chase:
+                obsMode = "3rd";
+                break;
+            case ObsMode::Roaming:
+                obsMode = "Freecam";
+                break;
+            default:
+                continue;
+            }
+
+            ImGui::TextWrapped("%s - %s", player.name.c_str(), obsMode);
+        }
+    }
+
     ImGui::End();
 }
 

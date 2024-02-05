@@ -244,6 +244,8 @@ void LocalPlayerData::update() noexcept
     handle = localPlayer->handle();
 
     origin = localPlayer->getAbsOrigin();
+
+    observerTargetHandle = localPlayer->observerTarget();
 }
 
 BaseData::BaseData(Entity* entity) noexcept
@@ -295,13 +297,15 @@ void PlayerData::update(Entity* entity) noexcept
         }
         return;
     }
-
     bool playerNetworkUpdate = simulationTime != entity->simulationTime();
     if (playerNetworkUpdate)
         simulationTime = entity->simulationTime();
 
     if (playerNetworkUpdate)
     {
+        observerTargetHandle = entity->observerTarget();
+        observerMode = entity->getObserverMode();
+
         team = entity->teamNumber();
         classID = entity->getPlayerClass();
         alive = entity->isAlive();
