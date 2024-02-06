@@ -133,10 +133,10 @@ Vector getProjectileWeaponAimOffset(Entity* weapon, Entity* entity) noexcept
     return offset;
 }
 
-Vector getWeaponOffsetPosition(Entity* weapon) noexcept
+Vector getWeaponOffsetPosition(Entity* activeWeapon) noexcept
 {
     Vector offset{ 0.0f, 0.0f, 0.0f };
-    switch (weapon->itemDefinitionIndex())
+    switch (activeWeapon->itemDefinitionIndex())
     {
         case Soldier_m_TheDirectHit:
         case Soldier_m_RocketLauncher:
@@ -268,18 +268,20 @@ Vector getWeaponOffsetPosition(Entity* weapon) noexcept
     return offset;
 }
 
-AimbotProjectile::ProjectileWeaponInfo getProjectileWeaponInfo(Entity* weapon) noexcept
+AimbotProjectile::ProjectileWeaponInfo getProjectileWeaponInfo(Entity* activeWeapon) noexcept
 {
     float beginCharge = 0.0f;
     float charge = 0.0f;
     float chargeRate = 0.0f;
+    bool usesPipes = false;
     float speed = 0.0f;
     float gravity = 0.0f;
     float maxTime = 0.0f;
 
-    Vector offset = getWeaponOffsetPosition(weapon);
-
-    switch (weapon->itemDefinitionIndex())
+    Vector offset = getWeaponOffsetPosition(activeWeapon);
+    
+    const auto itemDefinitionIndex = activeWeapon->itemDefinitionIndex();
+    switch (itemDefinitionIndex)
     {
         case Soldier_m_RocketLauncher:
         case Soldier_m_TheDirectHit:
@@ -312,7 +314,7 @@ AimbotProjectile::ProjectileWeaponInfo getProjectileWeaponInfo(Entity* weapon) n
         case Soldier_m_CoffinNail:
         case Soldier_m_HighRollers:
         case Soldier_m_Warhawk:
-            speed = AttributeManager::attributeHookFloat(1100.0f, "mult_projectile_speed", weapon, 0);
+            speed = AttributeManager::attributeHookFloat(1100.0f, "mult_projectile_speed", activeWeapon, 0);
             break;
         case Soldier_s_TheRighteousBison:
         case Engi_m_ThePomson6000:
@@ -360,8 +362,8 @@ AimbotProjectile::ProjectileWeaponInfo getProjectileWeaponInfo(Entity* weapon) n
         case Pyro_s_FestiveFlareGun:
         case Pyro_s_TheScorchShot:
         case Pyro_s_TheManmelter:
-            speed = AttributeManager::attributeHookFloat(2000.0f, "mult_projectile_speed", weapon, 0);
-            gravity = AttributeManager::attributeHookFloat(0.3f, "mult_projectile_speed", weapon, 0);
+            speed = AttributeManager::attributeHookFloat(2000.0f, "mult_projectile_speed", activeWeapon, 0);
+            gravity = AttributeManager::attributeHookFloat(0.3f, "mult_projectile_speed", activeWeapon, 0);
             break;
         case Medic_m_SyringeGun:
         case Medic_m_SyringeGunR:
@@ -379,19 +381,19 @@ AimbotProjectile::ProjectileWeaponInfo getProjectileWeaponInfo(Entity* weapon) n
         case Sniper_m_TheHuntsman:
         case Sniper_m_FestiveHuntsman:
         case Sniper_m_TheFortifiedCompound:
-            beginCharge = weapon->chargeTime();
+            beginCharge = activeWeapon->chargeTime();
 
             charge = (beginCharge == 0.0f) ? 0.0f : memory->globalVars->serverTime() - beginCharge;
 
             speed = Helpers::remapValClamped(charge, 0.0f, 1.f, 1800.f, 2600.f);
             gravity = Helpers::remapValClamped(charge, 0.0f, 1.f, 0.5f, 0.1f);
             break;
+        case Demoman_m_TheIronBomber:
+        case Demoman_m_TheLooseCannon:
         case Demoman_m_GrenadeLauncher:
         case Demoman_m_GrenadeLauncherR:
         case Demoman_m_TheLochnLoad:
-        case Demoman_m_TheLooseCannon:
         case Demoman_m_FestiveGrenadeLauncher:
-        case Demoman_m_TheIronBomber:
         case Demoman_m_Autumn:
         case Demoman_m_MacabreWeb:
         case Demoman_m_Rainbow:
@@ -400,23 +402,38 @@ AimbotProjectile::ProjectileWeaponInfo getProjectileWeaponInfo(Entity* weapon) n
         case Demoman_m_TopShelf:
         case Demoman_m_Warhawk:
         case Demoman_m_ButcherBird:
-            speed = AttributeManager::attributeHookFloat(1200.0f, "mult_projectile_speed", weapon, 0);
+            speed = AttributeManager::attributeHookFloat(1200.0f, "mult_projectile_speed", activeWeapon, 0);
             //https://github.com/lua9520/source-engine-2018-hl2_src/blob/3bf9df6b2785fa6d951086978a3e66f49427166a/game/shared/tf/tf_weapon_grenadelauncher.cpp#L469-L470
             if (localPlayer->hasPrecisionRune())
                 speed = 3000.0f;
             gravity = 0.5f;
+
+            switch (itemDefinitionIndex)
+            {
+                case Demoman_m_TheIronBomber:
+                    maxTime = 1.4f;
+                    break;
+                case Demoman_m_TheLooseCannon:
+                    maxTime = 0.95f;
+                    break;
+                default:
+                    maxTime = 2.0f;
+                    break;
+            }
+            usesPipes = true;
             break;
         case Demoman_s_StickybombLauncher:
         case Demoman_s_StickybombLauncherR:
         case Demoman_s_FestiveStickybombLauncher:
         case Demoman_s_TheScottishResistance:
         case Demoman_s_TheQuickiebombLauncher:
-            beginCharge = weapon->chargeTime();
+            beginCharge = activeWeapon->chargeTime();
             charge = (beginCharge == 0.0f) ? 0.f : memory->globalVars->serverTime() - beginCharge;
             
-            chargeRate = AttributeManager::attributeHookFloat(4.0f, "stickybomb_charge_rate", weapon, 0);
+            chargeRate = AttributeManager::attributeHookFloat(4.0f, "stickybomb_charge_rate", activeWeapon, 0);
             speed = Helpers::remapValClamped(charge, 0.0f, chargeRate, 900.f, 2400.f);
             gravity = Helpers::remapValClamped(charge, 0.0f, chargeRate, 0.5f, 0.0f);
+            usesPipes = true;
             break;
         case Scout_t_TheSandman:
         case Scout_t_TheWrapAssassin:
@@ -432,7 +449,7 @@ AimbotProjectile::ProjectileWeaponInfo getProjectileWeaponInfo(Entity* weapon) n
             break;
     }
 
-    return AimbotProjectile::ProjectileWeaponInfo{ speed, gravity, maxTime, offset };
+    return AimbotProjectile::ProjectileWeaponInfo{ speed, gravity, maxTime, offset, usesPipes, activeWeapon->weaponId(), itemDefinitionIndex };
 }
 
 Vector getProjectileTarget(UserCmd* cmd, Entity* entity, Vector offset, float& bestFov, Vector localPlayerEyePosition, bool friendlyFire) noexcept
@@ -468,10 +485,16 @@ bool calculateProjectileInfo(Vector source, Vector destination, AimbotProjectile
 
     const Vector delta = destination - source;
     const float distance = delta.length2D();
-    const float projectileSpeed = projectileInfo.speed;
+    float projectileSpeed = projectileInfo.speed;
 
-    const float root = std::powf(projectileSpeed, 4) - gravity * (gravity * std::powf(distance, 2) + 2.f * delta.z * std::powf(projectileSpeed, 2));
-    if (root < 0.f)
+    if (projectileInfo.usesPipes)
+    {
+        if (projectileSpeed > 2000.0f)
+            projectileSpeed = 2000.0f;
+    }
+
+    float root = std::powf(projectileSpeed, 4) - gravity * (gravity * std::powf(distance, 2) + 2.f * delta.z * std::powf(projectileSpeed, 2));
+    if (root < 0.0f)
         return false;
 
     const float pitch = std::atanf((std::powf(projectileSpeed, 2) - std::sqrtf(root)) / (gravity * distance));
@@ -479,6 +502,36 @@ bool calculateProjectileInfo(Vector source, Vector destination, AimbotProjectile
 
     angle = Vector{ -Helpers::rad2deg(pitch), Helpers::rad2deg(yaw), 0.0f };
     time = distance / (cos(pitch) * projectileSpeed);
+
+    //thank spook for this code
+    if (projectileInfo.usesPipes)
+    {
+        auto magic{ 0.0f };
+
+        switch (projectileInfo.weaponId)
+        {
+            case WeaponId::GRENADELAUNCHER:
+                magic = projectileInfo.itemDefinitionIndex == Demoman_m_TheLochnLoad ? 0.07f : 0.11f;
+                break;
+            case WeaponId::PIPEBOMBLAUNCHER:
+                magic = 0.16f;
+                break;
+            case WeaponId::CANNON:
+                magic = 0.35f;
+                break;
+            default:
+                break;
+        }
+
+        projectileSpeed -= (projectileSpeed * time) * magic;
+
+        root = std::powf(projectileSpeed, 4) - gravity * (gravity * std::powf(distance, 2) + 2.f * delta.z * std::powf(projectileSpeed, 2));
+        if (root < 0.0f)
+            return false;
+
+        angle = Vector{ -Helpers::rad2deg(pitch), Helpers::rad2deg(yaw), 0.0f };
+        time = distance / (cos(pitch) * projectileSpeed);
+    }
 
     return true;
 }

@@ -13,6 +13,11 @@ namespace AimbotProjectile
         float gravity;
         float maxTime;
         Vector offset;
+
+        bool usesPipes;
+
+        WeaponId weaponId;
+        int itemDefinitionIndex;
     };
 
     void reset() noexcept;
