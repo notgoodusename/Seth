@@ -200,31 +200,37 @@ void Chams::renderPlayer(Entity* player) noexcept
         applyChams(config->chams["Local player"].materials, health, maxHealth);
     } else if (player->isEnemy(localPlayer.get())) {
         applyChams(config->chams["Enemies"].materials, health, maxHealth);
+
         if (config->backtrack.enabled)
         {
-            if (const auto& playerTarget = TargetSystem::playerByHandle(player->handle()))
+            const auto activeWeapon = localPlayer->getActiveWeapon();
+            if (!activeWeapon || (activeWeapon && activeWeapon->getWeaponType() != WeaponType::PROJECTILE))
             {
-                const auto& records = playerTarget->playerData;
-                if (!records.empty() && records.size() >= 4U)
+                if (const auto& playerTarget = TargetSystem::playerByHandle(player->handle()))
                 {
-                    int lastTick = -1;
-
-                    for (int i = static_cast<int>(records.size() - 1U); i >= 3; i--)
+                    const auto& records = playerTarget->playerData;
+                    if (!records.empty() && records.size() >= 4U)
                     {
-                        const auto& targetTick = records[i];
-                        if (player->simulationTime() > targetTick.simulationTime
-                            && Backtrack::valid(targetTick.simulationTime)
-                            && targetTick.origin != player->origin())
+                        int lastTick = -1;
+
+                        for (int i = static_cast<int>(records.size() - 1U); i >= 3; i--)
                         {
-                            if (!appliedChams)
-                                hooks->modelRender.callOriginal<void, 19>(state, info, customBoneToWorld);
-                            applyChams(config->chams["Backtrack"].materials, health, maxHealth, targetTick.matrix.data());
-                            interfaces->modelRender->forcedMaterialOverride(nullptr);
+                            const auto& targetTick = records[i];
+                            if (player->simulationTime() > targetTick.simulationTime
+                                && Backtrack::valid(targetTick.simulationTime)
+                                && targetTick.origin != player->origin())
+                            {
+                                if (!appliedChams)
+                                    hooks->modelRender.callOriginal<void, 19>(state, info, customBoneToWorld);
+                                applyChams(config->chams["Backtrack"].materials, health, maxHealth, targetTick.matrix.data());
+                                interfaces->modelRender->forcedMaterialOverride(nullptr);
+                            }
                         }
                     }
                 }
             }
         }
+
     } else {
         applyChams(config->chams["Allies"].materials, health, maxHealth);
     }
