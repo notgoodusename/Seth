@@ -131,7 +131,7 @@ void Misc::drawAimbotFov(ImDrawList* drawList) noexcept
     if (!activeWeapon)
         return;
 
-    int aimFov;
+    float aimFov = 0.0f;
 
     const auto weaponType = activeWeapon->getWeaponType();
     switch (weaponType)
