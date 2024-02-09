@@ -1,11 +1,11 @@
 #include "../Memory.h"
 #include "../Helpers.h"
 #include "../Interfaces.h"
-#include "../StrayElements.h"
 
 #include "AttributeManager.h"
 #include "Entity.h"
 #include "GlobalVars.h"
+#include "Utils.h"
 
 std::string Entity::getPlayerName() noexcept
 {
@@ -42,7 +42,7 @@ std::uint64_t Entity::getSteamId() noexcept
 
 bool Entity::isEnemy(Entity* entity) noexcept
 {
-    return StrayElements::friendlyFire() ? true : entity->teamNumber() != teamNumber();
+    return isFriendlyFireOn() ? true : entity->teamNumber() != teamNumber();
 }
 
 //categorize position

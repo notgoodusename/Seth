@@ -16,6 +16,19 @@ std::tuple<float, float, float> rainbowColor(float speed) noexcept
                            std::sin(speed * memory->globalVars->realTime + 4 * pi / 3) * 0.5f + 0.5f);
 }
 
+TFPlayerResource* playerResourcePointer = nullptr;
+
+TFPlayerResource*& playerResource() noexcept
+{
+	return playerResourcePointer;
+}
+
+bool isFriendlyFireOn() noexcept
+{
+	static auto friendlyFireConvar = interfaces->cvar->findVar("mp_friendlyfire");
+	return friendlyFireConvar->getInt() != 0;
+}
+
 bool canAttack(UserCmd* cmd, Entity* activeWeapon) noexcept
 {
 	if (!localPlayer || !localPlayer->isAlive() || localPlayer->isTaunting() || localPlayer->isBonked() || localPlayer->isFeignDeathReady()
@@ -153,5 +166,6 @@ bool isAttacking(UserCmd* cmd, Entity* activeWeapon) noexcept
 
 void resetUtil() noexcept
 {
+	playerResourcePointer = nullptr;
 	charging = false;
 }

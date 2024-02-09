@@ -9,6 +9,7 @@
 
 class Entity;
 class matrix3x4;
+class TFPlayerResource;
 struct Vector;
 struct UserCmd;
 
@@ -16,6 +17,10 @@ static auto timeToTicks(float time) noexcept { return static_cast<int>(0.5f + ti
 static auto ticksToTime(int ticks) noexcept { return static_cast<float>(ticks * memory->globalVars->intervalPerTick); }
 
 std::tuple<float, float, float> rainbowColor(float speed) noexcept;
+
+TFPlayerResource*& playerResource() noexcept;
+
+bool isFriendlyFireOn() noexcept;
 
 bool canAttack(UserCmd* cmd, Entity* activeWeapon) noexcept;
 

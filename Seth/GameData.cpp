@@ -8,7 +8,6 @@
 #include "GameData.h"
 #include "Interfaces.h"
 #include "Memory.h"
-#include "StrayElements.h"
 #include "SteamInterfaces.h"
 
 #include "Resources/avatar_default.h"
@@ -123,7 +122,7 @@ void GameData::update() noexcept
                     break;
                 case ClassId::TFPlayerResource:
                     //i wanted to do it with a memory pattern but whatever
-                    StrayElements::getPlayerResource() = reinterpret_cast<TFPlayerResource*>(entity);
+                    playerResource() = reinterpret_cast<TFPlayerResource*>(entity);
                     break;
                /* case ClassId::TFProjectile_Rocket:
                 case ClassId::TFGrenadePipebombProjectile:
@@ -286,7 +285,7 @@ void PlayerData::update(Entity* entity) noexcept
 
     dormant = entity->isDormant();
     if (dormant) {
-        if (const auto pr = StrayElements::getPlayerResource()) {
+        if (const auto pr = playerResource()) {
             alive = pr->isAlive(idx);
             if (!alive)
                 lastContactTime = 0.0f;
@@ -311,7 +310,7 @@ void PlayerData::update(Entity* entity) noexcept
         alive = entity->isAlive();
 
         if (localPlayer)
-            enemy = StrayElements::friendlyFire() ? true : localPlayerData.team != team;
+            enemy = isFriendlyFireOn() ? true : localPlayerData.team != team;
 
         health = entity->health();
         maxHealth = entity->getMaxHealth();

@@ -254,9 +254,6 @@
     <ClCompile Include="Hacks\TargetSystem.cpp">
       <Filter>Hacks</Filter>
     </ClCompile>
-    <ClCompile Include="StrayElements.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Hacks\Fakelag.cpp">
       <Filter>Hacks</Filter>
     </ClCompile>
@@ -640,9 +637,6 @@
     <ClInclude Include="Hacks\TargetSystem.h">
       <Filter>Hacks</Filter>
     </ClInclude>
-    <ClInclude Include="StrayElements.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Hacks\Fakelag.h">
       <Filter>Hacks</Filter>
     </ClInclude>
@@ -659,6 +653,9 @@
       <Filter>SDK</Filter>
     </ClInclude>
     <ClInclude Include="SDK\WeaponData.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\EngineVGui.h">
       <Filter>SDK</Filter>
     </ClInclude>
   </ItemGroup>

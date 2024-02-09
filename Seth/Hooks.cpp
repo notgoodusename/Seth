@@ -18,7 +18,6 @@
 #include "Hooks.h"
 #include "Interfaces.h"
 #include "Memory.h"
-#include "StrayElements.h"
 #include "SteamInterfaces.h"
 
 #include "Hacks/Aimbot/Aimbot.h"
@@ -635,7 +634,6 @@ void resetAll(int resetType) noexcept
     Misc::reset(resetType);
     EnginePrediction::reset();
     TargetSystem::reset();
-    StrayElements::clear();
     Visuals::reset(resetType);
 
     resetUtil();

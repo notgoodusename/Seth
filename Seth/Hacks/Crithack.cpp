@@ -7,13 +7,13 @@
 #include "../SDK/LocalPlayer.h"
 #include "../SDK/MD5.h"
 #include "../SDK/MemAlloc.h"
+#include "../SDK/PlayerResource.h"
 #include "../SDK/Prediction.h"
 
 #include "../Config.h"
 #include "../GUI.h"
 #include "../Hooks.h"
 #include "../Interfaces.h"
-#include "../StrayElements.h"
 #include "../imguiCustom.h"
 
 #include "../imgui/imgui.h"
@@ -376,11 +376,11 @@ void updateDamage() noexcept
 	if (!localPlayer)
 		return;
 
-	const auto playerResource = StrayElements::getPlayerResource();
-	if (!playerResource)
+	const auto pr = playerResource();
+	if (!pr)
 		return;
 
-	const float playerResourceDamage = static_cast<float>(playerResource->getDamage(localPlayer->index()));
+	const float playerResourceDamage = static_cast<float>(pr->getDamage(localPlayer->index()));
 	
 	static float maxDamage = 0.0f;
 	maxDamage = max(playerResourceDamage, maxDamage);
@@ -749,8 +749,8 @@ void Crithack::updatePlayers() noexcept
 	if (!localPlayer)
 		return;
 
-	const auto playerResource = StrayElements::getPlayerResource();
-	if (!playerResource)
+	const auto pr = playerResource();
+	if (!pr)
 		return;
 
 	for (int i = 1; i <= interfaces->engine->getMaxClients(); i++)
@@ -761,10 +761,10 @@ void Crithack::updatePlayers() noexcept
 
 		const auto player = playerHealthInfoByHandle(entity->handle());
 		if (const auto player = playerHealthInfoByHandle(entity->handle())) {
-			player->syncedHealth = playerResource->getHealth(entity->index());
+			player->syncedHealth = pr->getHealth(entity->index());
 		}
 		else {
-			PlayerHealthInfo newPlayer{ entity->handle(), playerResource->getHealth(entity->index()) };
+			PlayerHealthInfo newPlayer{ entity->handle(), pr->getHealth(entity->index()) };
 			playerHealthInfo.emplace_back(newPlayer);
 		}
 	}
