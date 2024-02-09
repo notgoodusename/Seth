@@ -12,8 +12,8 @@ class Client;
 class Cvar;
 class DebugOverlay;
 class Engine;
-class EngineSound;
 class EngineTrace;
+class EngineVGui;
 class EntityList;
 class FileSystem;
 class GameEventManager;
@@ -48,6 +48,7 @@ type* name = reinterpret_cast<type*>(find(moduleName, version));
     GAME_INTERFACE(Engine, engine, ENGINE_DLL, "VEngineClient013")
     GAME_INTERFACE(EngineTrace, engineTrace, ENGINE_DLL, "EngineTraceClient003")
     GAME_INTERFACE(EntityList, entityList, CLIENT_DLL, "VClientEntityList003")
+    GAME_INTERFACE(EngineVGui, engineVGui, ENGINE_DLL, "VEngineVGui002")
     GAME_INTERFACE(FileSystem, fileSystem, FILESYSTEM_DLL, "VFileSystem022")
     GAME_INTERFACE(GameEventManager, gameEventManager, ENGINE_DLL, "GAMEEVENTSMANAGER002")
     GAME_INTERFACE(GameMovement, gameMovement, CLIENT_DLL, "GameMovement001")
@@ -64,7 +65,6 @@ type* name = reinterpret_cast<type*>(find(moduleName, version));
     GAME_INTERFACE(Prediction, prediction, CLIENT_DLL, "VClientPrediction001")
     GAME_INTERFACE(RenderView, renderView, ENGINE_DLL, "VEngineRenderView014")
     GAME_INTERFACE(Surface, surface, VGUIMATSURFACE_DLL, "VGUI_Surface030")
-    GAME_INTERFACE(EngineSound, sound, ENGINE_DLL, "IEngineSoundClient003")
     GAME_INTERFACE(Server, server, SERVER_DLL, "ServerGameDLL012")
     GAME_INTERFACE(SteamClient, steamClient, STEAMCLIENT, "SteamClient017")
     GAME_INTERFACE(StudioRender, studioRender, STUDIORENDER_DLL, "VStudioRender025")
