@@ -29,6 +29,8 @@ namespace Misc
 
     void showKeybinds() noexcept;
 
+    void drawAimbotFov(ImDrawList* drawList) noexcept;
+
     void spectatorList() noexcept;
 
     void updateInput() noexcept;

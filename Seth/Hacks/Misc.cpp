@@ -119,6 +119,43 @@ void Misc::showKeybinds() noexcept
     ImGui::End();
 }
 
+void Misc::drawAimbotFov(ImDrawList* drawList) noexcept
+{
+    if (!config->aimbotFov.enabled)
+        return;
+
+    if (!interfaces->engine->isInGame() || !localPlayer)
+        return;
+
+    const auto activeWeapon = localPlayer->getActiveWeapon();
+    if (!activeWeapon)
+        return;
+
+    int aimFov;
+
+    const auto weaponType = activeWeapon->getWeaponType();
+    switch (weaponType)
+    {
+    case WeaponType::HITSCAN:
+        aimFov = config->aimbot.hitscan.fov;
+        break;
+    case WeaponType::PROJECTILE:
+        aimFov = config->aimbot.projectile.fov;
+        break;
+    case WeaponType::MELEE:
+        aimFov = config->aimbot.melee.fov;
+        break;
+    default:
+        return;
+    }
+
+    const auto& displaySize = ImGui::GetIO().DisplaySize;
+
+    const auto radius = std::tan(Helpers::deg2rad(aimFov) / (16.0f / 6.0f)) / std::tan(Helpers::deg2rad(localPlayer->isScoped() ? localPlayer->fov() : (config->visuals.fov + 90.0f)) / 2.0f) * displaySize.x;
+
+    drawList->AddCircle(displaySize / 2, radius, Helpers::calculateColor(config->aimbotFov));
+}
+
 void Misc::spectatorList() noexcept
 {
     if (!config->misc.spectatorList.enabled)

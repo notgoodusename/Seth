@@ -9,7 +9,6 @@ struct UserCmd;
 
 namespace Visuals
 {
-    void drawAimbotFov(ImDrawList* drawList) noexcept;
     void thirdperson() noexcept;
     void disablePostProcessing(FrameStage stage) noexcept;
 

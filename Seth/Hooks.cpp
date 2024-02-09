@@ -110,6 +110,7 @@ static HRESULT __stdcall present(IDirect3DDevice9* device, const RECT* src, cons
 
         Misc::drawPlayerList();
         Crithack::draw(ImGui::GetForegroundDrawList());
+        Misc::drawAimbotFov(ImGui::GetForegroundDrawList());
 
         gui->handleToggle();
 
