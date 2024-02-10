@@ -1,6 +1,6 @@
 #pragma once
 
-#include "NetworkChannel.h"
+#include "Network.h"
 #include "Pad.h"
 #include "Vector.h"
 

@@ -454,6 +454,11 @@ void GUI::renderBacktrackWindow() noexcept
     ImGui::PushItemWidth(220.0f);
     ImGui::SliderInt("Ping", &config->backtrack.fakeLatencyAmount, 1, 800, "%d ms");
     ImGui::PopItemWidth();
+
+    ImGui::PushID("Doubletap");
+    ImGui::hotkey2("Doubletap", config->tickbase.warpKey);
+    ImGui::PopID();
+    
     ImGui::Columns(1);
 }
 

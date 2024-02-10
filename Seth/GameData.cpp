@@ -28,7 +28,7 @@
 #include "SDK/Localize.h"
 #include "SDK/LocalPlayer.h"
 #include "SDK/ModelInfo.h"
-#include "SDK/NetworkChannel.h"
+#include "SDK/Network.h"
 #include "SDK/PlayerResource.h"
 #include "SDK/RenderView.h"
 #include "SDK/Steam.h"

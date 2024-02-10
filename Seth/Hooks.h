@@ -29,6 +29,8 @@ public:
     MinHook canFireRandomCriticalShot;
     MinHook checkForSequenceChange;
     MinHook clLoadWhitelist;
+    MinHook clMove;
+    MinHook clSendMove;
     MinHook customTextureOnItemProxyOnBindInternal;
     MinHook doEnginePostProcessing;
     MinHook enableWorldFog;
@@ -39,6 +41,7 @@ public:
     MinHook interpolateServerEntities;
     MinHook isAllowedToWithdrawFromCritBucket;
     MinHook newMatchFoundDashboardStateOnUpdate;
+    MinHook physicsSimulate;
     MinHook randomSeed;
     MinHook sendDatagram;
     MinHook tfPlayerInventoryGetMaxItemCount;

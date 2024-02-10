@@ -268,6 +268,82 @@ Vector getWeaponOffsetPosition(Entity* activeWeapon) noexcept
     return offset;
 }
 
+void getWeaponBBoxSizes(Entity* activeWeapon, Vector& mins, Vector& maxs) noexcept
+{
+    const auto itemDefinitionIndex = activeWeapon->itemDefinitionIndex();
+    switch (itemDefinitionIndex)
+    {
+        case Pyro_m_FlameThrower:
+        case Pyro_m_FlameThrowerR:
+        case Pyro_m_TheBackburner:
+        case Pyro_m_TheDegreaser:
+        case Pyro_m_ThePhlogistinator:
+        case Pyro_m_FestiveFlameThrower:
+        case Pyro_m_TheRainblower:
+        case Pyro_m_SilverBotkillerFlameThrowerMkI:
+        case Pyro_m_GoldBotkillerFlameThrowerMkI:
+        case Pyro_m_RustBotkillerFlameThrowerMkI:
+        case Pyro_m_BloodBotkillerFlameThrowerMkI:
+        case Pyro_m_CarbonadoBotkillerFlameThrowerMkI:
+        case Pyro_m_DiamondBotkillerFlameThrowerMkI:
+        case Pyro_m_SilverBotkillerFlameThrowerMkII:
+        case Pyro_m_GoldBotkillerFlameThrowerMkII:
+        case Pyro_m_FestiveBackburner:
+        case Pyro_m_ForestFire:
+        case Pyro_m_BarnBurner:
+        case Pyro_m_BovineBlazemaker:
+        case Pyro_m_EarthSkyandFire:
+        case Pyro_m_FlashFryer:
+        case Pyro_m_TurbineTorcher:
+        case Pyro_m_Autumn:
+        case Pyro_m_PumpkinPatch:
+        case Pyro_m_Nutcracker:
+        case Pyro_m_Balloonicorn:
+        case Pyro_m_Rainbow:
+        case Pyro_m_CoffinNail:
+        case Pyro_m_Warhawk:
+        case Pyro_m_NostromoNapalmer:
+            mins = Vector{ -12.0f, -12.0f, -12.0f };
+            maxs = Vector{ 12.0f, 12.0f, 12.0f };
+            break;
+        case Pyro_s_TheDetonator:
+        case Pyro_s_TheFlareGun:
+        case Pyro_s_FestiveFlareGun:
+        case Pyro_s_TheScorchShot:
+        case Pyro_s_TheManmelter:
+            mins = { -8.0f, -8.0f, -8.0f };
+            maxs = { 8.0f, 8.0f, 20.0f };
+            break;
+        case Demoman_m_TheIronBomber:
+        case Demoman_m_GrenadeLauncher:
+        case Demoman_m_GrenadeLauncherR:
+        case Demoman_m_TheLochnLoad:
+        case Demoman_m_FestiveGrenadeLauncher:
+        case Demoman_m_Autumn:
+        case Demoman_m_MacabreWeb:
+        case Demoman_m_Rainbow:
+        case Demoman_m_SweetDreams:
+        case Demoman_m_CoffinNail:
+        case Demoman_m_TopShelf:
+        case Demoman_m_Warhawk:
+        case Demoman_m_ButcherBird:
+            mins = Vector{ -4.0f, -4.0f, -4.0f };
+            maxs = Vector{ 4.0f, 4.0f, 4.0f };
+            break;
+        case Demoman_m_TheLooseCannon:
+        case Demoman_s_StickybombLauncher:
+        case Demoman_s_StickybombLauncherR:
+        case Demoman_s_FestiveStickybombLauncher:
+        case Demoman_s_TheScottishResistance:
+        case Demoman_s_TheQuickiebombLauncher:
+            mins = { -8.0f, -8.0f, -8.0f };
+            maxs = { 8.0f, 8.0f, 20.0f };
+            break;
+        default:
+            break;
+    }
+}
+
 AimbotProjectile::ProjectileWeaponInfo getProjectileWeaponInfo(Entity* activeWeapon) noexcept
 {
     float beginCharge = 0.0f;
@@ -314,7 +390,10 @@ AimbotProjectile::ProjectileWeaponInfo getProjectileWeaponInfo(Entity* activeWea
         case Soldier_m_CoffinNail:
         case Soldier_m_HighRollers:
         case Soldier_m_Warhawk:
+            //https://github.com/lua9520/source-engine-2018-hl2_src/blob/master/game/shared/tf/tf_weaponbase_rocket.cpp#L305
             speed = AttributeManager::attributeHookFloat(1100.0f, "mult_projectile_speed", activeWeapon, 0);
+            if (localPlayer->hasPrecisionRune())
+                speed = 3000.0f;
             break;
         case Soldier_s_TheRighteousBison:
         case Engi_m_ThePomson6000:
@@ -478,7 +557,6 @@ bool calculateProjectileInfo(Vector source, Vector destination, AimbotProjectile
     if (gravity == 0.0f)
     {
         angle = Math::calculateRelativeAngle(source, destination, Vector{ 0.0f, 0.0f, 0.0f });
-        source -= projectileInfo.offset;
         time = source.distTo(destination) / projectileInfo.speed;
         return true;
     }

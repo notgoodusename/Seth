@@ -33,6 +33,7 @@
 #include "Hacks/SkinChanger.h"
 #include "Hacks/StreamProofESP.h"
 #include "Hacks/TargetSystem.h"
+#include "Hacks/Tickbase.h"
 #include "Hacks/Triggerbot/Triggerbot.h"
 #include "Hacks/Visuals.h"
 
@@ -153,9 +154,9 @@ static bool __fastcall createMove(void* thisPointer, void*, float inputSampleTim
     auto currentViewAngles{ cmd->viewangles };
     const auto currentCmd{ *cmd };
 
-    Misc::runFreeCam(cmd, currentViewAngles);
-
     memory->globalVars->serverTime(cmd);
+    Misc::runFreeCam(cmd, currentViewAngles);
+    Tickbase::start(cmd);
     Misc::antiAfkKick(cmd);
     Misc::fastStop(cmd);
     Misc::bunnyHop(cmd);
@@ -167,6 +168,7 @@ static bool __fastcall createMove(void* thisPointer, void*, float inputSampleTim
     Backtrack::run(cmd);
     Aimbot::run(cmd);
     Triggerbot::run(cmd);
+    Tickbase::end(cmd);
 
     Misc::edgejump(cmd);
 
@@ -217,7 +219,7 @@ static void __fastcall frameStageNotify(void* thisPointer, void*, FrameStage sta
         Misc::unlockHiddenCvars();
     }
     
-    original(thisPointer, stage); //render start crash
+    original(thisPointer, stage);
 }
 
 static bool __fastcall dispatchUserMessage(void* thisPointer, void*, int messageType, bufferRead* data) noexcept
@@ -379,6 +381,72 @@ static void* __cdecl clLoadWhitelistHook(void* whitelist, const char* name) noex
     if(config->misc.svPureBypass)
         return NULL;
     return original(whitelist, name);
+}
+
+static void __cdecl clMoveHook(float accumulatedExtraSamples, bool isFinalTick) noexcept
+{
+    static auto original = reinterpret_cast<void(__cdecl*)(float, bool)>(hooks->clMove.getDetour());
+
+    if (!Tickbase::canRun())
+        return;
+
+    original(accumulatedExtraSamples, isFinalTick);
+
+
+    if (!Tickbase::getTickshift())// || !config->tickbase.teleport)
+        return;
+
+    int remainToShift = 0;
+    int tickShift = Tickbase::getTickshift();
+
+    Tickbase::isShifting() = true;
+
+    for (int shiftAmount = 0; shiftAmount < tickShift; shiftAmount++)
+    {
+        Tickbase::isFinalTick() = (tickShift - shiftAmount) == 1;
+        original(accumulatedExtraSamples, isFinalTick);
+    }
+    Tickbase::isShifting() = false;
+
+    Tickbase::resetTickshift();
+}
+
+static void __cdecl clSendMoveHook() noexcept
+{
+    int nextCommandNumber = memory->clientState->lastOutgoingCommand + memory->clientState->chokedCommands + 1;
+    int chokedCommands = memory->clientState->chokedCommands;
+
+    byte data[4000 /* MAX_CMD_BUFFER */];
+    CLC_Move moveMsg;
+
+    moveMsg.dataOut.startWriting(data, sizeof(data));
+
+    const int newCommands = std::clamp(max(chokedCommands + 1, 0), 0, MAX_NEW_COMMANDS);
+    const int extraCommands = (chokedCommands + 1) - newCommands;
+    const int backupCommands = std::clamp(max(2, extraCommands), 0, MAX_BACKUP_COMMANDS);
+
+    moveMsg.backupCommands = backupCommands;
+    moveMsg.newCommands = newCommands;
+
+    const int numCmds = newCommands + backupCommands;
+    int from = -1;
+    bool ok = true;
+
+    for (int to = nextCommandNumber - numCmds + 1; to <= nextCommandNumber; ++to) {
+
+        bool isnewcmd = to >= (nextCommandNumber - newCommands + 1);
+
+        ok = ok && interfaces->client->writeUsercmdDeltaToBuffer(&moveMsg.dataOut, from, to, isnewcmd);
+        from = to;
+    }
+
+    if (ok) 
+    {
+        if (extraCommands)
+            memory->clientState->networkChannel->chokedPackets -= extraCommands;
+
+        memory->clientState->networkChannel->sendNetMsg(&moveMsg, false, false);
+    }
 }
 
 static void __fastcall customTextureOnItemProxyOnBindInternalHook(void* thisPointer, void*, void* scriptItem) noexcept
@@ -555,6 +623,43 @@ static void __fastcall newMatchFoundDashboardStateOnUpdateHook(void* thisPointer
     original(thisPointer);
 }
 
+static void __fastcall physicsSimulateHook(void* thisPointer, void*) noexcept
+{
+    static auto original = hooks->physicsSimulate.getOriginal<void>();
+
+    const auto entity = reinterpret_cast<Entity*>(thisPointer);
+    if (!localPlayer || !localPlayer->isAlive() || entity != localPlayer.get())
+        return original(thisPointer);
+
+    const int simulationTick = *reinterpret_cast<int*>(reinterpret_cast<uintptr_t>(thisPointer) + 0xE0);
+    if (simulationTick == memory->globalVars->tickCount)
+        return;
+
+    CommandContext* commandContext = localPlayer->getCommandContext();
+    if (!commandContext || !commandContext->needsProcessing)
+        return;
+
+    static int lastCommandNumber = -1;
+    static bool once = false;
+
+    if (Tickbase::pausedTicks() && !once)
+    {
+        lastCommandNumber = commandContext->commandNumber;
+        once = true;
+    }
+
+    if (lastCommandNumber != commandContext->commandNumber)
+    {
+        lastCommandNumber = commandContext->commandNumber;
+        once = false;
+        Tickbase::pausedTicks() = 0;
+    }
+
+    localPlayer->tickBase() = Tickbase::getCorrectTickbase(commandContext->commandNumber);
+
+    original(thisPointer);
+}
+
 static void __cdecl randomSeedHook(int seed) noexcept
 {
     static auto original = reinterpret_cast<void(__cdecl*)(int)>(hooks->randomSeed.getDetour());
@@ -585,6 +690,9 @@ static int __fastcall sendDatagramHook(NetworkChannel* network, void* edx, buffe
     if (!localPlayer || !config->backtrack.fakeLatency || !interfaces->engine->isInGame() || !interfaces->engine->isConnected()
         || !network || datagram)
         return original(network, datagram);
+
+    int a = sizeof(NetworkChannel);
+
 
     const int inState = network->inReliableState;
     const int inSequenceNr = network->inSequenceNr;
@@ -681,7 +789,8 @@ void Hooks::install() noexcept
     canFireRandomCriticalShot.detour(memory->canFireRandomCriticalShot, canFireRandomCriticalShotHook);
     checkForSequenceChange.detour(memory->checkForSequenceChange, checkForSequenceChangeHook);
     clLoadWhitelist.detour(memory->clLoadWhitelist, clLoadWhitelistHook);
-    customTextureOnItemProxyOnBindInternal.detour(memory->customTextureOnItemProxyOnBindInternal, customTextureOnItemProxyOnBindInternalHook);
+    clMove.detour(memory->clMove, clMoveHook);
+    clSendMove.detour(memory->clSendMove, clSendMoveHook);
     doEnginePostProcessing.detour(memory->doEnginePostProcessing, doEnginePostProcessingHook);
     enableWorldFog.detour(memory->enableWorldFog, enableWorldFogHook);
     estimateAbsVelocity.detour(memory->estimateAbsVelocity, estimateAbsVelocityHook);
@@ -691,6 +800,7 @@ void Hooks::install() noexcept
     interpolateServerEntities.detour(memory->interpolateServerEntities, interpolateServerEntitiesHook);
     isAllowedToWithdrawFromCritBucket.detour(memory->isAllowedToWithdrawFromCritBucket, isAllowedToWithdrawFromCritBucketHook);
     newMatchFoundDashboardStateOnUpdate.detour(memory->newMatchFoundDashboardStateOnUpdate, newMatchFoundDashboardStateOnUpdateHook);
+    physicsSimulate.detour(memory->physicsSimulate, physicsSimulateHook);
     randomSeed.detour(reinterpret_cast<uintptr_t>(memory->randomSeed), randomSeedHook);
     sendDatagram.detour(memory->sendDatagram, sendDatagramHook);
     tfPlayerInventoryGetMaxItemCount.detour(memory->tfPlayerInventoryGetMaxItemCount, tfPlayerInventoryGetMaxItemCountHook);

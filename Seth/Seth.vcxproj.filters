@@ -266,6 +266,9 @@
     <ClCompile Include="SDK\CBoneSetup.cpp">
       <Filter>SDK</Filter>
     </ClCompile>
+    <ClCompile Include="Hacks\Tickbase.cpp">
+      <Filter>Hacks</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GUI.h">
@@ -532,9 +535,6 @@
     <ClInclude Include="Hacks\Backtrack.h">
       <Filter>Hacks</Filter>
     </ClInclude>
-    <ClInclude Include="SDK\NetworkChannel.h">
-      <Filter>SDK</Filter>
-    </ClInclude>
     <ClInclude Include="Hacks\EnginePrediction.h">
       <Filter>Hacks</Filter>
     </ClInclude>
@@ -656,6 +656,12 @@
       <Filter>SDK</Filter>
     </ClInclude>
     <ClInclude Include="SDK\EngineVGui.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="Hacks\Tickbase.h">
+      <Filter>Hacks</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\Network.h">
       <Filter>SDK</Filter>
     </ClInclude>
   </ItemGroup>

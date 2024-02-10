@@ -137,6 +137,8 @@ Memory::Memory() noexcept
     canFireRandomCriticalShot = findPattern(CLIENT_DLL, "\x55\x8B\xEC\xF3\x0F\x10\x4D?\xF3\x0F\x58\x0D");
     checkForSequenceChange = relativeToAbsolute<decltype(checkForSequenceChange)>(findPattern(CLIENT_DLL, "\xE8????\x8B\x87????\x83\xEC\x0C") + 1);
     clLoadWhitelist = relativeToAbsolute<decltype(clLoadWhitelist)>(findPattern(ENGINE_DLL, "\xE8????\x83\xC4\x08\x8B\xF0\x56") + 1);
+    clMove = findPattern(ENGINE_DLL, "\x55\x8B\xEC\x83\xEC?\x83\x3D?????\x0F\x8C????\xE8");
+    clSendMove = findPattern(ENGINE_DLL, "\x55\x8B\xEC\x81\xEC????\xA1????\x8D");
     customTextureOnItemProxyOnBindInternal = findPattern(CLIENT_DLL, "\x55\x8B\xEC\x57\x8B\xF9\x8B\x4F\x04\x85\xC9\x0F\x84????");
     doEnginePostProcessing = relativeToAbsolute<decltype(doEnginePostProcessing)>(findPattern(CLIENT_DLL, "\xE8????\x8B\x75\xF4\x83\xC4\x18") + 1);
     estimateAbsVelocity = findPattern(CLIENT_DLL, "\x55\x8B\xEC\x83\xEC?\x56\x8B\xF1\xE8????\x3B\xF0\x75?\x8B\xCE\xE8????\x8B\x45?\xD9\x86????\xD9\x18\xD9\x86????\xD9\x58?\xD9\x86????\xD9\x58?\x5E\x8B\xE5\x5D\xC2");
@@ -147,6 +149,7 @@ Memory::Memory() noexcept
     interpolateServerEntities = findPattern(CLIENT_DLL, "\x55\x8B\xEC\x83\xEC\x30\x8B\x0D????\x53");
     isAllowedToWithdrawFromCritBucket = findPattern(CLIENT_DLL, "\x55\x8B\xEC\x56\x8B\xF1\x0F\xB7\x86????\xFF\x86????\x50\xE8????\x83\xC4\x04\x80\xB8?????\x74\x0A\xF3\x0F\x10\x15");
     newMatchFoundDashboardStateOnUpdate = findPattern(CLIENT_DLL, "\x55\x8B\xEC\x83\xEC\x0C\x56\x8B\xF1\xE8????\x8B\x86????");
+    physicsSimulate = findPattern(CLIENT_DLL, "\x56\x8B\xF1\x8B\x8E????\x85\xC9\x74\x32");
     tfPlayerInventoryGetMaxItemCount = findPattern(CLIENT_DLL, "\x8B\x49\x68\x56");
     randomSeedReturnAddress1 = findPattern(CLIENT_DLL, "\x83\xC4?\x0F\x57?\x80\x7D\xFF");
     randomSeedReturnAddress2 = findPattern(CLIENT_DLL, "\x83\xC4?\x68????\x6A?\xFF\x15????\xF3\x0F???\x83\xC4?\x0F\x28");

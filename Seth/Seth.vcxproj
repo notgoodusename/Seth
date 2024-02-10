@@ -44,6 +44,7 @@
     <ClCompile Include="Hacks\SkinChanger.cpp" />
     <ClCompile Include="Hacks\StreamProofESP.cpp" />
     <ClCompile Include="Hacks\TargetSystem.cpp" />
+    <ClCompile Include="Hacks\Tickbase.cpp" />
     <ClCompile Include="Hacks\Triggerbot\Triggerbot.cpp" />
     <ClCompile Include="Hacks\Triggerbot\TriggerbotHitscan.cpp" />
     <ClCompile Include="Hacks\Triggerbot\TriggerbotMelee.cpp" />
@@ -110,6 +111,7 @@
     <ClInclude Include="Hacks\SkinChanger.h" />
     <ClInclude Include="Hacks\StreamProofESP.h" />
     <ClInclude Include="Hacks\TargetSystem.h" />
+    <ClInclude Include="Hacks\Tickbase.h" />
     <ClInclude Include="Hacks\Triggerbot\Triggerbot.h" />
     <ClInclude Include="Hacks\Triggerbot\TriggerbotHitscan.h" />
     <ClInclude Include="Hacks\Triggerbot\TriggerbotMelee.h" />
@@ -190,7 +192,7 @@
     <ClInclude Include="SDK\ModelInfo.h" />
     <ClInclude Include="SDK\ModelRender.h" />
     <ClInclude Include="SDK\MoveHelper.h" />
-    <ClInclude Include="SDK\NetworkChannel.h" />
+    <ClInclude Include="SDK\Network.h" />
     <ClInclude Include="SDK\Pad.h" />
     <ClInclude Include="SDK\Panel.h" />
     <ClInclude Include="SDK\PhysicsSurfaceProps.h" />

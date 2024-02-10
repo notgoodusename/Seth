@@ -248,6 +248,11 @@ public:
         return *reinterpret_cast<AnimationLayer**>(reinterpret_cast<uintptr_t>(this) + 0x8A8);
     }
 
+    CommandContext* getCommandContext() noexcept
+    {
+        return reinterpret_cast<CommandContext*>(reinterpret_cast<uintptr_t>(this) + 0x1330);
+    }
+
     AnimationLayer* getAnimationLayer(int overlay) noexcept
     {
         return &animOverlays()[overlay];

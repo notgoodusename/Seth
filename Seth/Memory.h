@@ -104,6 +104,8 @@ public:
     std::uintptr_t canFireRandomCriticalShot;
     std::uintptr_t checkForSequenceChange;
     std::uintptr_t clLoadWhitelist;
+    std::uintptr_t clMove;
+    std::uintptr_t clSendMove;
     std::uintptr_t customTextureOnItemProxyOnBindInternal;
     std::uintptr_t doEnginePostProcessing;
     std::uintptr_t estimateAbsVelocity;
@@ -114,6 +116,7 @@ public:
     std::uintptr_t interpolateServerEntities;
     std::uintptr_t isAllowedToWithdrawFromCritBucket;
     std::uintptr_t newMatchFoundDashboardStateOnUpdate;
+    std::uintptr_t physicsSimulate;
     std::uintptr_t tfPlayerInventoryGetMaxItemCount;
     std::uintptr_t randomSeedReturnAddress1;
     std::uintptr_t randomSeedReturnAddress2;
