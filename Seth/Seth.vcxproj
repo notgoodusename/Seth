@@ -213,6 +213,7 @@
     <ClInclude Include="SDK\Utils.h" />
     <ClInclude Include="SDK\ViewSetup.h" />
     <ClInclude Include="SDK\VirtualMethod.h" />
+    <ClInclude Include="SDK\VPhysics.h" />
     <ClInclude Include="SDK\WeaponData.h" />
     <ClInclude Include="SDK\WeaponId.h" />
     <ClInclude Include="stb_image.h" />

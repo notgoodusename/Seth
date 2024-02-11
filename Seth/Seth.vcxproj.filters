@@ -658,5 +658,8 @@
     <ClInclude Include="SDK\EngineVGui.h">
       <Filter>SDK</Filter>
     </ClInclude>
+    <ClInclude Include="SDK\VPhysics.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
