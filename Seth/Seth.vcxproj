@@ -41,6 +41,7 @@
     <ClCompile Include="Hacks\Fakelag.cpp" />
     <ClCompile Include="Hacks\Glow.cpp" />
     <ClCompile Include="Hacks\MovementRebuild.cpp" />
+    <ClCompile Include="Hacks\ProjectileSimulation.cpp" />
     <ClCompile Include="Hacks\SkinChanger.cpp" />
     <ClCompile Include="Hacks\StreamProofESP.cpp" />
     <ClCompile Include="Hacks\TargetSystem.cpp" />
@@ -107,6 +108,7 @@
     <ClInclude Include="Hacks\Glow.h" />
     <ClInclude Include="Hacks\Misc.h" />
     <ClInclude Include="Hacks\MovementRebuild.h" />
+    <ClInclude Include="Hacks\ProjectileSimulation.h" />
     <ClInclude Include="Hacks\SkinChanger.h" />
     <ClInclude Include="Hacks\StreamProofESP.h" />
     <ClInclude Include="Hacks\TargetSystem.h" />
@@ -193,6 +195,7 @@
     <ClInclude Include="SDK\NetworkChannel.h" />
     <ClInclude Include="SDK\Pad.h" />
     <ClInclude Include="SDK\Panel.h" />
+    <ClInclude Include="SDK\PhysicsCollision.h" />
     <ClInclude Include="SDK\PhysicsSurfaceProps.h" />
     <ClInclude Include="SDK\Platform.h" />
     <ClInclude Include="SDK\PlayerResource.h" />

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Pad.h"
 #include "Vector.h"
 #include "VirtualMethod.h"
 
@@ -10,8 +9,8 @@ class PhysicsCollide;
 class PhysicsCollisionSet;
 class PhysicsObjectPairHash;
 
-constexpr float maxVelocity = 2000.0f;
-constexpr float maxAngularVelocity = 360.0f * 10.0f;
+constexpr float MAX_VELOCITY = 2000.0f;
+constexpr float MAX_ANGULAR_VELOCITY = 360.0f * 10.0f;
 
 constexpr float DEFAULT_MIN_FRICTION_MASS = 10.0f;
 constexpr float DEFAULT_MAX_FRICTION_MASS = 2500.0f;
@@ -48,8 +47,8 @@ public:
 	{
 		maxCollisionsPerObjectPerTimestep = 6;
 		maxCollisionChecksPerTimestep = 250;
-		maxVelocity = maxVelocity;
-		maxAngularVelocity = maxAngularVelocity;
+		maxVelocity = MAX_VELOCITY;
+		maxAngularVelocity = MAX_ANGULAR_VELOCITY;
 		lookAheadTimeObjectsVsWorld = 1.0f;
 		lookAheadTimeObjectsVsObject = 0.5f;
 		minFrictionMass = DEFAULT_MIN_FRICTION_MASS;

@@ -266,6 +266,9 @@
     <ClCompile Include="SDK\CBoneSetup.cpp">
       <Filter>SDK</Filter>
     </ClCompile>
+    <ClCompile Include="Hacks\ProjectileSimulation.cpp">
+      <Filter>Hacks</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GUI.h">
@@ -659,6 +662,12 @@
       <Filter>SDK</Filter>
     </ClInclude>
     <ClInclude Include="SDK\VPhysics.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="Hacks\ProjectileSimulation.h">
+      <Filter>Hacks</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\PhysicsCollision.h">
       <Filter>SDK</Filter>
     </ClInclude>
   </ItemGroup>
