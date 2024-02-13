@@ -378,6 +378,13 @@ static void from_json(const json& j, Config::StreamProofESP& e)
     read(j, "NPCs", e.npcs);
 }
 
+static void from_json(const json& j, Config::Visuals::ProjectileTrajectory& pt)
+{
+    read(j, "Enabled", pt.enabled);
+    read<value_t::object>(j, "Trail color", pt.trailColor);
+    read<value_t::object>(j, "BBox color", pt.bboxColor);
+}
+
 static void from_json(const json& j, Config::Visuals& v)
 {
     read(j, "Disable post-processing", v.disablePostProcessing);
@@ -390,6 +397,7 @@ static void from_json(const json& j, Config::Visuals& v)
     read(j, "Freecam key", v.freeCamKey);
     read(j, "Freecam speed", v.freeCamSpeed);
     read(j, "FOV", v.fov);
+    read<value_t::object>(j, "Projectile trajectory", v.projectileTrajectory);
     read<value_t::object>(j, "Bullet Tracers", v.bulletTracers);
     read<value_t::object>(j, "Bullet Impacts", v.bulletImpacts);
     read<value_t::object>(j, "Hitbox on Hit", v.onHitHitbox);
@@ -921,6 +929,14 @@ static void to_json(json& j, const Config::Misc::Logger& o, const Config::Misc::
     WRITE("Events", events);
 }
 
+
+static void to_json(json& j, const Config::Visuals::ProjectileTrajectory& o, const Config::Visuals::ProjectileTrajectory& dummy)
+{
+    WRITE("Enabled", enabled);
+    WRITE("Trail color", trailColor);
+    WRITE("BBox color", bboxColor);
+}
+
 static void to_json(json& j, const Config::Visuals::Viewmodel& o, const Config::Visuals::Viewmodel& dummy)
 {
     WRITE("Enabled", enabled);
@@ -977,6 +993,7 @@ static void to_json(json& j, const Config::Visuals& o)
     WRITE("Freecam key", freeCamKey);
     WRITE("Freecam speed", freeCamSpeed);
     WRITE("FOV", fov);
+    WRITE("Projectile trajectory", projectileTrajectory);
     WRITE("Bullet Tracers", bulletTracers);
     WRITE("Bullet Impacts", bulletImpacts);
     WRITE("Hitbox on Hit", onHitHitbox);

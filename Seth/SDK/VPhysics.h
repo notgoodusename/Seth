@@ -62,10 +62,11 @@ public:
 	VIRTUAL_METHOD(void, wake, 24, (), (this))
 
 	VIRTUAL_METHOD(void, setDragCoefficient, 36, (float* drag, float* angularDrag), (this, drag, angularDrag))
-	VIRTUAL_METHOD(void, setPosition, 45, (const Vector& worldPosition, const Vector& angles, bool isTeleport), (this, std::cref(worldPosition), std::cref(angles)))
+	VIRTUAL_METHOD(void, setPosition, 45, (const Vector& worldPosition, const Vector& angles, bool isTeleport), (this, std::cref(worldPosition), std::cref(angles), isTeleport))
 	VIRTUAL_METHOD(void, getPosition, 47, (Vector* worldPosition, Vector* angles), (this, worldPosition, angles))
 	VIRTUAL_METHOD(void, setVelocity, 49, (const Vector* velocity, const Vector* angularVelocity), (this, velocity, angularVelocity))
 
+	PAD(4)
 	void* gameData{ };
 	void* object{ };
 	const PhysicsCollide* collide{ };

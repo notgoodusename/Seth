@@ -41,6 +41,7 @@
     <ClCompile Include="Hacks\Fakelag.cpp" />
     <ClCompile Include="Hacks\Glow.cpp" />
     <ClCompile Include="Hacks\MovementRebuild.cpp" />
+    <ClCompile Include="Hacks\ProjectileTrajectory.cpp" />
     <ClCompile Include="Hacks\ProjectileSimulation.cpp" />
     <ClCompile Include="Hacks\SkinChanger.cpp" />
     <ClCompile Include="Hacks\StreamProofESP.cpp" />
@@ -109,6 +110,7 @@
     <ClInclude Include="Hacks\Misc.h" />
     <ClInclude Include="Hacks\MovementRebuild.h" />
     <ClInclude Include="Hacks\ProjectileSimulation.h" />
+    <ClInclude Include="Hacks\ProjectileTrajectory.h" />
     <ClInclude Include="Hacks\SkinChanger.h" />
     <ClInclude Include="Hacks\StreamProofESP.h" />
     <ClInclude Include="Hacks\TargetSystem.h" />

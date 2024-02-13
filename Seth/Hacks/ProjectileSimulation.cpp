@@ -71,6 +71,7 @@ Vector getWeaponOffsetPosition(Entity* activeWeapon) noexcept
     case Medic_m_CrusadersCrossbow:
         offset = { 23.5f, 8.0f, -3.0f };
         break;
+    case Demoman_s_StickyJumper:
     case Demoman_m_GrenadeLauncher:
     case Demoman_m_GrenadeLauncherR:
     case Demoman_m_FestiveGrenadeLauncher:
@@ -237,8 +238,8 @@ ProjectileSimulation::ProjectileWeaponInfo ProjectileSimulation::getProjectileWe
     case Pyro_s_FestiveFlareGun:
     case Pyro_s_TheScorchShot:
     case Pyro_s_TheManmelter:
-        speed = AttributeManager::attributeHookFloat(2000.0f, "mult_projectile_speed", activeWeapon, 0);
-        gravity = AttributeManager::attributeHookFloat(0.3f, "mult_projectile_speed", activeWeapon, 0);
+        speed = AttributeManager::attributeHookFloat(2000.0f, "mult_projectile_speed", activeWeapon);
+        gravity = AttributeManager::attributeHookFloat(0.3f, "mult_projectile_speed", activeWeapon);
         break;
     case Medic_m_SyringeGun:
     case Medic_m_SyringeGunR:
@@ -277,7 +278,7 @@ ProjectileSimulation::ProjectileWeaponInfo ProjectileSimulation::getProjectileWe
     case Demoman_m_TopShelf:
     case Demoman_m_Warhawk:
     case Demoman_m_ButcherBird:
-        speed = AttributeManager::attributeHookFloat(1200.0f, "mult_projectile_speed", activeWeapon, 0);
+        speed = AttributeManager::attributeHookFloat(1200.0f, "mult_projectile_speed", activeWeapon);
         //https://github.com/lua9520/source-engine-2018-hl2_src/blob/3bf9df6b2785fa6d951086978a3e66f49427166a/game/shared/tf/tf_weapon_grenadelauncher.cpp#L469-L470
         if (localPlayer->hasPrecisionRune())
             speed = 3000.0f;
@@ -297,15 +298,16 @@ ProjectileSimulation::ProjectileWeaponInfo ProjectileSimulation::getProjectileWe
         }
         usesPipes = true;
         break;
+    case Demoman_s_StickyJumper:
     case Demoman_s_StickybombLauncher:
     case Demoman_s_StickybombLauncherR:
     case Demoman_s_FestiveStickybombLauncher:
     case Demoman_s_TheScottishResistance:
     case Demoman_s_TheQuickiebombLauncher:
         beginCharge = activeWeapon->chargeTime();
-        charge = (beginCharge == 0.0f) ? 0.f : memory->globalVars->serverTime() - beginCharge;
+        charge = (beginCharge <= 0.0f) ? 0.f : memory->globalVars->serverTime() - beginCharge;
 
-        chargeRate = AttributeManager::attributeHookFloat(4.0f, "stickybomb_charge_rate", activeWeapon, 0);
+        chargeRate = AttributeManager::attributeHookFloat(4.0f, "stickybomb_charge_rate", activeWeapon);
         speed = Helpers::remapValClamped(charge, 0.0f, chargeRate, 900.f, 2400.f);
         gravity = Helpers::remapValClamped(charge, 0.0f, chargeRate, 0.5f, 0.0f);
         usesPipes = true;
@@ -324,6 +326,10 @@ ProjectileSimulation::ProjectileWeaponInfo ProjectileSimulation::getProjectileWe
         break;
     }
 
+    static auto flipViewModels{ interfaces->cvar->findVar("cl_flipviewmodels") };
+    if (flipViewModels->getInt())
+        offset.y *= -1.0f;
+
     Vector forward{ }, right{ }, up{ };
     Vector::fromAngleAll(angles, &forward, &right, &up);
 
@@ -336,13 +342,13 @@ ProjectileSimulation::ProjectileWeaponInfo ProjectileSimulation::getProjectileWe
     {
         Vector endPosition{ eyePosition + (forward * 2000.0f) };
 
-        spawnAngle = Vector::fromAngle(endPosition - spawnPosition);
+        spawnAngle = (endPosition - spawnPosition).toAngle();
     }
 
     return ProjectileSimulation::ProjectileWeaponInfo{ speed, gravity, maxTime, offset, spawnPosition, spawnAngle, usesPipes, activeWeapon->weaponId(), itemDefinitionIndex };
 }
 
-bool ProjectileSimulation::init(const ProjectileWeaponInfo& info, bool noVectorUp) noexcept
+bool ProjectileSimulation::init(const ProjectileWeaponInfo& projectileInfo) noexcept
 {
     if (!physicsEnviroment)
     {
@@ -366,7 +372,7 @@ bool ProjectileSimulation::init(const ProjectileWeaponInfo& info, bool noVectorU
         parameters.dragCoefficient = 1.0f;
         parameters.enableCollisions = false;
 
-        physicsObject = physicsEnviroment->createPolyObject(collide, 0, info.spawnPosition, info.spawnAngle, &parameters);
+        physicsObject = physicsEnviroment->createPolyObject(collide, 0, projectileInfo.spawnPosition, projectileInfo.spawnAngle, &parameters);
 
         physicsObject->wake();
     }
@@ -377,25 +383,24 @@ bool ProjectileSimulation::init(const ProjectileWeaponInfo& info, bool noVectorU
     {
         Vector forward{ }, up{ };
 
-        Vector::fromAngleAll(info.spawnAngle, &forward, nullptr, &up);
+        Vector::fromAngleAll(projectileInfo.spawnAngle, &forward, nullptr, &up);
 
-        Vector velocity{ forward * info.speed };
+        Vector velocity{ forward * projectileInfo.speed };
         Vector angularVelocity{ };
 
-        if (info.usesPipes)
+        if (projectileInfo.usesPipes)
         {
-            if (!noVectorUp)
-                velocity += up * 200.0f;
+            velocity += up * 200.0f;
 
             angularVelocity = { 600.0f, -1200.0f, 0.0f };
         }
 
         //https://github.com/lua9520/source-engine-2018-hl2_src/blob/3bf9df6b2785fa6d951086978a3e66f49427166a/game/shared/tf/tf_weaponbase_gun.cpp#L710C2-L710C28
         //theres only 1 item that uses the no spin attribute
-        if(info.itemDefinitionIndex == Demoman_m_TheLochnLoad)
+        if(projectileInfo.itemDefinitionIndex == Demoman_m_TheLochnLoad)
             angularVelocity = Vector{ };
 
-        physicsObject->setPosition(info.spawnPosition, info.spawnAngle, true);
+        physicsObject->setPosition(projectileInfo.spawnPosition, projectileInfo.spawnAngle, true);
         physicsObject->setVelocity(&velocity, &angularVelocity);
     }
 
@@ -404,7 +409,7 @@ bool ProjectileSimulation::init(const ProjectileWeaponInfo& info, bool noVectorU
         Vector dragBasis{ };
         Vector angularDragBasis{ };
 
-        switch (info.weaponId)
+        switch (projectileInfo.weaponId)
         {
             case WeaponId::GRENADELAUNCHER:
             {
@@ -442,7 +447,7 @@ bool ProjectileSimulation::init(const ProjectileWeaponInfo& info, bool noVectorU
         float maxVelocity = 1000000.0f;
         float maxAngularVelocity = 1000000.0f;
 
-        if (info.usesPipes)
+        if (projectileInfo.usesPipes)
         {
             maxVelocity = MAX_VELOCITY;
             maxAngularVelocity = MAX_ANGULAR_VELOCITY;
@@ -456,7 +461,10 @@ bool ProjectileSimulation::init(const ProjectileWeaponInfo& info, bool noVectorU
 
         physicsEnviroment->setPerformanceSettings(&parameters);
         physicsEnviroment->setAirDensity(2.0f);
-        physicsEnviroment->setGravity(Vector{ 0.0f, 0.0f, -(800.0f * info.gravity) });
+
+        static auto gravityConvar = interfaces->cvar->findVar("sv_gravity");
+        const float gravity = projectileInfo.usesPipes ? 800.0f : projectileInfo.gravity * gravityConvar->getFloat();
+        physicsEnviroment->setGravity(Vector{ 0.0f, 0.0f, -gravity });
 
         physicsEnviroment->resetSimulationClock();
     }

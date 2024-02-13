@@ -269,6 +269,9 @@
     <ClCompile Include="Hacks\ProjectileSimulation.cpp">
       <Filter>Hacks</Filter>
     </ClCompile>
+    <ClCompile Include="Hacks\ProjectileTrajectory.cpp">
+      <Filter>Hacks</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GUI.h">
@@ -669,6 +672,9 @@
     </ClInclude>
     <ClInclude Include="SDK\PhysicsCollision.h">
       <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="Hacks\ProjectileTrajectory.h">
+      <Filter>Hacks</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

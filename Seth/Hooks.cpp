@@ -30,6 +30,7 @@
 #include "Hacks/Glow.h"
 #include "Hacks/Misc.h"
 #include "Hacks/MovementRebuild.h"
+#include "Hacks/ProjectileTrajectory.h"
 #include "Hacks/SkinChanger.h"
 #include "Hacks/StreamProofESP.h"
 #include "Hacks/TargetSystem.h"
@@ -108,8 +109,9 @@ static HRESULT __stdcall present(IDirect3DDevice9* device, const RECT* src, cons
         Crithack::updateInput();
 
         Misc::drawPlayerList();
+        ProjectileTrajectory::draw(ImGui::GetBackgroundDrawList());
         Crithack::draw(ImGui::GetForegroundDrawList());
-        Misc::drawAimbotFov(ImGui::GetForegroundDrawList());
+        Misc::drawAimbotFov(ImGui::GetBackgroundDrawList());
 
         gui->handleToggle();
 
@@ -163,6 +165,7 @@ static bool __fastcall createMove(void* thisPointer, void*, float inputSampleTim
 
     EnginePrediction::update();
     EnginePrediction::run(cmd);
+    ProjectileTrajectory::calculate(cmd);
 
     Backtrack::run(cmd);
     Aimbot::run(cmd);

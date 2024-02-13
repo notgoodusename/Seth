@@ -228,11 +228,17 @@ public:
         KeyBind freeCamKey{ std::string("freecam") };
         int freeCamSpeed{ 2 };
         int fov{ 0 };
+        struct ProjectileTrajectory
+        {
+            bool enabled{ false };
+            Color4 trailColor{ 0.67f, 0.85f, 0.9f, 0.8f };
+            Color4 bboxColor{ 0.67f, 0.85f, 0.9f, 0.6f };
+        } projectileTrajectory;
         ColorToggle bulletImpacts{ 0.0f, 0.0f, 1.f, 0.5f };
         float bulletImpactsTime{ 4.f };
         struct BulletTracers
         {
-            bool enabled { false };
+            bool enabled{ false };
             int type { 0 };
         } bulletTracers;
         struct Viewmodel

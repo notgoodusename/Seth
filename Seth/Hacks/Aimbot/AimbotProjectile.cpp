@@ -10,6 +10,7 @@
 #include "../../SDK/UserCmd.h"
 #include "../../SDK/Math.h"
 #include "../../SDK/ModelInfo.h"
+#include "../../SDK/VPhysics.h"
 #include "../../SDK/Vector.h"
 
 Vector getProjectileWeaponAimOffset(Entity* weapon, Entity* entity) noexcept
@@ -95,6 +96,14 @@ Vector getProjectileWeaponAimOffset(Entity* weapon, Entity* entity) noexcept
     case Medic_m_FestiveCrusadersCrossbow:
     case Medic_m_CrusadersCrossbow:
 
+    case Scout_t_TheSandman:
+    case Scout_t_TheWrapAssassin:
+    case Scout_s_TheFlyingGuillotine:
+    case Scout_s_TheFlyingGuillotineG:
+        //Center of the hitbox
+        offset.z = (entity->obbMaxs().z - entity->obbMins().z) * 0.5f;
+        break;
+
     case Demoman_m_GrenadeLauncher:
     case Demoman_m_GrenadeLauncherR:
     case Demoman_m_FestiveGrenadeLauncher:
@@ -114,19 +123,15 @@ Vector getProjectileWeaponAimOffset(Entity* weapon, Entity* entity) noexcept
     case Demoman_s_FestiveStickybombLauncher:
     case Demoman_s_TheScottishResistance:
     case Demoman_s_TheQuickiebombLauncher:
-
-    case Scout_t_TheSandman:
-    case Scout_t_TheWrapAssassin:
-    case Scout_s_TheFlyingGuillotine:
-    case Scout_s_TheFlyingGuillotineG:
         //Center of the hitbox
-        offset.z = entity->obbMaxs().z / 2.0f;
+        offset.z = (entity->obbMaxs().z - entity->obbMins().z) * 0.2f;
         break;
+
     case Sniper_m_TheHuntsman:
     case Sniper_m_FestiveHuntsman:
     case Sniper_m_TheFortifiedCompound:
         //Close to Head
-        offset.z = entity->obbMaxs().z;
+        offset.z = (entity->obbMaxs().z - entity->obbMins().z) * 0.92f;
         break;
     default:
         break;
@@ -156,7 +161,8 @@ Vector getProjectileTarget(UserCmd* cmd, Entity* entity, Vector offset, float& b
 bool calculateProjectileInfo(Vector source, Vector destination, ProjectileSimulation::ProjectileWeaponInfo projectileInfo, float& time, Vector& angle) noexcept
 {
     static auto gravityConvar = interfaces->cvar->findVar("sv_gravity");
-    const float gravity = projectileInfo.gravity * gravityConvar->getFloat();
+    //if they use vphysics gravity doesnt affect the projectile
+    const float gravity = projectileInfo.usesPipes ? projectileInfo.gravity * 800.0f : projectileInfo.gravity * gravityConvar->getFloat();
     if (gravity == 0.0f)
     {
         angle = Math::calculateRelativeAngle(source, destination, Vector{ 0.0f, 0.0f, 0.0f });
@@ -171,8 +177,8 @@ bool calculateProjectileInfo(Vector source, Vector destination, ProjectileSimula
 
     if (projectileInfo.usesPipes)
     {
-        if (projectileSpeed > 2000.0f)
-            projectileSpeed = 2000.0f;
+        if (projectileSpeed > MAX_VELOCITY)
+            projectileSpeed = MAX_VELOCITY;
     }
 
     float root = std::powf(projectileSpeed, 4) - gravity * (gravity * std::powf(distance, 2) + 2.f * delta.z * std::powf(projectileSpeed, 2));
@@ -264,6 +270,9 @@ void AimbotProjectile::run(Entity* activeWeapon, UserCmd* cmd) noexcept
     const float latencyTime = ticksToTime(timeToTicks(max(0, network->getLatency(0))));
 
     const auto projectileWeaponInfo = ProjectileSimulation::getProjectileWeaponInfo(localPlayer.get(), activeWeapon);
+    if (projectileWeaponInfo.itemDefinitionIndex == Demoman_s_StickyJumper)
+        return;
+
     const auto& localPlayerEyePosition = localPlayer->getEyePosition();
     const int maxTicks = timeToTicks((projectileWeaponInfo.maxTime == 0.f ? cfg.maxTime : projectileWeaponInfo.maxTime) + latencyTime);
     for (const auto& target : enemies)

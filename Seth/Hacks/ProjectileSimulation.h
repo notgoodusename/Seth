@@ -23,7 +23,7 @@ namespace ProjectileSimulation
     };
     
     ProjectileWeaponInfo getProjectileWeaponInfo(Entity* player, Entity* activeWeapon, const Vector angles = Vector{ }) noexcept;
-    bool init(const ProjectileWeaponInfo& info, bool noVectorUp = false) noexcept;
+    bool init(const ProjectileWeaponInfo& projectileInfo) noexcept;
     void runTick() noexcept;
     Vector getOrigin() noexcept;
 

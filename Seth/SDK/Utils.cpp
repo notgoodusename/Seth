@@ -69,7 +69,7 @@ bool canAttack(UserCmd* cmd, Entity* activeWeapon) noexcept
 				return false;
 			break;
 		case WeaponType::PROJECTILE:
-			if (activeWeapon->nextPrimaryAttack() > memory->globalVars->serverTime())
+			if (activeWeapon->nextPrimaryAttack() > memory->globalVars->serverTime() || !activeWeapon->clip())
 				return false;
 			break;
 		case WeaponType::MELEE:

@@ -268,6 +268,7 @@ void GUI::renderAimbotWindow() noexcept
             ImGui::Checkbox("Aimlock", &config->aimbot.projectile.aimlock);
             ImGui::Checkbox("Friendly fire", &config->aimbot.projectile.friendlyFire);
             ImGui::Checkbox("Silent", &config->aimbot.projectile.silent);
+            ImGuiCustom::colorPicker("Draw fov", config->aimbotFov);
             ImGui::Checkbox("Ignore cloaked", &config->aimbot.projectile.ignoreCloaked);
             ImGui::Checkbox("Auto shoot", &config->aimbot.projectile.autoShoot);
             ImGui::Combo("Sort method", &config->aimbot.projectile.sortMethod, "Distance\0Fov\0");
@@ -283,6 +284,7 @@ void GUI::renderAimbotWindow() noexcept
             ImGui::Checkbox("Enabled", &config->aimbot.melee.enabled);
             ImGui::Checkbox("Aimlock", &config->aimbot.melee.aimlock);
             ImGui::Checkbox("Silent", &config->aimbot.melee.silent);
+            ImGuiCustom::colorPicker("Draw fov", config->aimbotFov);
             ImGui::Checkbox("Friendly fire", &config->aimbot.melee.friendlyFire);
             ImGui::Checkbox("Ignore cloaked", &config->aimbot.melee.ignoreCloaked);
             ImGui::Checkbox("Target backtrack", &config->aimbot.melee.targetBacktrack);
@@ -908,7 +910,7 @@ void GUI::renderVisualsWindow() noexcept
     ImGui::Checkbox("Disable custom decals", &config->visuals.disableCustomDecals);
     ImGui::Checkbox("No fog", &config->visuals.noFog);
 
-    ImGui::Checkbox("No scope overlay", &config->visuals.noScopeOverlay);
+    //ImGui::Checkbox("No scope overlay", &config->visuals.noScopeOverlay);
 
     ImGui::NextColumn();
     ImGui::Checkbox("Thirdperson", &config->visuals.thirdperson);
@@ -928,7 +930,7 @@ void GUI::renderVisualsWindow() noexcept
     ImGui::PushID(2);
     ImGui::SliderInt("", &config->visuals.fov, -60, 60, "FOV: %d");
     ImGui::PopID();
-
+    /*
     ImGui::Checkbox("Bullet Tracers", &config->visuals.bulletTracers.enabled);
     ImGui::SameLine();
 
@@ -946,6 +948,21 @@ void GUI::renderVisualsWindow() noexcept
     ImGui::SliderFloat("Bullet Impacts time", &config->visuals.bulletImpactsTime, 0.1f, 5.0f, "Bullet Impacts time: %.2fs");
     ImGuiCustom::colorPicker("On Hit Hitbox", config->visuals.onHitHitbox.color.color.data(), &config->visuals.onHitHitbox.color.color[3], nullptr, nullptr, &config->visuals.onHitHitbox.color.enabled);
     ImGui::SliderFloat("On Hit Hitbox Time", &config->visuals.onHitHitbox.duration, 0.1f, 60.0f, "On Hit Hitbox time: % .2fs");
+    */
+    ImGui::Checkbox("Draw Projectile Trajectory", &config->visuals.projectileTrajectory.enabled);
+    ImGui::SameLine();
+
+    ImGui::PushID("##projectileTrajectoryEdit");
+    if (bool ccPopup = ImGui::Button("Edit"))
+        ImGui::OpenPopup("##projectileTrajectory");
+
+    if (ImGui::BeginPopup("##projectileTrajectory"))
+    {
+        ImGuiCustom::colorPicker("Trail color", config->visuals.projectileTrajectory.trailColor.color.data(),  &config->visuals.projectileTrajectory.trailColor.color[3], nullptr, nullptr, nullptr);
+        ImGuiCustom::colorPicker("BBox color", config->visuals.projectileTrajectory.bboxColor.color.data(), &config->visuals.projectileTrajectory.bboxColor.color[3], nullptr, nullptr, nullptr);
+        ImGui::EndPopup();
+    }
+    ImGui::PopID();
 
     ImGui::Checkbox("Viewmodel", &config->visuals.viewModel.enabled);
     ImGui::SameLine();
@@ -1041,7 +1058,7 @@ void GUI::renderMiscWindow() noexcept
     }
     ImGui::PopID();
 
-    ImGui::Checkbox("Watermark", &config->misc.watermark.enabled);
+    //ImGui::Checkbox("Watermark", &config->misc.watermark.enabled);
     ImGuiCustom::colorPicker("Offscreen Enemies", config->misc.offscreenEnemies, &config->misc.offscreenEnemies.enabled);
     ImGui::SameLine();
     ImGui::PushID("Offscreen Enemies");
@@ -1066,6 +1083,7 @@ void GUI::renderMiscWindow() noexcept
     ImGui::Checkbox("Unlock hidden cvars", &config->misc.unhideConvars);
     ImGui::Checkbox("Backpack expander", &config->misc.backpackExpander);
 
+    /*
     ImGuiCustom::colorPicker("Logger", config->misc.logger);
     ImGui::SameLine();
 
@@ -1142,6 +1160,7 @@ void GUI::renderMiscWindow() noexcept
         ImGui::EndPopup();
     }
     ImGui::PopID();
+    */
 
     if (ImGui::Button("Unhook"))
         hooks->uninstall();
@@ -1393,15 +1412,15 @@ void GUI::renderGuiStyle() noexcept
                             if (ImGui::Button("Main                    ", ImVec2{ 80, 20 })) activeSubTabAimbot = 1;
                             if (ImGui::Button("Triggerbot              ", ImVec2{ 80, 20 })) activeSubTabAimbot = 2;
                             if (ImGui::Button("Backtrack               ", ImVec2{ 80, 20 })) activeSubTabAimbot = 3;
-                            if (ImGui::Button("AntiAim                 ", ImVec2{ 80, 20 })) activeSubTabAimbot = 4;
-                            if (ImGui::Button("FakeLag                 ", ImVec2{ 80, 20 })) activeSubTabAimbot = 5;
+                            //if (ImGui::Button("AntiAim                 ", ImVec2{ 80, 20 })) activeSubTabAimbot = 4;
+                            //if (ImGui::Button("FakeLag                 ", ImVec2{ 80, 20 })) activeSubTabAimbot = 5;
                             break;
                         case 2: //Visuals
                             ImGui::SetCursorPosY(10);
                             if (ImGui::Button("Main                    ", ImVec2{ 80, 20 })) activeSubTabVisuals = 1;
                             if (ImGui::Button("Esp                     ", ImVec2{ 80, 20 })) activeSubTabVisuals = 2;
                             if (ImGui::Button("Chams                   ", ImVec2{ 80, 20 })) activeSubTabVisuals = 3;
-                            if (ImGui::Button("Glow                    ", ImVec2{ 80, 20 })) activeSubTabVisuals = 4;
+                            //if (ImGui::Button("Glow                    ", ImVec2{ 80, 20 })) activeSubTabVisuals = 4;
                             break;
                         case 3: //Misc
                             ImGui::SetCursorPosY(10);
