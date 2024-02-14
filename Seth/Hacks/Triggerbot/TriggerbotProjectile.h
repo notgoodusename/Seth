@@ -1,8 +1,9 @@
 #pragma once
 
+class Entity;
 struct UserCmd;
 
 namespace TriggerbotProjectile
 {
-	void run(UserCmd* cmd) noexcept;
+	void run(Entity* activeWeapon, UserCmd* cmd) noexcept;
 }

@@ -6,13 +6,10 @@
 #include "../../SDK/UserCmd.h"
 #include "../../SDK/Math.h"
 
-void TriggerbotProjectile::run(UserCmd* cmd) noexcept
+void runAutoDetonate(Entity* activeWeapon, UserCmd* cmd) noexcept
 {
 	const auto& cfg = config->projectileTriggerbot.autoDetonate;
 	if (!cfg.enabled)
-		return;
-
-	if (!localPlayer || !localPlayer->isAlive())
 		return;
 
 	bool noStickyLauncher = true;
@@ -93,7 +90,7 @@ void TriggerbotProjectile::run(UserCmd* cmd) noexcept
 				continue;
 
 			auto entity{ interfaces->entityList->getEntityFromHandle(target.handle) };
-			if (!entity || 
+			if (!entity ||
 				(entity->isCloaked() && ignoreCloaked) ||
 				(entity->isInvulnerable() && ignoreInvulnerable) ||
 				(!entity->isEnemy(localPlayer.get()) && !cfg.friendlyFire))
@@ -125,11 +122,23 @@ void TriggerbotProjectile::run(UserCmd* cmd) noexcept
 				const auto angle = Math::calculateRelativeAngle(localPlayer->getEyePosition(), worldSpaceCenterSticky, cmd->viewangles);
 
 				cmd->viewangles += angle;
-				if(!cfg.silent)
+				if (!cfg.silent)
 					interfaces->engine->setViewAngles(cmd->viewangles);
 			}
 			cmd->buttons |= UserCmd::IN_ATTACK2;
 			break;
 		}
 	}
+}
+
+void TriggerbotProjectile::run(Entity* activeWeapon, UserCmd* cmd) noexcept
+{
+	const auto& cfg = config->projectileTriggerbot;
+	if (!cfg.enabled)
+		return;
+
+	if (!localPlayer || !localPlayer->isAlive())
+		return;
+
+	runAutoDetonate(activeWeapon, cmd);
 }

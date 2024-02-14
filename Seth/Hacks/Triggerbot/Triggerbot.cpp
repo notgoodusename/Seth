@@ -40,7 +40,7 @@ void Triggerbot::run(UserCmd* cmd) noexcept
         TriggerbotHitscan::run(activeWeapon, cmd, lastTime, lastContact);
         break;
     case WeaponType::PROJECTILE:
-        TriggerbotProjectile::run(cmd);
+        TriggerbotProjectile::run(activeWeapon, cmd);
         break;
     case WeaponType::MELEE:
         TriggerbotMelee::run(activeWeapon, cmd, lastTime, lastContact);
