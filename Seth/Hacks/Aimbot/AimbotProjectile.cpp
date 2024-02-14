@@ -276,8 +276,8 @@ void AimbotProjectile::run(Entity* activeWeapon, UserCmd* cmd) noexcept
     const auto& localPlayerEyePosition = localPlayer->getEyePosition();
     const int maxTicks = timeToTicks((projectileWeaponInfo.maxTime == 0.f ? cfg.maxTime : projectileWeaponInfo.maxTime) + latencyTime);
     
-    const bool ignoreCloaked = (cfg.ignore & 1 << 1) == 1 << 1;
-    const bool ignoreInvulnerable = (cfg.ignore & 1 << 2) == 1 << 2;
+    const bool ignoreCloaked = (cfg.ignore & 1 << 0) == 1 << 0;
+    const bool ignoreInvulnerable = (cfg.ignore & 1 << 1) == 1 << 1;
     for (const auto& target : enemies)
     {
         if (target.playerData.empty() || !target.isAlive || target.priority == 0)

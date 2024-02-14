@@ -28,8 +28,33 @@ void TriggerbotProjectile::run(UserCmd* cmd) noexcept
 		if (!weapon)
 			continue;
 
-		if (weapon->weaponId() == WeaponId::PIPEBOMBLAUNCHER)
+		switch (weapon->itemDefinitionIndex())
+		{
+		case Demoman_s_StickyJumper:
+		case Demoman_m_GrenadeLauncher:
+		case Demoman_m_GrenadeLauncherR:
+		case Demoman_m_FestiveGrenadeLauncher:
+		case Demoman_m_TheIronBomber:
+		case Demoman_m_Autumn:
+		case Demoman_m_MacabreWeb:
+		case Demoman_m_Rainbow:
+		case Demoman_m_SweetDreams:
+		case Demoman_m_CoffinNail:
+		case Demoman_m_TopShelf:
+		case Demoman_m_Warhawk:
+		case Demoman_m_ButcherBird:
+		case Demoman_m_TheLochnLoad:
+		case Demoman_m_TheLooseCannon:
+		case Demoman_s_StickybombLauncher:
+		case Demoman_s_StickybombLauncherR:
+		case Demoman_s_FestiveStickybombLauncher:
+		case Demoman_s_TheScottishResistance:
+		case Demoman_s_TheQuickiebombLauncher:
 			noStickyLauncher = false;
+			break;
+		default:
+			break;
+		}
 	}
 
 	if (noStickyLauncher)
@@ -43,8 +68,8 @@ void TriggerbotProjectile::run(UserCmd* cmd) noexcept
 
 	const auto& enemies = TargetSystem::playerTargets();
 
-	const bool ignoreCloaked = (cfg.ignore & 1 << 1) == 1 << 1;
-	const bool ignoreInvulnerable = (cfg.ignore & 1 << 2) == 1 << 2;
+	const bool ignoreCloaked = (cfg.ignore & 1 << 0) == 1 << 0;
+	const bool ignoreInvulnerable = (cfg.ignore & 1 << 1) == 1 << 1;
 	for (const auto& stickyHandle : localStickiesHandles)
 	{
 		auto sticky{ interfaces->entityList->getEntityFromHandle(stickyHandle) };
