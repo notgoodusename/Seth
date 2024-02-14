@@ -725,9 +725,17 @@ public:
         return false;
     }
 
+    bool isInvulnerable() noexcept
+    {
+        return isUbered() || isUberHidden() || isUberFading() || isUberCanteen() || isBonked();
+    }
+
     CONDITION(isCharging, condition(), TFCond_Charging)
     CONDITION(isScoped, condition(), TFCond_Zoomed)
     CONDITION(isUbered, condition(), TFCond_Ubercharged)
+    CONDITION(isUberHidden, conditionEx(), TFCondEx_UberchargedHidden)
+    CONDITION(isUberCanteen, conditionEx(), TFCondEx_UberchargedCanteen)
+    CONDITION(isUberFading, condition(), TFCond_UberchargeFading)
     CONDITION(isBonked, condition(), TFCond_Bonked)
     CONDITION(inMilk, condition(), TFCond_Milked)
     CONDITION(inJarate, condition(), TFCond_Jarated)

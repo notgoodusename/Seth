@@ -41,11 +41,10 @@ void TriggerbotProjectile::run(UserCmd* cmd) noexcept
 	if (localStickiesHandles.empty())
 		return;
 
-	const bool ignoreCloaked = (cfg.ignore & 1 << 1) == 1 << 1;
-	const bool ignoreInvulnerable = (cfg.ignore & 1 << 2) == 1 << 2;
-
 	const auto& enemies = TargetSystem::playerTargets();
 
+	const bool ignoreCloaked = (cfg.ignore & 1 << 1) == 1 << 1;
+	const bool ignoreInvulnerable = (cfg.ignore & 1 << 2) == 1 << 2;
 	for (const auto& stickyHandle : localStickiesHandles)
 	{
 		auto sticky{ interfaces->entityList->getEntityFromHandle(stickyHandle) };
@@ -71,7 +70,7 @@ void TriggerbotProjectile::run(UserCmd* cmd) noexcept
 			auto entity{ interfaces->entityList->getEntityFromHandle(target.handle) };
 			if (!entity || 
 				(entity->isCloaked() && ignoreCloaked) ||
-				(entity->isUbered() && ignoreInvulnerable) ||
+				(entity->isInvulnerable() && ignoreInvulnerable) ||
 				(!entity->isEnemy(localPlayer.get()) && !cfg.friendlyFire))
 				continue;
 

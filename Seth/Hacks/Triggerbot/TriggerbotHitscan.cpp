@@ -107,14 +107,18 @@ void TriggerbotHitscan::run(Entity* activeWeapon, UserCmd* cmd, float& lastTime,
     const auto startPos = localPlayerEyePosition;
     const auto endPos = startPos + Vector::fromAngle(cmd->viewangles) * range;
 
+    const bool ignoreCloaked = (cfg.ignore & 1 << 1) == 1 << 1;
+    const bool ignoreInvulnerable = (cfg.ignore & 1 << 2) == 1 << 2;
     for (const auto& target : enemies)
     {
         if (target.playerData.empty() || !target.isAlive || target.priority == 0)
             continue;
 
         auto entity{ interfaces->entityList->getEntityFromHandle(target.handle) };
-        if (!entity || (entity->isCloaked() && cfg.ignoreCloaked) 
-            || (!entity->isEnemy(localPlayer.get()) && !cfg.friendlyFire))
+        if (!entity ||
+            (entity->isCloaked() && ignoreCloaked) ||
+            (entity->isInvulnerable() && ignoreInvulnerable) ||
+            (!entity->isEnemy(localPlayer.get()) && !cfg.friendlyFire))
             continue;
 
         matrix3x4* backupBoneCache = entity->getBoneCache().memory;

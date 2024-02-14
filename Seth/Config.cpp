@@ -221,12 +221,12 @@ static void from_json(const json& j, Config::Aimbot::Hitscan& h)
     read(j, "Silent", h.silent);
     read(j, "Friendly fire", h.friendlyFire);
     read(j, "Target backtrack", h.targetBacktrack);
-    read(j, "Ignore cloaked", h.ignoreCloaked);
     read(j, "Scoped only", h.scopedOnly);
     read(j, "Auto shoot", h.autoShoot);
     read(j, "Auto scope", h.autoScope);
     read(j, "Wait for headshot", h.waitForHeadshot);
     read(j, "Wait for charge", h.waitForHeadshot);
+    read(j, "Ignore", h.ignore);
     read(j, "Sort method", h.sortMethod);
     read(j, "Hitboxes", h.hitboxes);
     read(j, "Fov", h.fov);
@@ -240,7 +240,7 @@ static void from_json(const json& j, Config::Aimbot::Projectile& p)
     read(j, "Auto shoot", p.autoShoot);
     read(j, "Silent", p.silent);
     read(j, "Friendly fire", p.friendlyFire);
-    read(j, "Ignore cloaked", p.ignoreCloaked);
+    read(j, "Ignore", p.ignore);
     read(j, "Sort method", p.sortMethod);
     read(j, "Fov", p.fov);
     read(j, "Max time", p.maxTime);
@@ -252,10 +252,10 @@ static void from_json(const json& j, Config::Aimbot::Melee& m)
     read(j, "Aimlock", m.aimlock);
     read(j, "Silent", m.silent);
     read(j, "Friendly fire", m.friendlyFire);
-    read(j, "Ignore cloaked", m.ignoreCloaked);
     read(j, "Target backtrack", m.targetBacktrack);
     read(j, "Auto hit", m.autoHit);
     read(j, "Auto backstab", m.autoBackstab);
+    read(j, "Ignore", m.ignore);
     read(j, "Sort method", m.sortMethod);
     read(j, "Fov", m.fov);
 }
@@ -267,8 +267,8 @@ static void from_json(const json& j, Config::HitscanTriggerbot& t)
     read(j, "Friendly fire", t.friendlyFire);
     read(j, "Target backtrack", t.targetBacktrack);
     read(j, "Scoped only", t.scopedOnly);
+    read(j, "Ignore", t.ignore);
     read(j, "Hitboxes", t.hitboxes);
-    read(j, "Ignore cloaked", t.ignoreCloaked);
     read(j, "Shot delay", t.shotDelay);
 }
 
@@ -284,7 +284,7 @@ static void from_json(const json& j, Config::MeleeTriggerbot& t)
     read(j, "Friendly fire", t.friendlyFire);
     read(j, "Target backtrack", t.targetBacktrack);
     read(j, "Auto backstab", t.autoBackstab);
-    read(j, "Ignore cloaked", t.ignoreCloaked);
+    read(j, "Ignore", t.ignore);
     read(j, "Shot delay", t.shotDelay);
 }
 
@@ -712,12 +712,12 @@ static void to_json(json& j, const Config::Aimbot::Hitscan& o, const Config::Aim
     WRITE("Silent", silent);
     WRITE("Friendly fire", friendlyFire);
     WRITE("Target backtrack", targetBacktrack);
-    WRITE("Ignore cloaked", ignoreCloaked);
     WRITE("Scoped only", scopedOnly);
     WRITE("Auto shoot", autoScope);
     WRITE("Auto scope", autoScope);
     WRITE("Wait for headshot", waitForHeadshot);
     WRITE("Wait for charge", waitForHeadshot);
+    WRITE("Ignore", ignore);
     WRITE("Sort method", sortMethod);
     WRITE("Hitboxes", hitboxes);
     WRITE("Fov", fov);
@@ -731,7 +731,7 @@ static void to_json(json& j, const Config::Aimbot::Projectile& o, const Config::
     WRITE("Auto shoot", autoShoot);
     WRITE("Silent", silent);
     WRITE("Friendly fire", friendlyFire);
-    WRITE("Ignore cloaked", ignoreCloaked);
+    WRITE("Ignore", ignore);
     WRITE("Sort method", sortMethod);
     WRITE("Fov", fov);
     WRITE("Max time", maxTime);
@@ -743,10 +743,10 @@ static void to_json(json& j, const Config::Aimbot::Melee& o, const Config::Aimbo
     WRITE("Aimlock", aimlock);
     WRITE("Silent", silent);
     WRITE("Friendly fire", friendlyFire);
-    WRITE("Ignore cloaked", ignoreCloaked);
     WRITE("Target backtrack", targetBacktrack);
     WRITE("Auto hit", autoHit);
     WRITE("Auto backstab", autoBackstab);
+    WRITE("Ignore", ignore);
     WRITE("Sort method", sortMethod);
     WRITE("Fov", fov);
 }
@@ -758,8 +758,8 @@ static void to_json(json& j, const Config::HitscanTriggerbot& o, const Config::H
     WRITE("Friendly fire", friendlyFire);
     WRITE("Target backtrack", targetBacktrack);
     WRITE("Scoped only", scopedOnly);
+    WRITE("Ignore", ignore);
     WRITE("Hitboxes", hitboxes);
-    WRITE("Ignore cloaked", ignoreCloaked);
     WRITE("Shot delay", shotDelay);
 }
 
@@ -775,7 +775,7 @@ static void to_json(json& j, const Config::MeleeTriggerbot& o, const Config::Mel
     WRITE("Friendly fire", friendlyFire);
     WRITE("Target backtrack", targetBacktrack);
     WRITE("Auto backstab", autoBackstab);
-    WRITE("Ignore cloaked", ignoreCloaked);
+    WRITE("Ignore", ignore);
     WRITE("Shot delay", shotDelay);
 }
 

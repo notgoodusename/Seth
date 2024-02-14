@@ -180,7 +180,6 @@ void GUI::renderAimbotWindow() noexcept
             ImGuiCustom::colorPicker("Draw fov", config->aimbotFov);
             ImGui::Checkbox("Friendly fire", &config->aimbot.hitscan.friendlyFire);
             ImGui::Checkbox("Target backtrack", &config->aimbot.hitscan.targetBacktrack);
-            ImGui::Checkbox("Ignore cloaked", &config->aimbot.hitscan.ignoreCloaked);
             ImGui::Checkbox("Scoped only", &config->aimbot.hitscan.scopedOnly);
             ImGui::Checkbox("Auto shoot", &config->aimbot.hitscan.autoShoot);
             if (ImGui::IsItemHovered())
@@ -189,6 +188,7 @@ void GUI::renderAimbotWindow() noexcept
             ImGui::Checkbox("Wait for headshot", &config->aimbot.hitscan.waitForHeadshot);
             ImGui::Checkbox("Wait for charge", &config->aimbot.hitscan.waitForHeadshot);
 
+            ImGuiCustom::multiBox("AimbotHitscanIgnore", config->aimbot.hitscan.ignore, "Ignore", "Cloaked\0Invulnerable\0");
             ImGui::Combo("Sort method", &config->aimbot.hitscan.sortMethod, "Distance\0Fov\0");
             ImGuiCustom::multiBox("AimbotHitboxes", config->aimbot.hitscan.hitboxes, "Hitbox", "Head\0Body\0Auto\0", 2);
             
@@ -202,11 +202,11 @@ void GUI::renderAimbotWindow() noexcept
             ImGui::SameLine();
             ImGui::Checkbox("Enabled", &config->aimbot.projectile.enabled);
             ImGui::Checkbox("Aimlock", &config->aimbot.projectile.aimlock);
-            ImGui::Checkbox("Friendly fire", &config->aimbot.projectile.friendlyFire);
             ImGui::Checkbox("Silent", &config->aimbot.projectile.silent);
             ImGuiCustom::colorPicker("Draw fov", config->aimbotFov);
-            ImGui::Checkbox("Ignore cloaked", &config->aimbot.projectile.ignoreCloaked);
+            ImGui::Checkbox("Friendly fire", &config->aimbot.projectile.friendlyFire);
             ImGui::Checkbox("Auto shoot", &config->aimbot.projectile.autoShoot);
+            ImGuiCustom::multiBox("AimbotProjectileIgnore", config->aimbot.projectile.ignore, "Ignore", "Cloaked\0Invulnerable\0");
             ImGui::Combo("Sort method", &config->aimbot.projectile.sortMethod, "Distance\0Fov\0");
 
             ImGui::NextColumn();
@@ -222,10 +222,10 @@ void GUI::renderAimbotWindow() noexcept
             ImGui::Checkbox("Silent", &config->aimbot.melee.silent);
             ImGuiCustom::colorPicker("Draw fov", config->aimbotFov);
             ImGui::Checkbox("Friendly fire", &config->aimbot.melee.friendlyFire);
-            ImGui::Checkbox("Ignore cloaked", &config->aimbot.melee.ignoreCloaked);
             ImGui::Checkbox("Target backtrack", &config->aimbot.melee.targetBacktrack);
             ImGui::Checkbox("Auto hit", &config->aimbot.melee.autoHit);
             ImGui::Checkbox("Auto backstab", &config->aimbot.melee.autoBackstab);
+            ImGuiCustom::multiBox("AimbotMeleeIgnore", config->aimbot.melee.ignore, "Ignore", "Cloaked\0Invulnerable\0");
             ImGui::Combo("Sort method", &config->aimbot.melee.sortMethod, "Distance\0Fov\0");
             ImGui::NextColumn();
             ImGui::PushItemWidth(240.0f);
@@ -258,7 +258,8 @@ void GUI::renderTriggerbotWindow() noexcept
             ImGui::Checkbox("Friendly fire", &config->hitscanTriggerbot.friendlyFire);
             ImGui::Checkbox("Target backtrack", &config->hitscanTriggerbot.targetBacktrack);
             ImGui::Checkbox("Scoped only", &config->hitscanTriggerbot.scopedOnly);
-            ImGui::Checkbox("Ignore cloaked", &config->hitscanTriggerbot.ignoreCloaked);
+            ImGui::SetNextItemWidth(85.0f);
+            ImGuiCustom::multiBox("TriggerbotHitscanIgnore", config->hitscanTriggerbot.ignore, "Ignore", "Cloaked\0Invulnerable\0");
             ImGui::SetNextItemWidth(85.0f);
             ImGuiCustom::multiBox("TriggerbotHitboxes", config->hitscanTriggerbot.hitboxes, "Hitbox", "Head\0Body\0Auto\0", 2);
             ImGui::PushItemWidth(220.0f);
@@ -278,7 +279,7 @@ void GUI::renderTriggerbotWindow() noexcept
             {
                 ImGui::Checkbox("Silent", &config->projectileTriggerbot.autoDetonate.silent);
                 ImGui::Checkbox("Friendly fire", &config->projectileTriggerbot.autoDetonate.friendlyFire);
-                ImGuiCustom::multiBox("AutoDetonate", config->projectileTriggerbot.autoDetonate.ignore, "Ignore", "None\0Cloaked\0Invulnerable\0", 0);
+                ImGuiCustom::multiBox("AutoDetonate", config->projectileTriggerbot.autoDetonate.ignore, "Ignore", "Cloaked\0Invulnerable\0");
                 ImGui::EndPopup();
             }
             break;
@@ -288,7 +289,8 @@ void GUI::renderTriggerbotWindow() noexcept
             ImGui::Checkbox("Friendly fire", &config->meleeTriggerbot.friendlyFire);
             ImGui::Checkbox("Target backtrack", &config->meleeTriggerbot.targetBacktrack);
             ImGui::Checkbox("Auto backstab", &config->meleeTriggerbot.autoBackstab);
-            ImGui::Checkbox("Ignore cloaked", &config->meleeTriggerbot.ignoreCloaked);
+            ImGui::SetNextItemWidth(85.0f);
+            ImGuiCustom::multiBox("TriggerbotMeleeIgnore", config->meleeTriggerbot.ignore, "Ignore", "Cloaked\0Invulnerable\0");
             ImGui::PushItemWidth(220.0f);
             ImGui::SliderInt("Shot delay", &config->meleeTriggerbot.shotDelay, 0, 250, "%d ms");
             break;

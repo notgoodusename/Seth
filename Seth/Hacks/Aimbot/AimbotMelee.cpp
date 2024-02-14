@@ -67,14 +67,20 @@ void runKnife(Entity* activeWeapon, UserCmd* cmd) noexcept
     const auto& localPlayerOrigin = localPlayer->getAbsOrigin();
     const auto& localPlayerEyePosition = localPlayer->getEyePosition();
 
+    const bool ignoreCloaked = (cfg.ignore & 1 << 1) == 1 << 1;
+    const bool ignoreInvulnerable = (cfg.ignore & 1 << 2) == 1 << 2;
     for (const auto& target : enemies)
     {
         if (target.playerData.empty() || !target.isAlive || target.priority == 0)
             continue;
 
         auto entity{ interfaces->entityList->getEntityFromHandle(target.handle) };
-        if ((entity->isCloaked() && cfg.ignoreCloaked) || (!entity->isEnemy(localPlayer.get()) && !cfg.friendlyFire))
+        if (!entity ||
+            (entity->isCloaked() && ignoreCloaked) ||
+            (entity->isInvulnerable() && ignoreInvulnerable) ||
+            (!entity->isEnemy(localPlayer.get()) && !cfg.friendlyFire))
             continue;
+
 
         matrix3x4* backupBoneCache = entity->getBoneCache().memory;
         Vector backupPrescaledMins = entity->getCollideable()->obbMinsPreScaled();
@@ -249,13 +255,19 @@ void AimbotMelee::run(Entity* activeWeapon, UserCmd* cmd) noexcept
     Vector bestTarget{ };
     const auto& localPlayerOrigin = localPlayer->getAbsOrigin();
     const auto& localPlayerEyePosition = localPlayer->getEyePosition();
+
+    const bool ignoreCloaked = (cfg.ignore & 1 << 1) == 1 << 1;
+    const bool ignoreInvulnerable = (cfg.ignore & 1 << 2) == 1 << 2;
     for (const auto& target : enemies)
     {
         if (target.playerData.empty() || !target.isAlive || target.priority == 0)
             continue;
 
         auto entity{ interfaces->entityList->getEntityFromHandle(target.handle) };
-        if (!entity || (entity->isCloaked() && cfg.ignoreCloaked) || (!entity->isEnemy(localPlayer.get()) && !cfg.friendlyFire))
+        if (!entity ||
+            (entity->isCloaked() && ignoreCloaked) ||
+            (entity->isInvulnerable() && ignoreInvulnerable) ||
+            (!entity->isEnemy(localPlayer.get()) && !cfg.friendlyFire))
             continue;
 
         matrix3x4* backupBoneCache = entity->getBoneCache().memory;

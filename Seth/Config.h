@@ -65,7 +65,7 @@ public:
             constexpr auto operator!=(const Hitscan& h) const noexcept
             {
                 return enabled != h.enabled || aimlock != h.aimlock || silent != h.silent
-                    || friendlyFire != h.friendlyFire || ignoreCloaked != h.ignoreCloaked
+                    || friendlyFire != h.friendlyFire || ignore != h.ignore
                     || scopedOnly != h.scopedOnly || targetBacktrack != h.targetBacktrack || autoShoot != h.autoShoot
                     || autoScope != h.autoScope || waitForHeadshot != h.waitForHeadshot
                     || waitForCharge != h.waitForCharge || sortMethod != h.sortMethod
@@ -75,13 +75,13 @@ public:
             bool aimlock{ false };
             bool silent{ false };
             bool friendlyFire{ false };
-            bool ignoreCloaked{ true };
             bool scopedOnly{ true };
             bool targetBacktrack{ true };
             bool autoShoot{ false };
             bool autoScope{ false };
             bool waitForHeadshot{ false };
             bool waitForCharge{ false };
+            int ignore{ 0 };
             int sortMethod{ 0 };
             int hitboxes{ 0 };
             float fov{ 255.0f };
@@ -91,7 +91,7 @@ public:
             constexpr auto operator!=(const Projectile& p) const noexcept
             {
                 return enabled != p.enabled || aimlock != p.aimlock || silent != p.silent || friendlyFire != p.friendlyFire ||
-                    ignoreCloaked != p.ignoreCloaked || autoShoot != p.autoShoot ||
+                    ignore != p.ignore || autoShoot != p.autoShoot ||
                     sortMethod != p.sortMethod || fov != p.fov
                     || maxTime != p.maxTime;
             }
@@ -99,8 +99,8 @@ public:
             bool aimlock{ false };
             bool silent{ false };
             bool friendlyFire{ false };
-            bool ignoreCloaked{ true };
             bool autoShoot{ false };
+            int ignore{ 0 };
             int sortMethod{ 0 };
             float fov{ 255.0f };
             float maxTime{ 1.0f };
@@ -109,7 +109,7 @@ public:
             constexpr auto operator!=(const Melee& m) const noexcept
             {
                 return enabled != m.enabled || aimlock != m.aimlock || silent != m.silent 
-                    || friendlyFire != m.friendlyFire || ignoreCloaked != m.ignoreCloaked
+                    || friendlyFire != m.friendlyFire || ignore != m.ignore
                     || targetBacktrack != m.targetBacktrack|| autoHit != m.autoHit
                     || autoBackstab != m.autoBackstab || sortMethod != m.sortMethod
                     || fov != m.fov;
@@ -118,10 +118,10 @@ public:
             bool aimlock{ false };
             bool silent{ false };
             bool friendlyFire{ false };
-            bool ignoreCloaked{ true };
             bool targetBacktrack{ true };
             bool autoHit{ false };
             bool autoBackstab{ true };
+            int ignore{ 0 };
             int sortMethod{ 0 };
             float fov{ 255.0f };
         } melee;
@@ -135,7 +135,7 @@ public:
         bool friendlyFire{ false };
         bool targetBacktrack{ true };
         bool scopedOnly{ true };
-        bool ignoreCloaked{ true };
+        int ignore{ 0 };
         int hitboxes{ 0 };
         int shotDelay{ 0 };
     } hitscanTriggerbot;
@@ -158,7 +158,7 @@ public:
         bool friendlyFire{ false };
         bool targetBacktrack{ true };
         bool autoBackstab{ true };
-        bool ignoreCloaked{ true };
+        int ignore{ 0 };
         int shotDelay{ 0 };
     } meleeTriggerbot;
 
