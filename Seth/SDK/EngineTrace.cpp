@@ -43,6 +43,32 @@ bool TraceFilterHitscanIgnoreTeammates::shouldHitEntity(Entity* serverEntity, in
     return serverEntity != passEntity;
 }
 
+bool TraceFilterWorldCustom::shouldHitEntity(Entity* serverEntity, int contentsMask) noexcept
+{
+    if (!serverEntity)
+        return false;
+
+    switch (serverEntity->getClassId())
+    {
+    case ClassId::ObjectCartDispenser:
+    case ClassId::BaseDoor:
+    case ClassId::PhysicsProp:
+    case ClassId::DynamicProp:
+    case ClassId::BaseEntity:
+    case ClassId::FuncTrackTrain:
+        return true;
+    case ClassId::TFPlayer:
+    case ClassId::ObjectSentrygun:
+    case ClassId::ObjectDispenser:
+    case ClassId::ObjectTeleporter:
+        return serverEntity == passEntity;
+    default:
+        break;
+    }
+    
+    return false;
+}
+
 bool TraceFilterHitscan::shouldHitEntity(Entity* serverEntity, int contentsMask) noexcept
 {
     if (!serverEntity)

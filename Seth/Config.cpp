@@ -193,6 +193,14 @@ static void from_json(const json& j, Config::Visuals::BulletTracers& o)
     read(j, "Type", o.type);
 }
 
+static void from_json(const json& j, Config::ProjectileTriggerbot::AutoDetonate& ad)
+{
+    read(j, "Enabled", ad.enabled);
+    read(j, "Silent", ad.silent);
+    read(j, "Friendly fire", ad.friendlyFire);
+    read(j, "Ignore", ad.ignore);
+}
+
 static void from_json(const json& j, ImVec2& v)
 {
     read(j, "X", v.x);
@@ -262,6 +270,12 @@ static void from_json(const json& j, Config::HitscanTriggerbot& t)
     read(j, "Hitboxes", t.hitboxes);
     read(j, "Ignore cloaked", t.ignoreCloaked);
     read(j, "Shot delay", t.shotDelay);
+}
+
+static void from_json(const json& j, Config::ProjectileTriggerbot& pt)
+{
+    read(j, "Enabled", pt.enabled);
+    read<value_t::object>(j, "Auto detonate", pt.autoDetonate);
 }
 
 static void from_json(const json& j, Config::MeleeTriggerbot& t)
@@ -530,6 +544,7 @@ void Config::load(const char8_t* name, bool incremental) noexcept
     read<value_t::object>(j, "Draw aimbot fov", aimbotFov);
 
     read<value_t::object>(j, "Hitscan triggerbot", hitscanTriggerbot);
+    read<value_t::object>(j, "Projectile triggerbot", projectileTriggerbot);
     read<value_t::object>(j, "Melee triggerbot", meleeTriggerbot);
     read(j, "Triggerbot Key", triggerbotKey);
 
@@ -673,6 +688,14 @@ static void to_json(json& j, const ImVec2& o, const ImVec2& dummy = {})
     WRITE("Y", y);
 }
 
+static void to_json(json& j, const Config::ProjectileTriggerbot::AutoDetonate& o, const Config::ProjectileTriggerbot::AutoDetonate& dummy = {})
+{
+    WRITE("Enabled", enabled);
+    WRITE("Silent", silent);
+    WRITE("Friendly fire", friendlyFire);
+    WRITE("Ignore", ignore);
+}
+
 static void to_json(json& j, const Config::Aimbot& o)
 {
     const Config::Aimbot dummy;
@@ -738,6 +761,12 @@ static void to_json(json& j, const Config::HitscanTriggerbot& o, const Config::H
     WRITE("Hitboxes", hitboxes);
     WRITE("Ignore cloaked", ignoreCloaked);
     WRITE("Shot delay", shotDelay);
+}
+
+static void to_json(json& j, const Config::ProjectileTriggerbot& o, const Config::ProjectileTriggerbot& dummy = {})
+{
+    WRITE("Enabled", enabled);
+    WRITE("Auto detonate", autoDetonate);
 }
 
 static void to_json(json& j, const Config::MeleeTriggerbot& o, const Config::MeleeTriggerbot& dummy = {})
@@ -1037,6 +1066,7 @@ void Config::save(size_t id) const noexcept
         j["Draw aimbot fov"] = aimbotFov;
 
         j["Hitscan triggerbot"] = hitscanTriggerbot;
+        j["Projectile triggerbot"] = projectileTriggerbot;
         j["Melee triggerbot"] = meleeTriggerbot;
         to_json(j["Triggerbot Key"], triggerbotKey, KeyBind::NONE);
 
@@ -1093,6 +1123,7 @@ void Config::reset() noexcept
     tickbase = { };
     backtrack = { };
     hitscanTriggerbot = { };
+    projectileTriggerbot = { };
     meleeTriggerbot = { };
     chams = { };
     buildingChams = { }; 

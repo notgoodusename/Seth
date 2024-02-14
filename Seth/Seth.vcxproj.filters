@@ -272,6 +272,9 @@
     <ClCompile Include="Hacks\ProjectileTrajectory.cpp">
       <Filter>Hacks</Filter>
     </ClCompile>
+    <ClCompile Include="Hacks\Triggerbot\TriggerbotProjectile.cpp">
+      <Filter>Hacks\Triggerbot</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GUI.h">
@@ -675,6 +678,9 @@
     </ClInclude>
     <ClInclude Include="Hacks\ProjectileTrajectory.h">
       <Filter>Hacks</Filter>
+    </ClInclude>
+    <ClInclude Include="Hacks\Triggerbot\TriggerbotProjectile.h">
+      <Filter>Hacks\Triggerbot</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

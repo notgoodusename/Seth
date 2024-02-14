@@ -7,6 +7,7 @@
 
 LocalPlayerInfo localPlayerInfo;
 std::vector<PlayerTarget> playersTargets;
+std::vector<int> localStickies;
 
 static auto playerTargetByHandle(int handle) noexcept
 {
@@ -23,18 +24,38 @@ void TargetSystem::updateFrame() noexcept
         return;
     }
 
-    for (int i = 1; i <= interfaces->engine->getMaxClients(); i++)
+    localStickies.clear();
+
+    const auto highestEntityIndex = interfaces->entityList->getHighestEntityIndex();
+    for (int i = 1; i <= highestEntityIndex; ++i)
     {
         const auto entity = interfaces->entityList->getEntity(i);
-        if (!entity || !entity->isPlayer() || entity == localPlayer.get() 
-            || entity->isDormant())
+        if (!entity)
             continue;
+        
+        if (entity->isPlayer())
+        {
+            if (entity == localPlayer.get() || entity->isDormant())
+                continue;
 
-        if (const auto player = playerTargetByHandle(entity->handle())) {
-            player->update(entity);
+            if (const auto player = playerTargetByHandle(entity->handle())) {
+                player->update(entity);
+            }
+            else {
+                playersTargets.emplace_back(entity);
+            }
         }
-        else {
-            playersTargets.emplace_back(entity);
+        else
+        {
+            switch (entity->getClassId())
+            {
+                case ClassId::TFGrenadePipebombProjectile:
+                    if ((entity->type() == 1 || entity->type() == 2) && entity->thrower() == localPlayerInfo.handle)
+                        localStickies.push_back(entity->handle());
+                    break;
+                default:
+                    break;
+            }
         }
     }
 
@@ -150,4 +171,9 @@ const std::vector<PlayerTarget>& TargetSystem::playerTargets(int sortType) noexc
 const PlayerTarget* TargetSystem::playerByHandle(int handle) noexcept
 {
     return playerTargetByHandle(handle);
+}
+
+const std::vector<int>& TargetSystem::localStickiesHandles() noexcept
+{
+    return localStickies;
 }

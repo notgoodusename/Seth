@@ -157,11 +157,6 @@ static void menuBarItem(const char* name, bool& enabled) noexcept
 
 void GUI::renderAimbotWindow() noexcept
 {
-    static const char* hitboxes[]{ "Head","Body","Auto" };
-    static bool hitbox[ARRAYSIZE(hitboxes)] = { false, false, false };
-    static std::string previewvalue = "";
-    bool once = false;
-
     ImGui::PushID("Key");
     ImGui::hotkey2("Key", config->aimbotKey);
     ImGui::PopID();
@@ -195,67 +190,8 @@ void GUI::renderAimbotWindow() noexcept
             ImGui::Checkbox("Wait for charge", &config->aimbot.hitscan.waitForHeadshot);
 
             ImGui::Combo("Sort method", &config->aimbot.hitscan.sortMethod, "Distance\0Fov\0");
+            ImGuiCustom::multiBox("AimbotHitboxes", config->aimbot.hitscan.hitboxes, "Hitbox", "Head\0Body\0Auto\0", 2);
             
-            if (config->aimbot.hitscan.hitboxes & 1 << 2)
-            {
-                config->aimbot.hitscan.hitboxes &= ~(1 << 0);
-                config->aimbot.hitscan.hitboxes &= ~(1 << 1);
-            }
-
-            for (size_t i = 0; i < ARRAYSIZE(hitbox); i++)
-            {
-                hitbox[i] = (config->aimbot.hitscan.hitboxes & 1 << i) == 1 << i;
-            }
-
-
-            if (ImGui::BeginCombo("Hitbox", previewvalue.c_str()))
-            {
-                bool wasAutoActive = hitbox[2];
-                
-                previewvalue = "";
-                for (size_t i = 0; i < ARRAYSIZE(hitboxes); i++)
-                {
-                    ImGui::Selectable(hitboxes[i], &hitbox[i], ImGuiSelectableFlags_::ImGuiSelectableFlags_DontClosePopups);
-                }
-
-                if ((hitbox[0] || hitbox[1]) && wasAutoActive)
-                {
-                    hitbox[2] = false;
-                }
-
-                if (hitbox[2])
-                {
-                    hitbox[0] = false;
-                    hitbox[1] = false;
-                }
-
-                ImGui::EndCombo();
-            }
-
-            for (size_t i = 0; i < ARRAYSIZE(hitboxes); i++)
-            {
-                if (!once)
-                {
-                    previewvalue = "";
-                    once = true;
-                }
-
-                if (hitbox[i])
-                {
-                    previewvalue += previewvalue.size() ? std::string(", ") + hitboxes[i] : hitboxes[i];
-                    config->aimbot.hitscan.hitboxes |= 1 << i;
-                }
-                else
-                {
-                    config->aimbot.hitscan.hitboxes &= ~(1 << i);
-                }
-            }
-
-            if ((config->aimbot.hitscan.hitboxes & 1 << 0) == 1 << 0 || (config->aimbot.hitscan.hitboxes & 1 << 1) == 1 << 1)
-            {
-                config->aimbot.hitscan.hitboxes &= ~(1 << 2);
-            }
-
             ImGui::NextColumn();
             ImGui::PushItemWidth(240.0f);
             ImGui::SliderFloat("Fov", &config->aimbot.hitscan.fov, 0.0f, 255.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
@@ -303,17 +239,13 @@ void GUI::renderAimbotWindow() noexcept
 
 void GUI::renderTriggerbotWindow() noexcept
 {
-    static const char* hitboxes[]{ "Head","Body","Auto" };
-    static bool hitbox[ARRAYSIZE(hitboxes)] = { false, false, false };
-    static std::string previewvalue = "";
-
     ImGui::hotkey2("Key", config->triggerbotKey, 80.0f);
     ImGui::Separator();
 
     static int currentCategory{ 0 };
     ImGui::PushItemWidth(110.0f);
     ImGui::PushID(0);
-    ImGui::Combo("", &currentCategory, "Hitscan\0Melee\0");
+    ImGui::Combo("", &currentCategory, "Hitscan\0Projectile\0Melee\0");
     ImGui::PopID();
 
     ImGui::SameLine();
@@ -328,62 +260,30 @@ void GUI::renderTriggerbotWindow() noexcept
             ImGui::Checkbox("Scoped only", &config->hitscanTriggerbot.scopedOnly);
             ImGui::Checkbox("Ignore cloaked", &config->hitscanTriggerbot.ignoreCloaked);
             ImGui::SetNextItemWidth(85.0f);
-
-            for (size_t i = 0; i < ARRAYSIZE(hitbox); i++)
-            {
-                hitbox[i] = (config->hitscanTriggerbot.hitboxes & 1 << i) == 1 << i;
-            }
-
-            if (ImGui::BeginCombo("Hitbox", previewvalue.c_str()))
-            {
-                bool wasAutoActive = hitbox[2];
-
-                previewvalue = "";
-                for (size_t i = 0; i < ARRAYSIZE(hitboxes); i++)
-                {
-                    ImGui::Selectable(hitboxes[i], &hitbox[i], ImGuiSelectableFlags_::ImGuiSelectableFlags_DontClosePopups);
-                }
-
-                if ((hitbox[0] || hitbox[1]) && wasAutoActive)
-                {
-                    hitbox[2] = false;
-                }
-
-                if (hitbox[2])
-                {
-                    hitbox[0] = false;
-                    hitbox[1] = false;
-                }
-
-                ImGui::EndCombo();
-            }
-            for (size_t i = 0; i < ARRAYSIZE(hitboxes); i++)
-            {
-                if (i == 0)
-                    previewvalue = "";
-
-                if (hitbox[i])
-                {
-                    previewvalue += previewvalue.size() ? std::string(", ") + hitboxes[i] : hitboxes[i];
-                    config->hitscanTriggerbot.hitboxes |= 1 << i;
-                }
-                else
-                {
-                    config->hitscanTriggerbot.hitboxes &= ~(1 << i);
-                }
-            }
-
-            if (((config->hitscanTriggerbot.hitboxes & 1 << 0) == 1 << 0
-                || (config->hitscanTriggerbot.hitboxes & 1 << 1) == 1 << 1))
-            {
-                config->hitscanTriggerbot.hitboxes &= ~(1 << 2);
-            }
-
+            ImGuiCustom::multiBox("TriggerbotHitboxes", config->hitscanTriggerbot.hitboxes, "Hitbox", "Head\0Body\0Auto\0", 2);
             ImGui::PushItemWidth(220.0f);
             ImGui::SliderInt("Shot delay", &config->hitscanTriggerbot.shotDelay, 0, 250, "%d ms");
             break;
         }
         case 1:
+        {
+            ImGui::Checkbox("Enabled", &config->projectileTriggerbot.enabled);
+            ImGui::Checkbox("Auto detonate", &config->projectileTriggerbot.autoDetonate.enabled);
+            ImGui::SameLine();
+
+            if (bool ccPopup = ImGui::Button("Edit"))
+                ImGui::OpenPopup("##autoDetonateEdit");
+
+            if (ImGui::BeginPopup("##autoDetonateEdit"))
+            {
+                ImGui::Checkbox("Silent", &config->projectileTriggerbot.autoDetonate.silent);
+                ImGui::Checkbox("Friendly fire", &config->projectileTriggerbot.autoDetonate.friendlyFire);
+                ImGuiCustom::multiBox("AutoDetonate", config->projectileTriggerbot.autoDetonate.ignore, "Ignore", "None\0Cloaked\0Invulnerable\0", 0);
+                ImGui::EndPopup();
+            }
+            break;
+        }
+        case 2:
             ImGui::Checkbox("Enabled", &config->meleeTriggerbot.enabled);
             ImGui::Checkbox("Friendly fire", &config->meleeTriggerbot.friendlyFire);
             ImGui::Checkbox("Target backtrack", &config->meleeTriggerbot.targetBacktrack);
@@ -1260,7 +1160,7 @@ void GUI::renderConfigWindow() noexcept
                     switch (i) {
                     case 0: config->reset(); break;
                     case 1: config->aimbot = { }; config->aimbotKey.reset(); break;
-                    case 2: config->hitscanTriggerbot = { }; config->meleeTriggerbot = { }; config->triggerbotKey.reset();  break;
+                    case 2: config->hitscanTriggerbot = { }; config->projectileTriggerbot = { }; config->meleeTriggerbot = { }; config->triggerbotKey.reset();  break;
                     case 3: config->backtrack = { };  break;
                     case 4: config->antiAim = { }; break;
                     case 6: config->fakelag = { }; break;

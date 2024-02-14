@@ -30,7 +30,8 @@ void ProjectileTrajectory::calculate(UserCmd* cmd) noexcept
 		return;
 	}
 
-	if (!localPlayer || !localPlayer->isAlive())
+	if (!localPlayer || !localPlayer->isAlive() || localPlayer->isTaunting() || localPlayer->isBonked()
+		|| localPlayer->isInBumperKart() || localPlayer->isAGhost())
 	{
 		mutex.unlock();
 		return;

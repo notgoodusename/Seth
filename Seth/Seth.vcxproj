@@ -49,6 +49,7 @@
     <ClCompile Include="Hacks\Triggerbot\Triggerbot.cpp" />
     <ClCompile Include="Hacks\Triggerbot\TriggerbotHitscan.cpp" />
     <ClCompile Include="Hacks\Triggerbot\TriggerbotMelee.cpp" />
+    <ClCompile Include="Hacks\Triggerbot\TriggerbotProjectile.cpp" />
     <ClCompile Include="Hacks\Visuals.cpp" />
     <ClCompile Include="Helpers.cpp" />
     <ClCompile Include="Hooks\MinHook.cpp" />
@@ -114,6 +115,7 @@
     <ClInclude Include="Hacks\SkinChanger.h" />
     <ClInclude Include="Hacks\StreamProofESP.h" />
     <ClInclude Include="Hacks\TargetSystem.h" />
+    <ClInclude Include="Hacks\Triggerbot\TriggerbotProjectile.h" />
     <ClInclude Include="Hacks\Triggerbot\Triggerbot.h" />
     <ClInclude Include="Hacks\Triggerbot\TriggerbotHitscan.h" />
     <ClInclude Include="Hacks\Triggerbot\TriggerbotMelee.h" />

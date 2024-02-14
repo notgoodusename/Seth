@@ -836,6 +836,8 @@ public:
     NETVAR(objectMaxHealth, "CBaseObject", "m_iMaxHealth", int)
     NETVAR(objectCarried, "CBaseObject", "m_bCarried", bool)
 
+    NETVAR(thrower, "CBaseGrenade", "m_hThrower", int)
+
     NETVAR(lastFireTime, "CTFWeaponBase", "m_flLastFireTime", float)
     NETVAR_OFFSET(smackTime, "CTFWeaponBase", "m_nInspectStage", 0x1C, float)
     NETVAR(observedCritChance, "CTFWeaponBase", "m_flObservedCritChance", float)
@@ -851,6 +853,12 @@ public:
     NETVAR(eyeAngles, "CTFPlayer", "m_angEyeAngles[0]", Vector)
 
     NETVAR(chargeTime, "CTFPipebombLauncher", "m_flChargeBeginTime", float)
+
+    NETVAR(touched, "CTFGrenadePipebombProjectile", "m_bTouched", bool)
+    NETVAR(type, "CTFGrenadePipebombProjectile", "m_iType", int)
+    NETVAR(launcher, "CTFGrenadePipebombProjectile", "m_hLauncher", int)
+    NETVAR(defensiveBomb, "CTFGrenadePipebombProjectile", "m_bDefensiveBomb", int)
+    NETVAR_OFFSET(creationTime, "CTFGrenadePipebombProjectile", "m_iType", 4, float)
 
     NETVAR(chargedDamage, "CTFSniperRifle", "m_flChargedDamage", float)
 

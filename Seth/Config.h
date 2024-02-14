@@ -140,6 +140,19 @@ public:
         int shotDelay{ 0 };
     } hitscanTriggerbot;
 
+    struct ProjectileTriggerbot {
+        bool enabled{ false };
+
+        struct AutoDetonate
+        {
+            bool enabled{ false };
+            bool silent{ true };
+            bool friendlyFire{ false };
+            int ignore{ 0 };
+        } autoDetonate;
+
+   } projectileTriggerbot;
+
     struct MeleeTriggerbot {
         bool enabled{ false };
         bool friendlyFire{ false };

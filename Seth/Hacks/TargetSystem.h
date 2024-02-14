@@ -19,8 +19,11 @@ namespace TargetSystem
 	void setPriority(int handle, int priority) noexcept;
 
 	const LocalPlayerInfo& local() noexcept;
+
 	const std::vector<PlayerTarget>& playerTargets(int sortType = -1) noexcept;
 	const PlayerTarget* playerByHandle(int handle) noexcept;
+
+	const std::vector<int>& localStickiesHandles() noexcept;
 };
 
 struct LocalPlayerInfo 
