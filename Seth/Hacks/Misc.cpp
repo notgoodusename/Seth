@@ -763,9 +763,6 @@ void Misc::revealVotes(GameEvent* event) noexcept
     if (!config->misc.revealVotes)
         return;
 
-    if (!event)
-        return;
-
     const auto entity = interfaces->entityList->getEntity(event->getInt("entityid"));
     if (!entity || !entity->isPlayer())
         return;

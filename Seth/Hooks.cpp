@@ -286,6 +286,9 @@ static void __stdcall lockCursor() noexcept
 
 static bool __fastcall fireEventClientSide(void* thisPointer, void*, GameEvent* event) noexcept
 {
+    if (!event)
+        return hooks->eventManager.callOriginal<bool, 8>(event);
+
     switch (fnv::hashRuntime(event->getName())) 
     {
         case fnv::hash("teamplay_round_start"):
