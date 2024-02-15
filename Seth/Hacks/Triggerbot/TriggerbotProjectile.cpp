@@ -21,32 +21,15 @@ void runAutoDetonate(Entity* activeWeapon, UserCmd* cmd) noexcept
 		if (weaponHandle == -1)
 			break;
 
-		auto weapon = reinterpret_cast<Entity*>(interfaces->entityList->getEntityFromHandle(weaponHandle));
+		auto weapon = interfaces->entityList->getEntityFromHandle(weaponHandle);
 		if (!weapon)
 			continue;
 
-		switch (weapon->itemDefinitionIndex())
+		const auto weapondId = weapon->weaponId();
+
+		switch (weapon->weaponId())
 		{
-		case Demoman_s_StickyJumper:
-		case Demoman_m_GrenadeLauncher:
-		case Demoman_m_GrenadeLauncherR:
-		case Demoman_m_FestiveGrenadeLauncher:
-		case Demoman_m_TheIronBomber:
-		case Demoman_m_Autumn:
-		case Demoman_m_MacabreWeb:
-		case Demoman_m_Rainbow:
-		case Demoman_m_SweetDreams:
-		case Demoman_m_CoffinNail:
-		case Demoman_m_TopShelf:
-		case Demoman_m_Warhawk:
-		case Demoman_m_ButcherBird:
-		case Demoman_m_TheLochnLoad:
-		case Demoman_m_TheLooseCannon:
-		case Demoman_s_StickybombLauncher:
-		case Demoman_s_StickybombLauncherR:
-		case Demoman_s_FestiveStickybombLauncher:
-		case Demoman_s_TheScottishResistance:
-		case Demoman_s_TheQuickiebombLauncher:
+		case WeaponId::PIPEBOMBLAUNCHER:
 			noStickyLauncher = false;
 			break;
 		default:
@@ -76,10 +59,7 @@ void runAutoDetonate(Entity* activeWeapon, UserCmd* cmd) noexcept
 		if (sticky->type() == 2)
 			continue;
 
-		float a = sticky->creationTime();
-		float b = memory->globalVars->serverTime();
-
-		if (memory->globalVars->serverTime() < a + stickyArmTime)
+		if (memory->globalVars->serverTime() <= sticky->creationTime() + stickyArmTime)
 			continue;
 
 		float radius = sticky->touched() ? 150.0f : 100.0f;
@@ -141,4 +121,8 @@ void TriggerbotProjectile::run(Entity* activeWeapon, UserCmd* cmd) noexcept
 		return;
 
 	runAutoDetonate(activeWeapon, cmd);
+
+	const auto weaponType = activeWeapon->getWeaponType();
+	if (weaponType != WeaponType::PROJECTILE)
+		return;
 }

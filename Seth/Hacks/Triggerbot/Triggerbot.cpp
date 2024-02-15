@@ -39,15 +39,14 @@ void Triggerbot::run(UserCmd* cmd) noexcept
     case WeaponType::HITSCAN:
         TriggerbotHitscan::run(activeWeapon, cmd, lastTime, lastContact);
         break;
-    case WeaponType::PROJECTILE:
-        TriggerbotProjectile::run(activeWeapon, cmd);
-        break;
     case WeaponType::MELEE:
         TriggerbotMelee::run(activeWeapon, cmd, lastTime, lastContact);
         break;
     default:
         break;
     }
+
+    TriggerbotProjectile::run(activeWeapon, cmd);
 }
 
 void Triggerbot::updateInput() noexcept
