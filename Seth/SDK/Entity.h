@@ -845,6 +845,7 @@ public:
     NETVAR(objectCarried, "CBaseObject", "m_bCarried", bool)
 
     NETVAR(thrower, "CBaseGrenade", "m_hThrower", int)
+    NETVAR(damageRadius, "CBaseGrenade", "m_DmgRadius", float)
 
     NETVAR(lastFireTime, "CTFWeaponBase", "m_flLastFireTime", float)
     NETVAR_OFFSET(smackTime, "CTFWeaponBase", "m_nInspectStage", 0x1C, float)

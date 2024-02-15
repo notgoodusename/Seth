@@ -8,11 +8,15 @@
 
 void runAutoDetonate(Entity* activeWeapon, UserCmd* cmd) noexcept
 {
+	static auto grenadeLauncherLiveTime = interfaces->cvar->findVar("tf_grenadelauncher_livetime");
+	static auto stickyRadiusRampTime = interfaces->cvar->findVar("tf_sticky_radius_ramp_time");
+	static auto stickyAirdetRadius = interfaces->cvar->findVar("tf_sticky_airdet_radius");
+
 	const auto& cfg = config->projectileTriggerbot.autoDetonate;
 	if (!cfg.enabled)
 		return;
 
-	bool noStickyLauncher = true;
+	Entity* stickyLauncher = nullptr;
 
 	auto& weapons = localPlayer->weapons();
 
@@ -30,17 +34,20 @@ void runAutoDetonate(Entity* activeWeapon, UserCmd* cmd) noexcept
 		switch (weapon->weaponId())
 		{
 		case WeaponId::PIPEBOMBLAUNCHER:
-			noStickyLauncher = false;
+			stickyLauncher = weapon;
 			break;
 		default:
 			break;
 		}
 	}
 
-	if (noStickyLauncher)
+	if (!stickyLauncher)
 		return;
 
-	const float stickyArmTime = AttributeManager::attributeHookFloat(0.8f, "sticky_arm_time", localPlayer.get());
+	const float armTime = grenadeLauncherLiveTime->getFloat();
+	const float radiusRampTime = stickyRadiusRampTime->getFloat();
+	const float airdetRadius = stickyAirdetRadius->getFloat();
+	const float stickyArmTime = AttributeManager::attributeHookFloat(grenadeLauncherLiveTime->getFloat(), "sticky_arm_time", localPlayer.get());
 
 	const auto& localStickiesHandles = TargetSystem::localStickiesHandles();
 	if (localStickiesHandles.empty())
@@ -59,10 +66,14 @@ void runAutoDetonate(Entity* activeWeapon, UserCmd* cmd) noexcept
 		if (sticky->type() == 2)
 			continue;
 
-		if (memory->globalVars->serverTime() <= sticky->creationTime() + stickyArmTime)
+		const float creationTime = sticky->creationTime();
+
+		if (memory->globalVars->serverTime() <= creationTime + stickyArmTime)
 			continue;
 
-		float radius = sticky->touched() ? 150.0f : 100.0f;
+		float radius = AttributeManager::attributeHookFloat(sticky->damageRadius(), "mult_explosion_radius", stickyLauncher);
+		if (!sticky->touched())
+			radius *= Helpers::remapValClamped(memory->globalVars->serverTime() - creationTime, armTime, armTime + radiusRampTime, airdetRadius, 1.0f);
 
 		for (const auto& target : enemies)
 		{
