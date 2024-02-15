@@ -121,7 +121,8 @@ void TriggerbotHitscan::run(Entity* activeWeapon, UserCmd* cmd, float& lastTime,
             (!entity->isEnemy(localPlayer.get()) && !cfg.friendlyFire))
             continue;
 
-        matrix3x4* backupBoneCache = entity->getBoneCache().memory;
+        matrix3x4 backupBoneCache[MAXSTUDIOBONES];
+        memcpy(backupBoneCache, entity->getBoneCache().memory, std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
         Vector backupPrescaledMins = entity->getCollideable()->obbMinsPreScaled();
         Vector backupPrescaledMaxs = entity->getCollideable()->obbMaxsPreScaled();
         Vector backupOrigin = entity->getAbsOrigin();
