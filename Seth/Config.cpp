@@ -167,6 +167,10 @@ static void from_json(const json& j, HealthBar& o)
 {
     from_json(j, static_cast<ColorToggle&>(o));
     read(j, "Type", o.type);
+    read<value_t::object>(j, "Top color", o.top);
+    read<value_t::object>(j, "Middle color", o.middle);
+    read<value_t::object>(j, "Bottom color", o.bottom);
+    read(j, "Show numbers", o.showNumbers);
 }
 
 static void from_json(const json& j, Player& p)
@@ -647,6 +651,10 @@ static void to_json(json& j, const HealthBar& o, const HealthBar& dummy = {})
 {
     to_json(j, static_cast<const ColorToggle&>(o), dummy);
     WRITE("Type", type);
+    WRITE("Top color", top);
+    WRITE("Middle color", middle);
+    WRITE("Bottom color", bottom);
+    WRITE("Show numbers", showNumbers);
 }
 
 static void to_json(json& j, const Player& o, const Player& dummy = {})

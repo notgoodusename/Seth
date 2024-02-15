@@ -96,6 +96,10 @@ struct HealthBar : ColorToggle {
     };
 
     int type = Type::Gradient;
+    Color4 top{ 0.0f, 1.0f, 0.0f, 1.0f};
+    Color4 middle{ 1.0f, 1.0f, 0.0f, 1.0f };
+    Color4 bottom{ 1.0f, 0.0f, 0.0f, 1.0f };
+    bool showNumbers{ true };
 };
 
 struct Player : Shared {

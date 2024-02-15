@@ -760,10 +760,16 @@ void GUI::renderStreamProofESPWindow() noexcept
             if (ImGui::BeginPopup("")) {
                 ImGui::SetNextItemWidth(95.0f);
                 ImGui::Combo("Type", &playerConfig.healthBar.type, "Gradient\0Solid\0Health-based\0");
-                if (playerConfig.healthBar.type == HealthBar::Solid) {
-                    ImGui::SameLine();
+                if (playerConfig.healthBar.type == HealthBar::Gradient)
+                {
+                    ImGuiCustom::colorPicker("Top", static_cast<Color4&>(playerConfig.healthBar.top));
+                    ImGuiCustom::colorPicker("Middle", static_cast<Color4&>(playerConfig.healthBar.middle));
+                    ImGuiCustom::colorPicker("Bottom", static_cast<Color4&>(playerConfig.healthBar.bottom));
+                }
+                else if (playerConfig.healthBar.type == HealthBar::Solid) {
                     ImGuiCustom::colorPicker("", static_cast<Color4&>(playerConfig.healthBar));
                 }
+                ImGui::Checkbox("Show numbers", &playerConfig.healthBar.showNumbers);
                 ImGui::EndPopup();
             }
 
@@ -786,10 +792,16 @@ void GUI::renderStreamProofESPWindow() noexcept
             if (ImGui::BeginPopup("")) {
                 ImGui::SetNextItemWidth(95.0f);
                 ImGui::Combo("Type", &buildingConfig.healthBar.type, "Gradient\0Solid\0Health-based\0");
-                if (buildingConfig.healthBar.type == HealthBar::Solid) {
-                    ImGui::SameLine();
+                if (buildingConfig.healthBar.type == HealthBar::Gradient)
+                {
+                    ImGuiCustom::colorPicker("Top", static_cast<Color4&>(buildingConfig.healthBar.top));
+                    ImGuiCustom::colorPicker("Middle", static_cast<Color4&>(buildingConfig.healthBar.middle));
+                    ImGuiCustom::colorPicker("Bottom", static_cast<Color4&>(buildingConfig.healthBar.bottom));
+                }
+                else if (buildingConfig.healthBar.type == HealthBar::Solid) {
                     ImGuiCustom::colorPicker("", static_cast<Color4&>(buildingConfig.healthBar));
                 }
+                ImGui::Checkbox("Show numbers", &buildingConfig.healthBar.showNumbers);
                 ImGui::EndPopup();
             }
 
