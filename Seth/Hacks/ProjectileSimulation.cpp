@@ -2,8 +2,8 @@
 
 #include "../SDK/AttributeManager.h"
 #include "../SDK/Entity.h"
+#include "../SDK/Physics.h"
 #include "../SDK/PhysicsCollision.h"
-#include "../SDK/VPhysics.h"
 
 PhysicsEnviroment* physicsEnviroment;
 PhysicsObject* physicsObject;

@@ -10,7 +10,7 @@
 #include "../../SDK/UserCmd.h"
 #include "../../SDK/Math.h"
 #include "../../SDK/ModelInfo.h"
-#include "../../SDK/VPhysics.h"
+#include "../../SDK/Physics.h"
 #include "../../SDK/Vector.h"
 
 Vector getProjectileWeaponAimOffset(Entity* weapon, Entity* entity) noexcept
