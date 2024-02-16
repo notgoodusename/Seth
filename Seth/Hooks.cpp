@@ -286,8 +286,10 @@ static void __stdcall lockCursor() noexcept
 
 static bool __fastcall fireEventClientSide(void* thisPointer, void*, GameEvent* event) noexcept
 {
+    static auto original = hooks->eventManager.getOriginal<bool, 8>(event);
+
     if (!event)
-        return hooks->eventManager.callOriginal<bool, 8>(event);
+        return original(thisPointer, event);
 
     switch (fnv::hashRuntime(event->getName())) 
     {
@@ -300,7 +302,7 @@ static bool __fastcall fireEventClientSide(void* thisPointer, void*, GameEvent* 
             break;
     }
 
-    return hooks->eventManager.callOriginal<bool, 8>(event);
+    return original(thisPointer, event);
 }
 
 static UserCmd* __stdcall getUserCmd(int sequenceNumber) noexcept
