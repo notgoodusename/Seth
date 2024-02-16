@@ -267,7 +267,7 @@ struct FontPush {
     }
 };
 
-static void drawHealthBar(const HealthBar& config, const ImVec2& pos, float height, int health, int maxHealth) noexcept
+static void drawHealthBar(const HealthBar& config, const ImVec2& pos, float height, int health, int maxHealth, float distanceToLocal, float textCullDistance) noexcept
 {
     if (!config.enabled)
         return;
@@ -277,19 +277,19 @@ static void drawHealthBar(const HealthBar& config, const ImVec2& pos, float heig
     drawList->PushClipRect(pos + ImVec2{ 0.0f, ((static_cast<float>(maxHealth) - static_cast<float>(health)) / static_cast<float>(maxHealth)) * height }, pos + ImVec2{ width + 1.0f, height + 1.0f });
 
     if (config.type == HealthBar::Gradient) {
-        const auto green = Helpers::calculateColor(0, 255, 0, 255);
-        const auto yellow = Helpers::calculateColor(255, 255, 0, 255);
-        const auto red = Helpers::calculateColor(255, 0, 0, 255);
+        const auto top = Helpers::calculateColor(config.top);
+        const auto middle = Helpers::calculateColor(config.middle);
+        const auto bottom = Helpers::calculateColor(config.bottom);
 
         ImVec2 min = pos;
         ImVec2 max = min + ImVec2{ width, height / 2.0f };
 
         drawList->AddRectFilled(min + ImVec2{ 1.0f, 1.0f }, pos + ImVec2{ width + 1.0f, height + 1.0f }, Helpers::calculateColor(0, 0, 0, 255));
 
-        drawList->AddRectFilledMultiColor(ImFloor(min), ImFloor(max), green, green, yellow, yellow);
+        drawList->AddRectFilledMultiColor(ImFloor(min), ImFloor(max), top, top, middle, middle);
         min.y += height / 2.0f;
         max.y += height / 2.0f;
-        drawList->AddRectFilledMultiColor(ImFloor(min), ImFloor(max), yellow, yellow, red, red);
+        drawList->AddRectFilledMultiColor(ImFloor(min), ImFloor(max), middle, middle, bottom, bottom);
     } else {
         const auto color = config.type == HealthBar::HealthBased ? Helpers::healthColor(std::clamp(static_cast<float>(health) / static_cast<float>(maxHealth), 0.0f, 1.0f)) : Helpers::calculateColor(config);
         drawList->AddRectFilled(pos + ImVec2{ 1.0f, 1.0f }, pos + ImVec2{ width + 1.0f, height + 1.0f }, color & IM_COL32_A_MASK);
@@ -297,6 +297,15 @@ static void drawHealthBar(const HealthBar& config, const ImVec2& pos, float heig
     }
 
     drawList->PopClipRect();
+
+    if (config.showNumbers)
+    {
+        const std::string healthString = health > maxHealth ? "+" + std::to_string(health - maxHealth) : std::to_string(health);
+        const auto textSize = ImGui::CalcTextSize(healthString.c_str());
+        const auto position = pos - ImVec2{ 5.0f + (textSize.x / 2.0f), -2.5f - (textSize.y / 2.0f) } + ImVec2{ 0.0f, std::clamp((static_cast<float>(maxHealth) - static_cast<float>(health)) / static_cast<float>(maxHealth), 0.0f, 1.0f) * height };
+
+        renderText(distanceToLocal, textCullDistance, Color4(), healthString.c_str(), position);
+    }
 }
 
 static void renderPlayerBox(const PlayerData& playerData, const Player& config) noexcept
@@ -310,20 +319,10 @@ static void renderPlayerBox(const PlayerData& playerData, const Player& config) 
 
     ImVec2 offsetMins{}, offsetMaxs{};
 
-    const auto height = (bbox.max.y - bbox.min.y);
-    drawHealthBar(config.healthBar, bbox.min - ImVec2{ 5.0f, 0.0f }, height, playerData.health, playerData.maxHealth);
-
     FontPush font{ config.font.name, playerData.distanceToLocal };
 
-    if (config.healthBar.enabled)
-    {
-        const std::string healthString = playerData.health > playerData.maxHealth ? "+" + std::to_string(playerData.health - playerData.maxHealth) : std::to_string(playerData.health);
-        const auto textSize = ImGui::CalcTextSize((healthString).c_str());
-        const auto position = bbox.min - ImVec2{ 10.0f + (textSize.x/2.0f), -2.5f - (textSize.y / 2.0f) }
-        + ImVec2{ 0.0f, std::clamp((static_cast<float>(playerData.maxHealth) - static_cast<float>(playerData.health)) / static_cast<float>(playerData.maxHealth), 0.0f, 1.0f) * height };
-        renderText(playerData.distanceToLocal, config.textCullDistance, Color4(),
-            (healthString).c_str(), {position.x , position.y});
-    }
+    const auto height = (bbox.max.y - bbox.min.y);
+    drawHealthBar(config.healthBar, bbox.min - ImVec2{ 5.0f, 0.0f }, height, playerData.health, playerData.maxHealth, playerData.distanceToLocal, config.textCullDistance);
 
     if (config.name.enabled) {
         const auto nameSize = renderText(playerData.distanceToLocal, config.textCullDistance, config.name, playerData.name.c_str(), {(bbox.min.x + bbox.max.x) / 2, bbox.min.y - 2});
@@ -348,17 +347,10 @@ static void renderBuildingBox(const BuildingsData& buildingData, const Buildings
     renderBox(bbox, config.box);
     drawSnapline(config.snapline, bbox.min, bbox.max);
 
-    const auto height = (bbox.max.y - bbox.min.y);
-    drawHealthBar(config.healthBar, bbox.min - ImVec2{ 5.0f, 0.0f }, height, buildingData.health, buildingData.maxHealth);
-
     FontPush font{ config.font.name, buildingData.distanceToLocal };
 
-    if (config.healthBar.enabled)
-    {
-        const auto textSize = ImGui::CalcTextSize(std::to_string(buildingData.health).c_str());
-        const auto position = bbox.min - ImVec2{ 5.0f + (textSize.x / 2.0f), 0.0f } + ImVec2{ 0.0f, std::clamp((static_cast<float>(buildingData.maxHealth) - static_cast<float>(buildingData.health)) / static_cast<float>(buildingData.maxHealth), 0.0f, 1.0f) * height };
-        renderText(buildingData.distanceToLocal, config.textCullDistance, Color4(), std::to_string(buildingData.health).c_str(), { position.x , position.y });
-    }
+    const auto height = (bbox.max.y - bbox.min.y);
+    drawHealthBar(config.healthBar, bbox.min - ImVec2{ 5.0f, 0.0f }, height, buildingData.health, buildingData.maxHealth, buildingData.distanceToLocal, config.textCullDistance);
 
     if (config.name.enabled)
         renderText(buildingData.distanceToLocal, config.textCullDistance, config.name, buildingData.name.data(), { (bbox.min.x + bbox.max.x) / 2, bbox.min.y - 2 });

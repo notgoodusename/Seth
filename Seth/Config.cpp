@@ -167,6 +167,10 @@ static void from_json(const json& j, HealthBar& o)
 {
     from_json(j, static_cast<ColorToggle&>(o));
     read(j, "Type", o.type);
+    read<value_t::object>(j, "Top color", o.top);
+    read<value_t::object>(j, "Middle color", o.middle);
+    read<value_t::object>(j, "Bottom color", o.bottom);
+    read(j, "Show numbers", o.showNumbers);
 }
 
 static void from_json(const json& j, Player& p)
@@ -193,6 +197,14 @@ static void from_json(const json& j, Config::Visuals::BulletTracers& o)
     read(j, "Type", o.type);
 }
 
+static void from_json(const json& j, Config::ProjectileTriggerbot::AutoDetonate& ad)
+{
+    read(j, "Enabled", ad.enabled);
+    read(j, "Silent", ad.silent);
+    read(j, "Friendly fire", ad.friendlyFire);
+    read(j, "Ignore", ad.ignore);
+}
+
 static void from_json(const json& j, ImVec2& v)
 {
     read(j, "X", v.x);
@@ -213,12 +225,12 @@ static void from_json(const json& j, Config::Aimbot::Hitscan& h)
     read(j, "Silent", h.silent);
     read(j, "Friendly fire", h.friendlyFire);
     read(j, "Target backtrack", h.targetBacktrack);
-    read(j, "Ignore cloaked", h.ignoreCloaked);
     read(j, "Scoped only", h.scopedOnly);
     read(j, "Auto shoot", h.autoShoot);
     read(j, "Auto scope", h.autoScope);
     read(j, "Wait for headshot", h.waitForHeadshot);
     read(j, "Wait for charge", h.waitForHeadshot);
+    read(j, "Ignore", h.ignore);
     read(j, "Sort method", h.sortMethod);
     read(j, "Hitboxes", h.hitboxes);
     read(j, "Fov", h.fov);
@@ -232,7 +244,7 @@ static void from_json(const json& j, Config::Aimbot::Projectile& p)
     read(j, "Auto shoot", p.autoShoot);
     read(j, "Silent", p.silent);
     read(j, "Friendly fire", p.friendlyFire);
-    read(j, "Ignore cloaked", p.ignoreCloaked);
+    read(j, "Ignore", p.ignore);
     read(j, "Sort method", p.sortMethod);
     read(j, "Fov", p.fov);
     read(j, "Max time", p.maxTime);
@@ -244,10 +256,10 @@ static void from_json(const json& j, Config::Aimbot::Melee& m)
     read(j, "Aimlock", m.aimlock);
     read(j, "Silent", m.silent);
     read(j, "Friendly fire", m.friendlyFire);
-    read(j, "Ignore cloaked", m.ignoreCloaked);
     read(j, "Target backtrack", m.targetBacktrack);
     read(j, "Auto hit", m.autoHit);
     read(j, "Auto backstab", m.autoBackstab);
+    read(j, "Ignore", m.ignore);
     read(j, "Sort method", m.sortMethod);
     read(j, "Fov", m.fov);
 }
@@ -259,9 +271,15 @@ static void from_json(const json& j, Config::HitscanTriggerbot& t)
     read(j, "Friendly fire", t.friendlyFire);
     read(j, "Target backtrack", t.targetBacktrack);
     read(j, "Scoped only", t.scopedOnly);
+    read(j, "Ignore", t.ignore);
     read(j, "Hitboxes", t.hitboxes);
-    read(j, "Ignore cloaked", t.ignoreCloaked);
     read(j, "Shot delay", t.shotDelay);
+}
+
+static void from_json(const json& j, Config::ProjectileTriggerbot& pt)
+{
+    read(j, "Enabled", pt.enabled);
+    read<value_t::object>(j, "Auto detonate", pt.autoDetonate);
 }
 
 static void from_json(const json& j, Config::MeleeTriggerbot& t)
@@ -270,7 +288,7 @@ static void from_json(const json& j, Config::MeleeTriggerbot& t)
     read(j, "Friendly fire", t.friendlyFire);
     read(j, "Target backtrack", t.targetBacktrack);
     read(j, "Auto backstab", t.autoBackstab);
-    read(j, "Ignore cloaked", t.ignoreCloaked);
+    read(j, "Ignore", t.ignore);
     read(j, "Shot delay", t.shotDelay);
 }
 
@@ -379,6 +397,13 @@ static void from_json(const json& j, Config::StreamProofESP& e)
     read(j, "NPCs", e.npcs);
 }
 
+static void from_json(const json& j, Config::Visuals::ProjectileTrajectory& pt)
+{
+    read(j, "Enabled", pt.enabled);
+    read<value_t::object>(j, "Trail color", pt.trailColor);
+    read<value_t::object>(j, "BBox color", pt.bboxColor);
+}
+
 static void from_json(const json& j, Config::Visuals& v)
 {
     read(j, "Disable post-processing", v.disablePostProcessing);
@@ -391,6 +416,7 @@ static void from_json(const json& j, Config::Visuals& v)
     read(j, "Freecam key", v.freeCamKey);
     read(j, "Freecam speed", v.freeCamSpeed);
     read(j, "FOV", v.fov);
+    read<value_t::object>(j, "Projectile trajectory", v.projectileTrajectory);
     read<value_t::object>(j, "Bullet Tracers", v.bulletTracers);
     read<value_t::object>(j, "Bullet Impacts", v.bulletImpacts);
     read<value_t::object>(j, "Hitbox on Hit", v.onHitHitbox);
@@ -523,6 +549,7 @@ void Config::load(const char8_t* name, bool incremental) noexcept
     read<value_t::object>(j, "Draw aimbot fov", aimbotFov);
 
     read<value_t::object>(j, "Hitscan triggerbot", hitscanTriggerbot);
+    read<value_t::object>(j, "Projectile triggerbot", projectileTriggerbot);
     read<value_t::object>(j, "Melee triggerbot", meleeTriggerbot);
     read(j, "Triggerbot Key", triggerbotKey);
 
@@ -625,6 +652,10 @@ static void to_json(json& j, const HealthBar& o, const HealthBar& dummy = {})
 {
     to_json(j, static_cast<const ColorToggle&>(o), dummy);
     WRITE("Type", type);
+    WRITE("Top color", top);
+    WRITE("Middle color", middle);
+    WRITE("Bottom color", bottom);
+    WRITE("Show numbers", showNumbers);
 }
 
 static void to_json(json& j, const Player& o, const Player& dummy = {})
@@ -666,6 +697,14 @@ static void to_json(json& j, const ImVec2& o, const ImVec2& dummy = {})
     WRITE("Y", y);
 }
 
+static void to_json(json& j, const Config::ProjectileTriggerbot::AutoDetonate& o, const Config::ProjectileTriggerbot::AutoDetonate& dummy = {})
+{
+    WRITE("Enabled", enabled);
+    WRITE("Silent", silent);
+    WRITE("Friendly fire", friendlyFire);
+    WRITE("Ignore", ignore);
+}
+
 static void to_json(json& j, const Config::Aimbot& o)
 {
     const Config::Aimbot dummy;
@@ -682,12 +721,12 @@ static void to_json(json& j, const Config::Aimbot::Hitscan& o, const Config::Aim
     WRITE("Silent", silent);
     WRITE("Friendly fire", friendlyFire);
     WRITE("Target backtrack", targetBacktrack);
-    WRITE("Ignore cloaked", ignoreCloaked);
     WRITE("Scoped only", scopedOnly);
     WRITE("Auto shoot", autoScope);
     WRITE("Auto scope", autoScope);
     WRITE("Wait for headshot", waitForHeadshot);
     WRITE("Wait for charge", waitForHeadshot);
+    WRITE("Ignore", ignore);
     WRITE("Sort method", sortMethod);
     WRITE("Hitboxes", hitboxes);
     WRITE("Fov", fov);
@@ -701,7 +740,7 @@ static void to_json(json& j, const Config::Aimbot::Projectile& o, const Config::
     WRITE("Auto shoot", autoShoot);
     WRITE("Silent", silent);
     WRITE("Friendly fire", friendlyFire);
-    WRITE("Ignore cloaked", ignoreCloaked);
+    WRITE("Ignore", ignore);
     WRITE("Sort method", sortMethod);
     WRITE("Fov", fov);
     WRITE("Max time", maxTime);
@@ -713,10 +752,10 @@ static void to_json(json& j, const Config::Aimbot::Melee& o, const Config::Aimbo
     WRITE("Aimlock", aimlock);
     WRITE("Silent", silent);
     WRITE("Friendly fire", friendlyFire);
-    WRITE("Ignore cloaked", ignoreCloaked);
     WRITE("Target backtrack", targetBacktrack);
     WRITE("Auto hit", autoHit);
     WRITE("Auto backstab", autoBackstab);
+    WRITE("Ignore", ignore);
     WRITE("Sort method", sortMethod);
     WRITE("Fov", fov);
 }
@@ -728,9 +767,15 @@ static void to_json(json& j, const Config::HitscanTriggerbot& o, const Config::H
     WRITE("Friendly fire", friendlyFire);
     WRITE("Target backtrack", targetBacktrack);
     WRITE("Scoped only", scopedOnly);
+    WRITE("Ignore", ignore);
     WRITE("Hitboxes", hitboxes);
-    WRITE("Ignore cloaked", ignoreCloaked);
     WRITE("Shot delay", shotDelay);
+}
+
+static void to_json(json& j, const Config::ProjectileTriggerbot& o, const Config::ProjectileTriggerbot& dummy = {})
+{
+    WRITE("Enabled", enabled);
+    WRITE("Auto detonate", autoDetonate);
 }
 
 static void to_json(json& j, const Config::MeleeTriggerbot& o, const Config::MeleeTriggerbot& dummy = {})
@@ -739,7 +784,7 @@ static void to_json(json& j, const Config::MeleeTriggerbot& o, const Config::Mel
     WRITE("Friendly fire", friendlyFire);
     WRITE("Target backtrack", targetBacktrack);
     WRITE("Auto backstab", autoBackstab);
-    WRITE("Ignore cloaked", ignoreCloaked);
+    WRITE("Ignore", ignore);
     WRITE("Shot delay", shotDelay);
 }
 
@@ -923,6 +968,14 @@ static void to_json(json& j, const Config::Misc::Logger& o, const Config::Misc::
     WRITE("Events", events);
 }
 
+
+static void to_json(json& j, const Config::Visuals::ProjectileTrajectory& o, const Config::Visuals::ProjectileTrajectory& dummy)
+{
+    WRITE("Enabled", enabled);
+    WRITE("Trail color", trailColor);
+    WRITE("BBox color", bboxColor);
+}
+
 static void to_json(json& j, const Config::Visuals::Viewmodel& o, const Config::Visuals::Viewmodel& dummy)
 {
     WRITE("Enabled", enabled);
@@ -979,6 +1032,7 @@ static void to_json(json& j, const Config::Visuals& o)
     WRITE("Freecam key", freeCamKey);
     WRITE("Freecam speed", freeCamSpeed);
     WRITE("FOV", fov);
+    WRITE("Projectile trajectory", projectileTrajectory);
     WRITE("Bullet Tracers", bulletTracers);
     WRITE("Bullet Impacts", bulletImpacts);
     WRITE("Hitbox on Hit", onHitHitbox);
@@ -1022,6 +1076,7 @@ void Config::save(size_t id) const noexcept
         j["Draw aimbot fov"] = aimbotFov;
 
         j["Hitscan triggerbot"] = hitscanTriggerbot;
+        j["Projectile triggerbot"] = projectileTriggerbot;
         j["Melee triggerbot"] = meleeTriggerbot;
         to_json(j["Triggerbot Key"], triggerbotKey, KeyBind::NONE);
 
@@ -1078,6 +1133,7 @@ void Config::reset() noexcept
     tickbase = { };
     backtrack = { };
     hitscanTriggerbot = { };
+    projectileTriggerbot = { };
     meleeTriggerbot = { };
     chams = { };
     buildingChams = { }; 

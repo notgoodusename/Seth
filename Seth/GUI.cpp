@@ -157,11 +157,6 @@ static void menuBarItem(const char* name, bool& enabled) noexcept
 
 void GUI::renderAimbotWindow() noexcept
 {
-    static const char* hitboxes[]{ "Head","Body","Auto" };
-    static bool hitbox[ARRAYSIZE(hitboxes)] = { false, false, false };
-    static std::string previewvalue = "";
-    bool once = false;
-
     ImGui::PushID("Key");
     ImGui::hotkey2("Key", config->aimbotKey);
     ImGui::PopID();
@@ -185,7 +180,6 @@ void GUI::renderAimbotWindow() noexcept
             ImGuiCustom::colorPicker("Draw fov", config->aimbotFov);
             ImGui::Checkbox("Friendly fire", &config->aimbot.hitscan.friendlyFire);
             ImGui::Checkbox("Target backtrack", &config->aimbot.hitscan.targetBacktrack);
-            ImGui::Checkbox("Ignore cloaked", &config->aimbot.hitscan.ignoreCloaked);
             ImGui::Checkbox("Scoped only", &config->aimbot.hitscan.scopedOnly);
             ImGui::Checkbox("Auto shoot", &config->aimbot.hitscan.autoShoot);
             if (ImGui::IsItemHovered())
@@ -194,68 +188,10 @@ void GUI::renderAimbotWindow() noexcept
             ImGui::Checkbox("Wait for headshot", &config->aimbot.hitscan.waitForHeadshot);
             ImGui::Checkbox("Wait for charge", &config->aimbot.hitscan.waitForHeadshot);
 
+            ImGuiCustom::multiBox("AimbotHitscanIgnore", config->aimbot.hitscan.ignore, "Ignore", "Cloaked\0Invulnerable\0");
             ImGui::Combo("Sort method", &config->aimbot.hitscan.sortMethod, "Distance\0Fov\0");
+            ImGuiCustom::multiBox("AimbotHitboxes", config->aimbot.hitscan.hitboxes, "Hitbox", "Head\0Body\0Auto\0", 2);
             
-            if (config->aimbot.hitscan.hitboxes & 1 << 2)
-            {
-                config->aimbot.hitscan.hitboxes &= ~(1 << 0);
-                config->aimbot.hitscan.hitboxes &= ~(1 << 1);
-            }
-
-            for (size_t i = 0; i < ARRAYSIZE(hitbox); i++)
-            {
-                hitbox[i] = (config->aimbot.hitscan.hitboxes & 1 << i) == 1 << i;
-            }
-
-
-            if (ImGui::BeginCombo("Hitbox", previewvalue.c_str()))
-            {
-                bool wasAutoActive = hitbox[2];
-                
-                previewvalue = "";
-                for (size_t i = 0; i < ARRAYSIZE(hitboxes); i++)
-                {
-                    ImGui::Selectable(hitboxes[i], &hitbox[i], ImGuiSelectableFlags_::ImGuiSelectableFlags_DontClosePopups);
-                }
-
-                if ((hitbox[0] || hitbox[1]) && wasAutoActive)
-                {
-                    hitbox[2] = false;
-                }
-
-                if (hitbox[2])
-                {
-                    hitbox[0] = false;
-                    hitbox[1] = false;
-                }
-
-                ImGui::EndCombo();
-            }
-
-            for (size_t i = 0; i < ARRAYSIZE(hitboxes); i++)
-            {
-                if (!once)
-                {
-                    previewvalue = "";
-                    once = true;
-                }
-
-                if (hitbox[i])
-                {
-                    previewvalue += previewvalue.size() ? std::string(", ") + hitboxes[i] : hitboxes[i];
-                    config->aimbot.hitscan.hitboxes |= 1 << i;
-                }
-                else
-                {
-                    config->aimbot.hitscan.hitboxes &= ~(1 << i);
-                }
-            }
-
-            if ((config->aimbot.hitscan.hitboxes & 1 << 0) == 1 << 0 || (config->aimbot.hitscan.hitboxes & 1 << 1) == 1 << 1)
-            {
-                config->aimbot.hitscan.hitboxes &= ~(1 << 2);
-            }
-
             ImGui::NextColumn();
             ImGui::PushItemWidth(240.0f);
             ImGui::SliderFloat("Fov", &config->aimbot.hitscan.fov, 0.0f, 255.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
@@ -266,10 +202,11 @@ void GUI::renderAimbotWindow() noexcept
             ImGui::SameLine();
             ImGui::Checkbox("Enabled", &config->aimbot.projectile.enabled);
             ImGui::Checkbox("Aimlock", &config->aimbot.projectile.aimlock);
-            ImGui::Checkbox("Friendly fire", &config->aimbot.projectile.friendlyFire);
             ImGui::Checkbox("Silent", &config->aimbot.projectile.silent);
-            ImGui::Checkbox("Ignore cloaked", &config->aimbot.projectile.ignoreCloaked);
+            ImGuiCustom::colorPicker("Draw fov", config->aimbotFov);
+            ImGui::Checkbox("Friendly fire", &config->aimbot.projectile.friendlyFire);
             ImGui::Checkbox("Auto shoot", &config->aimbot.projectile.autoShoot);
+            ImGuiCustom::multiBox("AimbotProjectileIgnore", config->aimbot.projectile.ignore, "Ignore", "Cloaked\0Invulnerable\0");
             ImGui::Combo("Sort method", &config->aimbot.projectile.sortMethod, "Distance\0Fov\0");
 
             ImGui::NextColumn();
@@ -283,11 +220,12 @@ void GUI::renderAimbotWindow() noexcept
             ImGui::Checkbox("Enabled", &config->aimbot.melee.enabled);
             ImGui::Checkbox("Aimlock", &config->aimbot.melee.aimlock);
             ImGui::Checkbox("Silent", &config->aimbot.melee.silent);
+            ImGuiCustom::colorPicker("Draw fov", config->aimbotFov);
             ImGui::Checkbox("Friendly fire", &config->aimbot.melee.friendlyFire);
-            ImGui::Checkbox("Ignore cloaked", &config->aimbot.melee.ignoreCloaked);
             ImGui::Checkbox("Target backtrack", &config->aimbot.melee.targetBacktrack);
             ImGui::Checkbox("Auto hit", &config->aimbot.melee.autoHit);
             ImGui::Checkbox("Auto backstab", &config->aimbot.melee.autoBackstab);
+            ImGuiCustom::multiBox("AimbotMeleeIgnore", config->aimbot.melee.ignore, "Ignore", "Cloaked\0Invulnerable\0");
             ImGui::Combo("Sort method", &config->aimbot.melee.sortMethod, "Distance\0Fov\0");
             ImGui::NextColumn();
             ImGui::PushItemWidth(240.0f);
@@ -301,17 +239,13 @@ void GUI::renderAimbotWindow() noexcept
 
 void GUI::renderTriggerbotWindow() noexcept
 {
-    static const char* hitboxes[]{ "Head","Body","Auto" };
-    static bool hitbox[ARRAYSIZE(hitboxes)] = { false, false, false };
-    static std::string previewvalue = "";
-
     ImGui::hotkey2("Key", config->triggerbotKey, 80.0f);
     ImGui::Separator();
 
     static int currentCategory{ 0 };
     ImGui::PushItemWidth(110.0f);
     ImGui::PushID(0);
-    ImGui::Combo("", &currentCategory, "Hitscan\0Melee\0");
+    ImGui::Combo("", &currentCategory, "Hitscan\0Projectile\0Melee\0");
     ImGui::PopID();
 
     ImGui::SameLine();
@@ -324,69 +258,39 @@ void GUI::renderTriggerbotWindow() noexcept
             ImGui::Checkbox("Friendly fire", &config->hitscanTriggerbot.friendlyFire);
             ImGui::Checkbox("Target backtrack", &config->hitscanTriggerbot.targetBacktrack);
             ImGui::Checkbox("Scoped only", &config->hitscanTriggerbot.scopedOnly);
-            ImGui::Checkbox("Ignore cloaked", &config->hitscanTriggerbot.ignoreCloaked);
             ImGui::SetNextItemWidth(85.0f);
-
-            for (size_t i = 0; i < ARRAYSIZE(hitbox); i++)
-            {
-                hitbox[i] = (config->hitscanTriggerbot.hitboxes & 1 << i) == 1 << i;
-            }
-
-            if (ImGui::BeginCombo("Hitbox", previewvalue.c_str()))
-            {
-                bool wasAutoActive = hitbox[2];
-
-                previewvalue = "";
-                for (size_t i = 0; i < ARRAYSIZE(hitboxes); i++)
-                {
-                    ImGui::Selectable(hitboxes[i], &hitbox[i], ImGuiSelectableFlags_::ImGuiSelectableFlags_DontClosePopups);
-                }
-
-                if ((hitbox[0] || hitbox[1]) && wasAutoActive)
-                {
-                    hitbox[2] = false;
-                }
-
-                if (hitbox[2])
-                {
-                    hitbox[0] = false;
-                    hitbox[1] = false;
-                }
-
-                ImGui::EndCombo();
-            }
-            for (size_t i = 0; i < ARRAYSIZE(hitboxes); i++)
-            {
-                if (i == 0)
-                    previewvalue = "";
-
-                if (hitbox[i])
-                {
-                    previewvalue += previewvalue.size() ? std::string(", ") + hitboxes[i] : hitboxes[i];
-                    config->hitscanTriggerbot.hitboxes |= 1 << i;
-                }
-                else
-                {
-                    config->hitscanTriggerbot.hitboxes &= ~(1 << i);
-                }
-            }
-
-            if (((config->hitscanTriggerbot.hitboxes & 1 << 0) == 1 << 0
-                || (config->hitscanTriggerbot.hitboxes & 1 << 1) == 1 << 1))
-            {
-                config->hitscanTriggerbot.hitboxes &= ~(1 << 2);
-            }
-
+            ImGuiCustom::multiBox("TriggerbotHitscanIgnore", config->hitscanTriggerbot.ignore, "Ignore", "Cloaked\0Invulnerable\0");
+            ImGui::SetNextItemWidth(85.0f);
+            ImGuiCustom::multiBox("TriggerbotHitboxes", config->hitscanTriggerbot.hitboxes, "Hitbox", "Head\0Body\0Auto\0", 2);
             ImGui::PushItemWidth(220.0f);
             ImGui::SliderInt("Shot delay", &config->hitscanTriggerbot.shotDelay, 0, 250, "%d ms");
             break;
         }
         case 1:
+        {
+            ImGui::Checkbox("Enabled", &config->projectileTriggerbot.enabled);
+            ImGui::Checkbox("Auto detonate", &config->projectileTriggerbot.autoDetonate.enabled);
+            ImGui::SameLine();
+
+            if (bool ccPopup = ImGui::Button("Edit"))
+                ImGui::OpenPopup("##autoDetonateEdit");
+
+            if (ImGui::BeginPopup("##autoDetonateEdit"))
+            {
+                ImGui::Checkbox("Silent", &config->projectileTriggerbot.autoDetonate.silent);
+                ImGui::Checkbox("Friendly fire", &config->projectileTriggerbot.autoDetonate.friendlyFire);
+                ImGuiCustom::multiBox("AutoDetonate", config->projectileTriggerbot.autoDetonate.ignore, "Ignore", "Cloaked\0Invulnerable\0");
+                ImGui::EndPopup();
+            }
+            break;
+        }
+        case 2:
             ImGui::Checkbox("Enabled", &config->meleeTriggerbot.enabled);
             ImGui::Checkbox("Friendly fire", &config->meleeTriggerbot.friendlyFire);
             ImGui::Checkbox("Target backtrack", &config->meleeTriggerbot.targetBacktrack);
             ImGui::Checkbox("Auto backstab", &config->meleeTriggerbot.autoBackstab);
-            ImGui::Checkbox("Ignore cloaked", &config->meleeTriggerbot.ignoreCloaked);
+            ImGui::SetNextItemWidth(85.0f);
+            ImGuiCustom::multiBox("TriggerbotMeleeIgnore", config->meleeTriggerbot.ignore, "Ignore", "Cloaked\0Invulnerable\0");
             ImGui::PushItemWidth(220.0f);
             ImGui::SliderInt("Shot delay", &config->meleeTriggerbot.shotDelay, 0, 250, "%d ms");
             break;
@@ -861,10 +765,16 @@ void GUI::renderStreamProofESPWindow() noexcept
             if (ImGui::BeginPopup("")) {
                 ImGui::SetNextItemWidth(95.0f);
                 ImGui::Combo("Type", &playerConfig.healthBar.type, "Gradient\0Solid\0Health-based\0");
-                if (playerConfig.healthBar.type == HealthBar::Solid) {
-                    ImGui::SameLine();
+                if (playerConfig.healthBar.type == HealthBar::Gradient)
+                {
+                    ImGuiCustom::colorPicker("Top", static_cast<Color4&>(playerConfig.healthBar.top));
+                    ImGuiCustom::colorPicker("Middle", static_cast<Color4&>(playerConfig.healthBar.middle));
+                    ImGuiCustom::colorPicker("Bottom", static_cast<Color4&>(playerConfig.healthBar.bottom));
+                }
+                else if (playerConfig.healthBar.type == HealthBar::Solid) {
                     ImGuiCustom::colorPicker("", static_cast<Color4&>(playerConfig.healthBar));
                 }
+                ImGui::Checkbox("Show numbers", &playerConfig.healthBar.showNumbers);
                 ImGui::EndPopup();
             }
 
@@ -887,10 +797,16 @@ void GUI::renderStreamProofESPWindow() noexcept
             if (ImGui::BeginPopup("")) {
                 ImGui::SetNextItemWidth(95.0f);
                 ImGui::Combo("Type", &buildingConfig.healthBar.type, "Gradient\0Solid\0Health-based\0");
-                if (buildingConfig.healthBar.type == HealthBar::Solid) {
-                    ImGui::SameLine();
+                if (buildingConfig.healthBar.type == HealthBar::Gradient)
+                {
+                    ImGuiCustom::colorPicker("Top", static_cast<Color4&>(buildingConfig.healthBar.top));
+                    ImGuiCustom::colorPicker("Middle", static_cast<Color4&>(buildingConfig.healthBar.middle));
+                    ImGuiCustom::colorPicker("Bottom", static_cast<Color4&>(buildingConfig.healthBar.bottom));
+                }
+                else if (buildingConfig.healthBar.type == HealthBar::Solid) {
                     ImGuiCustom::colorPicker("", static_cast<Color4&>(buildingConfig.healthBar));
                 }
+                ImGui::Checkbox("Show numbers", &buildingConfig.healthBar.showNumbers);
                 ImGui::EndPopup();
             }
 
@@ -913,7 +829,7 @@ void GUI::renderVisualsWindow() noexcept
     ImGui::Checkbox("Disable custom decals", &config->visuals.disableCustomDecals);
     ImGui::Checkbox("No fog", &config->visuals.noFog);
 
-    ImGui::Checkbox("No scope overlay", &config->visuals.noScopeOverlay);
+    //ImGui::Checkbox("No scope overlay", &config->visuals.noScopeOverlay);
 
     ImGui::NextColumn();
     ImGui::Checkbox("Thirdperson", &config->visuals.thirdperson);
@@ -933,7 +849,7 @@ void GUI::renderVisualsWindow() noexcept
     ImGui::PushID(2);
     ImGui::SliderInt("", &config->visuals.fov, -60, 60, "FOV: %d");
     ImGui::PopID();
-
+    /*
     ImGui::Checkbox("Bullet Tracers", &config->visuals.bulletTracers.enabled);
     ImGui::SameLine();
 
@@ -951,6 +867,21 @@ void GUI::renderVisualsWindow() noexcept
     ImGui::SliderFloat("Bullet Impacts time", &config->visuals.bulletImpactsTime, 0.1f, 5.0f, "Bullet Impacts time: %.2fs");
     ImGuiCustom::colorPicker("On Hit Hitbox", config->visuals.onHitHitbox.color.color.data(), &config->visuals.onHitHitbox.color.color[3], nullptr, nullptr, &config->visuals.onHitHitbox.color.enabled);
     ImGui::SliderFloat("On Hit Hitbox Time", &config->visuals.onHitHitbox.duration, 0.1f, 60.0f, "On Hit Hitbox time: % .2fs");
+    */
+    ImGui::Checkbox("Draw Projectile Trajectory", &config->visuals.projectileTrajectory.enabled);
+    ImGui::SameLine();
+
+    ImGui::PushID("##projectileTrajectoryEdit");
+    if (bool ccPopup = ImGui::Button("Edit"))
+        ImGui::OpenPopup("##projectileTrajectory");
+
+    if (ImGui::BeginPopup("##projectileTrajectory"))
+    {
+        ImGuiCustom::colorPicker("Trail color", config->visuals.projectileTrajectory.trailColor.color.data(),  &config->visuals.projectileTrajectory.trailColor.color[3], nullptr, nullptr, nullptr);
+        ImGuiCustom::colorPicker("BBox color", config->visuals.projectileTrajectory.bboxColor.color.data(), &config->visuals.projectileTrajectory.bboxColor.color[3], nullptr, nullptr, nullptr);
+        ImGui::EndPopup();
+    }
+    ImGui::PopID();
 
     ImGui::Checkbox("Viewmodel", &config->visuals.viewModel.enabled);
     ImGui::SameLine();
@@ -1046,7 +977,7 @@ void GUI::renderMiscWindow() noexcept
     }
     ImGui::PopID();
 
-    ImGui::Checkbox("Watermark", &config->misc.watermark.enabled);
+    //ImGui::Checkbox("Watermark", &config->misc.watermark.enabled);
     ImGuiCustom::colorPicker("Offscreen Enemies", config->misc.offscreenEnemies, &config->misc.offscreenEnemies.enabled);
     ImGui::SameLine();
     ImGui::PushID("Offscreen Enemies");
@@ -1071,6 +1002,7 @@ void GUI::renderMiscWindow() noexcept
     ImGui::Checkbox("Unlock hidden cvars", &config->misc.unhideConvars);
     ImGui::Checkbox("Backpack expander", &config->misc.backpackExpander);
 
+    /*
     ImGuiCustom::colorPicker("Logger", config->misc.logger);
     ImGui::SameLine();
 
@@ -1147,6 +1079,7 @@ void GUI::renderMiscWindow() noexcept
         ImGui::EndPopup();
     }
     ImGui::PopID();
+    */
 
     if (ImGui::Button("Unhook"))
         hooks->uninstall();
@@ -1246,7 +1179,7 @@ void GUI::renderConfigWindow() noexcept
                     switch (i) {
                     case 0: config->reset(); break;
                     case 1: config->aimbot = { }; config->aimbotKey.reset(); break;
-                    case 2: config->hitscanTriggerbot = { }; config->meleeTriggerbot = { }; config->triggerbotKey.reset();  break;
+                    case 2: config->hitscanTriggerbot = { }; config->projectileTriggerbot = { }; config->meleeTriggerbot = { }; config->triggerbotKey.reset();  break;
                     case 3: config->backtrack = { };  break;
                     case 4: config->antiAim = { }; break;
                     case 6: config->fakelag = { }; break;
@@ -1398,15 +1331,15 @@ void GUI::renderGuiStyle() noexcept
                             if (ImGui::Button("Main                    ", ImVec2{ 80, 20 })) activeSubTabAimbot = 1;
                             if (ImGui::Button("Triggerbot              ", ImVec2{ 80, 20 })) activeSubTabAimbot = 2;
                             if (ImGui::Button("Backtrack               ", ImVec2{ 80, 20 })) activeSubTabAimbot = 3;
-                            if (ImGui::Button("AntiAim                 ", ImVec2{ 80, 20 })) activeSubTabAimbot = 4;
-                            if (ImGui::Button("FakeLag                 ", ImVec2{ 80, 20 })) activeSubTabAimbot = 5;
+                            //if (ImGui::Button("AntiAim                 ", ImVec2{ 80, 20 })) activeSubTabAimbot = 4;
+                            //if (ImGui::Button("FakeLag                 ", ImVec2{ 80, 20 })) activeSubTabAimbot = 5;
                             break;
                         case 2: //Visuals
                             ImGui::SetCursorPosY(10);
                             if (ImGui::Button("Main                    ", ImVec2{ 80, 20 })) activeSubTabVisuals = 1;
                             if (ImGui::Button("Esp                     ", ImVec2{ 80, 20 })) activeSubTabVisuals = 2;
                             if (ImGui::Button("Chams                   ", ImVec2{ 80, 20 })) activeSubTabVisuals = 3;
-                            if (ImGui::Button("Glow                    ", ImVec2{ 80, 20 })) activeSubTabVisuals = 4;
+                            //if (ImGui::Button("Glow                    ", ImVec2{ 80, 20 })) activeSubTabVisuals = 4;
                             break;
                         case 3: //Misc
                             ImGui::SetCursorPosY(10);

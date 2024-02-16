@@ -12,6 +12,7 @@ struct ColorToggleThicknessRounding;
 
 namespace ImGuiCustom
 {
+    void multiBox(const char* id, int& value, std::string comboName, const char* itemsSeparatedbyzeros, int itemDiscardAll = -1) noexcept;
     void colorPicker(const char* name, float color[3], float* alpha = nullptr, bool* rainbow = nullptr, float* rainbowSpeed = nullptr, bool* enable = nullptr, float* thickness = nullptr, float* rounding = nullptr, bool* outline = nullptr) noexcept;
     void colorPicker(const char* name, ColorToggle3& colorConfig) noexcept;
     void colorPicker(const char* name, Color4& colorConfig, bool* enable = nullptr, float* thickness = nullptr) noexcept;

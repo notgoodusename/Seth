@@ -30,6 +30,7 @@
 #include "Hacks/Glow.h"
 #include "Hacks/Misc.h"
 #include "Hacks/MovementRebuild.h"
+#include "Hacks/ProjectileTrajectory.h"
 #include "Hacks/SkinChanger.h"
 #include "Hacks/StreamProofESP.h"
 #include "Hacks/TargetSystem.h"
@@ -109,8 +110,9 @@ static HRESULT __stdcall present(IDirect3DDevice9* device, const RECT* src, cons
         Crithack::updateInput();
 
         Misc::drawPlayerList();
+        ProjectileTrajectory::draw(ImGui::GetBackgroundDrawList());
         Crithack::draw(ImGui::GetForegroundDrawList());
-        Misc::drawAimbotFov(ImGui::GetForegroundDrawList());
+        Misc::drawAimbotFov(ImGui::GetBackgroundDrawList());
 
         gui->handleToggle();
 
@@ -164,6 +166,7 @@ static bool __fastcall createMove(void* thisPointer, void*, float inputSampleTim
 
     EnginePrediction::update();
     EnginePrediction::run(cmd);
+    ProjectileTrajectory::calculate(cmd);
 
     Backtrack::run(cmd);
     Aimbot::run(cmd);
@@ -285,6 +288,11 @@ static void __stdcall lockCursor() noexcept
 
 static bool __fastcall fireEventClientSide(void* thisPointer, void*, GameEvent* event) noexcept
 {
+    static auto original = hooks->eventManager.getOriginal<bool, 8>(event);
+
+    if (!event)
+        return original(thisPointer, event);
+
     switch (fnv::hashRuntime(event->getName())) 
     {
         case fnv::hash("teamplay_round_start"):
@@ -296,7 +304,7 @@ static bool __fastcall fireEventClientSide(void* thisPointer, void*, GameEvent* 
             break;
     }
 
-    return hooks->eventManager.callOriginal<bool, 8>(event);
+    return original(thisPointer, event);
 }
 
 static UserCmd* __stdcall getUserCmd(int sequenceNumber) noexcept

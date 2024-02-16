@@ -4,6 +4,134 @@
 
 #include "imguiCustom.h"
 
+void ImGuiCustom::multiBox(const char* id, int& value, std::string comboName, const char* itemsSeparatedByzeros, int itemDiscardAll) noexcept
+{
+    static auto ItemsSingleStringGetter = [](void* data, int idx, const char** outText)
+    {
+        const char* itemsSeparatedbyzeros = (const char*)data;
+        int itemsCount = 0;
+        const char* p = itemsSeparatedbyzeros;
+        while (*p)
+        {
+            if (idx == itemsCount)
+                break;
+            p += strlen(p) + 1;
+            itemsCount++;
+        }
+        if (!*p)
+            return false;
+        if (outText)
+            *outText = p;
+        return true;
+    };
+
+    int items_count = 0;
+    const char* p = itemsSeparatedByzeros;
+    while (*p)
+    {
+        p += strlen(p) + 1;
+        items_count++;
+    }
+
+    //we save the id, with preview value
+    static std::map<const char*, std::pair<std::vector<bool>, std::string>> valuesMap;
+
+    const auto it = valuesMap.find(id);
+
+    if (it == valuesMap.end())
+    {
+        valuesMap[id] = std::pair<std::vector<bool>, std::string>(std::vector<bool>(items_count), "");
+    }
+
+    auto& array = valuesMap[id].first;
+    auto& preview = valuesMap[id].second;
+
+    for (int i = 0; i < items_count; i++)
+    {
+        array[i] = (value & 1 << i) == 1 << i;
+    }
+
+    if (ImGui::BeginCombo(comboName.c_str(), preview.c_str()))
+    {
+        bool wasDiscardActive = itemDiscardAll == -1 ? false : array[itemDiscardAll];
+
+        preview = "";
+        for (int i = 0; i < items_count; i++)
+        {
+            const char* itemText;
+            if(!ItemsSingleStringGetter((void*)itemsSeparatedByzeros, i, &itemText))
+                itemText = "*Unknown item*";
+
+            if (ImGui::Selectable(itemText, array[i], ImGuiSelectableFlags_::ImGuiSelectableFlags_DontClosePopups))
+                array[i] = !array[i];
+        }
+
+        bool areAnyActiveExceptDiscard = false;
+
+        if (wasDiscardActive)
+        {
+            for (int i = 0; i < items_count; i++)
+            {
+                if (i == itemDiscardAll)
+                    continue;
+
+                if (array[i])
+                {
+                    array[itemDiscardAll] = false;
+                    break;
+                }
+            }
+        }
+
+        if (itemDiscardAll != -1 && array[itemDiscardAll])
+        {
+            for (int i = 0; i < items_count; i++)
+            {
+                if (i == itemDiscardAll)
+                    continue;
+             
+                array[i] = false;
+            }
+        }
+
+        ImGui::EndCombo();
+    }
+    for (int i = 0; i < items_count; i++)
+    {
+        if (i == 0)
+            preview = "";
+
+        const char* itemText;
+        if (!ItemsSingleStringGetter((void*)itemsSeparatedByzeros, i, &itemText))
+            itemText = "*Unknown item*";
+
+        if (array[i])
+        {
+            preview += preview.size() ? std::string(", ") + itemText : itemText;
+            value |= 1 << i;
+        }
+        else
+        {
+            value &= ~(1 << i);
+        }
+    }
+
+    if (itemDiscardAll == -1)
+        return;
+
+    for (int i = 0; i < items_count; i++)
+    {
+        if (i == itemDiscardAll)
+            continue;
+
+        if (array[i])
+        {
+            array[itemDiscardAll] = false;
+            break;
+        }
+    }
+}
+
 void ImGuiCustom::colorPicker(const char* name, float color[3], float* alpha, bool* rainbow, float* rainbowSpeed, bool* enable, float* thickness, float* rounding, bool* outline) noexcept
 {
     ImGui::PushID(name);

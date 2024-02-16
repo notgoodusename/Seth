@@ -188,7 +188,6 @@ public:
     }
 };
 
-
 class TraceFilterWorldAndPropsOnly : public BaseTraceFilter
 {
 public:
@@ -201,6 +200,20 @@ public:
     {
         return TRACE_EVERYTHING;
     }
+};
+
+class TraceFilterWorldCustom : public BaseTraceFilter
+{
+public:
+    TraceFilterWorldCustom(Entity* entity) : passEntity{ entity } { }
+    virtual bool shouldHitEntity(Entity* serverEntity, int contentsMask) noexcept;
+
+    virtual int	getTraceType() const noexcept
+    {
+        return TRACE_EVERYTHING;
+    }
+
+    void* passEntity = nullptr;
 };
 
 class TraceFilterHitAll : public BaseTraceFilter
@@ -216,6 +229,20 @@ class TraceFilterHitscan : public BaseTraceFilter
 {
 public:
     TraceFilterHitscan(Entity* entity) : passEntity{ entity } { }
+    virtual bool shouldHitEntity(Entity* serverEntity, int contentsMask) noexcept;
+
+    virtual int	getTraceType() const noexcept
+    {
+        return TRACE_EVERYTHING;
+    }
+
+    void* passEntity = nullptr;
+};
+
+class TraceFilterArc : public BaseTraceFilter
+{
+public:
+    TraceFilterArc(Entity* entity) : passEntity{ entity } { }
     virtual bool shouldHitEntity(Entity* serverEntity, int contentsMask) noexcept;
 
     virtual int	getTraceType() const noexcept

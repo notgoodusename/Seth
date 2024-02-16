@@ -269,6 +269,15 @@
     <ClCompile Include="Hacks\Tickbase.cpp">
       <Filter>Hacks</Filter>
     </ClCompile>
+    <ClCompile Include="Hacks\ProjectileSimulation.cpp">
+      <Filter>Hacks</Filter>
+    </ClCompile>
+    <ClCompile Include="Hacks\ProjectileTrajectory.cpp">
+      <Filter>Hacks</Filter>
+    </ClCompile>
+    <ClCompile Include="Hacks\Triggerbot\TriggerbotProjectile.cpp">
+      <Filter>Hacks\Triggerbot</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GUI.h">
@@ -663,6 +672,21 @@
     </ClInclude>
     <ClInclude Include="SDK\Network.h">
       <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\Physics.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="Hacks\ProjectileSimulation.h">
+      <Filter>Hacks</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\PhysicsCollision.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="Hacks\ProjectileTrajectory.h">
+      <Filter>Hacks</Filter>
+    </ClInclude>
+    <ClInclude Include="Hacks\Triggerbot\TriggerbotProjectile.h">
+      <Filter>Hacks\Triggerbot</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

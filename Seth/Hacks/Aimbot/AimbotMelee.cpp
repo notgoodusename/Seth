@@ -67,16 +67,22 @@ void runKnife(Entity* activeWeapon, UserCmd* cmd) noexcept
     const auto& localPlayerOrigin = localPlayer->getAbsOrigin();
     const auto& localPlayerEyePosition = localPlayer->getEyePosition();
 
+    const bool ignoreCloaked = (cfg.ignore & 1 << 0) == 1 << 0;
+    const bool ignoreInvulnerable = (cfg.ignore & 1 << 1) == 1 << 1;
     for (const auto& target : enemies)
     {
         if (target.playerData.empty() || !target.isAlive || target.priority == 0)
             continue;
 
         auto entity{ interfaces->entityList->getEntityFromHandle(target.handle) };
-        if ((entity->isCloaked() && cfg.ignoreCloaked) || (!entity->isEnemy(localPlayer.get()) && !cfg.friendlyFire))
+        if (!entity ||
+            (entity->isCloaked() && ignoreCloaked) ||
+            (entity->isInvulnerable() && ignoreInvulnerable) ||
+            (!entity->isEnemy(localPlayer.get()) && !cfg.friendlyFire))
             continue;
 
-        matrix3x4* backupBoneCache = entity->getBoneCache().memory;
+        matrix3x4 backupBoneCache[MAXSTUDIOBONES];
+        memcpy(backupBoneCache, entity->getBoneCache().memory, std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
         Vector backupPrescaledMins = entity->getCollideable()->obbMinsPreScaled();
         Vector backupPrescaledMaxs = entity->getCollideable()->obbMaxsPreScaled();
         Vector backupOrigin = entity->getAbsOrigin();
@@ -208,7 +214,8 @@ void AimbotMelee::run(Entity* activeWeapon, UserCmd* cmd) noexcept
             //We gotta recalculate to aim correctly
             const auto angle = Math::calculateRelativeAngle(localPlayer->getEyePosition(), meleeRecord.target, cmd->viewangles);
 
-            matrix3x4* backupBoneCache = entity->getBoneCache().memory;
+            matrix3x4 backupBoneCache[MAXSTUDIOBONES];
+            memcpy(backupBoneCache, entity->getBoneCache().memory, std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
             Vector backupPrescaledMins = entity->getCollideable()->obbMinsPreScaled();
             Vector backupPrescaledMaxs = entity->getCollideable()->obbMaxsPreScaled();
             Vector backupOrigin = entity->getAbsOrigin();
@@ -249,16 +256,23 @@ void AimbotMelee::run(Entity* activeWeapon, UserCmd* cmd) noexcept
     Vector bestTarget{ };
     const auto& localPlayerOrigin = localPlayer->getAbsOrigin();
     const auto& localPlayerEyePosition = localPlayer->getEyePosition();
+
+    const bool ignoreCloaked = (cfg.ignore & 1 << 0) == 1 << 0;
+    const bool ignoreInvulnerable = (cfg.ignore & 1 << 1) == 1 << 1;
     for (const auto& target : enemies)
     {
         if (target.playerData.empty() || !target.isAlive || target.priority == 0)
             continue;
 
         auto entity{ interfaces->entityList->getEntityFromHandle(target.handle) };
-        if (!entity || (entity->isCloaked() && cfg.ignoreCloaked) || (!entity->isEnemy(localPlayer.get()) && !cfg.friendlyFire))
+        if (!entity ||
+            (entity->isCloaked() && ignoreCloaked) ||
+            (entity->isInvulnerable() && ignoreInvulnerable) ||
+            (!entity->isEnemy(localPlayer.get()) && !cfg.friendlyFire))
             continue;
 
-        matrix3x4* backupBoneCache = entity->getBoneCache().memory;
+        matrix3x4 backupBoneCache[MAXSTUDIOBONES];
+        memcpy(backupBoneCache, entity->getBoneCache().memory, std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
         Vector backupPrescaledMins = entity->getCollideable()->obbMinsPreScaled();
         Vector backupPrescaledMaxs = entity->getCollideable()->obbMaxsPreScaled();
         Vector backupOrigin = entity->getAbsOrigin();

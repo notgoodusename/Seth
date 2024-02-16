@@ -730,9 +730,17 @@ public:
         return false;
     }
 
+    bool isInvulnerable() noexcept
+    {
+        return isUbered() || isUberHidden() || isUberFading() || isUberCanteen() || isBonked();
+    }
+
     CONDITION(isCharging, condition(), TFCond_Charging)
     CONDITION(isScoped, condition(), TFCond_Zoomed)
     CONDITION(isUbered, condition(), TFCond_Ubercharged)
+    CONDITION(isUberHidden, conditionEx(), TFCondEx_UberchargedHidden)
+    CONDITION(isUberCanteen, conditionEx(), TFCondEx_UberchargedCanteen)
+    CONDITION(isUberFading, condition(), TFCond_UberchargeFading)
     CONDITION(isBonked, condition(), TFCond_Bonked)
     CONDITION(inMilk, condition(), TFCond_Milked)
     CONDITION(inJarate, condition(), TFCond_Jarated)
@@ -841,6 +849,9 @@ public:
     NETVAR(objectMaxHealth, "CBaseObject", "m_iMaxHealth", int)
     NETVAR(objectCarried, "CBaseObject", "m_bCarried", bool)
 
+    NETVAR(thrower, "CBaseGrenade", "m_hThrower", int)
+    NETVAR(damageRadius, "CBaseGrenade", "m_DmgRadius", float)
+
     NETVAR(lastFireTime, "CTFWeaponBase", "m_flLastFireTime", float)
     NETVAR_OFFSET(smackTime, "CTFWeaponBase", "m_nInspectStage", 0x1C, float)
     NETVAR(observedCritChance, "CTFWeaponBase", "m_flObservedCritChance", float)
@@ -856,6 +867,12 @@ public:
     NETVAR(eyeAngles, "CTFPlayer", "m_angEyeAngles[0]", Vector)
 
     NETVAR(chargeTime, "CTFPipebombLauncher", "m_flChargeBeginTime", float)
+
+    NETVAR(touched, "CTFGrenadePipebombProjectile", "m_bTouched", bool)
+    NETVAR(type, "CTFGrenadePipebombProjectile", "m_iType", int)
+    NETVAR(launcher, "CTFGrenadePipebombProjectile", "m_hLauncher", int)
+    NETVAR(defensiveBomb, "CTFGrenadePipebombProjectile", "m_bDefensiveBomb", int)
+    NETVAR_OFFSET(creationTime, "CTFGrenadePipebombProjectile", "m_iType", 4, float)
 
     NETVAR(chargedDamage, "CTFSniperRifle", "m_flChargedDamage", float)
 

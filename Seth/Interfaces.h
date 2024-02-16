@@ -27,6 +27,8 @@ class ModelInfo;
 class ModelRender;
 class NetworkStringTableContainer;
 class Panel;
+class Physics;
+class PhysicsCollision;
 class PhysicsSurfaceProps;
 class Prediction;
 class RenderView;
@@ -61,6 +63,8 @@ type* name = reinterpret_cast<type*>(find(moduleName, version));
     GAME_INTERFACE(ModelRender, modelRender, ENGINE_DLL, "VEngineModel016")
     GAME_INTERFACE(NetworkStringTableContainer, networkStringTableContainer, ENGINE_DLL, "VEngineClientStringTable001")
     GAME_INTERFACE(Panel, panel, VGUI2_DLL, "VGUI_Panel009")
+    GAME_INTERFACE(Physics, physics, VPHYSICS_DLL, "VPhysics031")
+    GAME_INTERFACE(PhysicsCollision, physicsCollision, VPHYSICS_DLL, "VPhysicsCollision007");
     GAME_INTERFACE(PhysicsSurfaceProps, physicsSurfaceProps, VPHYSICS_DLL, "VPhysicsSurfaceProps001")
     GAME_INTERFACE(Prediction, prediction, CLIENT_DLL, "VClientPrediction001")
     GAME_INTERFACE(RenderView, renderView, ENGINE_DLL, "VEngineRenderView014")

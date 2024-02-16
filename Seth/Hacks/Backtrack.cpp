@@ -85,15 +85,46 @@ void Backtrack::run(UserCmd* cmd) noexcept
             if (!Backtrack::valid(targetTick.simulationTime))
                 continue;
 
-            for (auto& position :
-                canHeadshot ? targetTick.headPositions : targetTick.bodyPositions) {
-                auto angle = Math::calculateRelativeAngle(localPlayerEyePosition, position, cmd->viewangles);
-                auto fov = std::hypotf(angle.x, angle.y);
-                if (fov < bestFov) {
-                    bestFov = fov;
+            if (weaponType != WeaponType::MELEE)
+            {
+                for (auto& position :
+                    canHeadshot ? targetTick.headPositions : targetTick.bodyPositions) {
+                    auto angle = Math::calculateRelativeAngle(localPlayerEyePosition, position, cmd->viewangles);
+                    auto fov = std::hypotf(angle.x, angle.y);
+                    if (fov < bestFov) {
+                        bestFov = fov;
+                        bestTick = i;
+                        bestTargetIndex = target.handle;
+                    }
+                }
+            }
+            else
+            {
+                matrix3x4 backupBoneCache[MAXSTUDIOBONES];
+                memcpy(backupBoneCache, entity->getBoneCache().memory, std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
+                Vector backupPrescaledMins = entity->getCollideable()->obbMinsPreScaled();
+                Vector backupPrescaledMaxs = entity->getCollideable()->obbMaxsPreScaled();
+                Vector backupOrigin = entity->getAbsOrigin();
+                Vector backupAbsAngle = entity->getAbsAngle();
+
+                entity->replaceMatrix(targetTick.matrix.data());
+                memory->setAbsOrigin(entity, targetTick.origin);
+                memory->setAbsAngle(entity, targetTick.absAngle);
+                memory->setCollisionBounds(entity->getCollideable(), targetTick.minsPrescaled, targetTick.maxsPrescaled);
+
+                if (Math::doesMeleeHit(activeWeapon, entity->index(), cmd->viewangles))
+                {
                     bestTick = i;
                     bestTargetIndex = target.handle;
                 }
+
+                entity->replaceMatrix(backupBoneCache);
+                memory->setAbsOrigin(entity, backupOrigin);
+                memory->setAbsAngle(entity, backupAbsAngle);
+                memory->setCollisionBounds(entity->getCollideable(), backupPrescaledMins, backupPrescaledMaxs);
+
+                if(bestTick != -1)
+                    break;
             }
         }
     }

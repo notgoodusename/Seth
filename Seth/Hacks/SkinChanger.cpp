@@ -61,7 +61,7 @@ void SkinChanger::run() noexcept
         if (weaponHandle == -1)
             break;
 
-        auto weapon = reinterpret_cast<Entity*>(interfaces->entityList->getEntityFromHandle(weaponHandle));
+        auto weapon = interfaces->entityList->getEntityFromHandle(weaponHandle);
         if (!weapon)
             continue;
 
