@@ -68,6 +68,8 @@ public:
     void(__thiscall* boneSetupCalcBoneAdj)(void*, Vector*, Quaternion*, const float*);
     
     void(__thiscall* calcAbsoluteVelocity)(void*);
+    std::add_pointer_t<void __cdecl(const std::array<std::uint8_t, 4>& color, const char* msg, ...)> conColorMsg;
+    std::add_pointer_t<void __cdecl(const char* msg, ...)> conMsg;
     bool(_cdecl* cullBox)(const Vector&, const Vector&, const Frustum&);
     int(__thiscall* getAmmoCount)(void*, int);
     EconItemDefinition*( __thiscall* getItemDefinition)(void*, int);
@@ -116,16 +118,14 @@ public:
     std::uintptr_t interpolateServerEntities;
     std::uintptr_t isAllowedToWithdrawFromCritBucket;
     std::uintptr_t newMatchFoundDashboardStateOnUpdate;
-    std::uintptr_t physicsSimulate;
     std::uintptr_t tfPlayerInventoryGetMaxItemCount;
     std::uintptr_t randomSeedReturnAddress1;
     std::uintptr_t randomSeedReturnAddress2;
     std::uintptr_t randomSeedReturnAddress3;
+    std::uintptr_t runSimulation;
     std::uintptr_t sendDatagram;
     std::uintptr_t updateClientSideAnimation;
     std::uintptr_t updateTFAnimState;
-
-    std::add_pointer_t<void _cdecl(const char* msg, ...)> logDirect;
 private:
 };
 

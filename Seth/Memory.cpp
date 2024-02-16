@@ -101,6 +101,8 @@ Memory::Memory() noexcept
     boneSetupCalcBoneAdj = relativeToAbsolute<decltype(boneSetupCalcBoneAdj)>(findPattern(CLIENT_DLL, "\xE8????\xFF\x75\x18\xD9\x45\x14\x8B\x07") + 1);
 
     calcAbsoluteVelocity = relativeToAbsolute<decltype(calcAbsoluteVelocity)>(findPattern(CLIENT_DLL, "\xE8????\xD9\xE8\x8D\x45\xEC") + 1);
+    conColorMsg = reinterpret_cast<decltype(conColorMsg)>(GetProcAddress(GetModuleHandleA(TIER0_DLL), "?ConColorMsg@@YAXABVColor@@PBDZZ"));
+    conMsg = reinterpret_cast<decltype(conMsg)>(GetProcAddress(GetModuleHandleA(TIER0_DLL), "?ConMsg@@YAXPBDZZ"));
     cullBox = relativeToAbsolute<decltype(cullBox)>(findPattern(ENGINE_DLL, "\xE8????\x33\xC9\x83\xC4\x10\x84\xC0") + 1);
     getAmmoCount = reinterpret_cast<decltype(getAmmoCount)>(findPattern(CLIENT_DLL, "\x55\x8B\xEC\x56\x8B\x75\x08\x57\x8B\xF9\x83\xFE\xFF\x75\x08\x5F\x33\xC0\x5E\x5D\xC2\x04\x00"));
     getItemDefinition = relativeToAbsolute<decltype(getItemDefinition)>(findPattern(CLIENT_DLL, "\xE8????\x0F\xB6\x40\x15") + 1);
@@ -149,16 +151,15 @@ Memory::Memory() noexcept
     interpolateServerEntities = findPattern(CLIENT_DLL, "\x55\x8B\xEC\x83\xEC\x30\x8B\x0D????\x53");
     isAllowedToWithdrawFromCritBucket = findPattern(CLIENT_DLL, "\x55\x8B\xEC\x56\x8B\xF1\x0F\xB7\x86????\xFF\x86????\x50\xE8????\x83\xC4\x04\x80\xB8?????\x74\x0A\xF3\x0F\x10\x15");
     newMatchFoundDashboardStateOnUpdate = findPattern(CLIENT_DLL, "\x55\x8B\xEC\x83\xEC\x0C\x56\x8B\xF1\xE8????\x8B\x86????");
-    physicsSimulate = findPattern(CLIENT_DLL, "\x56\x8B\xF1\x8B\x8E????\x85\xC9\x74\x32");
     tfPlayerInventoryGetMaxItemCount = findPattern(CLIENT_DLL, "\x8B\x49\x68\x56");
     randomSeedReturnAddress1 = findPattern(CLIENT_DLL, "\x83\xC4?\x0F\x57?\x80\x7D\xFF");
     randomSeedReturnAddress2 = findPattern(CLIENT_DLL, "\x83\xC4?\x68????\x6A?\xFF\x15????\xF3\x0F???\x83\xC4?\x0F\x28");
     randomSeedReturnAddress3 = findPattern(CLIENT_DLL, "\x83\xC4?\x68????\x6A?\xFF\x15????\xF3\x0F???\x83\xC4?\xF3\x0F");
+    runSimulation = findPattern(CLIENT_DLL, "\x55\x8B\xEC\x51\x53\x56\x8B\x75?\x57\xFF\x75?\x8B\xF9\x8D\x8E");
     sendDatagram = findPattern(ENGINE_DLL, "\x55\x8B\xEC\xB8????\xE8????\xA1????\x53\x56\x8B\xD9");
     updateClientSideAnimation = findPattern(CLIENT_DLL, "\x56\x8B\xF1\x80\xBE?????\x74\x27");
     updateTFAnimState = findPattern(CLIENT_DLL, "\x55\x8B\xEC\x81\xEC????\x53\x57\x8B\xF9\x8B\x9F????");
 
-    logDirect = reinterpret_cast<decltype(logDirect)>(GetProcAddress(GetModuleHandleA("tier0.dll"), "Msg"));
 
     localPlayer.init(*reinterpret_cast<Entity***>(findPattern(CLIENT_DLL, "\xA1????\x33\xC9\x83\xC4\x04")+1));
 }

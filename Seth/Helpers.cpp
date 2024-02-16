@@ -130,7 +130,7 @@ float Helpers::bias(float x, float biasAmt) noexcept
     static float lastExponent = 0;
     if (lastAmt != biasAmt)
     {
-        lastExponent = log(biasAmt) * -1.4427f;
+        lastExponent = std::log(biasAmt) * -1.4427f;
     }
     return pow(x, lastExponent);
 }

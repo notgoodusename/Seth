@@ -12,7 +12,8 @@ int shiftedTickbase{ 0 };
 int ticksAllowedForProcessing{ 0 };
 int chokedPackets{ 0 };
 int pauseTicks{ 0 };
-float realTime{ 0.0f };
+int totalPauseTicks{ 0 };
+int tickCountAtShift{ 0};
 bool shifting{ false };
 bool finalTick{ false };
 bool hasHadTickbaseActive{ false };
@@ -64,15 +65,45 @@ void Tickbase::end(UserCmd* cmd) noexcept
         shift(cmd, targetTickShift);
 }
 
+static int timeTillRecharge() noexcept
+{
+    constexpr float time = 1.0f;
+    return static_cast<int>(time / memory->globalVars->intervalPerTick);
+}
+
 bool Tickbase::shift(UserCmd* cmd, int shiftAmount, bool forceShift) noexcept
 {
     if (!canShift(shiftAmount, forceShift))
         return false;
 
-    realTime = memory->globalVars->realTime;
+    tickCountAtShift = memory->globalVars->tickCount;
     shiftedTickbase = shiftAmount;
     shiftCommand = cmd->commandNumber;
     tickShift = shiftAmount;
+    return true;
+}
+
+bool Tickbase::runSimulationHandler() noexcept
+{
+    if (!interfaces->engine->isInGame() || !interfaces->engine->isConnected())
+        return true;
+
+    if (!localPlayer || !localPlayer->isAlive() || !targetTickShift)
+        return true;
+
+    if (ticksAllowedForProcessing < targetTickShift
+        || chokedPackets > MAX_COMMANDS - targetTickShift)
+    {
+        if (targetTickShift > ticksAllowedForProcessing)
+            totalPauseTicks = max(max(targetTickShift - ticksAllowedForProcessing, 0), totalPauseTicks);
+
+        if (chokedPackets > MAX_COMMANDS - targetTickShift)
+            totalPauseTicks = max(max(chokedPackets - (MAX_COMMANDS - targetTickShift), 0), totalPauseTicks);
+    }
+
+    if (totalPauseTicks && memory->globalVars->tickCount - tickCountAtShift > timeTillRecharge())
+        return false;
+
     return true;
 }
 
@@ -94,7 +125,7 @@ bool Tickbase::canRun() noexcept
 
     if ((ticksAllowedForProcessing < targetTickShift 
         || chokedPackets > MAX_COMMANDS - targetTickShift)
-        && memory->globalVars->realTime - realTime > 1.0f)
+        && memory->globalVars->tickCount - tickCountAtShift > timeTillRecharge())
     {
         ticksAllowedForProcessing = min(ticksAllowedForProcessing++, MAX_COMMANDS);
         chokedPackets = max(chokedPackets--, 0);
@@ -110,7 +141,7 @@ bool Tickbase::canShift(int shiftAmount, bool forceShift) noexcept
     if (!localPlayer || !localPlayer->isAlive())
         return false;
 
-    if (!shiftAmount || shiftAmount > ticksAllowedForProcessing || memory->globalVars->realTime - realTime <= 0.5f)
+    if (!shiftAmount || shiftAmount > ticksAllowedForProcessing || memory->globalVars->tickCount - tickCountAtShift <= timeTillRecharge())
         return false;
 
     if (forceShift)
@@ -122,13 +153,16 @@ bool Tickbase::canShift(int shiftAmount, bool forceShift) noexcept
 int Tickbase::getCorrectTickbase(int commandNumber) noexcept
 {
     const int tickBase = localPlayer->tickBase();
-    
-    if (commandNumber == shiftCommand + 1)
-        return tickBase - shiftedTickbase;
-    
-    if (pauseTicks)
-        return tickBase + pauseTicks;
-    return tickBase;
+
+
+    const int result = tickBase + totalPauseTicks + 1;
+    totalPauseTicks = 0;
+    return result;
+}
+
+int& Tickbase::totalPausedTicks() noexcept
+{
+    return totalPauseTicks;
 }
 
 int& Tickbase::pausedTicks() noexcept
@@ -149,6 +183,7 @@ int Tickbase::getTickshift() noexcept
 void Tickbase::resetTickshift() noexcept
 {
     shiftedTickbase = tickShift;
+    totalPauseTicks = max(max(shiftedTickbase, 0), totalPauseTicks);
     ticksAllowedForProcessing = max(ticksAllowedForProcessing - tickShift, 0);
     tickShift = 0;
 }
@@ -177,5 +212,5 @@ void Tickbase::reset() noexcept
     shiftCommand = 0;
     shiftedTickbase = 0;
     ticksAllowedForProcessing = 0;
-    realTime = 0.0f;
+    tickCountAtShift = 0.0f;
 }

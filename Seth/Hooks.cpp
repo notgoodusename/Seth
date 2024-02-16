@@ -152,7 +152,7 @@ static bool __fastcall createMove(void* thisPointer, void*, float inputSampleTim
     uintptr_t framePointer;
     __asm mov framePointer, ebp;
     bool& sendPacket = *reinterpret_cast<bool*>(***reinterpret_cast<uintptr_t***>(framePointer) - 0x1);
-
+    
     auto currentViewAngles{ cmd->viewangles };
     const auto currentCmd{ *cmd };
 
@@ -262,7 +262,7 @@ static void __stdcall overrideView(ViewSetup* setup) noexcept
     Misc::freeCam(setup);
 }
 
-static unsigned int vguiFocusOverlayPanel;
+static unsigned int vguiFocusOverlayPanel = NULL;
 
 static void __fastcall paintTraverse(void* thisPointer, void*, unsigned int vguiPanel, bool forceRepaint, bool allowForce) noexcept
 {
@@ -399,7 +399,6 @@ static void __cdecl clMoveHook(float accumulatedExtraSamples, bool isFinalTick) 
         return;
 
     original(accumulatedExtraSamples, isFinalTick);
-
 
     if (!Tickbase::getTickshift())// || !config->tickbase.teleport)
         return;
@@ -631,41 +630,23 @@ static void __fastcall newMatchFoundDashboardStateOnUpdateHook(void* thisPointer
     original(thisPointer);
 }
 
-static void __fastcall physicsSimulateHook(void* thisPointer, void*) noexcept
+static void __fastcall runSimulationHook(void* thisPointer, void*, int currentCommand, float currentTime, UserCmd* cmd, Entity* entity) noexcept
 {
-    static auto original = hooks->physicsSimulate.getOriginal<void>();
+    static auto original = hooks->runSimulation.getOriginal<void>(currentCommand, currentTime, cmd, entity);
 
-    const auto entity = reinterpret_cast<Entity*>(thisPointer);
-    if (!localPlayer || !localPlayer->isAlive() || entity != localPlayer.get())
-        return original(thisPointer);
-
-    const int simulationTick = *reinterpret_cast<int*>(reinterpret_cast<uintptr_t>(thisPointer) + 0xE0);
-    if (simulationTick == memory->globalVars->tickCount)
-        return;
-
-    CommandContext* commandContext = localPlayer->getCommandContext();
-    if (!commandContext || !commandContext->needsProcessing)
-        return;
-
-    static int lastCommandNumber = -1;
-    static bool once = false;
-
-    if (Tickbase::pausedTicks() && !once)
+    //since runsimulation runs before createmove, we wait 1 tick before actually fixing tickbase
+    static bool lastTick = false;
+    if (lastTick)
     {
-        lastCommandNumber = commandContext->commandNumber;
-        once = true;
+        localPlayer->tickBase() = Tickbase::getCorrectTickbase(currentCommand);
+        lastTick = false;
+        return;
     }
 
-    if (lastCommandNumber != commandContext->commandNumber)
-    {
-        lastCommandNumber = commandContext->commandNumber;
-        once = false;
-        Tickbase::pausedTicks() = 0;
-    }
+    if (!Tickbase::runSimulationHandler())
+        lastTick = true;
 
-    localPlayer->tickBase() = Tickbase::getCorrectTickbase(commandContext->commandNumber);
-
-    original(thisPointer);
+    original(thisPointer, currentCommand, currentTime, cmd, entity);
 }
 
 static void __cdecl randomSeedHook(int seed) noexcept
@@ -808,8 +789,8 @@ void Hooks::install() noexcept
     interpolateServerEntities.detour(memory->interpolateServerEntities, interpolateServerEntitiesHook);
     isAllowedToWithdrawFromCritBucket.detour(memory->isAllowedToWithdrawFromCritBucket, isAllowedToWithdrawFromCritBucketHook);
     newMatchFoundDashboardStateOnUpdate.detour(memory->newMatchFoundDashboardStateOnUpdate, newMatchFoundDashboardStateOnUpdateHook);
-    physicsSimulate.detour(memory->physicsSimulate, physicsSimulateHook);
     randomSeed.detour(reinterpret_cast<uintptr_t>(memory->randomSeed), randomSeedHook);
+    runSimulation.detour(memory->runSimulation, runSimulationHook);
     sendDatagram.detour(memory->sendDatagram, sendDatagramHook);
     tfPlayerInventoryGetMaxItemCount.detour(memory->tfPlayerInventoryGetMaxItemCount, tfPlayerInventoryGetMaxItemCountHook);
     updateTFAnimState.detour(memory->updateTFAnimState, updateTFAnimStateHook);

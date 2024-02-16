@@ -9,6 +9,7 @@
 #include "imgui/imgui.h"
 
 #include "Config.h"
+#include "Memory.h"
 
 struct Color4;
 struct Frustum;
@@ -16,6 +17,26 @@ struct Vector;
 
 namespace Helpers
 {
+    template<typename ...Args>
+    void log(const char* msg, Args ...args) noexcept
+    {
+        if (config->misc.antiAfkKick)
+            return;
+
+        memory->conMsg(msg, args...);
+    }
+
+    template<typename ...Args>
+    void colorLog(std::array<float, 4> color, const char* msg, Args ...args) noexcept
+    {
+        if (config->misc.antiAfkKick)
+            return;
+
+        std::array<std::uint8_t, 4> finalColor = { static_cast<uint8_t>(color[0] * 255.0f), static_cast<uint8_t>(color[1] * 255.0f), static_cast<uint8_t>(color[2] * 255.0f), static_cast<uint8_t>(color[3] * 255.0f) };
+
+        memory->conColorMsg(finalColor, msg, args...);
+    }
+
     float simpleSpline(float value) noexcept;
     float simpleSplineRemapVal(float val, float A, float B, float C, float D) noexcept;
     float simpleSplineRemapValClamped(float val, float A, float B, float C, float D) noexcept;

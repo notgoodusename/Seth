@@ -9,10 +9,14 @@ namespace Tickbase
 
 	bool shift(UserCmd* cmd, int shiftAmount, bool forceShift = false) noexcept;
 
+	bool runSimulationHandler() noexcept;
+
 	bool canRun() noexcept;
 	bool canShift(int shiftAmount, bool forceShift = false) noexcept;
 
 	int getCorrectTickbase(int commandNumber) noexcept;
+
+	int& totalPausedTicks() noexcept;
 
 	int& pausedTicks() noexcept;
 
