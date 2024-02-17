@@ -115,7 +115,9 @@ public:
     std::uintptr_t fireBullet;
     std::uintptr_t frameAdvance;
     std::uintptr_t getTraceType;
+    std::uintptr_t interpolate;
     std::uintptr_t interpolateServerEntities;
+    std::uintptr_t interpolateViewModel;
     std::uintptr_t isAllowedToWithdrawFromCritBucket;
     std::uintptr_t newMatchFoundDashboardStateOnUpdate;
     std::uintptr_t tfPlayerInventoryGetMaxItemCount;

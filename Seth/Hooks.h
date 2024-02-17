@@ -38,7 +38,9 @@ public:
     MinHook fireBullet;
     MinHook frameAdvance;
     MinHook getTraceType;
+    MinHook interpolate;
     MinHook interpolateServerEntities;
+    MinHook interpolateViewModel;
     MinHook isAllowedToWithdrawFromCritBucket;
     MinHook newMatchFoundDashboardStateOnUpdate;
     MinHook randomSeed;

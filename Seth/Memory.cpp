@@ -148,7 +148,9 @@ Memory::Memory() noexcept
     fireBullet = relativeToAbsolute<decltype(fireBullet)>(findPattern(CLIENT_DLL, "\xE8????\x8B\x45\x20\x47") + 1);
     frameAdvance = relativeToAbsolute<decltype(frameAdvance)>(findPattern(CLIENT_DLL, "\xE8????\x80\xBF?????\xD9\x55\x08") + 1);
     getTraceType = findPattern(CLIENT_DLL, "\x55\x8B\xEC\x51\x53\x56\x57\x8B\xF9\xE8????\x6A\x00");
+    interpolate = findPattern(CLIENT_DLL, "\x55\x8B\xEC\x83\xEC\x2C\x56\x8B\xF1\x83\xBE?????\x0F\x85????\xF3\x0F\x10\x86????");
     interpolateServerEntities = findPattern(CLIENT_DLL, "\x55\x8B\xEC\x83\xEC\x30\x8B\x0D????\x53");
+    interpolateViewModel = findPattern(CLIENT_DLL, "\x55\x8B\xEC\x83\xEC\x08\x53\x56\x8B\xF1\x57\x80\xBE?????");
     isAllowedToWithdrawFromCritBucket = findPattern(CLIENT_DLL, "\x55\x8B\xEC\x56\x8B\xF1\x0F\xB7\x86????\xFF\x86????\x50\xE8????\x83\xC4\x04\x80\xB8?????\x74\x0A\xF3\x0F\x10\x15");
     newMatchFoundDashboardStateOnUpdate = findPattern(CLIENT_DLL, "\x55\x8B\xEC\x83\xEC\x0C\x56\x8B\xF1\xE8????\x8B\x86????");
     tfPlayerInventoryGetMaxItemCount = findPattern(CLIENT_DLL, "\x8B\x49\x68\x56");

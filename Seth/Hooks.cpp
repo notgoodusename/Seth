@@ -579,7 +579,7 @@ static const char* __fastcall getTraceTypeHook(void* thisPointer, void*) noexcep
         case 1:
             return (localPlayer->teamNumber() == Team::RED ? "dxhr_sniper_rail_red" : "dxhr_sniper_rail_blue");
         case 2:
-            return (localPlayer->isCritBoosted() ? 
+            return (localPlayer->isCritBoosted() ?
                 (localPlayer->teamNumber() == Team::RED ? "bullet_tracer_raygun_red_crit" : "bullet_tracer_raygun_blue_crit") :
                 (localPlayer->teamNumber() == Team::RED ? "bullet_tracer_raygun_red" : "bullet_tracer_raygun_blue"));
         case 3:
@@ -589,24 +589,64 @@ static const char* __fastcall getTraceTypeHook(void* thisPointer, void*) noexcep
         case 5:
             return "merasmus_zap_beam02";
         case 6:
-            return localPlayer->isCritBoosted() ? 
-                (localPlayer->teamNumber() == Team::RED ? "bullet_bignasty_tracer01_red_crit" : "bullet_bignasty_tracer01_blue_crit") : 
+            return localPlayer->isCritBoosted() ?
+                (localPlayer->teamNumber() == Team::RED ? "bullet_bignasty_tracer01_red_crit" : "bullet_bignasty_tracer01_blue_crit") :
                 (localPlayer->teamNumber() == Team::RED ? "bullet_bignasty_tracer01_blue" : "bullet_bignasty_tracer01_red");
-        default: 
+        default:
             break;
     }
 
     return original(thisPointer);
 }
 
+static bool __fastcall interpolateHook(void* thisPointer, void*, float currentTime) noexcept
+{
+    static auto original = hooks->interpolate.getOriginal<bool>(currentTime);
+
+    const auto entity = reinterpret_cast<Entity*>(thisPointer);
+    if (!entity || !localPlayer || entity != localPlayer.get())
+        return original(thisPointer, currentTime);
+
+    if (Tickbase::pausedTicks())
+        return true;
+
+    return original(thisPointer, currentTime);
+}
+
 static void __cdecl interpolateServerEntitiesHook() noexcept
 {
     static auto original = reinterpret_cast<void(__cdecl*)()>(hooks->interpolateServerEntities.getDetour());
-    
+
     static auto extrapolate = interfaces->cvar->findVar("cl_extrapolate");
     if(extrapolate->getInt() != 0)
         extrapolate->setValue(0);
     original();
+}
+
+static bool __fastcall interpolateViewModelHook(void* thisPointer, void*, float currentTime) noexcept
+{
+    static auto original = hooks->interpolateViewModel.getOriginal<bool>(currentTime);
+    
+    const auto viewModel = reinterpret_cast<Entity*>(thisPointer);
+    if(!viewModel)
+        return original(thisPointer, currentTime);
+
+    const auto entity = interfaces->entityList->getEntityFromHandle(viewModel->owner());
+    if (!entity || !localPlayer || entity != localPlayer.get())
+        return original(thisPointer, currentTime);
+
+    const int finalPredictedTick = entity->finalPredictedTick();
+    const float interpolationAmount = memory->globalVars->interpolationAmount;
+
+    entity->finalPredictedTick() = timeToTicks(memory->globalVars->currentTime);
+    memory->globalVars->interpolationAmount = 0.f;
+
+    const bool result = original(thisPointer, currentTime);
+
+    entity->finalPredictedTick() = finalPredictedTick;
+    memory->globalVars->interpolationAmount = interpolationAmount;
+
+    return result;
 }
 
 static bool __fastcall isAllowedToWithdrawFromCritBucketHook(void* thisPointer, void*, float damage) noexcept
@@ -714,9 +754,6 @@ static int __fastcall sendDatagramHook(NetworkChannel* network, void* edx, buffe
         || !network || datagram)
         return original(network, datagram);
 
-    int a = sizeof(NetworkChannel);
-
-
     const int inState = network->inReliableState;
     const int inSequenceNr = network->inSequenceNr;
 
@@ -820,7 +857,9 @@ void Hooks::install() noexcept
     //fireBullet.detour(memory->fireBullet, fireBulletHook);
     frameAdvance.detour(memory->frameAdvance, frameAdvanceHook);
     //getTraceType.detour(memory->getTraceType, getTraceTypeHook);
+    interpolate.detour(memory->interpolate, interpolateHook);
     interpolateServerEntities.detour(memory->interpolateServerEntities, interpolateServerEntitiesHook);
+    interpolateViewModel.detour(memory->interpolateViewModel, interpolateViewModelHook);
     isAllowedToWithdrawFromCritBucket.detour(memory->isAllowedToWithdrawFromCritBucket, isAllowedToWithdrawFromCritBucketHook);
     newMatchFoundDashboardStateOnUpdate.detour(memory->newMatchFoundDashboardStateOnUpdate, newMatchFoundDashboardStateOnUpdateHook);
     randomSeed.detour(reinterpret_cast<uintptr_t>(memory->randomSeed), randomSeedHook);
