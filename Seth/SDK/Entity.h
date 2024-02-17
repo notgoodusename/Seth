@@ -779,6 +779,7 @@ public:
     CONDITION(hasBulletResist, conditionEx(), TFCondEx_BulletCharge)
     CONDITION(hasFireResist, conditionEx(), TFCondEx_FireCharge)
 
+    OFFSET(networkOrigin, 0x364, Vector)
     OFFSET(critTokenBucket, 0xA54, float)
     OFFSET(critChecks, 0xA58, int)
     OFFSET(critSeedRequests, 0xA5C, int)

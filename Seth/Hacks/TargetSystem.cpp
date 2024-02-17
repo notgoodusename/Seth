@@ -116,7 +116,8 @@ void PlayerTarget::update(Entity* entity) noexcept
         distanceToLocal = entity->getAbsOrigin().distTo(localPlayerInfo.origin);
         fovFromLocal = angle.length2D();
 
-        newRecord.origin = entity->origin();
+        //m_vecOrigin works fine, but im paranoid
+        newRecord.origin = entity->networkOrigin();
         newRecord.absAngle = entity->getAbsAngle();
         newRecord.eyeAngle = entity->eyeAngles();
 
