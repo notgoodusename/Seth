@@ -400,7 +400,7 @@ static void __cdecl clMoveHook(float accumulatedExtraSamples, bool isFinalTick) 
 
     original(accumulatedExtraSamples, isFinalTick);
 
-    if (!Tickbase::getTickshift())// || !config->tickbase.teleport)
+    if (!Tickbase::getTickshift())
         return;
 
     int remainToShift = 0;
@@ -634,19 +634,52 @@ static void __fastcall runSimulationHook(void* thisPointer, void*, int currentCo
 {
     static auto original = hooks->runSimulation.getOriginal<void>(currentCommand, currentTime, cmd, entity);
 
-    //since runsimulation runs before createmove, we wait 1 tick before actually fixing tickbase
-    static bool lastTick = false;
-    if (lastTick)
+    if(!entity || !localPlayer || entity != localPlayer.get())
+        return original(thisPointer, currentCommand, currentTime, cmd, entity);
+
+    if (Tickbase::pausedTicks())
     {
-        localPlayer->tickBase() = Tickbase::getCorrectTickbase(currentCommand);
-        lastTick = false;
+        entity->tickBase() += Tickbase::pausedTicks() + 1;
+
+        if (currentCommand != Tickbase::getShiftCommandNumber())
+        {
+            Tickbase::pausedTicks() = 0;
+            return;
+        }
+    }
+
+    //for this case we have to wait 2 ticks
+    // runSimulation (normal -> createmove we send shift
+    // runSimulation (normal, because we havent shifted yet) -> createmove
+    // runSimulation (SHIFT,  tickbase - shiftedamount) -> createmove
+
+    static int tickWait = 0;
+    static int savedCommandNumber = 0;
+
+    if (savedCommandNumber == currentCommand)
+        entity->tickBase() -= Tickbase::getShiftedTickbase();
+
+    if (tickWait)
+    {
+        savedCommandNumber = currentCommand;
+        tickWait++;
+        if (tickWait >= 3)
+        {
+            tickWait = 0;
+            entity->tickBase() -= Tickbase::getShiftedTickbase();
+        }
+    }
+
+    if (currentCommand == Tickbase::getShiftCommandNumber())
+        tickWait++;
+
+    if (Tickbase::pausedTicks())
+    {
+        Tickbase::pausedTicks() = 0;
         return;
     }
 
-    if (!Tickbase::runSimulationHandler())
-        lastTick = true;
-
-    original(thisPointer, currentCommand, currentTime, cmd, entity);
+    original(thisPointer, currentCommand, entity->tickBase() * memory->globalVars->intervalPerTick, cmd, entity);
 }
 
 static void __cdecl randomSeedHook(int seed) noexcept
@@ -656,9 +689,10 @@ static void __cdecl randomSeedHook(int seed) noexcept
     if (Crithack::protectData())
         return original(seed);
 
-    if (reinterpret_cast<DWORD>(_ReturnAddress()) == memory->randomSeedReturnAddress1 ||
-        reinterpret_cast<DWORD>(_ReturnAddress()) == memory->randomSeedReturnAddress2 ||
-        reinterpret_cast<DWORD>(_ReturnAddress()) == memory->randomSeedReturnAddress3)
+    const auto returnAddress = reinterpret_cast<unsigned long>(_ReturnAddress());
+    if (returnAddress == memory->randomSeedReturnAddress1 ||
+        returnAddress == memory->randomSeedReturnAddress2 ||
+        returnAddress == memory->randomSeedReturnAddress3)
     {
         if (localPlayer)
         {
