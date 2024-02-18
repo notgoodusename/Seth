@@ -154,7 +154,13 @@ int Tickbase::getCorrectTickbase(int simulationTicks) noexcept
 
         const int idealFinalTick = serverTime + correctionTicks;
         
-        tickBase = idealFinalTick - simulationTicks + 1;
+        const int estimatedFinalTick = tickBase + simulationTicks;
+
+        const int tooFastLimit = idealFinalTick + correctionTicks;
+        const int tooSlowLimit = idealFinalTick - correctionTicks;
+
+        if (estimatedFinalTick > tooFastLimit || estimatedFinalTick < tooSlowLimit)
+            tickBase = idealFinalTick - simulationTicks + 1;
     }
 
     return tickBase;
