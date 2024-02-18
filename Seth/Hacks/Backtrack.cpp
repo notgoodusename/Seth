@@ -29,12 +29,18 @@ static Cvars cvars;
 
 float Backtrack::getLerp() noexcept
 {
+    if (!cvars.interpRatio || !cvars.minInterpRatio || !cvars.maxInterpRatio || !cvars.interp || !cvars.maxUpdateRate || !cvars.updateRate)
+        return 0.0f;
+
     auto ratio = std::clamp(cvars.interpRatio->getFloat(), cvars.minInterpRatio->getFloat(), cvars.maxInterpRatio->getFloat());
     return (std::max)(cvars.interp->getFloat(), (ratio / ((cvars.maxUpdateRate) ? cvars.maxUpdateRate->getFloat() : cvars.updateRate->getFloat())));
 }
 
 float Backtrack::getLatency() noexcept
 {
+    if (!cvars.maxUnlag)
+        return 0.0f;
+
     return std::clamp(static_cast<float>(config->backtrack.fakeLatencyAmount), 0.f, cvars.maxUnlag->getFloat() * 1000.0f);
 }
 
@@ -175,7 +181,7 @@ void Backtrack::updateSequences() noexcept
 bool Backtrack::valid(float simtime) noexcept
 {
     const auto network = interfaces->engine->getNetworkChannel();
-    if (!network || !memory->clientState)
+    if (!network || !memory->clientState || !cvars.maxUnlag)
         return false;
 
     const float currentTick = memory->clientState->clockDrift.serverTick + 1;
