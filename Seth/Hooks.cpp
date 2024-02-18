@@ -679,7 +679,7 @@ static void __fastcall runSimulationHook(void* thisPointer, void*, int currentCo
 
     if (Tickbase::pausedTicks())
     {
-        entity->tickBase() += Tickbase::pausedTicks() + 1;
+        //entity->tickBase() = Tickbase::getCorrectTickbase(-Tickbase::pausedTicks());
 
         if (currentCommand != Tickbase::getShiftCommandNumber())
         {
@@ -697,7 +697,7 @@ static void __fastcall runSimulationHook(void* thisPointer, void*, int currentCo
     static int savedCommandNumber = 0;
 
     if (savedCommandNumber == currentCommand)
-        entity->tickBase() -= Tickbase::getShiftedTickbase();
+        entity->tickBase() = Tickbase::getCorrectTickbase(Tickbase::getShiftedTickbase());
 
     if (tickWait)
     {
@@ -706,7 +706,7 @@ static void __fastcall runSimulationHook(void* thisPointer, void*, int currentCo
         if (tickWait >= 3)
         {
             tickWait = 0;
-            entity->tickBase() -= Tickbase::getShiftedTickbase();
+            entity->tickBase() = Tickbase::getCorrectTickbase(Tickbase::getShiftedTickbase());
         }
     }
 
@@ -802,6 +802,7 @@ void resetAll(int resetType) noexcept
     Misc::reset(resetType);
     EnginePrediction::reset();
     TargetSystem::reset();
+    Tickbase::reset();
     Visuals::reset(resetType);
 
     resetUtil();

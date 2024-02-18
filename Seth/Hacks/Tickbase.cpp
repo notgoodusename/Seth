@@ -38,7 +38,9 @@ void Tickbase::start(UserCmd* cmd) noexcept
     }
 
     if (config->tickbase.warpKey.isActive())
-        targetTickShift = 21;
+    {
+        targetTickShift = 19;
+    }
 
     //We do -1 to leave 1 tick to fakelag
     targetTickShift = std::clamp(targetTickShift, 0, MAX_COMMANDS - 1);
@@ -66,7 +68,7 @@ void Tickbase::end(UserCmd* cmd) noexcept
 
 static int timeTillRecharge() noexcept
 {
-    constexpr float time = 0.5f;
+    constexpr float time = 2.5f;
     return static_cast<int>(time / memory->globalVars->intervalPerTick);
 }
 
@@ -123,6 +125,39 @@ bool Tickbase::canShift(int shiftAmount, bool forceShift) noexcept
         return true;
 
     return true;
+}
+
+int Tickbase::getCorrectTickbase(int simulationTicks) noexcept
+{
+    int tickBase = localPlayer->tickBase();
+
+    const auto network = interfaces->engine->getNetworkChannel();
+    if (!network || !memory->clientState)
+        return tickBase;
+
+    //Straight out of AdjustPlayerTimeBase
+
+    const int serverTime = memory->clientState->clockDrift.serverTick + 1;
+
+    if (memory->globalVars->maxClients == 1)
+    {
+        tickBase = serverTime - simulationTicks + 1;
+    }
+    else
+    {
+        static auto clockCorrection = interfaces->cvar->findVar("sv_clockcorrection_msecs");
+
+        const float correctionSeconds = std::clamp(clockCorrection->getFloat() / 1000.0f, 0.0f, 1.0f);
+        const int correctionTicks = timeToTicks(correctionSeconds);
+
+        const int idealFinalTick = serverTime + correctionTicks;
+        
+        const int latencyTicks = timeToTicks(network->getLatency(0)) - 1;
+
+        tickBase = idealFinalTick - simulationTicks + 1;
+    }
+
+    return tickBase;
 }
 
 int& Tickbase::getShiftedTickbase() noexcept
