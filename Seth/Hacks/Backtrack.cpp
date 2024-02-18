@@ -178,17 +178,17 @@ bool Backtrack::valid(float simtime) noexcept
     if (!network || !memory->clientState)
         return false;
 
-    const float arrivalTime = ticksToTime(memory->clientState->clockDrift.serverTick + 1 + timeToTicks(network->getLatency(0)));
+    const float currentTick = memory->clientState->clockDrift.serverTick + 1;
 
-    const auto deadTime = static_cast<int>(arrivalTime - cvars.maxUnlag->getFloat());
+    const auto deadTime = static_cast<int>(ticksToTime(currentTick) - cvars.maxUnlag->getFloat());
     if (simtime < deadTime) 
         return false;
 
     const auto delta = std::clamp(
-        network->getLatency(0) + network->getLatency(1) + getLerp(),
+        network->getLatency(1) + getLerp(),
         0.f,
         cvars.maxUnlag->getFloat())
-        - (arrivalTime - simtime);
+        - ticksToTime(currentTick - timeToTicks(simtime));
     return std::fabs(delta) <= 0.2f;
 }
 
