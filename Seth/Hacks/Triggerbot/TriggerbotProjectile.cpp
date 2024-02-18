@@ -12,6 +12,9 @@ void runAutoDetonate(Entity* activeWeapon, UserCmd* cmd) noexcept
 	static auto stickyRadiusRampTime = interfaces->cvar->findVar("tf_sticky_radius_ramp_time");
 	static auto stickyAirdetRadius = interfaces->cvar->findVar("tf_sticky_airdet_radius");
 
+	if (!grenadeLauncherLiveTime || !stickyRadiusRampTime || !stickyAirdetRadius)
+		return;
+
 	const auto& cfg = config->projectileTriggerbot.autoDetonate;
 	if (!cfg.enabled)
 		return;

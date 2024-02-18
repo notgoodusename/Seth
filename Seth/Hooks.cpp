@@ -618,7 +618,7 @@ static void __cdecl interpolateServerEntitiesHook() noexcept
     static auto original = reinterpret_cast<void(__cdecl*)()>(hooks->interpolateServerEntities.getDetour());
 
     static auto extrapolate = interfaces->cvar->findVar("cl_extrapolate");
-    if(extrapolate->getInt() != 0)
+    if(extrapolate && extrapolate->getInt() != 0)
         extrapolate->setValue(0);
     original();
 }

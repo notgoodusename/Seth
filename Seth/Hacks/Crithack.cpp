@@ -426,7 +426,7 @@ void Crithack::run(UserCmd* cmd) noexcept
 	updateDrawInfo();
 
 	static auto weaponCriticals = interfaces->cvar->findVar("tf_weapon_criticals");
-	if (weaponCriticals->getInt() <= 0)
+	if (!weaponCriticals || weaponCriticals->getInt() <= 0)
 		return;
 
 	if (!config->misc.critHack.enabled)
@@ -631,6 +631,9 @@ void Crithack::draw(ImDrawList* drawList) noexcept
 
 	static auto weaponCriticals = interfaces->cvar->findVar("tf_weapon_criticals");
 	static auto weaponCriticalsBucketCap = interfaces->cvar->findVar("tf_weapon_criticals_bucket_cap");
+
+	if (!weaponCriticals || !weaponCriticalsBucketCap)
+		return;
 
 	int critsPossible = 0;
 	if (cost > 0.0f)

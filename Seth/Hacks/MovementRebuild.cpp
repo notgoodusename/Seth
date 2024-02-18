@@ -72,6 +72,10 @@ void MovementRebuild::setEntity(Entity* player) noexcept
 
 Vector MovementRebuild::runPlayerMove() noexcept
 {
+	if (!cvars.accelerate || !cvars.airAccelerate || !cvars.bounce || !cvars.friction || !cvars.gravity 
+		|| !cvars.stopSpeed || !cvars.maxVelocity || !cvars.optimizedMovement || !cvars.parachuteMaxSpeedZ)
+		return Vector{ };
+	
 	if (!cvars.optimizedMovement->getInt())
 		categorizePosition();
 	else if (mv.velocity.z > 250.0f)

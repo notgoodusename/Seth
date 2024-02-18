@@ -161,6 +161,9 @@ Vector getProjectileTarget(UserCmd* cmd, Entity* entity, Vector offset, float& b
 bool calculateProjectileInfo(Vector source, Vector destination, ProjectileSimulation::ProjectileWeaponInfo projectileInfo, float& time, Vector& angle) noexcept
 {
     static auto gravityConvar = interfaces->cvar->findVar("sv_gravity");
+    if (!gravityConvar)
+        return false;
+
     //if they use vphysics gravity doesnt affect the projectile
     const float gravity = projectileInfo.usesPipes ? projectileInfo.gravity * 800.0f : projectileInfo.gravity * gravityConvar->getFloat();
     if (gravity == 0.0f)
@@ -226,6 +229,9 @@ bool calculateProjectileInfo(Vector source, Vector destination, ProjectileSimula
 bool doesProjectileHit(ProjectileSimulation::ProjectileWeaponInfo projectileInfo, Vector source, Vector destination) noexcept
 {
     static auto gravityConvar = interfaces->cvar->findVar("sv_gravity");
+    if (!gravityConvar)
+        return false;
+
     const float gravity = projectileInfo.gravity * gravityConvar->getFloat();
     if (gravity == 0.0f)
     {
@@ -302,7 +308,12 @@ void AimbotProjectile::run(Entity* activeWeapon, UserCmd* cmd) noexcept
         bool foundTarget = false;
         for (int step = 1; step <= maxTicks; step++)
         {
-            Vector position = MovementRebuild::runPlayerMove() + aimOffset;
+            Vector position = MovementRebuild::runPlayerMove();
+            if (position.null())
+                break;
+
+            position += aimOffset;
+
             float currentTime = static_cast<float>(step) * memory->globalVars->intervalPerTick;
 
             Vector angle{ 0.0f, 0.0f, 0.0f };

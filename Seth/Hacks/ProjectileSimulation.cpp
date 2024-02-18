@@ -327,7 +327,7 @@ ProjectileSimulation::ProjectileWeaponInfo ProjectileSimulation::getProjectileWe
     }
 
     static auto flipViewModels{ interfaces->cvar->findVar("cl_flipviewmodels") };
-    if (flipViewModels->getInt())
+    if (flipViewModels && flipViewModels->getInt())
         offset.y *= -1.0f;
 
     Vector forward{ }, right{ }, up{ };
@@ -462,8 +462,13 @@ bool ProjectileSimulation::init(const ProjectileWeaponInfo& projectileInfo) noex
         physicsEnviroment->setPerformanceSettings(&parameters);
         physicsEnviroment->setAirDensity(2.0f);
 
+        float gravity = 0.0f;
         static auto gravityConvar = interfaces->cvar->findVar("sv_gravity");
-        const float gravity = projectileInfo.usesPipes ? 800.0f : projectileInfo.gravity * gravityConvar->getFloat();
+        if (!gravityConvar)
+            gravity = projectileInfo.gravity * 800.0f;
+        else
+            gravity = projectileInfo.usesPipes ? 800.0f : projectileInfo.gravity * gravityConvar->getFloat();
+
         physicsEnviroment->setGravity(Vector{ 0.0f, 0.0f, -gravity });
 
         physicsEnviroment->resetSimulationClock();

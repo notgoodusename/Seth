@@ -146,14 +146,14 @@ int Tickbase::getCorrectTickbase(int simulationTicks) noexcept
     else
     {
         static auto clockCorrection = interfaces->cvar->findVar("sv_clockcorrection_msecs");
+        if (!clockCorrection)
+            return tickBase;
 
         const float correctionSeconds = std::clamp(clockCorrection->getFloat() / 1000.0f, 0.0f, 1.0f);
         const int correctionTicks = timeToTicks(correctionSeconds);
 
         const int idealFinalTick = serverTime + correctionTicks;
         
-        const int latencyTicks = timeToTicks(network->getLatency(0)) - 1;
-
         tickBase = idealFinalTick - simulationTicks + 1;
     }
 

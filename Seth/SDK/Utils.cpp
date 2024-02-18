@@ -26,7 +26,7 @@ TFPlayerResource*& playerResource() noexcept
 bool isFriendlyFireOn() noexcept
 {
 	static auto friendlyFireConvar = interfaces->cvar->findVar("mp_friendlyfire");
-	return friendlyFireConvar->getInt() != 0;
+	return friendlyFireConvar && friendlyFireConvar->getInt() != 0;
 }
 
 bool canAttack(UserCmd* cmd, Entity* activeWeapon) noexcept
