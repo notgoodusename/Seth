@@ -12,11 +12,8 @@ namespace Tickbase
 	bool canRun() noexcept;
 	bool canShift(int shiftAmount, bool forceShift = false) noexcept;
 
-	int getCorrectTickbase(int simulationTicks) noexcept;
+	bool setCorrectTickbase(int commandNumber) noexcept;
 
-	int& getShiftedTickbase() noexcept;
-	int& getShiftCommandNumber() noexcept;
-	int& pausedTicks() noexcept;
 	int getTargetTickShift() noexcept;
 	int getTickshift() noexcept;
 
@@ -24,6 +21,7 @@ namespace Tickbase
 
 	bool& isFinalTick() noexcept;
 	bool& isShifting() noexcept;
+	bool& isRecharging() noexcept;
 
 	void updateInput() noexcept;
 	void reset() noexcept;

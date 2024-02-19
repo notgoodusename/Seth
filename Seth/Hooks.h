@@ -38,7 +38,7 @@ public:
     MinHook fireBullet;
     MinHook frameAdvance;
     MinHook getTraceType;
-    MinHook interpolate;
+    MinHook baseInterpolatePart1;
     MinHook interpolateServerEntities;
     MinHook interpolateViewModel;
     MinHook isAllowedToWithdrawFromCritBucket;

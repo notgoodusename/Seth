@@ -326,6 +326,20 @@ static void __fastcall addToCritBucketHook(void* thisPointer, void*, const float
     original(thisPointer, amount);
 }
 
+static int __fastcall baseInterpolatePart1Hook(void* thisPointer, void*, float& currentTime, Vector& oldOrigin, Vector& oldAngles, Vector& oldVelocity, int& noMoreChanges) noexcept
+{
+    static auto original = hooks->baseInterpolatePart1.getOriginal<int>(&currentTime, &oldOrigin, &oldAngles, &oldVelocity, &noMoreChanges);
+
+    const auto entity = reinterpret_cast<Entity*>(thisPointer);
+    if (!entity || !localPlayer || entity != localPlayer.get())
+        return original(thisPointer, &currentTime, &oldOrigin, &oldAngles, &oldVelocity, &noMoreChanges);
+
+    if (Tickbase::isRecharging())
+        return 0;
+
+    return original(thisPointer, &currentTime, &oldOrigin, &oldAngles, &oldVelocity, &noMoreChanges);
+}
+
 static void __fastcall calcIsAttackCriticalHook(void* thisPointer, void*) noexcept
 {
     static auto original = hooks->calcIsAttackCritical.getOriginal<void>();
@@ -599,20 +613,6 @@ static const char* __fastcall getTraceTypeHook(void* thisPointer, void*) noexcep
     return original(thisPointer);
 }
 
-static bool __fastcall interpolateHook(void* thisPointer, void*, float currentTime) noexcept
-{
-    static auto original = hooks->interpolate.getOriginal<bool>(currentTime);
-
-    const auto entity = reinterpret_cast<Entity*>(thisPointer);
-    if (!entity || !localPlayer || entity != localPlayer.get())
-        return original(thisPointer, currentTime);
-
-    if (Tickbase::pausedTicks())
-        return true;
-
-    return original(thisPointer, currentTime);
-}
-
 static void __cdecl interpolateServerEntitiesHook() noexcept
 {
     static auto original = reinterpret_cast<void(__cdecl*)()>(hooks->interpolateServerEntities.getDetour());
@@ -677,47 +677,8 @@ static void __fastcall runSimulationHook(void* thisPointer, void*, int currentCo
     if(!entity || !localPlayer || entity != localPlayer.get())
         return original(thisPointer, currentCommand, currentTime, cmd, entity);
 
-    if (Tickbase::pausedTicks())
-    {
-        //entity->tickBase() = Tickbase::getCorrectTickbase(-Tickbase::pausedTicks());
-
-        if (currentCommand != Tickbase::getShiftCommandNumber())
-        {
-            Tickbase::pausedTicks() = 0;
-            return;
-        }
-    }
-
-    //for this case we have to wait 2 ticks
-    // runSimulation (normal -> createmove we send shift
-    // runSimulation (normal, because we havent shifted yet) -> createmove
-    // runSimulation (SHIFT,  tickbase - shiftedamount) -> createmove
-
-    static int tickWait = 0;
-    static int savedCommandNumber = 0;
-
-    if (savedCommandNumber == currentCommand)
-        entity->tickBase() = Tickbase::getCorrectTickbase(Tickbase::getShiftedTickbase());
-
-    if (tickWait)
-    {
-        savedCommandNumber = currentCommand;
-        tickWait++;
-        if (tickWait >= 3)
-        {
-            tickWait = 0;
-            entity->tickBase() = Tickbase::getCorrectTickbase(Tickbase::getShiftedTickbase());
-        }
-    }
-
-    if (currentCommand == Tickbase::getShiftCommandNumber())
-        tickWait++;
-
-    if (Tickbase::pausedTicks())
-    {
-        Tickbase::pausedTicks() = 0;
+    if (!Tickbase::setCorrectTickbase(currentCommand))
         return;
-    }
 
     original(thisPointer, currentCommand, entity->tickBase() * memory->globalVars->intervalPerTick, cmd, entity);
 }
@@ -844,6 +805,7 @@ void Hooks::install() noexcept
     MH_Initialize();
 
     addToCritBucket.detour(memory->addToCritBucket, addToCritBucketHook);
+    baseInterpolatePart1.detour(memory->baseInterpolatePart1, baseInterpolatePart1Hook);
     calcIsAttackCritical.detour(memory->calcIsAttackCritical, calcIsAttackCriticalHook);
     calculateChargeCap.detour(memory->calculateChargeCap, calculateChargeCapHook);
     calcViewModelView.detour(memory->calcViewModelView, calcViewModelViewHook);
@@ -858,7 +820,6 @@ void Hooks::install() noexcept
     //fireBullet.detour(memory->fireBullet, fireBulletHook);
     frameAdvance.detour(memory->frameAdvance, frameAdvanceHook);
     //getTraceType.detour(memory->getTraceType, getTraceTypeHook);
-    interpolate.detour(memory->interpolate, interpolateHook);
     interpolateServerEntities.detour(memory->interpolateServerEntities, interpolateServerEntitiesHook);
     interpolateViewModel.detour(memory->interpolateViewModel, interpolateViewModelHook);
     isAllowedToWithdrawFromCritBucket.detour(memory->isAllowedToWithdrawFromCritBucket, isAllowedToWithdrawFromCritBucketHook);
@@ -880,7 +841,7 @@ void Hooks::install() noexcept
     clientMode.hookAt(39, doPostScreenEffects);
 
     eventManager.init(interfaces->gameEventManager);
-    eventManager.hookAt(8, fireEventClientSide);
+    eventManager.hookAt(8, fireEventClientSide); //this shit is crashing, so yeah needs fixing
 
     input.init(memory->input);
     input.hookAt(8, getUserCmd);
