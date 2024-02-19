@@ -129,8 +129,6 @@ bool Tickbase::canRun() noexcept
             if (chokedPackets > MAX_COMMANDS - targetTickShift)
                 totalPauseTicks = max(max(chokedPackets - (MAX_COMMANDS - targetTickShift), 0), totalPauseTicks);
         }
-           
-        Helpers::colorLog(Color4{ 1.0f, 0.0f, 0.0f, 1.0f }.color, "RECHARGING %i\n", 0);
 
         lastResult = false;
         return false;
