@@ -275,7 +275,7 @@ void Crithack::handleEvent(GameEvent* event) noexcept
 
 			for (auto weaponHandle : weapons) {
 				if (weaponHandle == -1)
-					break;
+					continue;
 
 				auto weapon = interfaces->entityList->getEntityFromHandle(weaponHandle);
 				if (!weapon || static_cast<int>(weapon->weaponId()) != weaponId)

@@ -81,7 +81,7 @@ void runKnife(Entity* activeWeapon, UserCmd* cmd) noexcept
             (!entity->isEnemy(localPlayer.get()) && !cfg.friendlyFire))
             continue;
 
-        matrix3x4 backupBoneCache[MAXSTUDIOBONES];
+        matrix3x4* backupBoneCache = new matrix3x4[MAXSTUDIOBONES];
         memcpy(backupBoneCache, entity->getBoneCache().memory, std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
         Vector backupPrescaledMins = entity->getCollideable()->obbMinsPreScaled();
         Vector backupPrescaledMaxs = entity->getCollideable()->obbMaxsPreScaled();
@@ -113,7 +113,6 @@ void runKnife(Entity* activeWeapon, UserCmd* cmd) noexcept
                 memory->setAbsOrigin(entity, backupOrigin);
                 memory->setAbsAngle(entity, backupAbsAngle);
                 memory->setCollisionBounds(entity->getCollideable(), backupPrescaledMins, backupPrescaledMaxs);
-
                 if (bestTarget.notNull())
                 {
                     bestSimulationTime = targetTick.simulationTime;
@@ -153,12 +152,16 @@ void runKnife(Entity* activeWeapon, UserCmd* cmd) noexcept
             memory->setAbsAngle(entity, backupAbsAngle);
             memory->setCollisionBounds(entity->getCollideable(), backupPrescaledMins, backupPrescaledMaxs);
 
+            delete[] backupBoneCache;
+
             if (bestTarget.notNull())
             {
                 bestSimulationTime = targetTick.simulationTime;
                 break;
             }
         }
+
+        delete[] backupBoneCache;
 
         if (bestTarget.notNull())
             break;
@@ -214,7 +217,7 @@ void AimbotMelee::run(Entity* activeWeapon, UserCmd* cmd) noexcept
             //We gotta recalculate to aim correctly
             const auto angle = Math::calculateRelativeAngle(localPlayer->getEyePosition(), meleeRecord.target, cmd->viewangles);
 
-            matrix3x4 backupBoneCache[MAXSTUDIOBONES];
+            matrix3x4* backupBoneCache = new matrix3x4[MAXSTUDIOBONES];
             memcpy(backupBoneCache, entity->getBoneCache().memory, std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
             Vector backupPrescaledMins = entity->getCollideable()->obbMinsPreScaled();
             Vector backupPrescaledMaxs = entity->getCollideable()->obbMaxsPreScaled();
@@ -237,6 +240,7 @@ void AimbotMelee::run(Entity* activeWeapon, UserCmd* cmd) noexcept
             memory->setAbsOrigin(entity, backupOrigin);
             memory->setAbsAngle(entity, backupAbsAngle);
             memory->setCollisionBounds(entity->getCollideable(), backupPrescaledMins, backupPrescaledMaxs);
+            delete[] backupBoneCache;
         }
     }
 
@@ -271,7 +275,7 @@ void AimbotMelee::run(Entity* activeWeapon, UserCmd* cmd) noexcept
             (!entity->isEnemy(localPlayer.get()) && !cfg.friendlyFire))
             continue;
 
-        matrix3x4 backupBoneCache[MAXSTUDIOBONES];
+        matrix3x4* backupBoneCache = new matrix3x4[MAXSTUDIOBONES];
         memcpy(backupBoneCache, entity->getBoneCache().memory, std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
         Vector backupPrescaledMins = entity->getCollideable()->obbMinsPreScaled();
         Vector backupPrescaledMaxs = entity->getCollideable()->obbMaxsPreScaled();
@@ -337,6 +341,9 @@ void AimbotMelee::run(Entity* activeWeapon, UserCmd* cmd) noexcept
         memory->setAbsOrigin(entity, backupOrigin);
         memory->setAbsAngle(entity, backupAbsAngle);
         memory->setCollisionBounds(entity->getCollideable(), backupPrescaledMins, backupPrescaledMaxs);
+
+        delete[] backupBoneCache;
+
         if (bestTarget.notNull())
         {
             meleeRecord.target = bestTarget;

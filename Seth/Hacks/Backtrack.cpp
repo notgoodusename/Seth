@@ -85,6 +85,13 @@ void Backtrack::run(UserCmd* cmd) noexcept
 
         const auto& records = target.playerData;
      
+        matrix3x4* backupBoneCache = new matrix3x4[MAXSTUDIOBONES];
+        memcpy(backupBoneCache, entity->getBoneCache().memory, std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
+        Vector backupPrescaledMins = entity->getCollideable()->obbMinsPreScaled();
+        Vector backupPrescaledMaxs = entity->getCollideable()->obbMaxsPreScaled();
+        Vector backupOrigin = entity->getAbsOrigin();
+        Vector backupAbsAngle = entity->getAbsAngle();
+
         for (int i = 0; i < static_cast<int>(records.size()); i++)
         {
             const auto& targetTick = records[i];
@@ -106,13 +113,6 @@ void Backtrack::run(UserCmd* cmd) noexcept
             }
             else
             {
-                matrix3x4 backupBoneCache[MAXSTUDIOBONES];
-                memcpy(backupBoneCache, entity->getBoneCache().memory, std::clamp(entity->getBoneCache().size, 0, MAXSTUDIOBONES) * sizeof(matrix3x4));
-                Vector backupPrescaledMins = entity->getCollideable()->obbMinsPreScaled();
-                Vector backupPrescaledMaxs = entity->getCollideable()->obbMaxsPreScaled();
-                Vector backupOrigin = entity->getAbsOrigin();
-                Vector backupAbsAngle = entity->getAbsAngle();
-
                 entity->replaceMatrix(targetTick.matrix.data());
                 memory->setAbsOrigin(entity, targetTick.origin);
                 memory->setAbsAngle(entity, targetTick.absAngle);
@@ -129,10 +129,11 @@ void Backtrack::run(UserCmd* cmd) noexcept
                 memory->setAbsAngle(entity, backupAbsAngle);
                 memory->setCollisionBounds(entity->getCollideable(), backupPrescaledMins, backupPrescaledMaxs);
 
-                if(bestTick != -1)
+                if (bestTick != -1)
                     break;
             }
         }
+        delete[] backupBoneCache;
     }
 
     if (bestTick <= -1 || bestTargetIndex <= -1)
@@ -184,7 +185,7 @@ bool Backtrack::valid(float simtime) noexcept
     if (!network || !memory->clientState || !cvars.maxUnlag)
         return false;
 
-    const float currentTick = memory->clientState->clockDrift.serverTick + 1;
+    const int currentTick = memory->clientState->clockDrift.serverTick + 1;
 
     const auto deadTime = static_cast<int>(ticksToTime(currentTick) - cvars.maxUnlag->getFloat());
     if (simtime < deadTime) 
