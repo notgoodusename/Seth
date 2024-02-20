@@ -23,7 +23,7 @@ void runAutoDetonate(Entity* activeWeapon, UserCmd* cmd) noexcept
 	for (auto weaponHandle : weapons)
 	{
 		if (weaponHandle == -1)
-			break;
+			continue;
 
 		auto weapon = interfaces->entityList->getEntityFromHandle(weaponHandle);
 		if (!weapon)
