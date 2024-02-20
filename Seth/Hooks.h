@@ -34,6 +34,7 @@ public:
     MinHook clSendMove;
     MinHook customTextureOnItemProxyOnBindInternal;
     MinHook doEnginePostProcessing;
+    MinHook fireEventIntern;
     MinHook enableWorldFog;
     MinHook estimateAbsVelocity;
     MinHook fireBullet;
@@ -53,7 +54,6 @@ public:
     MinHook client;
     MinHook clientMode;
     MinHook engine;
-    MinHook eventManager;
     MinHook input;
     MinHook modelRender;
     MinHook panel;

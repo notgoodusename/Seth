@@ -114,6 +114,7 @@ public:
     std::uintptr_t estimateAbsVelocity;
     std::uintptr_t enableWorldFog;
     std::uintptr_t fireBullet;
+    std::uintptr_t fireEventIntern;
     std::uintptr_t frameAdvance;
     std::uintptr_t getTraceType;
     std::uintptr_t interpolateServerEntities;

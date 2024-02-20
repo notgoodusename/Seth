@@ -288,27 +288,6 @@ static void __stdcall lockCursor() noexcept
     return hooks->surface.callOriginal<void, 62>();
 }
 
-static bool __fastcall fireEventClientSide(void* thisPointer, void*, GameEvent* event) noexcept
-{
-    static auto original = hooks->eventManager.getOriginal<bool, 8>(event);
-
-    if (!event)
-        return original(thisPointer, event);
-
-    switch (fnv::hashRuntime(event->getName())) 
-    {
-        case fnv::hash("teamplay_round_start"):
-        case fnv::hash("player_hurt"):
-            Crithack::handleEvent(event);
-            break;
-        case fnv::hash("vote_cast"):
-            Misc::revealVotes(event);
-            break;
-    }
-
-    return original(thisPointer, event);
-}
-
 static UserCmd* __stdcall getUserCmd(int sequenceNumber) noexcept
 {
     const auto commands = *reinterpret_cast<UserCmd**>(reinterpret_cast<uintptr_t>(memory->input) + 0xFC);
@@ -550,6 +529,27 @@ static void __fastcall fireBulletHook(void* thisPointer, void*, Entity* weapon, 
     }*/
 
     return original(thisPointer, weapon, info, doEffects, damageType, customDamageType);
+}
+
+static bool __fastcall fireEventInternHook(void* thisPointer, void*, GameEvent* event, bool serverOnly, bool clientOnly) noexcept
+{
+    static auto original = hooks->fireEventIntern.getOriginal<bool>(event, serverOnly, clientOnly);
+
+    if (event)
+    {
+        switch (fnv::hashRuntime(event->getName()))
+        {
+        case fnv::hash("teamplay_round_start"):
+        case fnv::hash("player_hurt"):
+            Crithack::handleEvent(event);
+            break;
+        case fnv::hash("vote_cast"):
+            Misc::revealVotes(event);
+            break;
+        }
+    }
+
+    return original(thisPointer, event, serverOnly, clientOnly);
 }
 
 std::vector<std::pair<int, float>> simTimes;
@@ -819,6 +819,7 @@ void Hooks::install() noexcept
     enableWorldFog.detour(memory->enableWorldFog, enableWorldFogHook);
     estimateAbsVelocity.detour(memory->estimateAbsVelocity, estimateAbsVelocityHook);
     //fireBullet.detour(memory->fireBullet, fireBulletHook);
+    fireEventIntern.detour(memory->fireEventIntern, fireEventInternHook);
     frameAdvance.detour(memory->frameAdvance, frameAdvanceHook);
     //getTraceType.detour(memory->getTraceType, getTraceTypeHook);
     interpolateServerEntities.detour(memory->interpolateServerEntities, interpolateServerEntitiesHook);
@@ -840,9 +841,6 @@ void Hooks::install() noexcept
     clientMode.hookAt(16, overrideView);
     clientMode.hookAt(21, createMove);
     clientMode.hookAt(39, doPostScreenEffects);
-
-    eventManager.init(interfaces->gameEventManager);
-    eventManager.hookAt(8, fireEventClientSide); //random crash generator
 
     input.init(memory->input);
     input.hookAt(8, getUserCmd);
