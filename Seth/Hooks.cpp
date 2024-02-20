@@ -514,8 +514,8 @@ struct FireBulletsInfo
 
 static void __fastcall fireBulletHook(void* thisPointer, void*, Entity* weapon, const FireBulletsInfo& info, bool doEffects, int damageType, int customDamageType) noexcept
 {
-    static auto original = hooks->fireBullet.getOriginal<void>(weapon, info, doEffects, damageType, customDamageType);
-    /*
+    static auto original = hooks->fireBullet.getOriginal<void>(weapon, &info, doEffects, damageType, customDamageType);
+    
     const auto entity = reinterpret_cast<Entity*>(thisPointer);
     if (config->visuals.bulletTracers.enabled 
         && localPlayer && entity == localPlayer.get())
@@ -525,10 +525,10 @@ static void __fastcall fireBulletHook(void* thisPointer, void*, Entity* weapon, 
             damageType &= ~(1 << 20);
 
         //Draws tracer on each shot
-        //info.tracerFrequency = 1;
-    }*/
+        *const_cast<int*>(&info.tracerFrequency) = 1;
+    }
 
-    return original(thisPointer, weapon, info, doEffects, damageType, customDamageType);
+    return original(thisPointer, weapon, &info, doEffects, damageType, customDamageType);
 }
 
 static bool __fastcall fireEventInternHook(void* thisPointer, void*, GameEvent* event, bool serverOnly, bool clientOnly) noexcept
@@ -818,10 +818,10 @@ void Hooks::install() noexcept
     doEnginePostProcessing.detour(memory->doEnginePostProcessing, doEnginePostProcessingHook);
     enableWorldFog.detour(memory->enableWorldFog, enableWorldFogHook);
     estimateAbsVelocity.detour(memory->estimateAbsVelocity, estimateAbsVelocityHook);
-    //fireBullet.detour(memory->fireBullet, fireBulletHook);
+    fireBullet.detour(memory->fireBullet, fireBulletHook);
     fireEventIntern.detour(memory->fireEventIntern, fireEventInternHook);
     frameAdvance.detour(memory->frameAdvance, frameAdvanceHook);
-    //getTraceType.detour(memory->getTraceType, getTraceTypeHook);
+    getTraceType.detour(memory->getTraceType, getTraceTypeHook);
     interpolateServerEntities.detour(memory->interpolateServerEntities, interpolateServerEntitiesHook);
     interpolateViewModel.detour(memory->interpolateViewModel, interpolateViewModelHook);
     isAllowedToWithdrawFromCritBucket.detour(memory->isAllowedToWithdrawFromCritBucket, isAllowedToWithdrawFromCritBucketHook);

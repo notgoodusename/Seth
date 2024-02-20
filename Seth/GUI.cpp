@@ -844,7 +844,7 @@ void GUI::renderVisualsWindow() noexcept
     ImGui::PushID(2);
     ImGui::SliderInt("", &config->visuals.fov, -60, 60, "FOV: %d");
     ImGui::PopID();
-    /*
+    
     ImGui::Checkbox("Bullet Tracers", &config->visuals.bulletTracers.enabled);
     ImGui::SameLine();
 
@@ -858,6 +858,7 @@ void GUI::renderVisualsWindow() noexcept
     }
     ImGui::PopID();
 
+    /*
     ImGuiCustom::colorPicker("Bullet Impacts", config->visuals.bulletImpacts.color.data(), &config->visuals.bulletImpacts.color[3], nullptr, nullptr, &config->visuals.bulletImpacts.enabled);
     ImGui::SliderFloat("Bullet Impacts time", &config->visuals.bulletImpactsTime, 0.1f, 5.0f, "Bullet Impacts time: %.2fs");
     ImGuiCustom::colorPicker("On Hit Hitbox", config->visuals.onHitHitbox.color.color.data(), &config->visuals.onHitHitbox.color.color[3], nullptr, nullptr, &config->visuals.onHitHitbox.color.enabled);
