@@ -317,9 +317,15 @@ static void from_json(const json& j, Config::Fakelag& f)
 
 static void from_json(const json& j, Config::Tickbase& t)
 {
-    read(j, "Doubletap", t.doubletap);
-    read(j, "Hideshots", t.hideshots);
-    read(j, "Teleport", t.teleport);
+    read(j, "Enabled", t.enabled);
+    read<value_t::object>(j, "Recharge key", t.rechargeKey);
+    read<value_t::object>(j, "Doubletap key", t.doubleTapKey);
+    read<value_t::object>(j, "Warp key", t.warpKey);
+    read(j, "Anti warp", t.antiWarp);
+    read(j, "Ticks to shift", t.ticksToShift);
+    read(j, "Auto recharge", t.autoRecharge);
+    read(j, "Time till recharge", t.timeTillRecharge);
+    read(j, "Shift on disable", t.shiftOnDisable);
 }
 
 static void from_json(const json& j, Config::Backtrack& b)
@@ -878,9 +884,15 @@ static void to_json(json& j, const Config::Fakelag& o, const Config::Fakelag& du
 
 static void to_json(json& j, const Config::Tickbase& o, const Config::Tickbase& dummy = {})
 {
-    WRITE("Doubletap", doubletap);
-    WRITE("Hideshots", hideshots);
-    WRITE("Teleport", teleport);
+    WRITE("Enabled", enabled);
+    WRITE("Recharge key", rechargeKey);
+    WRITE("Doubletap key", doubleTapKey);
+    WRITE("Warp key", warpKey);
+    WRITE("Anti warp", antiWarp);
+    WRITE("Ticks to shift", ticksToShift);
+    WRITE("Auto recharge", autoRecharge);
+    WRITE("Time till recharge", timeTillRecharge);
+    WRITE("Shift on disable", shiftOnDisable);
 }
 
 static void to_json(json& j, const Config::Backtrack& o, const Config::Backtrack& dummy = {})

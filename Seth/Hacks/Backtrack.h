@@ -5,7 +5,7 @@
 
 #include "../ConfigStructs.h"
 
-#include "../SDK/NetworkChannel.h"
+#include "../SDK/Network.h"
 #include "../SDK/matrix3x4.h"
 #include "../SDK/ModelInfo.h"
 #include "../SDK/Vector.h"

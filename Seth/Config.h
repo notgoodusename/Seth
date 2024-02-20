@@ -54,9 +54,19 @@ public:
     } antiAim;
 
     struct Tickbase {
-        KeyBind doubletap{ std::string("doubletap"), KeyMode::Off };
-        KeyBind hideshots{ std::string("hideshots"), KeyMode::Off };
-        bool teleport{ false };
+        bool enabled{ false };
+
+        KeyBind rechargeKey{ std::string("recharge"), KeyMode::Off };
+        KeyBind doubleTapKey{ std::string("doubletap"), KeyMode::Off };
+        KeyBind warpKey{ std::string("warp"), KeyMode::Off };
+
+        bool antiWarp{ false };
+
+        int ticksToShift{ 21 };
+
+        bool autoRecharge{ true };
+        float timeTillRecharge{ 1.0f };
+        bool shiftOnDisable{ true };
     } tickbase;
 
     struct Aimbot {

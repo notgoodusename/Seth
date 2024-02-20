@@ -51,7 +51,6 @@
 #include "SDK/Input.h"
 #include "SDK/InputSystem.h"
 #include "SDK/ModelRender.h"
-#include "SDK/Network.h"
 #include "SDK/Panel.h"
 #include "SDK/Platform.h"
 #include "SDK/Prediction.h"
@@ -103,13 +102,12 @@ static HRESULT __stdcall present(IDirect3DDevice9* device, const RECT* src, cons
         Misc::spectatorList();
 
         Aimbot::updateInput();
+        Visuals::updateInput();
+        StreamProofESP::updateInput();
+        Triggerbot::updateInput();
+        Misc::updateInput();
         Chams::updateInput();
         Crithack::updateInput();
-        Misc::updateInput();
-        StreamProofESP::updateInput();
-        Tickbase::updateInput();
-        Triggerbot::updateInput();
-        Visuals::updateInput();
 
         Misc::drawPlayerList();
         ProjectileTrajectory::draw(ImGui::GetBackgroundDrawList());
@@ -154,7 +152,7 @@ static bool __fastcall createMove(void* thisPointer, void*, float inputSampleTim
     uintptr_t framePointer;
     __asm mov framePointer, ebp;
     bool& sendPacket = *reinterpret_cast<bool*>(***reinterpret_cast<uintptr_t***>(framePointer) - 0x1);
-
+    
     auto currentViewAngles{ cmd->viewangles };
     const auto currentCmd{ *cmd };
 
@@ -224,7 +222,7 @@ static void __fastcall frameStageNotify(void* thisPointer, void*, FrameStage sta
         Misc::unlockHiddenCvars();
     }
     
-    original(thisPointer, stage); //render start crash
+    original(thisPointer, stage);
 }
 
 static bool __fastcall dispatchUserMessage(void* thisPointer, void*, int messageType, bufferRead* data) noexcept
@@ -264,7 +262,7 @@ static void __stdcall overrideView(ViewSetup* setup) noexcept
     Misc::freeCam(setup);
 }
 
-static unsigned int vguiFocusOverlayPanel;
+static unsigned int vguiFocusOverlayPanel = NULL;
 
 static void __fastcall paintTraverse(void* thisPointer, void*, unsigned int vguiPanel, bool forceRepaint, bool allowForce) noexcept
 {
@@ -463,7 +461,7 @@ static void __cdecl clSendMoveHook() noexcept
         from = to;
     }
 
-    if (ok)
+    if (ok) 
     {
         if (extraCommands)
             memory->clientState->networkChannel->chokedPackets -= extraCommands;
@@ -595,7 +593,7 @@ static const char* __fastcall getTraceTypeHook(void* thisPointer, void*) noexcep
         case 1:
             return (localPlayer->teamNumber() == Team::RED ? "dxhr_sniper_rail_red" : "dxhr_sniper_rail_blue");
         case 2:
-            return (localPlayer->isCritBoosted() ? 
+            return (localPlayer->isCritBoosted() ?
                 (localPlayer->teamNumber() == Team::RED ? "bullet_tracer_raygun_red_crit" : "bullet_tracer_raygun_blue_crit") :
                 (localPlayer->teamNumber() == Team::RED ? "bullet_tracer_raygun_red" : "bullet_tracer_raygun_blue"));
         case 3:
@@ -605,10 +603,10 @@ static const char* __fastcall getTraceTypeHook(void* thisPointer, void*) noexcep
         case 5:
             return "merasmus_zap_beam02";
         case 6:
-            return localPlayer->isCritBoosted() ? 
-                (localPlayer->teamNumber() == Team::RED ? "bullet_bignasty_tracer01_red_crit" : "bullet_bignasty_tracer01_blue_crit") : 
+            return localPlayer->isCritBoosted() ?
+                (localPlayer->teamNumber() == Team::RED ? "bullet_bignasty_tracer01_red_crit" : "bullet_bignasty_tracer01_blue_crit") :
                 (localPlayer->teamNumber() == Team::RED ? "bullet_bignasty_tracer01_blue" : "bullet_bignasty_tracer01_red");
-        default: 
+        default:
             break;
     }
 
@@ -618,9 +616,9 @@ static const char* __fastcall getTraceTypeHook(void* thisPointer, void*) noexcep
 static void __cdecl interpolateServerEntitiesHook() noexcept
 {
     static auto original = reinterpret_cast<void(__cdecl*)()>(hooks->interpolateServerEntities.getDetour());
-    
+
     static auto extrapolate = interfaces->cvar->findVar("cl_extrapolate");
-    if(extrapolate->getInt() != 0)
+    if(extrapolate && extrapolate->getInt() != 0)
         extrapolate->setValue(0);
     original();
 }
@@ -628,9 +626,9 @@ static void __cdecl interpolateServerEntitiesHook() noexcept
 static bool __fastcall interpolateViewModelHook(void* thisPointer, void*, float currentTime) noexcept
 {
     static auto original = hooks->interpolateViewModel.getOriginal<bool>(currentTime);
-
+    
     const auto viewModel = reinterpret_cast<Entity*>(thisPointer);
-    if (!viewModel)
+    if(!viewModel)
         return original(thisPointer, currentTime);
 
     const auto entity = interfaces->entityList->getEntityFromHandle(viewModel->owner());
@@ -672,6 +670,19 @@ static void __fastcall newMatchFoundDashboardStateOnUpdateHook(void* thisPointer
     original(thisPointer);
 }
 
+static void __fastcall runSimulationHook(void* thisPointer, void*, int currentCommand, float currentTime, UserCmd* cmd, Entity* entity) noexcept
+{
+    static auto original = hooks->runSimulation.getOriginal<void>(currentCommand, currentTime, cmd, entity);
+
+    if(!entity || !localPlayer || entity != localPlayer.get())
+        return original(thisPointer, currentCommand, currentTime, cmd, entity);
+
+    if (!Tickbase::setCorrectTickbase(currentCommand))
+        return;
+
+    original(thisPointer, currentCommand, entity->tickBase() * memory->globalVars->intervalPerTick, cmd, entity);
+}
+
 static void __cdecl randomSeedHook(int seed) noexcept
 {
     static auto original = reinterpret_cast<void(__cdecl*)(int)>(hooks->randomSeed.getDetour());
@@ -679,9 +690,10 @@ static void __cdecl randomSeedHook(int seed) noexcept
     if (Crithack::protectData())
         return original(seed);
 
-    if (reinterpret_cast<DWORD>(_ReturnAddress()) == memory->randomSeedReturnAddress1 ||
-        reinterpret_cast<DWORD>(_ReturnAddress()) == memory->randomSeedReturnAddress2 ||
-        reinterpret_cast<DWORD>(_ReturnAddress()) == memory->randomSeedReturnAddress3)
+    const auto returnAddress = reinterpret_cast<unsigned long>(_ReturnAddress());
+    if (returnAddress == memory->randomSeedReturnAddress1 ||
+        returnAddress == memory->randomSeedReturnAddress2 ||
+        returnAddress == memory->randomSeedReturnAddress3)
     {
         if (localPlayer)
         {
@@ -694,19 +706,6 @@ static void __cdecl randomSeedHook(int seed) noexcept
     }
 
     original(seed);
-}
-
-static void __fastcall runSimulationHook(void* thisPointer, void*, int currentCommand, float currentTime, UserCmd* cmd, Entity* entity) noexcept
-{
-    static auto original = hooks->runSimulation.getOriginal<void>(currentCommand, currentTime, cmd, entity);
-
-    if (!entity || !localPlayer || entity != localPlayer.get())
-        return original(thisPointer, currentCommand, currentTime, cmd, entity);
-
-    if (!Tickbase::setCorrectTickbase(currentCommand))
-        return;
-
-    original(thisPointer, currentCommand, entity->tickBase() * memory->globalVars->intervalPerTick, cmd, entity);
 }
 
 static int __fastcall sendDatagramHook(NetworkChannel* network, void* edx, bufferWrite* datagram) noexcept
@@ -842,7 +841,7 @@ void Hooks::install() noexcept
     clientMode.hookAt(39, doPostScreenEffects);
 
     eventManager.init(interfaces->gameEventManager);
-    eventManager.hookAt(8, fireEventClientSide); //random crash generator
+    eventManager.hookAt(8, fireEventClientSide); //this shit is crashing, so yeah needs fixing
 
     input.init(memory->input);
     input.hookAt(8, getUserCmd);

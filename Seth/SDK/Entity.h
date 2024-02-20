@@ -812,6 +812,7 @@ public:
     NETVAR(getObserverMode, "CBasePlayer", "m_iObserverMode", ObsMode)
     NETVAR(flags, "CBasePlayer", "m_fFlags", int)
     NETVAR(tickBase, "CBasePlayer", "m_nTickBase", int)
+    NETVAR_OFFSET(finalPredictedTick, "CBasePlayer", "m_nTickBase", sizeof(int), int)
     NETVAR(baseVelocity, "CBasePlayer", "m_vecBaseVelocity", Vector)
     NETVAR(viewPunchAngle, "CBasePlayer", "m_viewPunchAngle", Vector)
     NETVAR(viewOffset, "CBasePlayer", "m_vecViewOffset[0]", Vector)

@@ -8,7 +8,7 @@
 #include "../SDK/Entity.h"
 #include "../SDK/FrameStage.h"
 #include "../SDK/LocalPlayer.h"
-#include "../SDK/NetworkChannel.h"
+#include "../SDK/Network.h"
 #include "../SDK/Math.h"
 #include "../SDK/UserCmd.h"
 #include "../SDK/Utils.h"
@@ -178,17 +178,17 @@ bool Backtrack::valid(float simtime) noexcept
     if (!network || !memory->clientState)
         return false;
 
-    const float arrivalTime = ticksToTime(memory->clientState->clockDrift.serverTick + 1 + timeToTicks(network->getLatency(0)));
+    const int serverTick = memory->clientState->clockDrift.serverTick + 1;
 
-    const auto deadTime = static_cast<int>(arrivalTime - cvars.maxUnlag->getFloat());
+    const auto deadTime = static_cast<int>(ticksToTime(serverTick) - cvars.maxUnlag->getFloat());
     if (simtime < deadTime) 
         return false;
 
     const auto delta = std::clamp(
-        network->getLatency(0) + network->getLatency(1) + getLerp(),
+        network->getLatency(0) + getLerp(),
         0.f,
         cvars.maxUnlag->getFloat())
-        - (arrivalTime - simtime);
+        - ticksToTime(serverTick - timeToTicks(simtime));
     return std::fabs(delta) <= 0.2f;
 }
 

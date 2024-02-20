@@ -40,8 +40,9 @@ const bool anyActiveKeybinds() noexcept
     const bool antiAimManualBackward = config->antiAim.enabled && config->antiAim.manualBackward.canShowKeybind();
     const bool antiAimManualRight = config->antiAim.enabled && config->antiAim.manualRight.canShowKeybind();
     const bool antiAimManualLeft = config->antiAim.enabled && config->antiAim.manualLeft.canShowKeybind();
-    const bool doubletap = config->tickbase.doubletap.canShowKeybind();
-    const bool hideshots = config->tickbase.hideshots.canShowKeybind();
+    const bool recharge = config->tickbase.rechargeKey.canShowKeybind();
+    const bool doubletap = config->tickbase.doubleTapKey.canShowKeybind();
+    const bool warp = config->tickbase.warpKey.canShowKeybind();
     const bool aimbot = config->aimbotKey.canShowKeybind();
     const bool triggerbot = (config->hitscanTriggerbot.enabled || config->meleeTriggerbot.enabled) && config->triggerbotKey.canShowKeybind();
     const bool glow = config->glowKey.canShowKeybind();
@@ -55,7 +56,7 @@ const bool anyActiveKeybinds() noexcept
     const bool edgejump = config->misc.edgeJump && config->misc.edgeJumpKey.canShowKeybind();
 
     return aimbot || antiAimManualForward || antiAimManualBackward || antiAimManualRight  || antiAimManualLeft 
-        || doubletap || hideshots
+        || recharge || doubletap || warp
         || triggerbot || chams || glow || esp
         || thirdperson || freecam || crithack || edgejump;
 }
@@ -95,8 +96,9 @@ void Misc::showKeybinds() noexcept
         config->antiAim.manualLeft.showKeybind();
     }
 
-    config->tickbase.doubletap.showKeybind();
-    config->tickbase.hideshots.showKeybind();
+    config->tickbase.rechargeKey.showKeybind();
+    config->tickbase.doubleTapKey.showKeybind();
+    config->tickbase.warpKey.showKeybind();
 
     config->aimbotKey.showKeybind();
     if (config->hitscanTriggerbot.enabled || config->meleeTriggerbot.enabled)

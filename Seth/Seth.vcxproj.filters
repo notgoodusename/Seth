@@ -275,6 +275,9 @@
     <ClCompile Include="Hacks\Triggerbot\TriggerbotProjectile.cpp">
       <Filter>Hacks\Triggerbot</Filter>
     </ClCompile>
+    <ClCompile Include="Hacks\Tickbase.cpp">
+      <Filter>Hacks</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GUI.h">
@@ -541,9 +544,6 @@
     <ClInclude Include="Hacks\Backtrack.h">
       <Filter>Hacks</Filter>
     </ClInclude>
-    <ClInclude Include="SDK\NetworkChannel.h">
-      <Filter>SDK</Filter>
-    </ClInclude>
     <ClInclude Include="Hacks\EnginePrediction.h">
       <Filter>Hacks</Filter>
     </ClInclude>
@@ -681,6 +681,12 @@
     </ClInclude>
     <ClInclude Include="Hacks\Triggerbot\TriggerbotProjectile.h">
       <Filter>Hacks\Triggerbot</Filter>
+    </ClInclude>
+    <ClInclude Include="Hacks\Tickbase.h">
+      <Filter>Hacks</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\Network.h">
+      <Filter>SDK</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

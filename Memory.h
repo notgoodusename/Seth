@@ -128,8 +128,6 @@ public:
     std::uintptr_t sendDatagram;
     std::uintptr_t updateClientSideAnimation;
     std::uintptr_t updateTFAnimState;
-
-    std::add_pointer_t<void _cdecl(const char* msg, ...)> logDirect;
 private:
 };
 

@@ -162,7 +162,6 @@ Memory::Memory() noexcept
     updateClientSideAnimation = findPattern(CLIENT_DLL, "\x56\x8B\xF1\x80\xBE?????\x74\x27");
     updateTFAnimState = findPattern(CLIENT_DLL, "\x55\x8B\xEC\x81\xEC????\x53\x57\x8B\xF9\x8B\x9F????");
 
-    logDirect = reinterpret_cast<decltype(logDirect)>(GetProcAddress(GetModuleHandleA("tier0.dll"), "Msg"));
 
     localPlayer.init(*reinterpret_cast<Entity***>(findPattern(CLIENT_DLL, "\xA1????\x33\xC9\x83\xC4\x04")+1));
 }

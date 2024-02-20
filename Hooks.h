@@ -23,7 +23,6 @@ public:
     void uninstall() noexcept;
 
     MinHook addToCritBucket;
-    MinHook baseInterpolatePart1;
     MinHook calcIsAttackCritical;
     MinHook calculateChargeCap;
     MinHook calcViewModelView;
@@ -39,6 +38,7 @@ public:
     MinHook fireBullet;
     MinHook frameAdvance;
     MinHook getTraceType;
+    MinHook baseInterpolatePart1;
     MinHook interpolateServerEntities;
     MinHook interpolateViewModel;
     MinHook isAllowedToWithdrawFromCritBucket;
