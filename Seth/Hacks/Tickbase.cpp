@@ -31,18 +31,14 @@ void Tickbase::start(UserCmd* cmd) noexcept
         return;
     }
 
-    if (!config->tickbase.enabled)
+    if (!config->tickBase.enabled)
     {
         hasHadTickbaseActive = false;
         targetTickShift = 0;
         return;
     }
 
-    if (memory->clientState)
-        if (memory->clientState->chokedCommands > chokedPackets)
-            chokedPackets = 0;//needs fixing
-
-    if (!config->tickbase.warpKey.isActive() && !config->tickbase.doubleTapKey.isActive())
+    if (!config->tickBase.warpKey.isActive() && !config->tickBase.doubleTapKey.isActive())
     {
         if (hasHadTickbaseActive)
             shift(cmd, ticksAllowedForProcessing, true);
@@ -50,8 +46,8 @@ void Tickbase::start(UserCmd* cmd) noexcept
         return;
     }
 
-    if (config->tickbase.warpKey.isActive() || config->tickbase.doubleTapKey.isActive())
-        targetTickShift = config->tickbase.ticksToShift;
+    if (config->tickBase.warpKey.isActive() || config->tickBase.doubleTapKey.isActive())
+        targetTickShift = config->tickBase.ticksToShift;
 
     //We do -1 to leave 1 tick to fakelag
     targetTickShift = std::clamp(targetTickShift, 0, MAX_COMMANDS - 1);
@@ -63,7 +59,7 @@ void Tickbase::end(UserCmd* cmd) noexcept
     if (!localPlayer || !localPlayer->isAlive())
         return;
 
-    if (!config->tickbase.warpKey.isActive())
+    if (!config->tickBase.warpKey.isActive())
     {
         targetTickShift = 0;
         return;
@@ -79,8 +75,16 @@ void Tickbase::end(UserCmd* cmd) noexcept
 
 static int timeTillRecharge() noexcept
 {
-    constexpr float time = 2.5f;
-    return static_cast<int>(time / memory->globalVars->intervalPerTick);
+
+    const float time = config->tickBase.timeTillRecharge;
+
+    if (config->tickBase.autoRecharge)
+        return static_cast<int>(time / memory->globalVars->intervalPerTick);
+
+    if (config->tickBase.rechargeKey.isActive())
+        return INT_MIN;
+
+    return INT_MAX;
 }
 
 bool Tickbase::shift(UserCmd* cmd, int shiftAmount, bool forceShift) noexcept
@@ -116,9 +120,14 @@ bool Tickbase::canRun() noexcept
         return true;
     }
 
+    static int timeRecharge = 0;
+
+    if (lastResult)
+        timeRecharge = timeTillRecharge();
+
     if ((ticksAllowedForProcessing < targetTickShift 
         || chokedPackets > MAX_COMMANDS - targetTickShift)
-        && memory->globalVars->tickCount - tickCountAtShift > timeTillRecharge())
+        && memory->globalVars->tickCount - tickCountAtShift > timeRecharge)
     {
         ticksAllowedForProcessing = min(ticksAllowedForProcessing++, MAX_COMMANDS);
         chokedPackets = max(chokedPackets--, 0);
@@ -223,12 +232,7 @@ bool Tickbase::setCorrectTickbase(int commandNumber) noexcept
         return false;
     }
 
-    //for this case we have to wait 2 ticks
-    // runSimulation (normal -> createmove we send shift
-    // runSimulation (normal, because we havent shifted yet) -> createmove
-    // runSimulation (SHIFT,  tickbase - shiftedamount) -> createmove
-
-    if (commandNumber == shiftCommandNumber + 2)
+    if (commandNumber == shiftCommandNumber + 1)
         adjustPlayerTimeBase(shiftedTickbase);
 
     return true;
@@ -249,6 +253,12 @@ void Tickbase::resetTickshift() noexcept
     shiftedTickbase = tickShift;
     ticksAllowedForProcessing = max(ticksAllowedForProcessing - tickShift, 0);
     tickShift = 0;
+}
+
+void Tickbase::updateChokedCommands(int currentChokedCommands) noexcept
+{
+    if (currentChokedCommands > chokedPackets)
+        chokedPackets = currentChokedCommands;
 }
 
 bool& Tickbase::isFinalTick() noexcept

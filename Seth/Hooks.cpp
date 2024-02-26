@@ -418,6 +418,8 @@ static void __cdecl clSendMoveHook() noexcept
     int nextCommandNumber = memory->clientState->lastOutgoingCommand + memory->clientState->chokedCommands + 1;
     int chokedCommands = memory->clientState->chokedCommands;
 
+    Tickbase::updateChokedCommands(chokedCommands);
+
     byte data[4000 /* MAX_CMD_BUFFER */];
     CLC_Move moveMsg;
 

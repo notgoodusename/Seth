@@ -19,6 +19,8 @@ namespace Tickbase
 
 	void resetTickshift() noexcept;
 
+	void updateChokedCommands(int currentChokedCommands) noexcept;
+
 	bool& isFinalTick() noexcept;
 	bool& isShifting() noexcept;
 	bool& isRecharging() noexcept;

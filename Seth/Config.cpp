@@ -560,7 +560,7 @@ void Config::load(const char8_t* name, bool incremental) noexcept
 
     read<value_t::object>(j, "Anti aim", antiAim);
     read<value_t::object>(j, "Fakelag", fakelag);
-    read<value_t::object>(j, "Tickbase", tickbase);
+    read<value_t::object>(j, "Tickbase", tickBase);
     read<value_t::object>(j, "Backtrack", backtrack);
 
     read(j["Glow"], "Items", glow);
@@ -1092,7 +1092,7 @@ void Config::save(size_t id) const noexcept
 
         j["Anti aim"] = antiAim;
         j["Fakelag"] = fakelag;
-        j["Tickbase"] = tickbase;
+        j["Tickbase"] = tickBase;
         j["Backtrack"] = backtrack;
 
         j["Glow"]["Items"] = glow;
@@ -1140,7 +1140,7 @@ void Config::reset() noexcept
     aimbot = { };
     antiAim = { };
     fakelag = { };
-    tickbase = { };
+    tickBase = { };
     backtrack = { };
     hitscanTriggerbot = { };
     projectileTriggerbot = { };

@@ -67,7 +67,7 @@ public:
         bool autoRecharge{ true };
         float timeTillRecharge{ 1.0f };
         bool shiftOnDisable{ true };
-    } tickbase;
+    } tickBase;
 
     struct Aimbot {
         struct Hitscan {
