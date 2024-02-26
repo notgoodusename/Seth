@@ -193,6 +193,11 @@ public:
         return lifeState() == 0;
     }
 
+    CommandContext* getCommandContext() noexcept
+    {
+        return reinterpret_cast<CommandContext*>(reinterpret_cast<uintptr_t>(this) + 0x1330);
+    }
+
     bool isEnemy(Entity* entity) noexcept;
 
     bool isOnGround() noexcept
