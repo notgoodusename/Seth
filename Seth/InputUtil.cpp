@@ -134,6 +134,14 @@ KeyBind::KeyBind(KeyCode keyCode) noexcept
     this->keyCode = static_cast<std::size_t>(keyCode) < keyMap.size() ? keyCode : KeyCode::NONE;
 }
 
+KeyBind::KeyBind(KeyCode keyCode, KeyMode keyMode) noexcept
+{
+    this->keyCode = static_cast<std::size_t>(keyCode) < keyMap.size() ? keyCode : KeyCode::NONE;
+    this->originalKeyCode = this->keyCode;
+    this->keyMode = keyMode;
+    this->originalKeyMode = keyMode;
+}
+
 KeyBind::KeyBind(const char* keyName) noexcept
 {
     auto it = std::lower_bound(keyMap.begin(), keyMap.end(), keyName, [](const Key& key, const char* keyName) { return key.name < keyName; });
@@ -147,6 +155,7 @@ KeyBind::KeyBind(const std::string name, KeyMode keyMode) noexcept
 {
     this->keyCode = KeyCode::NONE;
     this->keyMode = keyMode;
+    this->originalKeyMode = keyMode;
     this->activeName = name;
 }
 
@@ -278,4 +287,10 @@ void KeyBind::showKeybind() noexcept
     default:
         break;
     }
+}
+
+void KeyBind::reset() noexcept
+{
+   keyCode = originalKeyCode;
+   keyMode = originalKeyMode;
 }

@@ -108,9 +108,6 @@ static void hotkey3(const char* label, KeyBind& key, float samelineOffset = 0.0f
     const auto id = ImGui::GetID(label);
     ImGui::PushID(label);
 
-    ImGui::TextUnformatted(label);
-    ImGui::SameLine(samelineOffset);
-
     if (ImGui::GetActiveID() == id) {
         ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetColorU32(ImGuiCol_ButtonActive));
         ImGui::Button("...", size);
@@ -123,6 +120,9 @@ static void hotkey3(const char* label, KeyBind& key, float samelineOffset = 0.0f
     else if (ImGui::Button(key.toString(), size)) {
         ImGui::SetActiveID(id, ImGui::GetCurrentWindow());
     }
+
+    ImGui::SameLine(samelineOffset);
+    ImGui::TextUnformatted(label);
 
     ImGui::PopID();
 }

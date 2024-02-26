@@ -263,9 +263,7 @@ public:
     std::vector<itemSetting> skinChanger;
 
     struct Misc {
-        Misc() { menuKey.keyMode = KeyMode::Toggle; }
-
-        KeyBind menuKey = KeyBind::INSERT;
+        KeyBind menuKey{ KeyBind::KeyCode::INSERT, KeyMode::Toggle };
         bool antiAfkKick{ false };
         bool autoStrafe{ false };
         bool bunnyHop{ false };

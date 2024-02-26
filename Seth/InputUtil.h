@@ -120,6 +120,8 @@ public:
     };
 
     KeyBind(KeyCode keyCode) noexcept;
+    KeyBind(KeyCode keyCode, KeyMode keyMode) noexcept;
+
     KeyBind(const char* keyName) noexcept;
     KeyBind(const std::string name, KeyMode keyMode = KeyMode::Always) noexcept;
 
@@ -141,9 +143,13 @@ public:
     bool canShowKeybind() noexcept;
     void showKeybind() noexcept;
 
-    void reset() noexcept { keyCode = KeyCode::NONE; }
+    void reset() noexcept;
 
     KeyMode keyMode = KeyMode::Always;
+
+    KeyCode originalKeyCode = KeyCode::NONE;
+    KeyMode originalKeyMode = KeyMode::Always;
+
     std::string activeName = { };
 private:
     KeyCode keyCode;
