@@ -134,19 +134,6 @@ public:
         int shotDelay{ 0 };
     } hitscanTriggerbot;
 
-    struct ProjectileTriggerbot {
-        bool enabled{ false };
-
-        struct AutoDetonate
-        {
-            bool enabled{ false };
-            bool silent{ true };
-            bool friendlyFire{ false };
-            int ignore{ 0 };
-        } autoDetonate;
-
-   } projectileTriggerbot;
-
     struct MeleeTriggerbot {
         bool enabled{ false };
         bool friendlyFire{ false };
@@ -157,6 +144,15 @@ public:
     } meleeTriggerbot;
 
     KeyBind triggerbotKey{ std::string("triggerbot") };
+
+    struct AutoDetonate {
+        bool enabled{ false };
+        bool silent{ true };
+        bool friendlyFire{ false };
+        int ignore{ 0 };
+    } autoDetonate;
+
+    KeyBind autoKey{ std::string("auto") };
 
     struct Backtrack {
         bool enabled = false;
@@ -205,18 +201,19 @@ public:
     std::unordered_map<std::string, GlowItem> glow;
     std::unordered_map<std::string, BuildingGlow> buildingGlow;
     std::unordered_map<std::string, WorldGlow> worldGlow;
+    
     KeyBind glowKey{ std::string("glow") };
 
 
     struct StreamProofESP {
-        KeyBind key{ std::string("esp") };
-
         std::unordered_map<std::string, Player> allies;
         std::unordered_map<std::string, Player> enemies;
         std::unordered_map<std::string, Buildings> buildings;
         std::unordered_map<std::string, NPCs> npcs;
         std::unordered_map<std::string, World> world; 
     } streamProofESP;
+    
+    KeyBind espKey{ std::string("esp") };
 
     struct Font {
         ImFont* tiny;

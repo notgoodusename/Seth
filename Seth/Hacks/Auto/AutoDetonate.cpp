@@ -1,4 +1,4 @@
-#include "TriggerbotProjectile.h"
+#include "AutoDetonate.h"
 #include "../TargetSystem.h"
 
 #include "../../SDK/AttributeManager.h"
@@ -6,15 +6,15 @@
 #include "../../SDK/UserCmd.h"
 #include "../../SDK/Math.h"
 
-void runAutoDetonate(Entity* activeWeapon, UserCmd* cmd) noexcept
+void AutoDetonate::run(Entity* activeWeapon, UserCmd* cmd) noexcept
 {
+	const auto& cfg = config->autoDetonate;
+	if (!cfg.enabled)
+		return;
+
 	static auto grenadeLauncherLiveTime = interfaces->cvar->findVar("tf_grenadelauncher_livetime");
 	static auto stickyRadiusRampTime = interfaces->cvar->findVar("tf_sticky_radius_ramp_time");
 	static auto stickyAirdetRadius = interfaces->cvar->findVar("tf_sticky_airdet_radius");
-
-	const auto& cfg = config->projectileTriggerbot.autoDetonate;
-	if (!cfg.enabled)
-		return;
 
 	Entity* stickyLauncher = nullptr;
 
@@ -120,20 +120,4 @@ void runAutoDetonate(Entity* activeWeapon, UserCmd* cmd) noexcept
 			break;
 		}
 	}
-}
-
-void TriggerbotProjectile::run(Entity* activeWeapon, UserCmd* cmd) noexcept
-{
-	const auto& cfg = config->projectileTriggerbot;
-	if (!cfg.enabled)
-		return;
-
-	if (!localPlayer || !localPlayer->isAlive())
-		return;
-
-	runAutoDetonate(activeWeapon, cmd);
-
-	const auto weaponType = activeWeapon->getWeaponType();
-	if (weaponType != WeaponType::PROJECTILE)
-		return;
 }

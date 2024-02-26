@@ -2,7 +2,6 @@
 #include "../Backtrack.h"
 #include "Triggerbot.h"
 #include "TriggerbotHitscan.h"
-#include "TriggerbotProjectile.h"
 #include "TriggerbotMelee.h"
 
 #include "../Config.h"
@@ -25,11 +24,11 @@ void Triggerbot::run(UserCmd* cmd) noexcept
         return;
 
     const auto weaponType = activeWeapon->getWeaponType();
-    if (weaponType == WeaponType::HITSCAN || weaponType == WeaponType::MELEE)
-    {
-        if (!canAttack(cmd, activeWeapon))
-            return;
-    }
+    if (weaponType != WeaponType::HITSCAN && weaponType != WeaponType::MELEE)
+        return;
+
+    if (!canAttack(cmd, activeWeapon))
+        return;
 
     static auto lastTime = 0.0f;
     static auto lastContact = 0.0f;
@@ -45,8 +44,6 @@ void Triggerbot::run(UserCmd* cmd) noexcept
     default:
         break;
     }
-
-    TriggerbotProjectile::run(activeWeapon, cmd);
 }
 
 void Triggerbot::updateInput() noexcept

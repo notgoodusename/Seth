@@ -197,7 +197,7 @@ static void from_json(const json& j, Config::Visuals::BulletTracers& o)
     read(j, "Type", o.type);
 }
 
-static void from_json(const json& j, Config::ProjectileTriggerbot::AutoDetonate& ad)
+static void from_json(const json& j, Config::AutoDetonate& ad)
 {
     read(j, "Enabled", ad.enabled);
     read(j, "Silent", ad.silent);
@@ -274,12 +274,6 @@ static void from_json(const json& j, Config::HitscanTriggerbot& t)
     read(j, "Ignore", t.ignore);
     read(j, "Hitboxes", t.hitboxes);
     read(j, "Shot delay", t.shotDelay);
-}
-
-static void from_json(const json& j, Config::ProjectileTriggerbot& pt)
-{
-    read(j, "Enabled", pt.enabled);
-    read<value_t::object>(j, "Auto detonate", pt.autoDetonate);
 }
 
 static void from_json(const json& j, Config::MeleeTriggerbot& t)
@@ -394,7 +388,6 @@ static void from_json(const json& j, Config::WorldGlow& w)
 
 static void from_json(const json& j, Config::StreamProofESP& e)
 {
-    read(j, "Key", e.key);
     read(j, "Allies", e.allies);
     read(j, "Enemies", e.enemies);
     read(j, "Buildings", e.buildings);
@@ -555,9 +548,11 @@ void Config::load(const char8_t* name, bool incremental) noexcept
     read<value_t::object>(j, "Draw aimbot fov", aimbotFov);
 
     read<value_t::object>(j, "Hitscan triggerbot", hitscanTriggerbot);
-    read<value_t::object>(j, "Projectile triggerbot", projectileTriggerbot);
     read<value_t::object>(j, "Melee triggerbot", meleeTriggerbot);
     read(j, "Triggerbot Key", triggerbotKey);
+
+    read<value_t::object>(j, "Auto Detonate", autoDetonate);
+    read(j, "Auto Key", autoKey);
 
     read<value_t::object>(j, "Anti aim", antiAim);
     read<value_t::object>(j, "Fakelag", fakelag);
@@ -573,6 +568,8 @@ void Config::load(const char8_t* name, bool incremental) noexcept
     read<value_t::object>(j, "World chams", worldChams);
     read(j["Chams"], "Key", chamsKey);
     read<value_t::object>(j, "ESP", streamProofESP);
+    read(j["ESP"], "Key", espKey);
+
     read<value_t::object>(j, "Visuals", visuals);
     read<value_t::object>(j, "Misc", misc);
 }
@@ -702,7 +699,7 @@ static void to_json(json& j, const ImVec2& o, const ImVec2& dummy = {})
     WRITE("Y", y);
 }
 
-static void to_json(json& j, const Config::ProjectileTriggerbot::AutoDetonate& o, const Config::ProjectileTriggerbot::AutoDetonate& dummy = {})
+static void to_json(json& j, const Config::AutoDetonate& o, const Config::AutoDetonate& dummy = {})
 {
     WRITE("Enabled", enabled);
     WRITE("Silent", silent);
@@ -777,12 +774,6 @@ static void to_json(json& j, const Config::HitscanTriggerbot& o, const Config::H
     WRITE("Shot delay", shotDelay);
 }
 
-static void to_json(json& j, const Config::ProjectileTriggerbot& o, const Config::ProjectileTriggerbot& dummy = {})
-{
-    WRITE("Enabled", enabled);
-    WRITE("Auto detonate", autoDetonate);
-}
-
 static void to_json(json& j, const Config::MeleeTriggerbot& o, const Config::MeleeTriggerbot& dummy = {})
 {
     WRITE("Enabled", enabled);
@@ -851,7 +842,6 @@ static void to_json(json& j, const  Config::WorldGlow& o, const  Config::WorldGl
 
 static void to_json(json& j, const Config::StreamProofESP& o, const Config::StreamProofESP& dummy = {})
 {
-    WRITE("Key", key);
     j["Allies"] = o.allies;
     j["Enemies"] = o.enemies;
     j["Buildings"] = o.buildings;
@@ -1086,9 +1076,11 @@ void Config::save(size_t id) const noexcept
         j["Draw aimbot fov"] = aimbotFov;
 
         j["Hitscan triggerbot"] = hitscanTriggerbot;
-        j["Projectile triggerbot"] = projectileTriggerbot;
         j["Melee triggerbot"] = meleeTriggerbot;
         to_json(j["Triggerbot Key"], triggerbotKey, KeyBind::NONE);
+
+        j["Auto Detonate"] = autoDetonate;
+        to_json(j["Auto Key"], autoKey, KeyBind::NONE);
 
         j["Anti aim"] = antiAim;
         j["Fakelag"] = fakelag;
@@ -1104,6 +1096,8 @@ void Config::save(size_t id) const noexcept
         j["World chams"] = worldChams;
         to_json(j["Chams"]["Key"], chamsKey, KeyBind::NONE);
         j["ESP"] = streamProofESP;
+        to_json(j["ESP"]["Key"], espKey, KeyBind::NONE);
+
         j["Visuals"] = visuals;
         j["Misc"] = misc;
 
@@ -1137,16 +1131,26 @@ void Config::rename(size_t item, const char* newName) noexcept
 void Config::reset() noexcept
 {
     aimbot = { };
+    config->aimbotKey.reset();
+
     antiAim = { };
     fakelag = { };
     backtrack = { };
     hitscanTriggerbot = { };
-    projectileTriggerbot = { };
     meleeTriggerbot = { };
-    chams = { };
-    buildingChams = { }; 
+    config->triggerbotKey.reset();
+
+    autoDetonate = { };
+    config->autoKey.reset();
+
+    buildingChams = { };
     worldChams = { };
+    chams = { };
+    config->chamsKey.reset();
+
     streamProofESP = { };
+    config->espKey.reset();
+
     visuals = { };
     misc = { };
 }

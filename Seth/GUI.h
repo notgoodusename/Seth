@@ -19,6 +19,7 @@ private:
     void renderGuiStyle() noexcept;
     void renderAimbotWindow() noexcept;
     void renderTriggerbotWindow() noexcept;
+    void renderAutoWindow() noexcept;
     void renderFakelagWindow() noexcept;
     void renderAntiAimWindow() noexcept;
     void renderBacktrackWindow() noexcept;

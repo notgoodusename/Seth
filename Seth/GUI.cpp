@@ -245,7 +245,7 @@ void GUI::renderTriggerbotWindow() noexcept
     static int currentCategory{ 0 };
     ImGui::PushItemWidth(110.0f);
     ImGui::PushID(0);
-    ImGui::Combo("", &currentCategory, "Hitscan\0Projectile\0Melee\0");
+    ImGui::Combo("", &currentCategory, "Hitscan\0Melee\0");
     ImGui::PopID();
 
     ImGui::SameLine();
@@ -267,24 +267,6 @@ void GUI::renderTriggerbotWindow() noexcept
             break;
         }
         case 1:
-        {
-            ImGui::Checkbox("Enabled", &config->projectileTriggerbot.enabled);
-            ImGui::Checkbox("Auto detonate", &config->projectileTriggerbot.autoDetonate.enabled);
-            ImGui::SameLine();
-
-            if (bool ccPopup = ImGui::Button("Edit"))
-                ImGui::OpenPopup("##autoDetonateEdit");
-
-            if (ImGui::BeginPopup("##autoDetonateEdit"))
-            {
-                ImGui::Checkbox("Silent", &config->projectileTriggerbot.autoDetonate.silent);
-                ImGui::Checkbox("Friendly fire", &config->projectileTriggerbot.autoDetonate.friendlyFire);
-                ImGuiCustom::multiBox("AutoDetonate", config->projectileTriggerbot.autoDetonate.ignore, "Ignore", "Cloaked\0Invulnerable\0");
-                ImGui::EndPopup();
-            }
-            break;
-        }
-        case 2:
             ImGui::Checkbox("Enabled", &config->meleeTriggerbot.enabled);
             ImGui::Checkbox("Friendly fire", &config->meleeTriggerbot.friendlyFire);
             ImGui::Checkbox("Target backtrack", &config->meleeTriggerbot.targetBacktrack);
@@ -297,6 +279,35 @@ void GUI::renderTriggerbotWindow() noexcept
     default:
         break;
     }
+}
+
+void GUI::renderAutoWindow() noexcept
+{
+    ImGui::hotkey2("Key", config->autoKey, 80.0f);
+    ImGui::Separator();
+
+    ImGui::Columns(2, nullptr, false);
+    ImGui::SetColumnOffset(1, 280.0f);
+
+    ImGui::Checkbox("Auto detonate", &config->autoDetonate.enabled);
+    ImGui::SameLine();
+
+    ImGui::PushID("Auto detonate");
+    if (bool ccPopup = ImGui::Button("Edit"))
+        ImGui::OpenPopup("##autoDetonateEdit");
+
+    if (ImGui::BeginPopup("##autoDetonateEdit"))
+    {
+        ImGui::Checkbox("Silent", &config->autoDetonate.silent);
+        ImGui::Checkbox("Friendly fire", &config->autoDetonate.friendlyFire);
+        ImGuiCustom::multiBox("AutoDetonate", config->autoDetonate.ignore, "Ignore", "Cloaked\0Invulnerable\0");
+        ImGui::EndPopup();
+    }
+
+    ImGui::PopID();
+
+    ImGui::NextColumn();
+    ImGui::Columns(1);
 }
 
 void GUI::renderFakelagWindow() noexcept
@@ -502,7 +513,7 @@ void GUI::renderGlowWindow() noexcept
 
 void GUI::renderStreamProofESPWindow() noexcept
 {
-    ImGui::hotkey2("Key", config->streamProofESP.key, 80.0f);
+    ImGui::hotkey2("Key", config->espKey, 80.0f);
     ImGui::Separator();
 
     static std::size_t currentCategory;
@@ -1199,7 +1210,7 @@ void GUI::renderConfigWindow() noexcept
             ImGui::OpenPopup("Config to reset");
 
         if (ImGui::BeginPopup("Config to reset")) {
-            static constexpr const char* names[]{ "Whole", "Aimbot", "Triggerbot", "Backtrack", "Anti Aim", "Fakelag", "Glow", "Chams", "ESP", "Visuals", "Misc" };
+            static constexpr const char* names[]{ "Whole", "Aimbot", "Triggerbot", "Auto", "Backtrack", "Chams", "ESP", "Visuals", "Misc" };
             for (int i = 0; i < IM_ARRAYSIZE(names); i++) {
                 if (i == 1) ImGui::Separator();
 
@@ -1207,15 +1218,16 @@ void GUI::renderConfigWindow() noexcept
                     switch (i) {
                     case 0: config->reset(); break;
                     case 1: config->aimbot = { }; config->aimbotKey.reset(); break;
-                    case 2: config->hitscanTriggerbot = { }; config->projectileTriggerbot = { }; config->meleeTriggerbot = { }; config->triggerbotKey.reset();  break;
-                    case 3: config->backtrack = { };  break;
-                    case 4: config->antiAim = { }; break;
-                    case 6: config->fakelag = { }; break;
-                    case 7: config->glow = { }; config->glowKey.reset(); break;
-                    case 8: config->chams = { }; config->buildingChams = { }; config->worldChams = { }; config->chamsKey.reset(); break;
-                    case 9: config->streamProofESP = { }; break;
-                    case 10: config->visuals = { }; break;
-                    case 11: config->misc = { }; break;
+                    case 2: config->hitscanTriggerbot = { }; config->meleeTriggerbot = { }; config->triggerbotKey.reset();  break;
+                    case 3: config->autoDetonate = { }; config->autoKey.reset(); break;
+                    case 4: config->backtrack = { };  break;
+                    //case 4: config->antiAim = { }; break;
+                    //case 6: config->fakelag = { }; break;
+                    //case 7: config->glow = { }; config->glowKey.reset(); break;
+                    case 5: config->chams = { }; config->buildingChams = { }; config->worldChams = { }; config->chamsKey.reset(); break;
+                    case 6: config->streamProofESP = { }; config->espKey.reset();
+                    case 7: config->visuals = { }; break;
+                    case 8: config->misc = { }; break;
                     default: break;
                     }
                 }
@@ -1358,9 +1370,10 @@ void GUI::renderGuiStyle() noexcept
                             ImGui::SetCursorPosY(10);
                             if (ImGui::Button("Main                    ", ImVec2{ 80, 20 })) activeSubTabAimbot = 1;
                             if (ImGui::Button("Triggerbot              ", ImVec2{ 80, 20 })) activeSubTabAimbot = 2;
-                            if (ImGui::Button("Backtrack               ", ImVec2{ 80, 20 })) activeSubTabAimbot = 3;
-                            //if (ImGui::Button("AntiAim                 ", ImVec2{ 80, 20 })) activeSubTabAimbot = 4;
-                            //if (ImGui::Button("FakeLag                 ", ImVec2{ 80, 20 })) activeSubTabAimbot = 5;
+                            if (ImGui::Button("Auto                    ", ImVec2{ 80, 20 })) activeSubTabAimbot = 3;
+                            if (ImGui::Button("Backtrack               ", ImVec2{ 80, 20 })) activeSubTabAimbot = 4;
+                            //if (ImGui::Button("AntiAim                 ", ImVec2{ 80, 20 })) activeSubTabAimbot = 5;
+                            //if (ImGui::Button("FakeLag                 ", ImVec2{ 80, 20 })) activeSubTabAimbot = 6;
                             break;
                         case 2: //Visuals
                             ImGui::SetCursorPosY(10);
@@ -1400,14 +1413,18 @@ void GUI::renderGuiStyle() noexcept
                                     renderTriggerbotWindow();
                                     break;
                                 case 3:
+                                    //Auto
+                                    renderAutoWindow();
+                                    break;
+                                case 4:
                                     //Backtrack
                                     renderBacktrackWindow();
                                     break;
-                                case 4:
+                                case 5:
                                     //Anti aim
                                     //renderAntiAimWindow();
                                     break;
-                                case 5:
+                                case 6:
                                     //FakeLag
                                     //renderFakelagWindow();
                                     break;

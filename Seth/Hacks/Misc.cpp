@@ -45,9 +45,10 @@ const bool anyActiveKeybinds() noexcept
     const bool warp = config->misc.tickBase.enabled && config->misc.tickBase.warpKey.canShowKeybind();
     const bool aimbot = config->aimbotKey.canShowKeybind();
     const bool triggerbot = (config->hitscanTriggerbot.enabled || config->meleeTriggerbot.enabled) && config->triggerbotKey.canShowKeybind();
+    const bool auto_ = config->autoKey.canShowKeybind();
     const bool glow = config->glowKey.canShowKeybind();
     const bool chams = config->chamsKey.canShowKeybind();
-    const bool esp = config->streamProofESP.key.canShowKeybind();
+    const bool esp = config->espKey.canShowKeybind();
 
     const bool thirdperson = config->visuals.thirdperson && config->visuals.thirdpersonKey.canShowKeybind();
     const bool freecam = config->visuals.freeCam && config->visuals.freeCamKey.canShowKeybind();
@@ -55,9 +56,10 @@ const bool anyActiveKeybinds() noexcept
     const bool crithack = config->misc.critHack.enabled && config->misc.forceCritKey.canShowKeybind();
     const bool edgejump = config->misc.edgeJump && config->misc.edgeJumpKey.canShowKeybind();
 
-    return aimbot || antiAimManualForward || antiAimManualBackward || antiAimManualRight  || antiAimManualLeft 
+    return antiAimManualForward || antiAimManualBackward || antiAimManualRight  || antiAimManualLeft 
         || recharge || doubletap || warp
-        || triggerbot || chams || glow || esp
+        || aimbot || triggerbot || auto_
+        || chams || glow || esp
         || thirdperson || freecam || crithack || edgejump;
 }
 
@@ -106,9 +108,10 @@ void Misc::showKeybinds() noexcept
     config->aimbotKey.showKeybind();
     if (config->hitscanTriggerbot.enabled || config->meleeTriggerbot.enabled)
         config->triggerbotKey.showKeybind();
+    config->autoKey.showKeybind();
     config->chamsKey.showKeybind();
     config->glowKey.showKeybind();
-    config->streamProofESP.key.showKeybind();
+    config->espKey.showKeybind();
 
     if (config->visuals.thirdperson)
         config->visuals.thirdpersonKey.showKeybind();

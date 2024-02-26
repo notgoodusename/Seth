@@ -39,6 +39,9 @@
     <Filter Include="Hacks\Triggerbot">
       <UniqueIdentifier>{17b602df-f5de-4a92-8a3c-ff6ee0691c6a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Hacks\Auto">
+      <UniqueIdentifier>{8b03fd07-0ff4-482d-a35e-e1be30f168cc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GUI.cpp">
@@ -272,11 +275,14 @@
     <ClCompile Include="Hacks\ProjectileTrajectory.cpp">
       <Filter>Hacks</Filter>
     </ClCompile>
-    <ClCompile Include="Hacks\Triggerbot\TriggerbotProjectile.cpp">
-      <Filter>Hacks\Triggerbot</Filter>
-    </ClCompile>
     <ClCompile Include="Hacks\Tickbase.cpp">
       <Filter>Hacks</Filter>
+    </ClCompile>
+    <ClCompile Include="Hacks\Auto\AutoDetonate.cpp">
+      <Filter>Hacks\Auto</Filter>
+    </ClCompile>
+    <ClCompile Include="Hacks\Auto\Auto.cpp">
+      <Filter>Hacks\Auto</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -679,14 +685,17 @@
     <ClInclude Include="Hacks\ProjectileTrajectory.h">
       <Filter>Hacks</Filter>
     </ClInclude>
-    <ClInclude Include="Hacks\Triggerbot\TriggerbotProjectile.h">
-      <Filter>Hacks\Triggerbot</Filter>
-    </ClInclude>
     <ClInclude Include="Hacks\Tickbase.h">
       <Filter>Hacks</Filter>
     </ClInclude>
     <ClInclude Include="SDK\Network.h">
       <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="Hacks\Auto\AutoDetonate.h">
+      <Filter>Hacks\Auto</Filter>
+    </ClInclude>
+    <ClInclude Include="Hacks\Auto\Auto.h">
+      <Filter>Hacks\Auto</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

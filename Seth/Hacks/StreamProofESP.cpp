@@ -442,7 +442,7 @@ static void renderEntityEsp(const BaseData& entityData, const std::unordered_map
 
 void StreamProofESP::render() noexcept
 {
-    if (!config->streamProofESP.key.isActive())
+    if (!config->espKey.isActive())
         return;
 
     drawList = ImGui::GetBackgroundDrawList();
@@ -482,5 +482,5 @@ void StreamProofESP::render() noexcept
 
 void StreamProofESP::updateInput() noexcept
 {
-    config->streamProofESP.key.handleToggle();
+    config->espKey.handleToggle();
 }

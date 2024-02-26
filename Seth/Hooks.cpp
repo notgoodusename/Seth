@@ -21,6 +21,7 @@
 #include "SteamInterfaces.h"
 
 #include "Hacks/Aimbot/Aimbot.h"
+#include "Hacks/Auto/Auto.h"
 #include "Hacks/Animations.h"
 #include "Hacks/Backtrack.h"
 #include "Hacks/Chams.h"
@@ -103,6 +104,7 @@ static HRESULT __stdcall present(IDirect3DDevice9* device, const RECT* src, cons
         Misc::spectatorList();
 
         Aimbot::updateInput();
+        Auto::updateInput();
         Chams::updateInput();
         Crithack::updateInput();
         Misc::updateInput();
@@ -213,6 +215,7 @@ static bool __fastcall createMove(void* thisPointer, void*, float inputSampleTim
     Backtrack::run(cmd);
     Aimbot::run(cmd);
     Triggerbot::run(cmd);
+    Auto::run(cmd);
     Tickbase::end(cmd);
 
     Misc::edgejump(cmd);

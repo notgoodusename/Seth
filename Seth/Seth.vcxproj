@@ -34,6 +34,8 @@
     <ClCompile Include="Hacks\Aimbot\AimbotMelee.cpp" />
     <ClCompile Include="Hacks\Aimbot\AimbotProjectile.cpp" />
     <ClCompile Include="Hacks\Animations.cpp" />
+    <ClCompile Include="Hacks\Auto\Auto.cpp" />
+    <ClCompile Include="Hacks\Auto\AutoDetonate.cpp" />
     <ClCompile Include="Hacks\Backtrack.cpp" />
     <ClCompile Include="Hacks\Chams.cpp" />
     <ClCompile Include="Hacks\Crithack.cpp" />
@@ -50,7 +52,6 @@
     <ClCompile Include="Hacks\Triggerbot\Triggerbot.cpp" />
     <ClCompile Include="Hacks\Triggerbot\TriggerbotHitscan.cpp" />
     <ClCompile Include="Hacks\Triggerbot\TriggerbotMelee.cpp" />
-    <ClCompile Include="Hacks\Triggerbot\TriggerbotProjectile.cpp" />
     <ClCompile Include="Hacks\Visuals.cpp" />
     <ClCompile Include="Helpers.cpp" />
     <ClCompile Include="Hooks\MinHook.cpp" />
@@ -103,6 +104,8 @@
     <ClInclude Include="Hacks\Aimbot\AimbotMelee.h" />
     <ClInclude Include="Hacks\Aimbot\AimbotProjectile.h" />
     <ClInclude Include="Hacks\Animations.h" />
+    <ClInclude Include="Hacks\Auto\Auto.h" />
+    <ClInclude Include="Hacks\Auto\AutoDetonate.h" />
     <ClInclude Include="Hacks\Backtrack.h" />
     <ClInclude Include="Hacks\Chams.h" />
     <ClInclude Include="Hacks\Crithack.h" />
@@ -117,7 +120,6 @@
     <ClInclude Include="Hacks\StreamProofESP.h" />
     <ClInclude Include="Hacks\TargetSystem.h" />
     <ClInclude Include="Hacks\Tickbase.h" />
-    <ClInclude Include="Hacks\Triggerbot\TriggerbotProjectile.h" />
     <ClInclude Include="Hacks\Triggerbot\Triggerbot.h" />
     <ClInclude Include="Hacks\Triggerbot\TriggerbotHitscan.h" />
     <ClInclude Include="Hacks\Triggerbot\TriggerbotMelee.h" />
