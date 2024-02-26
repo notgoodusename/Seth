@@ -185,7 +185,7 @@ bool Backtrack::valid(float simtime) noexcept
         return false;
 
     const auto delta = std::clamp(
-        network->getLatency(0) + getLerp(),
+        network->getLatency(1) + getLerp(),
         0.f,
         cvars.maxUnlag->getFloat())
         - ticksToTime(serverTick - timeToTicks(simtime));
