@@ -31,14 +31,14 @@ void Tickbase::start(UserCmd* cmd) noexcept
         return;
     }
 
-    if (!config->tickBase.enabled)
+    if (!config->misc.tickBase.enabled)
     {
         hasHadTickbaseActive = false;
         targetTickShift = 0;
         return;
     }
 
-    if (!config->tickBase.warpKey.isActive() && !config->tickBase.doubleTapKey.isActive())
+    if (!config->misc.tickBase.warpKey.isActive() && !config->misc.tickBase.doubleTapKey.isActive())
     {
         if (hasHadTickbaseActive)
             shift(cmd, ticksAllowedForProcessing, true);
@@ -46,8 +46,8 @@ void Tickbase::start(UserCmd* cmd) noexcept
         return;
     }
 
-    if (config->tickBase.warpKey.isActive() || config->tickBase.doubleTapKey.isActive())
-        targetTickShift = config->tickBase.ticksToShift;
+    if (config->misc.tickBase.warpKey.isActive() || config->misc.tickBase.doubleTapKey.isActive())
+        targetTickShift = config->misc.tickBase.ticksToShift;
 
     //We do -1 to leave 1 tick to fakelag
     targetTickShift = std::clamp(targetTickShift, 0, MAX_COMMANDS - 1);
@@ -59,29 +59,31 @@ void Tickbase::end(UserCmd* cmd) noexcept
     if (!localPlayer || !localPlayer->isAlive())
         return;
 
-    if (!config->tickBase.warpKey.isActive())
+    if (!config->misc.tickBase.warpKey.isActive() && !config->misc.tickBase.doubleTapKey.isActive())
     {
         targetTickShift = 0;
         return;
     }
 
+    if(config->misc.tickBase.warpKey.isActive())
+        shift(cmd, targetTickShift);
+
     const auto activeWeapon = localPlayer->getActiveWeapon();
     if (!activeWeapon)
         return;
 
-    if (cmd->buttons & UserCmd::IN_ATTACK && canAttack(cmd, activeWeapon))
+    if (isAttacking(cmd, activeWeapon) && config->misc.tickBase.doubleTapKey.isActive())
         shift(cmd, targetTickShift);
 }
 
 static int timeTillRecharge() noexcept
 {
+    const float time = config->misc.tickBase.timeTillRecharge;
 
-    const float time = config->tickBase.timeTillRecharge;
-
-    if (config->tickBase.autoRecharge)
+    if (config->misc.tickBase.autoRecharge)
         return static_cast<int>(time / memory->globalVars->intervalPerTick);
 
-    if (config->tickBase.rechargeKey.isActive())
+    if (config->misc.tickBase.rechargeKey.isActive())
         return INT_MIN;
 
     return INT_MAX;
@@ -158,7 +160,7 @@ bool Tickbase::canShift(int shiftAmount, bool forceShift) noexcept
     if (!localPlayer || !localPlayer->isAlive())
         return false;
 
-    if (!shiftAmount || shiftAmount > ticksAllowedForProcessing || memory->globalVars->tickCount - tickCountAtShift <= timeTillRecharge())
+    if (!shiftAmount || shiftAmount > ticksAllowedForProcessing || memory->globalVars->tickCount - tickCountAtShift <= 1)
         return false;
 
     if (forceShift)
@@ -212,7 +214,7 @@ bool Tickbase::setCorrectTickbase(int commandNumber) noexcept
     {
         if (memory->globalVars->maxClients == 1)
         {
-            localPlayer->tickBase() += totalPauseTicks + 1;
+            localPlayer->tickBase() += totalPauseTicks;
         }
         else
         {
@@ -225,7 +227,7 @@ bool Tickbase::setCorrectTickbase(int commandNumber) noexcept
             const int correctionTicks = timeToTicks(correctionSeconds);
 
             if (totalPauseTicks > correctionTicks)
-                localPlayer->tickBase() += totalPauseTicks + 1;
+                localPlayer->tickBase() += totalPauseTicks;
         }
 
         localPlayer->tickBase()++;
@@ -278,9 +280,9 @@ bool& Tickbase::isRecharging() noexcept
 
 void Tickbase::updateInput() noexcept
 {
-    config->tickBase.rechargeKey.handleToggle();
-    config->tickBase.doubleTapKey.handleToggle();
-    config->tickBase.warpKey.handleToggle();
+    config->misc.tickBase.rechargeKey.handleToggle();
+    config->misc.tickBase.doubleTapKey.handleToggle();
+    config->misc.tickBase.warpKey.handleToggle();
 }
 
 void Tickbase::reset() noexcept

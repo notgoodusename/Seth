@@ -923,6 +923,38 @@ void GUI::renderMiscWindow() noexcept
     }
     ImGui::PopID();
 
+    ImGui::Checkbox("Tickbase", &config->misc.tickBase.enabled);
+    ImGui::SameLine();
+
+    ImGui::PushID("Tickbase");
+    if (ImGui::Button("..."))
+        ImGui::OpenPopup("");
+
+    if (ImGui::BeginPopup("")) {
+        ImGui::hotkey2("Recharge key", config->misc.tickBase.rechargeKey);
+        ImGui::hotkey2("Warp key", config->misc.tickBase.warpKey);
+        ImGui::hotkey2("Doubletap key", config->misc.tickBase.doubleTapKey);
+
+        //ImGui::Checkbox("Anti warp", &config->misc.tickBase.antiWarp);
+
+        ImGui::PushID("Tick shift");
+        ImGui::SliderInt("", &config->misc.tickBase.ticksToShift, 14, 21, "Ticks to shift: %d");
+        ImGui::PopID();
+
+        ImGui::Spacing();
+
+        ImGui::Checkbox("Auto recharge", &config->misc.tickBase.autoRecharge);
+
+        ImGui::PushID("Time till recharge");
+        ImGui::SliderFloat("", &config->misc.tickBase.timeTillRecharge, 0.2f, 5.0f, "Time till recharge: %.2fs");
+        ImGui::PopID();
+
+        ImGui::Checkbox("Shift on disable", &config->misc.tickBase.shiftOnDisable);
+
+        ImGui::EndPopup();
+    }
+    ImGui::PopID();
+
     ImGui::Checkbox("Edge Jump", &config->misc.edgeJump);
     ImGui::SameLine();
     ImGui::PushID("Edge Jump Key");
@@ -1373,11 +1405,11 @@ void GUI::renderGuiStyle() noexcept
                                     break;
                                 case 4:
                                     //Anti aim
-                                    renderAntiAimWindow();
+                                    //renderAntiAimWindow();
                                     break;
                                 case 5:
                                     //FakeLag
-                                    renderFakelagWindow();
+                                    //renderFakelagWindow();
                                     break;
                                 default:
                                     break;

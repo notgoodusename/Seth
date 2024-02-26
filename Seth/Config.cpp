@@ -315,7 +315,7 @@ static void from_json(const json& j, Config::Fakelag& f)
     read(j, "Limit", f.limit);
 }
 
-static void from_json(const json& j, Config::Tickbase& t)
+static void from_json(const json& j, Config::Misc::Tickbase& t)
 {
     read(j, "Enabled", t.enabled);
     read<value_t::object>(j, "Recharge key", t.rechargeKey);
@@ -512,6 +512,7 @@ static void from_json(const json& j, Config::Misc& m)
     read(j, "Bunny hop", m.bunnyHop);
     read<value_t::object>(j, "Crit hack", m.critHack);
     read(j, "Force crit key", m.forceCritKey);
+    read<value_t::object>(j, "Tickbase", m.tickBase);
     read(j, "Edge Jump", m.edgeJump);
     read(j, "Edge Jump Key", m.edgeJumpKey);
     read(j, "Fast stop", m.fastStop);
@@ -560,7 +561,6 @@ void Config::load(const char8_t* name, bool incremental) noexcept
 
     read<value_t::object>(j, "Anti aim", antiAim);
     read<value_t::object>(j, "Fakelag", fakelag);
-    read<value_t::object>(j, "Tickbase", tickBase);
     read<value_t::object>(j, "Backtrack", backtrack);
 
     read(j["Glow"], "Items", glow);
@@ -882,7 +882,7 @@ static void to_json(json& j, const Config::Fakelag& o, const Config::Fakelag& du
     WRITE("Limit", limit);
 }
 
-static void to_json(json& j, const Config::Tickbase& o, const Config::Tickbase& dummy = {})
+static void to_json(json& j, const Config::Misc::Tickbase& o, const Config::Misc::Tickbase& dummy = {})
 {
     WRITE("Enabled", enabled);
     WRITE("Recharge key", rechargeKey);
@@ -1092,7 +1092,6 @@ void Config::save(size_t id) const noexcept
 
         j["Anti aim"] = antiAim;
         j["Fakelag"] = fakelag;
-        j["Tickbase"] = tickBase;
         j["Backtrack"] = backtrack;
 
         j["Glow"]["Items"] = glow;
@@ -1140,7 +1139,6 @@ void Config::reset() noexcept
     aimbot = { };
     antiAim = { };
     fakelag = { };
-    tickBase = { };
     backtrack = { };
     hitscanTriggerbot = { };
     projectileTriggerbot = { };

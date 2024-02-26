@@ -44,8 +44,8 @@ public:
     MinHook interpolateViewModel;
     MinHook isAllowedToWithdrawFromCritBucket;
     MinHook newMatchFoundDashboardStateOnUpdate;
+    MinHook physicsSimulate;
     MinHook randomSeed;
-    MinHook runSimulation;
     MinHook sendDatagram;
     MinHook tfPlayerInventoryGetMaxItemCount;
     MinHook updateClientSideAnimation;

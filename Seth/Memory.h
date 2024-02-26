@@ -121,11 +121,11 @@ public:
     std::uintptr_t interpolateViewModel;
     std::uintptr_t isAllowedToWithdrawFromCritBucket;
     std::uintptr_t newMatchFoundDashboardStateOnUpdate;
+    std::uintptr_t physicsSimulate;
     std::uintptr_t tfPlayerInventoryGetMaxItemCount;
     std::uintptr_t randomSeedReturnAddress1;
     std::uintptr_t randomSeedReturnAddress2;
     std::uintptr_t randomSeedReturnAddress3;
-    std::uintptr_t runSimulation;
     std::uintptr_t sendDatagram;
     std::uintptr_t updateClientSideAnimation;
     std::uintptr_t updateTFAnimState;

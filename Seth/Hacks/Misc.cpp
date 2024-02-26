@@ -40,9 +40,9 @@ const bool anyActiveKeybinds() noexcept
     const bool antiAimManualBackward = config->antiAim.enabled && config->antiAim.manualBackward.canShowKeybind();
     const bool antiAimManualRight = config->antiAim.enabled && config->antiAim.manualRight.canShowKeybind();
     const bool antiAimManualLeft = config->antiAim.enabled && config->antiAim.manualLeft.canShowKeybind();
-    const bool recharge = config->tickBase.rechargeKey.canShowKeybind();
-    const bool doubletap = config->tickBase.doubleTapKey.canShowKeybind();
-    const bool warp = config->tickBase.warpKey.canShowKeybind();
+    const bool recharge = config->misc.tickBase.enabled && config->misc.tickBase.rechargeKey.canShowKeybind();
+    const bool doubletap = config->misc.tickBase.enabled && config->misc.tickBase.doubleTapKey.canShowKeybind();
+    const bool warp = config->misc.tickBase.enabled && config->misc.tickBase.warpKey.canShowKeybind();
     const bool aimbot = config->aimbotKey.canShowKeybind();
     const bool triggerbot = (config->hitscanTriggerbot.enabled || config->meleeTriggerbot.enabled) && config->triggerbotKey.canShowKeybind();
     const bool glow = config->glowKey.canShowKeybind();
@@ -96,9 +96,12 @@ void Misc::showKeybinds() noexcept
         config->antiAim.manualLeft.showKeybind();
     }
 
-    config->tickBase.rechargeKey.showKeybind();
-    config->tickBase.doubleTapKey.showKeybind();
-    config->tickBase.warpKey.showKeybind();
+    if (config->misc.tickBase.enabled)
+    {
+        config->misc.tickBase.rechargeKey.showKeybind();
+        config->misc.tickBase.doubleTapKey.showKeybind();
+        config->misc.tickBase.warpKey.showKeybind();
+    }
 
     config->aimbotKey.showKeybind();
     if (config->hitscanTriggerbot.enabled || config->meleeTriggerbot.enabled)

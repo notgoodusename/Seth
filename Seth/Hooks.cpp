@@ -157,6 +157,46 @@ static bool __fastcall createMove(void* thisPointer, void*, float inputSampleTim
 
     auto currentViewAngles{ cmd->viewangles };
     const auto currentCmd{ *cmd };
+    
+    //TODO: Fix first shot after just recharging not using correct servertime
+
+    if (Tickbase::isShifting())
+    {
+        sendPacket = Tickbase::isFinalTick();
+
+        cmd->buttons |= UserCmd::IN_ATTACK;
+
+        if(config->misc.tickBase.warpKey.isActive())
+            cmd->buttons &= ~(UserCmd::IN_ATTACK | UserCmd::IN_ATTACK2);
+
+        Misc::antiAfkKick(cmd);
+        Misc::fastStop(cmd);
+        Misc::bunnyHop(cmd);
+        Misc::autoStrafe(cmd, currentViewAngles);
+
+        EnginePrediction::update();
+        EnginePrediction::run(cmd);
+
+        Misc::edgejump(cmd);
+
+        cmd->viewangles.normalize();
+
+        if ((currentViewAngles != cmd->viewangles
+            || cmd->forwardmove != currentCmd.forwardmove
+            || cmd->sidemove != currentCmd.sidemove) && (cmd->sidemove != 0 || cmd->forwardmove != 0))
+        {
+            Misc::fixMovement(cmd, currentViewAngles.y);
+        }
+
+        cmd->viewangles.x = std::clamp(cmd->viewangles.x, -89.0f, 89.0f);
+        cmd->viewangles.y = std::clamp(cmd->viewangles.y, -180.0f, 180.0f);
+        cmd->viewangles.z = 0.0f;
+        cmd->forwardmove = std::clamp(cmd->forwardmove, -450.0f, 450.0f);
+        cmd->sidemove = std::clamp(cmd->sidemove, -450.0f, 450.0f);
+        cmd->upmove = std::clamp(cmd->upmove, -320.0f, 320.0f);
+        Animations::updateLocalAngles(cmd);
+        return false;
+    }
 
     memory->globalVars->serverTime(cmd);
     Misc::runFreeCam(cmd, currentViewAngles);
@@ -398,7 +438,6 @@ static void __cdecl clMoveHook(float accumulatedExtraSamples, bool isFinalTick) 
     if (!Tickbase::getTickshift())
         return;
 
-    int remainToShift = 0;
     int tickShift = Tickbase::getTickshift();
 
     Tickbase::isShifting() = true;
@@ -674,6 +713,27 @@ static void __fastcall newMatchFoundDashboardStateOnUpdateHook(void* thisPointer
     original(thisPointer);
 }
 
+static void __fastcall physicsSimulateHook(void* thisPointer, void*) noexcept
+{
+    static auto original = hooks->physicsSimulate.getOriginal<void>();
+
+    const auto entity = reinterpret_cast<Entity*>(thisPointer);
+    if (!localPlayer || !localPlayer->isAlive() || entity != localPlayer.get())
+        return original(thisPointer);
+
+    const int simulationTick = *reinterpret_cast<int*>(reinterpret_cast<uintptr_t>(thisPointer) + 0xE0);
+    if (simulationTick == memory->globalVars->tickCount)
+        return;
+
+    CommandContext* commandContext = localPlayer->getCommandContext();
+    if (!commandContext || !commandContext->needsProcessing)
+        return;
+
+    Tickbase::setCorrectTickbase(commandContext->commandNumber);
+
+    original(thisPointer);
+}
+
 static void __cdecl randomSeedHook(int seed) noexcept
 {
     static auto original = reinterpret_cast<void(__cdecl*)(int)>(hooks->randomSeed.getDetour());
@@ -696,19 +756,6 @@ static void __cdecl randomSeedHook(int seed) noexcept
     }
 
     original(seed);
-}
-
-static void __fastcall runSimulationHook(void* thisPointer, void*, int currentCommand, float currentTime, UserCmd* cmd, Entity* entity) noexcept
-{
-    static auto original = hooks->runSimulation.getOriginal<void>(currentCommand, currentTime, cmd, entity);
-
-    if (!entity || !localPlayer || entity != localPlayer.get())
-        return original(thisPointer, currentCommand, currentTime, cmd, entity);
-
-    if (!Tickbase::setCorrectTickbase(currentCommand))
-        return;
-
-    original(thisPointer, currentCommand, entity->tickBase() * memory->globalVars->intervalPerTick, cmd, entity);
 }
 
 static int __fastcall sendDatagramHook(NetworkChannel* network, void* edx, bufferWrite* datagram) noexcept
@@ -828,8 +875,8 @@ void Hooks::install() noexcept
     interpolateViewModel.detour(memory->interpolateViewModel, interpolateViewModelHook);
     isAllowedToWithdrawFromCritBucket.detour(memory->isAllowedToWithdrawFromCritBucket, isAllowedToWithdrawFromCritBucketHook);
     newMatchFoundDashboardStateOnUpdate.detour(memory->newMatchFoundDashboardStateOnUpdate, newMatchFoundDashboardStateOnUpdateHook);
+    physicsSimulate.detour(memory->physicsSimulate, physicsSimulateHook);
     randomSeed.detour(reinterpret_cast<uintptr_t>(memory->randomSeed), randomSeedHook);
-    runSimulation.detour(memory->runSimulation, runSimulationHook);
     sendDatagram.detour(memory->sendDatagram, sendDatagramHook);
     tfPlayerInventoryGetMaxItemCount.detour(memory->tfPlayerInventoryGetMaxItemCount, tfPlayerInventoryGetMaxItemCountHook);
     updateTFAnimState.detour(memory->updateTFAnimState, updateTFAnimStateHook);

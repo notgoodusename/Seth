@@ -53,22 +53,6 @@ public:
         bool atTargets = false;
     } antiAim;
 
-    struct Tickbase {
-        bool enabled{ false };
-
-        KeyBind rechargeKey{ std::string("recharge"), KeyMode::Off };
-        KeyBind doubleTapKey{ std::string("doubletap"), KeyMode::Off };
-        KeyBind warpKey{ std::string("warp"), KeyMode::Off };
-
-        bool antiWarp{ false };
-
-        int ticksToShift{ 21 };
-
-        bool autoRecharge{ true };
-        float timeTillRecharge{ 1.0f };
-        bool shiftOnDisable{ true };
-    } tickBase;
-
     struct Aimbot {
         struct Hitscan {
             //I hate this, but otherwise it wont compile
@@ -295,6 +279,22 @@ public:
             bool skipRandomCrits{ false };
             ImVec2 pos;
         } critHack;
+
+        struct Tickbase {
+            bool enabled{ false };
+
+            KeyBind rechargeKey{ std::string("recharge"), KeyMode::Off };
+            KeyBind doubleTapKey{ std::string("doubletap"), KeyMode::Off };
+            KeyBind warpKey{ std::string("shift"), KeyMode::Off };
+
+            bool antiWarp{ false };
+
+            int ticksToShift{ 21 };
+
+            bool autoRecharge{ true };
+            float timeTillRecharge{ 1.0f };
+            bool shiftOnDisable{ true };
+        } tickBase;
 
         KeyBind forceCritKey{ std::string("crithack") };
         bool edgeJump{ false };
