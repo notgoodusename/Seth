@@ -40,9 +40,9 @@ const bool anyActiveKeybinds() noexcept
     const bool antiAimManualBackward = config->antiAim.enabled && config->antiAim.manualBackward.canShowKeybind();
     const bool antiAimManualRight = config->antiAim.enabled && config->antiAim.manualRight.canShowKeybind();
     const bool antiAimManualLeft = config->antiAim.enabled && config->antiAim.manualLeft.canShowKeybind();
-    const bool recharge = config->tickbase.rechargeKey.canShowKeybind();
-    const bool doubletap = config->tickbase.doubleTapKey.canShowKeybind();
-    const bool warp = config->tickbase.warpKey.canShowKeybind();
+    const bool recharge = config->tickBase.rechargeKey.canShowKeybind();
+    const bool doubletap = config->tickBase.doubleTapKey.canShowKeybind();
+    const bool warp = config->tickBase.warpKey.canShowKeybind();
     const bool aimbot = config->aimbotKey.canShowKeybind();
     const bool triggerbot = (config->hitscanTriggerbot.enabled || config->meleeTriggerbot.enabled) && config->triggerbotKey.canShowKeybind();
     const bool glow = config->glowKey.canShowKeybind();
@@ -96,9 +96,9 @@ void Misc::showKeybinds() noexcept
         config->antiAim.manualLeft.showKeybind();
     }
 
-    config->tickbase.rechargeKey.showKeybind();
-    config->tickbase.doubleTapKey.showKeybind();
-    config->tickbase.warpKey.showKeybind();
+    config->tickBase.rechargeKey.showKeybind();
+    config->tickBase.doubleTapKey.showKeybind();
+    config->tickBase.warpKey.showKeybind();
 
     config->aimbotKey.showKeybind();
     if (config->hitscanTriggerbot.enabled || config->meleeTriggerbot.enabled)
@@ -152,7 +152,7 @@ void Misc::drawAimbotFov(ImDrawList* drawList) noexcept
     }
 
     const auto& displaySize = ImGui::GetIO().DisplaySize;
-
+   
     const auto radius = std::tan(Helpers::deg2rad(aimFov) / (16.0f / 6.0f)) / std::tan(Helpers::deg2rad(localPlayer->isScoped() ? localPlayer->fov() : (config->visuals.fov + 90.0f)) / 2.0f) * displaySize.x;
 
     drawList->AddCircle(displaySize / 2, radius, Helpers::calculateColor(config->aimbotFov));

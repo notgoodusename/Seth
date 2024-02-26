@@ -278,9 +278,9 @@ bool& Tickbase::isRecharging() noexcept
 
 void Tickbase::updateInput() noexcept
 {
-    config->tickbase.rechargeKey.handleToggle();
-    config->tickbase.doubleTapKey.handleToggle();
-    config->tickbase.warpKey.handleToggle();
+    config->tickBase.rechargeKey.handleToggle();
+    config->tickBase.doubleTapKey.handleToggle();
+    config->tickBase.warpKey.handleToggle();
 }
 
 void Tickbase::reset() noexcept
