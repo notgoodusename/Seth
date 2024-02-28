@@ -59,7 +59,7 @@ void Tickbase::end(UserCmd* cmd) noexcept
     if (!localPlayer || !localPlayer->isAlive())
         return;
 
-    if (!config->misc.tickBase.warpKey.isActive() && !config->misc.tickBase.doubleTapKey.isActive())
+    if (!config->misc.tickBase.enabled)
     {
         targetTickShift = 0;
         return;
