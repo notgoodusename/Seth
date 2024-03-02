@@ -38,6 +38,15 @@ float Backtrack::getLatency() noexcept
     return std::clamp(static_cast<float>(config->backtrack.fakeLatencyAmount), 0.f, cvars.maxUnlag->getFloat() * 1000.0f);
 }
 
+float Backtrack::getRealTotalLatency() noexcept
+{
+    const auto network = interfaces->engine->getNetworkChannel();
+    if (!network || !memory->clientState)
+        return 0.0f;
+    
+    return network->getLatency(0) + network->getLatency(1) - (config->backtrack.fakeLatency ? getLatency() / 1000.0f : 0.0f);
+}
+
 void Backtrack::run(UserCmd* cmd) noexcept
 {
     if (!config->backtrack.enabled && !config->backtrack.fakeLatency)
@@ -185,7 +194,7 @@ bool Backtrack::valid(float simtime) noexcept
         return false;
 
     const auto delta = std::clamp(
-        network->getLatency(1) + getLerp(),
+        network->getLatency(0) + getLerp(),
         0.f,
         cvars.maxUnlag->getFloat())
         - ticksToTime(serverTick - timeToTicks(simtime));

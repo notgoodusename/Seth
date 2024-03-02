@@ -23,6 +23,8 @@ namespace Backtrack
     float getLerp() noexcept;
     float getLatency() noexcept;
 
+    float getRealTotalLatency() noexcept;
+
     struct IncomingSequence {
         int inReliableState;
         int inSequenceNr;

@@ -6,6 +6,7 @@
 #include "../TargetSystem.h"
 
 #include "../../SDK/AttributeManager.h"
+#include "../../SDK/ClientState.h"
 #include "../../SDK/Entity.h"
 #include "../../SDK/UserCmd.h"
 #include "../../SDK/Math.h"
@@ -262,16 +263,16 @@ void AimbotProjectile::run(Entity* activeWeapon, UserCmd* cmd) noexcept
     if (!canAttack(cmd, activeWeapon))
         return;
 
+    if (activeWeapon->itemDefinitionIndex() == Demoman_s_StickyJumper)
+        return;
+
     const auto& enemies = TargetSystem::playerTargets(cfg.sortMethod);
 
     auto bestFov = cfg.fov;
 
-    //Still wrong but atleast its better?
-    const float latencyTime = ticksToTime(timeToTicks(max(0, network->getLatency(0))));
+    const float latencyTime = max(0.0f, Backtrack::getRealTotalLatency());
 
     const auto projectileWeaponInfo = ProjectileSimulation::getProjectileWeaponInfo(localPlayer.get(), activeWeapon);
-    if (projectileWeaponInfo.itemDefinitionIndex == Demoman_s_StickyJumper)
-        return;
 
     const auto& localPlayerEyePosition = localPlayer->getEyePosition();
     const int maxTicks = timeToTicks((projectileWeaponInfo.maxTime == 0.f ? cfg.maxTime : projectileWeaponInfo.maxTime) + latencyTime);
@@ -321,7 +322,6 @@ void AimbotProjectile::run(Entity* activeWeapon, UserCmd* cmd) noexcept
                 continue;
 
             //We already know that it can hit, so we set angle and fire
-            //TODO: Compensate for weapon offset? idk how
             cmd->viewangles = angle;
 
             if (cfg.autoShoot)
