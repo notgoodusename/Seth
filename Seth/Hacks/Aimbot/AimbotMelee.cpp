@@ -3,6 +3,7 @@
 #include "../Backtrack.h"
 #include "../TargetSystem.h"
 
+#include "../../SDK/AttributeManager.h"
 #include "../../SDK/Entity.h"
 #include "../../SDK/UserCmd.h"
 #include "../../SDK/Math.h"
@@ -17,8 +18,7 @@ Vector getKnifeTarget(UserCmd* cmd, Entity* entity, Entity* activeWeapon,
     if (fov > bestFov)
         return Vector{ 0.0f, 0.0f, 0.0f };
 
-    Vector targetAngle = cmd->viewangles + angle;
-    targetAngle.normalize();
+    const auto targetAngle = (cmd->viewangles + angle).normalize();
 
     if (!Math::canBackstab(targetAngle, eyeAngle, worldSpaceCenter)
         || !Math::doesMeleeHit(activeWeapon, entity->index(), targetAngle))
@@ -32,7 +32,6 @@ Vector getKnifeTarget(UserCmd* cmd, Entity* entity, Entity* activeWeapon,
     return Vector{ 0.0f , 0.0f, 0.0f };
 }
 
-
 Vector getMeleeTarget(UserCmd* cmd, Entity* entity, Vector worldSpaceCenter, Entity* activeWeapon,
     float& bestFov, Vector localPlayerEyePosition) noexcept
 {
@@ -41,8 +40,7 @@ Vector getMeleeTarget(UserCmd* cmd, Entity* entity, Vector worldSpaceCenter, Ent
     if (fov > bestFov)
         return Vector{ 0.0f, 0.0f, 0.0f };
 
-    Vector possibleAngle = cmd->viewangles + angle;
-    possibleAngle.normalize();
+    const auto possibleAngle = (cmd->viewangles + angle).normalize();
 
     if (!Math::doesMeleeHit(activeWeapon, entity->index(), possibleAngle))
         return Vector{ 0.0f, 0.0f, 0.0f };
@@ -59,6 +57,16 @@ void runKnife(Entity* activeWeapon, UserCmd* cmd) noexcept
 {
     const auto& cfg = config->aimbot.melee;
 
+    float swingRange = activeWeapon->getSwingRange();
+    if (swingRange <= 0.0f)
+        return;
+
+    float modelScale = localPlayer->modelScale();
+    if (modelScale > 1.0f)
+        swingRange *= modelScale;
+
+    swingRange = AttributeManager::attributeHookFloat(swingRange, "melee_range_multiplier", activeWeapon);
+
     const auto& enemies = TargetSystem::playerTargets(cfg.sortMethod);
 
     float bestSimulationTime{ -1.0f };
@@ -72,6 +80,9 @@ void runKnife(Entity* activeWeapon, UserCmd* cmd) noexcept
     for (const auto& target : enemies)
     {
         if (target.playerData.empty() || !target.isAlive || target.priority == 0)
+            continue;
+
+        if (target.distanceToLocal > swingRange * 4.0f)
             continue;
 
         auto entity{ interfaces->entityList->getEntityFromHandle(target.handle) };
@@ -250,6 +261,16 @@ void AimbotMelee::run(Entity* activeWeapon, UserCmd* cmd) noexcept
     if (activeWeapon->isKnife())
         return runKnife(activeWeapon, cmd);
 
+    float swingRange = activeWeapon->getSwingRange();
+    if (swingRange <= 0.0f)
+        return;
+    
+    float modelScale = localPlayer->modelScale();
+    if (modelScale > 1.0f)
+        swingRange *= modelScale;
+
+    swingRange = AttributeManager::attributeHookFloat(swingRange, "melee_range_multiplier", activeWeapon);
+
     const auto& enemies = TargetSystem::playerTargets(cfg.sortMethod);
 
     auto bestFov = cfg.fov;
@@ -262,6 +283,9 @@ void AimbotMelee::run(Entity* activeWeapon, UserCmd* cmd) noexcept
     for (const auto& target : enemies)
     {
         if (target.playerData.empty() || !target.isAlive || target.priority == 0)
+            continue;
+
+        if (target.distanceToLocal > swingRange * 4.0f)
             continue;
 
         auto entity{ interfaces->entityList->getEntityFromHandle(target.handle) };
