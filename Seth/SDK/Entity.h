@@ -79,6 +79,13 @@ enum class TFClass {
     ENGINEER
 };
 
+enum class WeaponDamageType {
+    UNKNOWN,
+    BULLET,
+    BLAST,
+    FIRE,
+};
+
 enum class WeaponType {
     UNKNOWN, 
     HITSCAN, 
@@ -91,6 +98,31 @@ enum WeaponSlots {
     SLOT_PRIMARY,
     SLOT_SECONDARY,
     SLOT_MELEE
+};
+
+enum MedigunWeaponType {
+    MEDIGUN_STANDARD = 0,
+    MEDIGUN_UBER,
+    MEDIGUN_QUICKFIX,
+    MEDIGUN_RESIST
+};
+
+enum MedigunChargeType {
+    CHARGE_INVALID = -1,
+    CHARGE_INVULNERABLE = 0,
+    CHARGE_CRITICAL_BOOST,
+    CHARGE_MEGAHEAL,
+    CHARGE_BULLET_RESIST,
+    CHARGE_BLAST_RESIST,
+    CHARGE_FIRE_RESIST,
+    NUM_CHARGE_TYPES
+};
+
+enum MedigunResistType {
+    BULLET_RESIST = 0,
+    BLAST_RESIST,
+    FIRE_RESIST,
+    NUM_RESISTS
 };
 
 struct AnimationLayer
@@ -272,15 +304,18 @@ public:
         vel.y = *reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + 0x160);
         vel.z = *reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + 0x164);
         
-        const auto groundEnt = calculateGroundEntity();
-        if (groundEnt)
+        if (getClassId() == ClassId::TFPlayer)
         {
-            if (groundEnt->getClassId() == ClassId::FuncConveyor)
+            const auto groundEnt = calculateGroundEntity();
+            if (groundEnt)
             {
-                Vector right{ };
-                Vector::fromAngleAll(groundEnt->angleRotation(), nullptr, &right, nullptr);
-                right *= groundEnt->conveyorSpeed();
-                vel -= right;
+                if (groundEnt->getClassId() == ClassId::FuncConveyor)
+                {
+                    Vector right{ };
+                    Vector::fromAngleAll(groundEnt->angleRotation(), nullptr, &right, nullptr);
+                    right *= groundEnt->conveyorSpeed();
+                    vel -= right;
+                }
             }
         }
     }
@@ -448,6 +483,52 @@ public:
         return WeaponType::UNKNOWN;
     }
 
+    WeaponDamageType getWeaponDamageType() noexcept
+    {
+        if (!this)
+            return WeaponDamageType::UNKNOWN;
+
+        if (slot() == WeaponSlots::SLOT_MELEE)
+            return WeaponDamageType::UNKNOWN;
+
+        switch (weaponId())
+        {
+        case WeaponId::ROCKETLAUNCHER:
+        case WeaponId::GRENADELAUNCHER:
+        case WeaponId::DIRECTHIT:
+        case WeaponId::CANNON:
+        case WeaponId::PIPEBOMBLAUNCHER:
+            return WeaponDamageType::BLAST;
+        case WeaponId::FLAMETHROWER:
+        case WeaponId::FLAMETHROWER_ROCKET:
+        case WeaponId::FLAME_BALL:
+        case WeaponId::FLAREGUN:
+            return WeaponDamageType::FIRE;
+        case WeaponId::SHOTGUN_PRIMARY:
+        case WeaponId::SHOTGUN_SOLDIER: 
+        case WeaponId::SHOTGUN_HWG: 
+        case WeaponId::SHOTGUN_PYRO: 
+        case WeaponId::SCATTERGUN:
+        case WeaponId::SNIPERRIFLE: 
+        case WeaponId::MINIGUN: 
+        case WeaponId::SMG: 
+        case WeaponId::PISTOL: 
+        case WeaponId::PISTOL_SCOUT: 
+        case WeaponId::REVOLVER: 
+        case WeaponId::SNIPERRIFLE_DECAP: 
+        case WeaponId::SNIPERRIFLE_CLASSIC:
+        case WeaponId::CHARGED_SMG:
+        case WeaponId::SHOTGUN_BUILDING_RESCUE:
+        case WeaponId::COMPOUND_BOW:
+        case WeaponId::CROSSBOW:
+            return WeaponDamageType::BULLET;
+        default:
+            break;
+        }
+
+        return WeaponDamageType::UNKNOWN;
+    }
+
     float getSwingRange() noexcept
     {
         if (weaponId() == WeaponId::SWORD)
@@ -495,6 +576,10 @@ public:
     {
         return &getWeaponInfo()->weaponData[weaponMode];
     }
+
+    int getMedigunType() noexcept;
+    MedigunChargeType getMedigunChargeType() noexcept;
+    MedigunResistType getMedigunResistType() noexcept;
 
     bool canFireCriticalShot(bool headshot) noexcept
     {
@@ -700,6 +785,16 @@ public:
         return false;
     }
 
+    bool isMiniCritBoosted() noexcept
+    {
+        int condition = this->condition(), conditionEx2 = this->conditionEx2();
+
+        return conditionEx2 & TFCondEx2_MiniCritBoosted_On_Kill
+            || condition & TFCond_NoHealingDamageBuff
+            || condition & TFCond_MiniCrits;
+    }
+
+
     bool isRapidFireCrits() noexcept
     {
         switch (weaponId())
@@ -735,6 +830,14 @@ public:
         return isUbered() || isUberHidden() || isUberFading() || isUberCanteen() || isBonked();
     }
 
+
+    bool isOnFire()
+    {
+        int condition = this->condition(), conditionEx3 = this->conditionEx3();
+     
+        return condition & TFCond_OnFire || conditionEx3 & TFCondEx3_BurningPyro;
+    }
+
     CONDITION(isCharging, condition(), TFCond_Charging)
     CONDITION(isScoped, condition(), TFCond_Zoomed)
     CONDITION(isUbered, condition(), TFCond_Ubercharged)
@@ -748,7 +851,6 @@ public:
     CONDITION(isDisguised, condition(), TFCond_Disguised)
     CONDITION(isCloaked, condition(), TFCond_Cloaked)
     CONDITION(isTaunting, condition(), TFCond_Taunting)
-    CONDITION(isOnFire, condition(), TFCond_OnFire)
     CONDITION(isStunned, condition(), TFCond_Stunned)
     CONDITION(isSlowed, condition(), TFCond_Slowed)
     CONDITION(isMegaHealed, condition(), TFCond_MegaHeal)
@@ -775,9 +877,9 @@ public:
     CONDITION(hasPlagueRune, conditionEx3(), TFCondEx3_PlagueRune)
     CONDITION(hasSupernovaRune, conditionEx3(), TFCondEx3_SupernovaRune)
     CONDITION(hasBuffedByKing, conditionEx3(), TFCondEx3_KingBuff)
-    CONDITION(hasBlastResist, conditionEx(), TFCondEx_ExplosiveCharge)
-    CONDITION(hasBulletResist, conditionEx(), TFCondEx_BulletCharge)
-    CONDITION(hasFireResist, conditionEx(), TFCondEx_FireCharge)
+    CONDITION(hasUberBlastResist, conditionEx(), TFCondEx_ExplosiveCharge)
+    CONDITION(hasUberBulletResist, conditionEx(), TFCondEx_BulletCharge)
+    CONDITION(hasUberFireResist, conditionEx(), TFCondEx_FireCharge)
 
     OFFSET(critTokenBucket, 0xA54, float)
     OFFSET(critChecks, 0xA58, int)
@@ -850,6 +952,9 @@ public:
     NETVAR(objectMaxHealth, "CBaseObject", "m_iMaxHealth", int)
     NETVAR(objectCarried, "CBaseObject", "m_bCarried", bool)
 
+    NETVAR(sentryEnemy, "CObjectSentrygun", "m_hEnemy", int)
+    NETVAR(sentryAutoAimTarget, "CObjectSentrygun", "m_hAutoAimTarget", int)
+
     NETVAR(thrower, "CBaseGrenade", "m_hThrower", int)
     NETVAR(damageRadius, "CBaseGrenade", "m_DmgRadius", float)
 
@@ -874,11 +979,31 @@ public:
     NETVAR(launcher, "CTFGrenadePipebombProjectile", "m_hLauncher", int)
     NETVAR(defensiveBomb, "CTFGrenadePipebombProjectile", "m_bDefensiveBomb", int)
     NETVAR_OFFSET(creationTime, "CTFGrenadePipebombProjectile", "m_iType", 4, float)
+    NETVAR(isPipeCritical, "CTFWeaponBaseGrenadeProj", "m_bCritical", bool)
 
     NETVAR(chargedDamage, "CTFSniperRifle", "m_flChargedDamage", float)
 
+    NETVAR(chargingClassic, "CTFSniperRifleClassic", "m_bCharging", bool);
+
     NETVAR(itemDefinitionIndex, "CEconEntity", "m_iItemDefinitionIndex", int)
+
+    NETVAR(healingTarget, "CWeaponMedigun", "m_hHealingTarget", int)
+    NETVAR(healing, "CWeaponMedigun", "m_bHealing", bool)
+    NETVAR(attacking, "CWeaponMedigun", "m_bAttacking", bool)
+    NETVAR(chargeRelease, "CWeaponMedigun", "m_bChargeRelease", bool)
+    NETVAR(holstered, "CWeaponMedigun", "m_bHolstered", bool)
+    NETVAR(chargeResistType, "CWeaponMedigun", "m_nChargeResistType", int)
+    NETVAR(lastHealingTarget, "CWeaponMedigun", "m_hLastHealingTarget", int)
+    NETVAR(chargeLevel, "CWeaponMedigun", "m_flChargeLevel", float)
+
+    NETVAR(isArrowAlight, "CTFProjectile_Arrow", "m_bArrowAlight", bool)
+    NETVAR(isArrowCritical, "CTFProjectile_Arrow", "m_bCritical", bool)
+    NETVAR(arrowProjectileType, "CTFProjectile_Arrow", "m_iProjectileType", int)
    
+    NETVAR(isRocketCritical, "CTFProjectile_Rocket", "m_bCritical", bool)
+
+    NETVAR(isFlareCritical, "CTFProjectile_Flare", "m_bCritical", bool)
+
     NETVAR(conveyorSpeed, "CFuncConveyor", "m_flConveyorSpeed", float)
 };
 
@@ -945,7 +1070,7 @@ public:
         if (dirty)
         {
             Vector vecSize;
-            Vector::vectorSubtract(vecMaxs, vecMins, vecSize);
+            vecSize = vecMaxs - vecMins;
             radius = vecSize.length() * 0.5f;
 
             outer->EFlags() |= (1 << 14);

@@ -232,3 +232,24 @@ bool Entity::canWeaponRandomCrit() noexcept
 
 	return true;
 }
+
+int Entity::getMedigunType() noexcept
+{
+	return static_cast<int>(AttributeManager::attributeHookFloat(0.0f, "set_weapon_mode", this));
+}
+
+MedigunChargeType Entity::getMedigunChargeType() noexcept
+{
+	int chargeType = static_cast<int>(AttributeManager::attributeHookFloat(0.0f, "set_charge_type", this));
+
+	if (getMedigunType() == MEDIGUN_RESIST)
+		chargeType += chargeResistType();
+
+	return static_cast<MedigunChargeType>(chargeType);
+}
+
+MedigunResistType Entity::getMedigunResistType() noexcept
+{
+	int currentActiveResist = (getMedigunChargeType() - CHARGE_BULLET_RESIST) % NUM_RESISTS;
+	return static_cast<MedigunResistType>(currentActiveResist);
+}

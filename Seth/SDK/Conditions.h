@@ -80,6 +80,7 @@ enum TFConds
 	TFCondEx2_HalloweenTiny = (1 << 11),
 	TFCondEx2_HalloweenInHell = (1 << 12),
 	TFCondEx2_HalloweenGhostMode = (1 << 13),
+	TFCondEx2_MiniCritBoosted_On_Kill = (1 << 14),
 	TFCondEx2_Parachute = (1 << 16),
 	TFCondEx2_BlastJumping = (1 << 17),
 	TFCondEx2_StrengthRune = (1 << 26),
@@ -99,6 +100,7 @@ enum TFConds
 	TFCondEx3_PlagueRune = (1 << 14),
 	TFCondEx3_SupernovaRune = (1 << 15),
 	TFCondEx3_KingBuff = (1 << 17),
+	TFCondEx3_BurningPyro = (1 << 28),
 
 	TFCond_MiniCrits = (TFCond_Buffed | TFCond_CritCola),
 	TFCond_IgnoreStates = (TFCond_Ubercharged | TFCond_Bonked),
