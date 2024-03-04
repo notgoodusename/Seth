@@ -226,13 +226,8 @@ bool Math::hitboxIntersection(const matrix3x4* matrix, int hitboxNumber, StudioH
         return false;
 
     Vector mins, maxs;
-    vectorTransform(vectorRotate(hitbox->bbMin, hitbox->angle), &matrix[hitbox->bone], mins);
-    vectorTransform(vectorRotate(hitbox->bbMax, hitbox->angle), &matrix[hitbox->bone], maxs);
-
     vectorITransform(start, matrix[hitbox->bone], mins);
     vectorITransform(end, matrix[hitbox->bone], maxs);
 
-    if (intersectLineWithBb(mins, maxs, hitbox->bbMin, hitbox->bbMax))
-        return true;
-    return false;
+    return intersectLineWithBb(mins, maxs, hitbox->bbMin, hitbox->bbMax));
 }
