@@ -601,6 +601,11 @@ void AutoVaccinator::draw(ImDrawList* drawList) noexcept
 	if (!hasVaccinatorAtHand && !gui->isOpen())
 		return;
 
+	if (config->autoVaccinator.indicatorPos != ImVec2{}) {
+		ImGui::SetNextWindowPos(config->autoVaccinator.indicatorPos);
+		config->autoVaccinator.indicatorPos = {};
+	}
+
 	ImGui::SetNextWindowSize({ 250.f, 0.f }, ImGuiCond_Once);
 	ImGui::SetNextWindowSizeConstraints({ 250.f, 0.f }, { 250.f, 1000.f });
 	ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
