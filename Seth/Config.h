@@ -152,6 +152,23 @@ public:
         int ignore{ 0 };
     } autoDetonate;
 
+    struct AutoVaccinator {
+        bool enabled{ false };
+
+        bool preserveSelf{ true };
+
+        float bulletSensibility{ 1.0f };
+        float blastSensibility{ 1.0f };
+        float fireSensibility{ 1.0f };
+
+        float bulletThreshold{ 200.0f };
+        float blastThreshold{ 150.0f };
+        float fireThreshold{ 160.0f };
+
+        bool indicator{ false };
+        ImVec2 indicatorPos{ 0.0f, 0.0f };
+    } autoVaccinator;
+
     KeyBind autoKey{ std::string("auto") };
 
     struct Backtrack {

@@ -36,6 +36,7 @@
     <ClCompile Include="Hacks\Animations.cpp" />
     <ClCompile Include="Hacks\Auto\Auto.cpp" />
     <ClCompile Include="Hacks\Auto\AutoDetonate.cpp" />
+    <ClCompile Include="Hacks\Auto\AutoVaccinator.cpp" />
     <ClCompile Include="Hacks\Backtrack.cpp" />
     <ClCompile Include="Hacks\Chams.cpp" />
     <ClCompile Include="Hacks\Crithack.cpp" />
@@ -106,6 +107,7 @@
     <ClInclude Include="Hacks\Animations.h" />
     <ClInclude Include="Hacks\Auto\Auto.h" />
     <ClInclude Include="Hacks\Auto\AutoDetonate.h" />
+    <ClInclude Include="Hacks\Auto\AutoVaccinator.h" />
     <ClInclude Include="Hacks\Backtrack.h" />
     <ClInclude Include="Hacks\Chams.h" />
     <ClInclude Include="Hacks\Crithack.h" />

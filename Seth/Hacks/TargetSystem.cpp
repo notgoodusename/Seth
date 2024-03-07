@@ -7,12 +7,22 @@
 
 LocalPlayerInfo localPlayerInfo;
 std::vector<PlayerTarget> playersTargets;
+std::vector<BuildingTarget> buildingsTargets;
+
+std::vector<ProjectileEntity> projectiles;
+
 std::vector<int> localStickies;
 
 static auto playerTargetByHandle(int handle) noexcept
 {
     const auto it = std::ranges::find(playersTargets, handle, &PlayerTarget::handle);
     return it != playersTargets.end() ? &(*it) : nullptr;
+}
+
+static auto buildingTargetByHandle(int handle) noexcept
+{
+    const auto it = std::ranges::find(buildingsTargets, handle, &BuildingTarget::handle);
+    return it != buildingsTargets.end() ? &(*it) : nullptr;
 }
 
 void TargetSystem::updateFrame() noexcept
@@ -25,6 +35,8 @@ void TargetSystem::updateFrame() noexcept
     }
 
     localStickies.clear();
+    buildingsTargets.clear();
+    projectiles.clear();
 
     const auto highestEntityIndex = interfaces->entityList->getHighestEntityIndex();
     for (int i = 1; i <= highestEntityIndex; ++i)
@@ -52,6 +64,27 @@ void TargetSystem::updateFrame() noexcept
                 case ClassId::TFGrenadePipebombProjectile:
                     if ((entity->type() == 1 || entity->type() == 2) && entity->thrower() == localPlayerInfo.handle)
                         localStickies.push_back(entity->handle());
+
+                    projectiles.emplace_back(entity);
+                    break;
+                case ClassId::TFProjectile_Rocket:
+                case ClassId::TFProjectile_SentryRocket:
+                case ClassId::TFProjectile_Jar:
+                case ClassId::TFProjectile_JarGas:
+                case ClassId::TFProjectile_JarMilk:
+                case ClassId::TFProjectile_Arrow:
+                case ClassId::TFProjectile_Flare:
+                case ClassId::TFProjectile_Cleaver:
+                case ClassId::TFProjectile_HealingBolt:
+                case ClassId::TFProjectile_BallOfFire:
+                case ClassId::TFProjectile_EnergyRing:
+                case ClassId::TFProjectile_EnergyBall:
+                    projectiles.emplace_back(entity);
+                    break;
+                case ClassId::ObjectSentrygun:
+                case ClassId::ObjectDispenser:
+                case ClassId::ObjectTeleporter:
+                    buildingsTargets.emplace_back(entity);
                     break;
                 default:
                     break;
@@ -66,6 +99,9 @@ void TargetSystem::updateFrame() noexcept
 void TargetSystem::reset() noexcept
 {
     playersTargets.clear();
+    buildingsTargets.clear();
+    projectiles.clear();
+    localStickies.clear();
 }
 
 void TargetSystem::setPriority(int handle, int priority) noexcept
@@ -84,6 +120,15 @@ void LocalPlayerInfo::update() noexcept
     origin = localPlayer->getAbsOrigin();
     eyePosition = localPlayer->getEyePosition();
     viewAngles = interfaces->engine->getViewAngles();
+}
+
+ProjectileEntity::ProjectileEntity(Entity* entity) noexcept
+{
+    handle = entity->handle();
+    origin = entity->origin();
+    mins = entity->obbMins();
+    maxs = entity->obbMaxs();
+    classId = entity->getClassId();
 }
 
 Target::Target(Entity* entity) noexcept
@@ -141,6 +186,21 @@ void PlayerTarget::update(Entity* entity) noexcept
         playerData.pop_front();
 }
 
+BuildingTarget::BuildingTarget(Entity* entity) noexcept : Target{ entity }
+{
+    origin = entity->origin();
+    mins = entity->obbMins();
+    maxs = entity->obbMaxs();
+
+    const auto worldSpaceCenter = origin + (mins.z + maxs.z) * 0.5f;
+    const auto angle = Math::calculateRelativeAngle(localPlayerInfo.eyePosition, worldSpaceCenter, localPlayerInfo.viewAngles);
+ 
+    distanceToLocal = entity->getAbsOrigin().distTo(localPlayerInfo.origin);
+    fovFromLocal = angle.length2D();
+
+    buildingType = entity->objectType();
+}
+
 const LocalPlayerInfo& TargetSystem::local() noexcept
 {
     return localPlayerInfo;
@@ -171,6 +231,38 @@ const std::vector<PlayerTarget>& TargetSystem::playerTargets(int sortType) noexc
 const PlayerTarget* TargetSystem::playerByHandle(int handle) noexcept
 {
     return playerTargetByHandle(handle);
+}
+
+const std::vector<BuildingTarget>& TargetSystem::buildingTargets(int sortType) noexcept
+{
+    switch (sortType)
+    {
+    case 0:
+        std::sort(buildingsTargets.begin(), buildingsTargets.end(),
+            [&](const BuildingTarget& a, const BuildingTarget& b) { return a.distanceToLocal < b.distanceToLocal; });
+        break;
+    case 1:
+        std::sort(buildingsTargets.begin(), buildingsTargets.end(),
+            [&](const BuildingTarget& a, const BuildingTarget& b) { return a.fovFromLocal < b.fovFromLocal; });
+        break;
+    default:
+        return buildingsTargets;
+    }
+
+    std::sort(buildingsTargets.begin(), buildingsTargets.end(),
+        [&](const BuildingTarget& a, const BuildingTarget& b) { return a.priority > b.priority; });
+
+    return buildingsTargets;
+}
+
+const BuildingTarget* TargetSystem::buildingByHandle(int handle) noexcept
+{
+    return buildingTargetByHandle(handle);
+}
+
+const std::vector<ProjectileEntity>& TargetSystem::projectilesVector() noexcept
+{
+    return projectiles;
 }
 
 const std::vector<int>& TargetSystem::localStickiesHandles() noexcept

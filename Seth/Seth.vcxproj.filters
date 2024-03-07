@@ -284,6 +284,9 @@
     <ClCompile Include="Hacks\Auto\Auto.cpp">
       <Filter>Hacks\Auto</Filter>
     </ClCompile>
+    <ClCompile Include="Hacks\Auto\AutoVaccinator.cpp">
+      <Filter>Hacks\Auto</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GUI.h">
@@ -695,6 +698,9 @@
       <Filter>Hacks\Auto</Filter>
     </ClInclude>
     <ClInclude Include="Hacks\Auto\Auto.h">
+      <Filter>Hacks\Auto</Filter>
+    </ClInclude>
+    <ClInclude Include="Hacks\Auto\AutoVaccinator.h">
       <Filter>Hacks\Auto</Filter>
     </ClInclude>
   </ItemGroup>

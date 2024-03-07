@@ -115,6 +115,7 @@ static HRESULT __stdcall present(IDirect3DDevice9* device, const RECT* src, cons
 
         Misc::drawPlayerList();
         ProjectileTrajectory::draw(ImGui::GetBackgroundDrawList());
+        Auto::draw(ImGui::GetBackgroundDrawList());
         Crithack::draw(ImGui::GetForegroundDrawList());
         Misc::drawAimbotFov(ImGui::GetBackgroundDrawList());
 
@@ -267,7 +268,7 @@ static void __fastcall frameStageNotify(void* thisPointer, void*, FrameStage sta
         Misc::unlockHiddenCvars();
     }
     
-    original(thisPointer, stage); //render start crash
+    original(thisPointer, stage);
 }
 
 static bool __fastcall dispatchUserMessage(void* thisPointer, void*, int messageType, bufferRead* data) noexcept

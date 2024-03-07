@@ -1,14 +1,18 @@
 #pragma once
-#include <deque>
-#include <vector>
 
+#include "../SDK/ClassId.h"
 #include "../SDK/ModelInfo.h"
 #include "../SDK/Vector.h"
+
+#include <deque>
+#include <vector>
 
 struct UserCmd;
 
 struct LocalPlayerInfo;
+struct ProjectileEntity;
 struct PlayerTarget;
+struct BuildingTarget;
 
 namespace TargetSystem
 {
@@ -23,6 +27,11 @@ namespace TargetSystem
 	const std::vector<PlayerTarget>& playerTargets(int sortType = -1) noexcept;
 	const PlayerTarget* playerByHandle(int handle) noexcept;
 
+	const std::vector<BuildingTarget>& buildingTargets(int sortType = -1) noexcept;
+	const BuildingTarget* buildingByHandle(int handle) noexcept;
+
+	const std::vector<ProjectileEntity>& projectilesVector() noexcept;
+
 	const std::vector<int>& localStickiesHandles() noexcept;
 };
 
@@ -34,14 +43,24 @@ struct LocalPlayerInfo
 	Vector origin, eyePosition, viewAngles;
 };
 
+struct ProjectileEntity
+{
+	ProjectileEntity(Entity* entity) noexcept;
+
+	int handle;
+
+	Vector origin{ };
+	Vector mins{ }, maxs{ };
+	ClassId classId{ 0 };
+};
+
 struct Target
 {
 	Target(Entity* entity) noexcept;
 
 	int handle;
 	int priority{ 1 };
-	float simulationTime{ -1.0f };
-	
+
 	float distanceToLocal{ 0.0f };
 	float fovFromLocal{ 0.0f };
 };
@@ -65,12 +84,22 @@ struct PlayerTarget : Target
 		float simulationTime{ };
 
 		std::array<matrix3x4, MAXSTUDIOBONES> matrix;
-		
 	};
 
 	bool isAlive{ true };
+	float simulationTime{ -1.0f };
 
 	std::deque<Record> playerData;
+};
+
+struct BuildingTarget : Target
+{
+	BuildingTarget(Entity* entity) noexcept;
+
+	Vector origin{ };
+	Vector mins{ }, maxs{ };
+
+	int buildingType{ 0 };
 };
 
 enum SortType

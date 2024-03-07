@@ -6,10 +6,16 @@
 #include "../../SDK/UserCmd.h"
 #include "../../SDK/Math.h"
 
-void AutoDetonate::run(Entity* activeWeapon, UserCmd* cmd) noexcept
+void AutoDetonate::run(UserCmd* cmd) noexcept
 {
+	if (!config->autoKey.isActive())
+		return;
+
 	const auto& cfg = config->autoDetonate;
 	if (!cfg.enabled)
+		return;
+
+	if (!localPlayer || !localPlayer->isAlive())
 		return;
 
 	static auto grenadeLauncherLiveTime = interfaces->cvar->findVar("tf_grenadelauncher_livetime");

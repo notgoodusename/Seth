@@ -205,6 +205,19 @@ static void from_json(const json& j, Config::AutoDetonate& ad)
     read(j, "Ignore", ad.ignore);
 }
 
+static void from_json(const json& j, Config::AutoVaccinator& av)
+{
+    read(j, "Enabled", av.enabled);
+    read(j, "Preserve self", av.preserveSelf);
+    read(j, "Bullet sensibility", av.bulletSensibility);
+    read(j, "Blast sensibility", av.blastSensibility);
+    read(j, "Fire sensibility", av.fireSensibility);
+    read(j, "Bullet threshold", av.bulletThreshold);
+    read(j, "Blast threshold", av.blastThreshold);
+    read(j, "Fire threshold", av.fireThreshold);
+    read(j, "Indicator", av.indicator);
+    read<value_t::object>(j, "Indicator position", av.indicatorPos);
+}
 static void from_json(const json& j, ImVec2& v)
 {
     read(j, "X", v.x);
@@ -552,6 +565,7 @@ void Config::load(const char8_t* name, bool incremental) noexcept
     read(j, "Triggerbot Key", triggerbotKey);
 
     read<value_t::object>(j, "Auto Detonate", autoDetonate);
+    read<value_t::object>(j, "Auto Vaccinator", autoVaccinator);
     read(j, "Auto Key", autoKey);
 
     read<value_t::object>(j, "Anti aim", antiAim);
@@ -705,6 +719,23 @@ static void to_json(json& j, const Config::AutoDetonate& o, const Config::AutoDe
     WRITE("Silent", silent);
     WRITE("Friendly fire", friendlyFire);
     WRITE("Ignore", ignore);
+}
+
+static void to_json(json& j, const Config::AutoVaccinator& o, const Config::AutoVaccinator& dummy = {})
+{
+    WRITE("Enabled", enabled);
+    WRITE("Preserve self", preserveSelf);
+    WRITE("Bullet sensibility", bulletSensibility);
+    WRITE("Blast sensibility", blastSensibility);
+    WRITE("Fire sensibility", fireSensibility);
+    WRITE("Bullet threshold", bulletThreshold);
+    WRITE("Blast threshold", blastThreshold);
+    WRITE("Fire threshold", fireThreshold);
+    WRITE("Indicator", indicator);
+
+    if (const auto window = ImGui::FindWindowByName("Auto vaccinator indicator")) {
+        j["Indicator position"] = window->Pos;
+    }
 }
 
 static void to_json(json& j, const Config::Aimbot& o)
@@ -1080,6 +1111,7 @@ void Config::save(size_t id) const noexcept
         to_json(j["Triggerbot Key"], triggerbotKey, KeyBind::NONE);
 
         j["Auto Detonate"] = autoDetonate;
+        j["Auto Vaccinator"] = autoVaccinator;
         to_json(j["Auto Key"], autoKey, KeyBind::NONE);
 
         j["Anti aim"] = antiAim;

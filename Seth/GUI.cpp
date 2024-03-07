@@ -306,6 +306,50 @@ void GUI::renderAutoWindow() noexcept
 
     ImGui::PopID();
 
+    ImGui::Checkbox("Auto vaccinator", &config->autoVaccinator.enabled);
+    ImGui::SameLine();
+
+    ImGui::PushID("Auto vaccinator");
+    if (bool ccPopup = ImGui::Button("Edit"))
+        ImGui::OpenPopup("##autoVaccinatorEdit");
+
+    if (ImGui::BeginPopup("##autoVaccinatorEdit"))
+    {
+        ImGui::Checkbox("Preserve self", &config->autoVaccinator.preserveSelf);
+
+        ImGui::PushID("Bullet sensibility");
+        ImGui::SliderFloat("", &config->autoVaccinator.bulletSensibility, 0.0f, 5.0f, "Bullet sensibility: %.2f");
+        ImGui::PopID();
+
+        ImGui::PushID("Blast sensibility");
+        ImGui::SliderFloat("", &config->autoVaccinator.blastSensibility, 0.0f, 5.0f, "Blast sensibility: %.2f");
+        ImGui::PopID();
+        
+        ImGui::PushID("Fire sensibility");
+        ImGui::SliderFloat("", &config->autoVaccinator.fireSensibility, 0.0f, 5.0f, "Fire sensibility: %.2f");
+        ImGui::PopID();
+
+        ImGui::Spacing();
+        
+        ImGui::PushID("Bullet threshold");
+        ImGui::SliderFloat("", &config->autoVaccinator.bulletThreshold, 1.0f, 500.0f, "Bullet threshold: %.2f");
+        ImGui::PopID();
+
+        ImGui::PushID("Blast threshold");
+        ImGui::SliderFloat("", &config->autoVaccinator.blastThreshold, 1.0f, 500.0f, "Blast threshold: %.2f");
+        ImGui::PopID();
+
+        ImGui::PushID("Fire threshold");
+        ImGui::SliderFloat("", &config->autoVaccinator.fireThreshold, 1.0f, 500.0f, "Fire threshold: %.2f");
+        ImGui::PopID();
+
+        ImGui::Checkbox("Indicator", &config->autoVaccinator.indicator);
+
+        ImGui::EndPopup();
+    }
+
+    ImGui::PopID();
+
     ImGui::NextColumn();
     ImGui::Columns(1);
 }

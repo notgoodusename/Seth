@@ -1,9 +1,8 @@
 #pragma once
 
-class Entity;
 struct UserCmd;
 
 namespace AutoDetonate
 {
-	void run(Entity* activeWeapon, UserCmd* cmd) noexcept;
+	void run(UserCmd* cmd) noexcept;
 }
